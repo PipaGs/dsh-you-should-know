@@ -148,12 +148,30 @@ test('parseVerdict treats an explicit silence as a silent verdict', () => {
   assert.deepEqual(parseVerdict('{"note":"","importance":null}'), { note: null, importance: null })
 })
 
-test('parseVerdict recovers JSON from fences and surrounding prose', () => {
-  assert.deepEqual(parseVerdict('```json\n{"note":"A","importance":"high"}\n```'), { note: 'A', importance: 'high' })
-  assert.deepEqual(parseVerdict('Here it is: {"note":"B","importance":"critical"} thanks'), {
-    note: 'B',
-    importance: 'critical',
+test('parseVerdict rejects Markdown-fenced JSON', () => {
+  assert.equal(parseVerdict('```json\n{"note":"A","importance":"high"}\n```'), null)
+  assert.equal(parseVerdict('```\n{"note":"A","importance":"high"}\n```'), null)
+  assert.equal(parseVerdict('```json\n{"note":null,"importance":null}\n```'), null)
+})
+
+test('parseVerdict rejects JSON embedded in surrounding prose', () => {
+  assert.equal(parseVerdict('Here it is: {"note":"B","importance":"critical"} thanks'), null)
+  assert.equal(parseVerdict('{"note":"B","importance":"critical"} trailing text'), null)
+  assert.equal(parseVerdict('leading text {"note":"B","importance":"critical"}'), null)
+  assert.equal(parseVerdict('Sure!\n{"note":"B","importance":"critical"}'), null)
+})
+
+test('parseVerdict requires a non-array top-level object', () => {
+  assert.deepEqual(parseVerdict('  {"note":"Whitespace is allowed.","importance":"high"}  '), {
+    note: 'Whitespace is allowed.',
+    importance: 'high',
   })
+  assert.equal(parseVerdict('["A"]'), null)
+  assert.equal(parseVerdict('[{"note":"A","importance":"high"}]'), null)
+  assert.equal(parseVerdict('"A"'), null)
+  assert.equal(parseVerdict('42'), null)
+  assert.equal(parseVerdict('null'), null)
+  assert.equal(parseVerdict('true'), null)
 })
 
 test('parseVerdict drops every malformed reply quietly', () => {
