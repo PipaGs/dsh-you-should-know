@@ -481,6 +481,199 @@ test('an automatic config resolves the discovered route before its single genera
   assert.equal(calls[0].model, 'deepseek-flash')
 })
 
+test('engine status reports route and per-session activity without conversation text', async () => {
+  const secretQuestion = 'SUPER-SECRET-QUESTION-ALPHA'
+  const secretAnswer = 'SUPER-SECRET-ANSWER-BETA'
+  const secretNote = 'SUPER-SECRET-NOTE-GAMMA'
+  let providers = [{ id: 'anthropic', name: 'Anthropic' }]
+  const models = { 'deepseek-account': ['deepseek-flash'] }
+  const llm = {
+    listProviders: () => providers,
+    listModels: async (provider) => (models[provider] ?? []).map((id) => ({ provider, id, name: id })),
+    resolveModelInfo: async (provider, model) => ({ provider, id: model, name: model }),
+    stream() {
+      return (async function* stream() {
+        yield { type: 'text-delta', index: 0, text: JSON.stringify({ note: secretNote, importance: 'high' }) }
+      })()
+    },
+  }
+  const engine = createEngine({
+    config: normalizeConfig({ minDeltaChars: 0, cooldownTurns: 1 }).config,
+    getLlm: () => llm,
+    now: () => 1700000000000,
+  })
+
+  assert.deepEqual(engine.status('unseen'), {
+    configured: true,
+    route: null,
+    routeResolutions: 0,
+    session: null,
+  })
+
+  const session = sessionWith('s-status', [{ turn: 1, question: secretQuestion, answer: secretAnswer }])
+  assert.equal((await observeAndSettle(engine, session)).status, 'unroutable')
+
+  let snapshot = engine.status('s-status')
+  assert.equal(snapshot.routeResolutions, 1)
+  assert.deepEqual(snapshot.route, null)
+  assert.equal(snapshot.session.reviewStarts, 1)
+  assert.equal(snapshot.session.lastOutcome, 'unroutable')
+  assert.equal(snapshot.session.lastReviewAt, 1700000000000)
+  assert.equal(snapshot.session.inFlight, false)
+  assert.equal(snapshot.session.noteCount, 0)
+
+  providers = [{ id: 'deepseek-account', name: 'DeepSeek' }]
+  session.events.push(userEvent(90, secretQuestion), assistantEvent(91, 2, secretAnswer), turnEnd(92, 2))
+  session.lastEvent = session.events[session.events.length - 1]
+  assert.equal((await observeAndSettle(engine, session)).status, 'noted')
+
+  snapshot = engine.status('s-status')
+  assert.equal(snapshot.routeResolutions, 2)
+  assert.deepEqual(snapshot.route, { provider: 'deepseek-account', model: 'deepseek-flash' })
+  assert.equal(snapshot.session.reviewStarts, 2)
+  assert.equal(snapshot.session.lastOutcome, 'noted')
+  assert.equal(snapshot.session.noteCount, 1)
+
+  const serialized = JSON.stringify(snapshot)
+  for (const secret of [secretQuestion, secretAnswer, secretNote]) {
+    assert.equal(serialized.includes(secret), false, 'diagnostics must not expose conversation or note text')
+  }
+  assert.equal('note' in snapshot.session, false)
+})
+
+test('engine status reports an unconfigured reviewer without a session', () => {
+  const engine = createEngine({ config: normalizeConfig({ provider: '', model: '' }).config, getLlm: () => undefined })
+  assert.deepEqual(engine.status('anything'), {
+    configured: false,
+    route: null,
+    routeResolutions: 0,
+    session: null,
+  })
+})
+
+test('engine status records silent and unexpected-error review outcomes', async () => {
+  const silentEngine = createEngine({
+    config: normalizeConfig({ provider: 'p', model: 'm', minDeltaChars: 0, cooldownTurns: 1 }).config,
+    getLlm: () => ({
+      resolveModelInfo: async (provider, model) => ({ provider, id: model, name: model }),
+      stream() {
+        return (async function* stream() {
+          yield { type: 'text-delta', index: 0, text: '{"note":null,"importance":null}' }
+        })()
+      },
+    }),
+  })
+  await observeAndSettle(silentEngine, sessionWith('s-silent', [{ turn: 1, answer: 'work' }]))
+  assert.equal(silentEngine.status('s-silent').session.lastOutcome, 'silent')
+
+  const errorEngine = createEngine({
+    config: normalizeConfig({ provider: 'p', model: 'm', minDeltaChars: 0, cooldownTurns: 1 }).config,
+    getLlm: () => ({
+      resolveModelInfo: async (provider, model) => ({ provider, id: model, name: model }),
+      stream() {
+        return (async function* stream() {
+          yield { type: 'text-delta', index: 0, text: '{"note":"N","importance":"high"}' }
+        })()
+      },
+    }),
+    now: () => {
+      throw new Error('clock unavailable')
+    },
+  })
+  assert.equal((await observeAndSettle(errorEngine, sessionWith('s-error', [{ turn: 1, answer: 'work' }]))).status, 'error')
+  assert.equal(errorEngine.status('s-error').session.lastOutcome, 'error')
+})
+
+test('an automatic route is retried when a DeepSeek provider appears after a no-route turn', async () => {
+  const calls = []
+  let providers = [{ id: 'anthropic', name: 'Anthropic' }]
+  const models = { 'deepseek-account': ['deepseek-flash'] }
+  const llm = {
+    listProviders: () => providers,
+    listModels: async (provider) => (models[provider] ?? []).map((id) => ({ provider, id, name: id })),
+    resolveModelInfo: async (provider, model) => ({ provider, id: model, name: model }),
+    stream(options) {
+      calls.push(options)
+      return (async function* stream() {
+        yield { type: 'text-delta', index: 0, text: '{"note":"late route works","importance":"high"}' }
+      })()
+    },
+  }
+  const engine = createEngine({ config: normalizeConfig({ minDeltaChars: 0, cooldownTurns: 1 }).config, getLlm: () => llm })
+  const session = sessionWith('s-race', [{ turn: 1, answer: 'one' }])
+  assert.equal((await observeAndSettle(engine, session)).status, 'unroutable')
+
+  // The same registry now exposes a usable DeepSeek route.
+  providers = [{ id: 'deepseek-account', name: 'DeepSeek' }]
+  session.events.push(userEvent(90, 'q2'), assistantEvent(91, 2, 'two'), turnEnd(92, 2))
+  session.lastEvent = session.events[session.events.length - 1]
+  const outcome = await observeAndSettle(engine, session)
+  assert.equal(outcome.status, 'noted')
+  assert.equal(calls.length, 1)
+  assert.equal(calls[0].provider, 'deepseek-account')
+  assert.equal(calls[0].model, 'deepseek-flash')
+  assert.equal(engine.notes('s-race').length, 1)
+})
+
+test('a resolved automatic route is cached across later turns', async () => {
+  let providerReads = 0
+  const calls = []
+  const llm = {
+    listProviders() {
+      providerReads += 1
+      return [{ id: 'deepseek-account', name: 'DeepSeek' }]
+    },
+    listModels: async (provider) => [{ provider, id: 'deepseek-flash', name: 'Flash' }],
+    resolveModelInfo: async (provider, model) => ({ provider, id: model, name: model }),
+    stream(options) {
+      calls.push(options)
+      return (async function* stream() {
+        yield { type: 'text-delta', index: 0, text: '{"note":null,"importance":null}' }
+      })()
+    },
+  }
+  const engine = createEngine({ config: normalizeConfig({ minDeltaChars: 0, cooldownTurns: 1 }).config, getLlm: () => llm })
+  const session = sessionWith('s-cache', [{ turn: 1, answer: 'one' }])
+  assert.equal((await observeAndSettle(engine, session)).status, 'silent')
+
+  session.events.push(userEvent(90, 'q2'), assistantEvent(91, 2, 'two'), turnEnd(92, 2))
+  session.lastEvent = session.events[session.events.length - 1]
+  assert.equal((await observeAndSettle(engine, session)).status, 'silent')
+  assert.equal(calls.length, 2)
+  assert.equal(providerReads, 1, 'a resolved route is discovered once and cached')
+})
+
+test('a no-route engine retries discovery only at a later qualifying turn', async () => {
+  let providerReads = 0
+  const llm = {
+    listProviders() {
+      providerReads += 1
+      return [{ id: 'anthropic', name: 'Anthropic' }]
+    },
+    listModels: async () => [],
+    resolveModelInfo: async () => {
+      throw new Error('NO_ADAPTER')
+    },
+    stream() {
+      throw new Error('must not stream without a route')
+    },
+  }
+  const engine = createEngine({ config: normalizeConfig({ minDeltaChars: 0, cooldownTurns: 1 }).config, getLlm: () => llm })
+  const session = sessionWith('s-quiet', [{ turn: 1, answer: 'one' }])
+  assert.equal((await observeAndSettle(engine, session)).status, 'unroutable')
+  assert.equal(providerReads, 1)
+
+  for (let index = 0; index < 10; index += 1) {
+    assert.equal(engine.observe(session, userEvent(300 + index, 'x'.repeat(500))).status, 'ignored')
+  }
+  assert.equal(providerReads, 1, 'non-qualifying events never re-run discovery')
+
+  session.events.push(userEvent(400, 'q2'), assistantEvent(401, 2, 'two'), turnEnd(402, 2))
+  session.lastEvent = session.events[session.events.length - 1]
+  assert.equal((await observeAndSettle(engine, session)).status, 'unroutable')
+  assert.equal(providerReads, 2, 'the next qualifying turn retries discovery once')
+})
+
 test('an automatic route is retried when the LLM service mounts after the first turn', async () => {
   const calls = []
   let llm

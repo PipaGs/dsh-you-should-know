@@ -405,6 +405,94 @@ test('a HEAD notes request answers without a body', async () => {
   assert.equal(response.body, '')
 })
 
+test('status handler answers with a bounded snapshot and rejects non-GET', async () => {
+  const seen = []
+  const snapshot = {
+    configured: true,
+    route: { provider: 'deepseek-account', model: 'deepseek-flash' },
+    routeResolutions: 2,
+    session: { reviewStarts: 1, lastReviewAt: 7, lastOutcome: 'silent', inFlight: false, noteCount: 0 },
+  }
+  const engine = {
+    notes: () => [],
+    dismiss: () => false,
+    status(sessionId) {
+      seen.push(sessionId)
+      return snapshot
+    },
+  }
+  const handlers = createRequestHandlers(engine)
+
+  const ok = fakeResponse()
+  await handlers.status({ method: 'GET', url: '/dsh-you-should-know/status?sessionId=s1' }, ok)
+  assert.equal(ok.status, 200)
+  assert.deepEqual(JSON.parse(ok.body), { ok: true, ...snapshot })
+  assert.deepEqual(seen, ['s1'])
+
+  const missing = fakeResponse()
+  await handlers.status({ method: 'GET', url: '/dsh-you-should-know/status' }, missing)
+  assert.deepEqual(JSON.parse(missing.body), { ok: true, ...snapshot })
+  assert.deepEqual(seen, ['s1', ''])
+
+  const rejected = fakeResponse()
+  await handlers.status({ method: 'POST', url: '/dsh-you-should-know/status' }, rejected)
+  assert.equal(rejected.status, 405)
+  assert.deepEqual(seen, ['s1', ''])
+})
+
+test('a HEAD status request answers without a body', async () => {
+  const engine = {
+    notes: () => [],
+    dismiss: () => false,
+    status: () => ({ configured: true, route: null, routeResolutions: 0, session: null }),
+  }
+  const handlers = createRequestHandlers(engine)
+  const response = fakeResponse()
+  await handlers.status({ method: 'HEAD', url: '/dsh-you-should-know/status?sessionId=s1' }, response)
+  assert.equal(response.status, 200)
+  assert.equal(response.body, '')
+})
+
+test('status rejects a foreign Origin', async () => {
+  const calls = []
+  const engine = {
+    notes: () => [],
+    dismiss: () => false,
+    status(sessionId) {
+      calls.push(sessionId)
+      return { configured: true, route: null, routeResolutions: 0, session: null }
+    },
+  }
+  const handlers = createRequestHandlers(engine)
+  const foreign = { origin: 'https://evil.example', host: '127.0.0.1:3080' }
+  const rejected = fakeResponse()
+  await handlers.status({ method: 'GET', url: '/dsh-you-should-know/status?sessionId=s1', headers: foreign }, rejected)
+  assert.equal(rejected.status, 403)
+  assert.deepEqual(calls, [], 'a foreign origin never reaches the engine')
+
+  const sameOrigin = { origin: 'http://127.0.0.1:3080', host: '127.0.0.1:3080' }
+  const accepted = fakeResponse()
+  await handlers.status({ method: 'GET', url: '/dsh-you-should-know/status?sessionId=s1', headers: sameOrigin }, accepted)
+  assert.equal(accepted.status, 200)
+  assert.deepEqual(calls, ['s1'])
+})
+
+test('an overlong session id reads no session state on the status route', async () => {
+  const calls = []
+  const engine = {
+    notes: () => [],
+    dismiss: () => false,
+    status(sessionId) {
+      calls.push(sessionId)
+      return { configured: true, route: null, routeResolutions: 0, session: null }
+    },
+  }
+  const handlers = createRequestHandlers(engine)
+  const query = 'x'.repeat(201)
+  await handlers.status({ method: 'GET', url: `/dsh-you-should-know/status?sessionId=${query}` }, fakeResponse())
+  assert.deepEqual(calls, [''])
+})
+
 test('an overlong or non-string session id reads nothing', async () => {
   const calls = []
   const engine = {

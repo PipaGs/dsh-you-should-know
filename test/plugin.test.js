@@ -252,6 +252,7 @@ test('a configured plugin observes a turn, serves the note, and dismisses it', a
   assert.deepEqual(harness.routes.map((route) => route.path).sort(), [
     '/dsh-you-should-know/dismiss',
     '/dsh-you-should-know/notes',
+    '/dsh-you-should-know/status',
   ])
 
   const listener = harness.listeners[0].listener
@@ -278,6 +279,44 @@ test('a configured plugin observes a turn, serves the note, and dismisses it', a
   const afterResponse = fakeResponse()
   await notesRoute.handler(fakeRequest({ url: '/dsh-you-should-know/notes?sessionId=s1' }), afterResponse)
   assert.deepEqual(JSON.parse(afterResponse.body).notes, [])
+  harness.disposeAll()
+})
+
+test('the status route reports activity without exposing conversation or note text', async () => {
+  const secret = 'PRIVATE-MARKER-42'
+  const llm = installedDeepSeekLlm([JSON.stringify({ note: `note ${secret}`, importance: 'high' })])
+  const harness = makeCtx({ llm })
+  apply(harness.ctx, { minDeltaChars: 0, cooldownTurns: 1 })
+  harness.runInjections()
+
+  const listener = harness.listeners[0].listener
+  const session = sessionWith('s-status', 1, `answer ${secret}`)
+  listener(session, session.lastEvent)
+  await settle()
+
+  const statusRoute = harness.routes.find((route) => route.path === '/dsh-you-should-know/status')
+  assert.equal(typeof statusRoute?.handler, 'function')
+
+  const response = fakeResponse()
+  await statusRoute.handler(fakeRequest({ url: '/dsh-you-should-know/status?sessionId=s-status' }), response)
+  const snapshot = JSON.parse(response.body)
+  assert.equal(snapshot.ok, true)
+  assert.equal(snapshot.configured, true)
+  assert.deepEqual(snapshot.route, { provider: 'deepseek-official', model: 'deepseek-flash' })
+  assert.equal(snapshot.routeResolutions, 1)
+  assert.equal(snapshot.session.reviewStarts, 1)
+  assert.equal(snapshot.session.lastOutcome, 'noted')
+  assert.equal(snapshot.session.noteCount, 1)
+  assert.equal(response.body.includes(secret), false, 'diagnostics must not leak conversation or note text')
+
+  const head = fakeResponse()
+  await statusRoute.handler(fakeRequest({ method: 'HEAD', url: '/dsh-you-should-know/status?sessionId=s-status' }), head)
+  assert.equal(head.status, 200)
+  assert.equal(head.body, '')
+
+  const wrongMethod = fakeResponse()
+  await statusRoute.handler(fakeRequest({ method: 'POST', url: '/dsh-you-should-know/status' }), wrongMethod)
+  assert.equal(wrongMethod.status, 405)
   harness.disposeAll()
 })
 
