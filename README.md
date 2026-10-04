@@ -8,7 +8,7 @@ The product intent is analogous to Claude Code's *You Should Know*, with one del
 
 ## Status
 
-Version `0.2.3`, MIT. Host and browser halves are committed as plain JavaScript, so a `github:` install needs no build step. Scope is intentionally small: one web surface, one reviewer call per qualifying turn, no settings UI.
+Version `0.2.5`, MIT. Host and browser halves are committed as plain JavaScript, so a `github:` install needs no build step. Scope is intentionally small: one web surface, one reviewer call per qualifying turn, no settings UI.
 
 ## What it does
 
@@ -49,7 +49,7 @@ This plugin is architecturally incapable of talking to the agent:
 - no modification of the primary model context;
 - no approval or tool mechanisms.
 
-Notes live in plugin-owned, in-memory, per-session state. The only consumer is the browser: local HTTP routes on the web server (`GET /dsh-you-should-know/notes`, `POST /dsh-you-should-know/dismiss`, and the read-only `GET`/`HEAD /dsh-you-should-know/status`). The host never hands a note to the model.
+Notes live in plugin-owned, in-memory, per-session state. The only consumer is the browser: exact Fetch routes on the host connection, reached under the absolute `/api` transport (`GET`/`HEAD /api/dsh-you-should-know/notes`, `POST /api/dsh-you-should-know/dismiss`, and the read-only `GET`/`HEAD /api/dsh-you-should-know/status`). The connection owns the Host/Origin fence and browser-session authentication, and the Desktop app origin proxies `/api` to the host. The host never hands a note to the model.
 
 A source-level test (`test/invariant.test.js`) scans the shipped files for every delivery shape that could break this invariant and fails if one appears.
 
@@ -129,10 +129,10 @@ Delivery uses conservative polling. While the page is visible the card polls its
 
 ## Operational verification
 
-The host exposes a read-only, same-origin `GET`/`HEAD /dsh-you-should-know/status?sessionId=<id>` route so you can prove the reviewer is working without reading any conversation text:
+The host exposes a read-only `GET`/`HEAD /api/dsh-you-should-know/status?sessionId=<id>` route on the connection transport so you can prove the reviewer is working without reading any conversation text. Because it sits behind the same browser-session authentication as the rest of `/api`, a bare `curl` gets `401`; read it from the page the GUI already authenticated, for example from the browser console:
 
-```sh
-curl -s 'http://127.0.0.1:<port>/dsh-you-should-know/status?sessionId=<session-id>'
+```js
+await (await fetch('api/dsh-you-should-know/status?sessionId=<session-id>')).json()
 ```
 
 It returns bounded JSON:
@@ -166,7 +166,7 @@ How to read each value:
 | `session.inFlight` | `true` while one reviewer call is in progress for that session. |
 | `session.noteCount` | Notes ever stored for the session, including dismissed ones. |
 
-An unknown or missing `sessionId` returns `"session": null` with the global route state only. `HEAD` returns the same status line with no body, and a non-`GET`/`HEAD` request is rejected with `405`. The route is read-only, applies the same session-id bound and same-origin check as `/notes` and `/dismiss`, and never includes conversation text, prompt text, note text, credentials, or tool data.
+An unknown or missing `sessionId` returns `"session": null` with the global route state only. `HEAD` returns the same status line with no body, and a non-`GET`/`HEAD` request is rejected with `405`. The route is read-only, applies the same session-id bound as `/notes` and `/dismiss`, relies on the connection's Host/Origin fence and browser authentication, and never includes conversation text, prompt text, note text, credentials, or tool data.
 
 Typical readings:
 
@@ -180,7 +180,7 @@ Typical readings:
 - The reviewer receives only the bounded excerpt described above: the human's own user messages and the agent's visible replies. Tool results, tool definitions, the system prompt, project instructions, attachments, and the rest of the session log are never sent.
 - Notes are never persisted to the session log and never enter model context. They live in host memory and are lost when the host process exits.
 - Each review is exactly one model call with a hard `maxTokens` cap, and the gates keep calls rare: a completed turn must pass the cooldown, the delta gate, and the per-session budget.
-- The HTTP routes are served by the same local web server as the rest of the GUI. They expose only note text for a session id plus the bounded status counters; they do not expose credentials, prompt text, conversation text, or the transcript, and they reject cross-origin browser traffic (a foreign `Origin`) so a random web page cannot dismiss notes or read diagnostics.
+- The routes are Fetch handlers on the connection carrier, mounted under the same `/api` transport as the rest of the GUI. They expose only note text for a session id plus the bounded status counters; they do not expose credentials, prompt text, conversation text, or the transcript. The connection rejects cross-origin browser traffic (a foreign `Host`/`Origin`, or a request without a valid browser session) so a random web page cannot dismiss notes or read diagnostics.
 - The reviewer prompt declares the conversation excerpt untrusted data, so instructions embedded in a user or assistant message are not followed as reviewer instructions.
 
 ## Failure model
@@ -190,7 +190,7 @@ The plugin fails quiet by construction:
 - a blank `provider`/`model` means zero reviewer calls, and the automatic DeepSeek route makes no visible change when the profile mounts no such route: discovery resolves to "no route" before any model call is attempted, and a later qualifying turn retries discovery, so a route that appears after a transient startup race is picked up without a restart;
 - a reviewer/model/parser/RPC/browser failure is contained and logged at most as a host warning;
 - a malformed or empty reply is dropped without a note;
-- if the web server is absent (headless profiles) the plugin still evaluates turns but has no delivery path: the note/status routes and the served browser bundle all live on that server, so nothing is shown;
+- if no web server is present (headless profiles) the plugin still evaluates turns but has no delivery path: the connection mounts its `/api` transport only when a web server exists, and the served browser bundle lives there too, so nothing is shown;
 - if the package is composed twice, the second row is inert, so there is never more than one reviewer fiber;
 - the `session/event` listener wraps its own work in a try/catch so a reviewer bug cannot disturb primary work.
 
@@ -201,7 +201,7 @@ The plugin fails quiet by construction:
 - Polling is not a push channel: a note can take up to one poll interval to appear.
 - The web card is the only surface; there is no CLI/headless delivery and no settings UI.
 - An explicit override is not validated against the catalog up front; an unknown route simply fails quietly on the first review. The automatic route does consult the live registry and model catalog before it calls anything.
-- The HTTP routes are unauthenticated, like every other in-tree plugin route: they reject cross-origin browser traffic, but any client that can reach the web server and knows a session id can read that session's notes and status counters. Keep the DSH web server on loopback or put your own authentication in front of it.
+- The routes require the connection's browser session: they reject cross-origin browser traffic and unauthenticated requests, but any client that holds the GUI's session cookie and knows a session id can read that session's notes and status counters. Keep the DSH web server on loopback and treat the browser session as the access boundary.
 - While no route resolves, the engine re-reads the live registry at each qualifying turn until discovery succeeds. Discovery never opens a generation stream, and the cooldown and delta gates bound how often it runs.
 - The reviewer reads the full committed log once per session through the synchronous `snapshotEvents()` accessor, which DSH marks deprecated. After that seed the plugin follows the `session/event` feed and keeps a bounded recent-event window, so steady-state review never re-reads the log; a future DSH that removes the accessor degrades resumed-session context to feed-only instead of breaking the reviewer. Alongside the raw window it keeps a bounded side buffer of the most recent visible messages and per-turn assistant text, so a long noisy turn — a visible answer followed by thousands of tool events — cannot erase the current answer from the reviewer excerpt or the output gate.
 - The per-session note budget (12) is an internal safety constant, not a config key.
@@ -216,7 +216,7 @@ node --check lib/core.js && node --check lib/index.js && node --check lib/client
 node --test test/*.test.js
 ```
 
-The suite covers adaptive DeepSeek route discovery, the documented and installed-style route variants, arbitrary exact overrides, partial pins, the blank-config gate, no-route fail-quiet and route recovery, live reconfiguration, the strict verdict shape, silent/malformed/non-text verdicts, deduplication, cooldown, the delta gate, the bounded event window and gap recovery, tool-event flood retention, session scoping and dismissal, the bounded client dismissal memory, the read-only status diagnostics, route origin checks and bodyless HEAD responses, bounded context, the single-reviewer guard, the browser bundle envelope, and the human-only source invariant. There are no runtime dependencies.
+The suite covers adaptive DeepSeek route discovery, the documented and installed-style route variants, arbitrary exact overrides, partial pins, the blank-config gate, no-route fail-quiet and route recovery, live reconfiguration, the strict verdict shape, silent/malformed/non-text verdicts, deduplication, cooldown, the delta gate, the bounded event window and gap recovery, tool-event flood retention, session scoping and dismissal, the bounded client dismissal memory, the read-only status diagnostics, connection Fetch route registration with Request/Response semantics and bodyless HEAD responses, the document-relative browser URLs, bounded context, the single-reviewer guard, the browser bundle envelope, and the human-only source invariant. There are no runtime dependencies.
 
 ## Related work
 
