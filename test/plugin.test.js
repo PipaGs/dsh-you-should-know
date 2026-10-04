@@ -118,8 +118,14 @@ test('the plugin exports the package name', () => {
   assert.equal(name, 'dsh-you-should-know')
 })
 
-test('a blank provider or model registers nothing at all', () => {
-  for (const config of [undefined, {}, { provider: 'p' }, { model: 'm' }, { provider: '  ', model: '  ' }]) {
+test('an explicitly blank provider or model registers nothing at all', () => {
+  const inert = [
+    { provider: '', model: '' },
+    { provider: '  ', model: '  ' },
+    { provider: '', model: 'deepseek-chat' },
+    { provider: 'deepseek', model: '' },
+  ]
+  for (const config of inert) {
     const harness = makeCtx()
     apply(harness.ctx, config)
     assert.equal(harness.listeners.length, 0)
@@ -128,9 +134,64 @@ test('a blank provider or model registers nothing at all', () => {
   }
 })
 
+test('the built-in default is the DeepSeek reviewer route', async () => {
+  const llm = makeLlm(['{"note":null,"importance":null}'])
+  const harness = makeCtx({ llm })
+  // Only provider/model are left to their defaults; the gates are lowered so
+  // one short turn actually reaches the reviewer channel.
+  apply(harness.ctx, { minDeltaChars: 0, cooldownTurns: 1 })
+  assert.equal(harness.listeners.length, 1)
+  assert.equal(harness.injected.length, 1)
+
+  const listener = harness.listeners[0].listener
+  const session = sessionWith('s-default', 1, 'done')
+  listener(session, session.lastEvent)
+  await settle()
+  assert.equal(llm.calls.length, 1)
+  assert.equal(llm.calls[0].provider, 'deepseek')
+  assert.equal(llm.calls[0].model, 'deepseek-chat')
+  harness.disposeAll()
+})
+
+test('a provider and model override reaches the reviewer channel', async () => {
+  const llm = makeLlm(['{"note":null,"importance":null}'])
+  const harness = makeCtx({ llm })
+  apply(harness.ctx, { provider: 'anthropic', model: 'claude-sonnet', minDeltaChars: 0, cooldownTurns: 1 })
+  const listener = harness.listeners[0].listener
+  const session = sessionWith('s-override', 1, 'done')
+  listener(session, session.lastEvent)
+  await settle()
+  assert.equal(llm.calls[0].provider, 'anthropic')
+  assert.equal(llm.calls[0].model, 'claude-sonnet')
+  harness.disposeAll()
+})
+
+test('a live config change takes effect on the next composition', async () => {
+  const firstLlm = makeLlm(['{"note":null,"importance":null}'])
+  const first = makeCtx({ llm: firstLlm })
+  apply(first.ctx, { provider: 'deepseek', model: 'deepseek-chat', minDeltaChars: 0, cooldownTurns: 1 })
+  const firstListener = first.listeners[0].listener
+  const firstSession = sessionWith('s-live-a', 1, 'done')
+  firstListener(firstSession, firstSession.lastEvent)
+  await settle()
+  assert.equal(firstLlm.calls[0].provider, 'deepseek')
+  first.disposeAll()
+
+  const secondLlm = makeLlm(['{"note":null,"importance":null}'])
+  const second = makeCtx({ llm: secondLlm })
+  apply(second.ctx, { provider: 'deepseek-official', model: 'deepseek-flash', minDeltaChars: 0, cooldownTurns: 1 })
+  const secondListener = second.listeners[0].listener
+  const secondSession = sessionWith('s-live-b', 1, 'done')
+  secondListener(secondSession, secondSession.lastEvent)
+  await settle()
+  assert.equal(secondLlm.calls[0].provider, 'deepseek-official')
+  assert.equal(secondLlm.calls[0].model, 'deepseek-flash')
+  second.disposeAll()
+})
+
 test('an inert row does not consume the single-reviewer slot', () => {
   const inert = makeCtx()
-  apply(inert.ctx, {})
+  apply(inert.ctx, { provider: '', model: '' })
   inert.disposeAll()
 
   const configured = makeCtx({ llm: makeLlm([]) })
