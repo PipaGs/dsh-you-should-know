@@ -1,6 +1,6 @@
 {
   "name": "dsh-you-should-know",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Quiet, human-only second-opinion reviewer for DeepSeek Harness: a separately configured reviewer model (DeepSeek by default, any registered provider and model by config) watches completed root-agent turns and, only when something important was missed, shows a dismissible card above the composer. It never injects or steers the primary agent.",
   "type": "module",
   "license": "MIT",
