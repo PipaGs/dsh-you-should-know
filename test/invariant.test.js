@@ -9,6 +9,10 @@ async function read(path) {
   return await readFile(new URL(`../${path}`, import.meta.url), 'utf8')
 }
 
+// Non-Latin script ranges: CJK/Kana, Hangul, Cyrillic, and Greek. English-only
+// means these must never appear in shipped or public text, not just CJK.
+const NON_LATIN = /[\u0370-\u03ff\u0400-\u04ff\u1100-\u11ff\u1f00-\u1fff\u3000-\u30ff\u3130-\u318f\u3400-\u4dbf\u4e00-\u9fff\uac00-\ud7af\uff00-\uffef]/
+
 /** Remove comments so prose about a forbidden shape never trips the scan. */
 function stripComments(source) {
   return source
@@ -55,12 +59,18 @@ test('the plugin uses only the sanctioned seams', async () => {
   assert.ok(!client.includes('localStorage'), 'dismissal state stays in the page, not shared storage')
 })
 
+test('the English-only scan rejects Cyrillic, Greek, and CJK text', () => {
+  for (const sample of ['Привет', 'Ελληνικά', '日本語', '한국어']) {
+    assert.equal(NON_LATIN.test(sample), true, `${sample} must be flagged as non-English`)
+  }
+  assert.equal(NON_LATIN.test('plain english text'), false)
+})
+
 test('public-facing text stays English-only and free of unrelated project references', async () => {
-  const cjk = /[\u3000-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uff00-\uffef]/
   const unrelated = [/\bozon\b/i, /chatgpt/i, /new-reg-ozon/i, /\bloto\b/i, /\bairo\b/i, /O-komplex/i, /immutable evidence/i]
   for (const path of [...SHIPPED, ...PUBLIC]) {
     const source = await read(path)
-    assert.equal(cjk.test(source), false, `${path} contains non-English (CJK) text`)
+    assert.equal(NON_LATIN.test(source), false, `${path} contains non-English text`)
     for (const pattern of unrelated) {
       assert.equal(pattern.test(source), false, `${path} references an unrelated project (${pattern})`)
     }
@@ -76,7 +86,7 @@ test('the bundled row leaves the reviewer route to adaptive discovery', async ()
 test('the manifest declares the bundle, the client half, and no build step', async () => {
   const manifest = JSON.parse(await read('package.json'))
   assert.equal(manifest.name, 'dsh-you-should-know')
-  assert.equal(manifest.version, '0.2.3')
+  assert.equal(manifest.version, '0.2.4')
   assert.equal(manifest.license, 'MIT')
   assert.equal(manifest.dsh.manifestVersion, 1)
   assert.equal(manifest.dsh.bundle.patch, './cordis.patch.yml')
