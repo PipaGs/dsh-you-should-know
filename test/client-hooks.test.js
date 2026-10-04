@@ -156,6 +156,7 @@ async function loadDock() {
   const intervals = []
   const fetchCalls = []
   const dismissCalls = []
+  const dismissUrls = []
   const responses = new Map()
 
   const documentMock = {
@@ -171,6 +172,7 @@ async function loadDock() {
 
   const fetchMock = async (url, init = {}) => {
     if (init && init.method === 'POST') {
+      dismissUrls.push(url)
       dismissCalls.push(JSON.parse(init.body))
       return { ok: true, json: async () => ({ ok: true, dismissed: true }) }
     }
@@ -222,6 +224,7 @@ async function loadDock() {
     intervals,
     fetchCalls,
     dismissCalls,
+    dismissUrls,
     responses,
     runIntervals() {
       for (const fn of intervals) if (fn) fn()
@@ -367,5 +370,23 @@ test('a note is shown again on the next poll if the host has not accepted the di
   env.runIntervals()
   await flushAsync()
   assert.equal(view.output, null)
+  view.unmount()
+})
+
+test('the browser polls document-relative api paths with no leading slash', async () => {
+  const env = await loadDock()
+  env.responses.set('A', noteFor('A'))
+
+  const view = env.runtime.mount(env.Dock, { sessionId: 'A' })
+  await flushAsync()
+  assert.equal(env.fetchCalls.length, 1)
+  assert.equal(env.fetchCalls[0].startsWith('api/dsh-you-should-know/notes'), true, 'the notes poll must be document-relative')
+  assert.equal(env.fetchCalls[0].startsWith('/'), false, 'a leading slash resolves against the origin, not the document')
+
+  const button = findButton(view.output)
+  assert.ok(button, 'the note renders with a dismiss control')
+  button.props.onClick()
+  await flushAsync()
+  assert.equal(env.dismissUrls.at(-1), 'api/dsh-you-should-know/dismiss', 'the dismiss post must be document-relative')
   view.unmount()
 })

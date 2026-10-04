@@ -21,7 +21,7 @@ function makeCtx(services = {}) {
   const listeners = []
   const injected = []
   const disposers = []
-  const routes = []
+  const fetchRoutes = []
   const ctx = {
     on(eventName, listener) {
       listeners.push({ eventName, listener })
@@ -37,23 +37,27 @@ function makeCtx(services = {}) {
       return services[key]
     },
   }
-  const webServer = {
-    register(route) {
-      routes.push(route)
-      return () => {}
+  // The Desktop delivers app-owned browser routes over the connection Fetch
+  // carrier; the raw web server is deliberately not part of the delivery path.
+  const connection = {
+    fetch: {
+      register(route) {
+        fetchRoutes.push(route)
+        return () => {}
+      },
     },
   }
   return {
     ctx,
     listeners,
     injected,
-    routes,
+    fetchRoutes,
     disposeAll() {
       for (const { disposer } of disposers) disposer()
       disposers.length = 0
     },
     runInjections() {
-      for (const { callback } of injected) callback({ effect: ctx.effect, webServer })
+      for (const { callback } of injected) callback({ effect: ctx.effect, connection })
     },
   }
 }
@@ -82,36 +86,6 @@ function sessionWith(id, turn, answer) {
 
 function settle() {
   return new Promise((resolve) => setImmediate(resolve))
-}
-
-function fakeRequest(overrides = {}) {
-  const listeners = new Map()
-  return {
-    method: 'GET',
-    url: '/',
-    ...overrides,
-    on(event, listener) {
-      listeners.set(event, listener)
-      return this
-    },
-    async send(body) {
-      if (listeners.has('data')) listeners.get('data')(body)
-      if (listeners.has('end')) listeners.get('end')()
-    },
-  }
-}
-
-function fakeResponse() {
-  return {
-    status: 0,
-    body: '',
-    writeHead(status) {
-      this.status = status
-    },
-    end(body) {
-      if (typeof body === 'string') this.body = body
-    },
-  }
 }
 
 test('the plugin exports the package name', () => {
@@ -244,41 +218,63 @@ test('composing the plugin twice keeps exactly one reviewer, until the first is 
   second.disposeAll()
 })
 
-test('a configured plugin observes a turn, serves the note, and dismisses it', async () => {
+test('the plugin registers its browser routes on the connection Fetch carrier', () => {
+  const harness = makeCtx({ llm: makeLlm([]) })
+  apply(harness.ctx, { provider: 'p', model: 'm' })
+  assert.equal(harness.injected.length, 1)
+  assert.deepEqual(harness.injected[0].dependencies, ['connection'])
+  harness.runInjections()
+
+  assert.deepEqual(harness.fetchRoutes.map((route) => route.path).sort(), [
+    '/api/dsh-you-should-know/dismiss',
+    '/api/dsh-you-should-know/notes',
+    '/api/dsh-you-should-know/status',
+  ])
+
+  const notes = harness.fetchRoutes.find((route) => route.path === '/api/dsh-you-should-know/notes')
+  assert.deepEqual(notes.methods, ['GET', 'HEAD'])
+  assert.equal(notes.requestBody, 'buffered')
+  assert.equal(typeof notes.fetch, 'function')
+
+  const dismiss = harness.fetchRoutes.find((route) => route.path === '/api/dsh-you-should-know/dismiss')
+  assert.deepEqual(dismiss.methods, ['POST'])
+  assert.equal(dismiss.requestBody, 'streaming', 'the handler enforces the plugin body bound itself')
+
+  const status = harness.fetchRoutes.find((route) => route.path === '/api/dsh-you-should-know/status')
+  assert.deepEqual(status.methods, ['GET', 'HEAD'])
+  assert.equal(status.requestBody, 'buffered')
+  harness.disposeAll()
+})
+
+test('a configured plugin observes a turn, serves the note, and dismisses it over Fetch', async () => {
   const llm = makeLlm(['{"note":"The retry path double-charges.","importance":"critical"}'])
   const harness = makeCtx({ llm })
   apply(harness.ctx, { provider: 'p', model: 'm', minDeltaChars: 0, cooldownTurns: 1 })
   harness.runInjections()
-  assert.deepEqual(harness.routes.map((route) => route.path).sort(), [
-    '/dsh-you-should-know/dismiss',
-    '/dsh-you-should-know/notes',
-    '/dsh-you-should-know/status',
-  ])
 
   const listener = harness.listeners[0].listener
   const session = sessionWith('s1', 1, 'done')
   listener(session, session.lastEvent)
   await settle()
 
-  const notesRoute = harness.routes.find((route) => route.path === '/dsh-you-should-know/notes')
-  const listResponse = fakeResponse()
-  await notesRoute.handler(fakeRequest({ url: '/dsh-you-should-know/notes?sessionId=s1' }), listResponse)
-  const listed = JSON.parse(listResponse.body)
+  const notesRoute = harness.fetchRoutes.find((route) => route.path === '/api/dsh-you-should-know/notes')
+  const listResponse = await notesRoute.fetch(new Request('http://127.0.0.1/api/dsh-you-should-know/notes?sessionId=s1', { method: 'GET' }))
+  assert.equal(listResponse.headers.get('cache-control'), 'no-store')
+  const listed = await listResponse.json()
   assert.equal(listed.ok, true)
   assert.equal(listed.notes.length, 1)
   assert.equal(listed.notes[0].importance, 'critical')
 
-  const dismissRoute = harness.routes.find((route) => route.path === '/dsh-you-should-know/dismiss')
-  const dismissRequest = fakeRequest({ method: 'POST' })
-  const dismissResponse = fakeResponse()
-  const pending = dismissRoute.handler(dismissRequest, dismissResponse)
-  await dismissRequest.send(JSON.stringify({ sessionId: 's1', noteId: listed.notes[0].id }))
-  await pending
-  assert.deepEqual(JSON.parse(dismissResponse.body), { ok: true, dismissed: true })
+  const dismissRoute = harness.fetchRoutes.find((route) => route.path === '/api/dsh-you-should-know/dismiss')
+  const dismissResponse = await dismissRoute.fetch(new Request('http://127.0.0.1/api/dsh-you-should-know/dismiss', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ sessionId: 's1', noteId: listed.notes[0].id }),
+  }))
+  assert.deepEqual(await dismissResponse.json(), { ok: true, dismissed: true })
 
-  const afterResponse = fakeResponse()
-  await notesRoute.handler(fakeRequest({ url: '/dsh-you-should-know/notes?sessionId=s1' }), afterResponse)
-  assert.deepEqual(JSON.parse(afterResponse.body).notes, [])
+  const afterResponse = await notesRoute.fetch(new Request('http://127.0.0.1/api/dsh-you-should-know/notes?sessionId=s1', { method: 'GET' }))
+  assert.deepEqual((await afterResponse.json()).notes, [])
   harness.disposeAll()
 })
 
@@ -294,12 +290,12 @@ test('the status route reports activity without exposing conversation or note te
   listener(session, session.lastEvent)
   await settle()
 
-  const statusRoute = harness.routes.find((route) => route.path === '/dsh-you-should-know/status')
-  assert.equal(typeof statusRoute?.handler, 'function')
+  const statusRoute = harness.fetchRoutes.find((route) => route.path === '/api/dsh-you-should-know/status')
+  assert.equal(typeof statusRoute?.fetch, 'function')
 
-  const response = fakeResponse()
-  await statusRoute.handler(fakeRequest({ url: '/dsh-you-should-know/status?sessionId=s-status' }), response)
-  const snapshot = JSON.parse(response.body)
+  const response = await statusRoute.fetch(new Request('http://127.0.0.1/api/dsh-you-should-know/status?sessionId=s-status', { method: 'GET' }))
+  const text = await response.text()
+  const snapshot = JSON.parse(text)
   assert.equal(snapshot.ok, true)
   assert.equal(snapshot.configured, true)
   assert.deepEqual(snapshot.route, { provider: 'deepseek-official', model: 'deepseek-flash' })
@@ -307,15 +303,13 @@ test('the status route reports activity without exposing conversation or note te
   assert.equal(snapshot.session.reviewStarts, 1)
   assert.equal(snapshot.session.lastOutcome, 'noted')
   assert.equal(snapshot.session.noteCount, 1)
-  assert.equal(response.body.includes(secret), false, 'diagnostics must not leak conversation or note text')
+  assert.equal(text.includes(secret), false, 'diagnostics must not leak conversation or note text')
 
-  const head = fakeResponse()
-  await statusRoute.handler(fakeRequest({ method: 'HEAD', url: '/dsh-you-should-know/status?sessionId=s-status' }), head)
+  const head = await statusRoute.fetch(new Request('http://127.0.0.1/api/dsh-you-should-know/status?sessionId=s-status', { method: 'HEAD' }))
   assert.equal(head.status, 200)
-  assert.equal(head.body, '')
+  assert.equal(await head.text(), '')
 
-  const wrongMethod = fakeResponse()
-  await statusRoute.handler(fakeRequest({ method: 'POST', url: '/dsh-you-should-know/status' }), wrongMethod)
+  const wrongMethod = await statusRoute.fetch(new Request('http://127.0.0.1/api/dsh-you-should-know/status', { method: 'POST' }))
   assert.equal(wrongMethod.status, 405)
   harness.disposeAll()
 })

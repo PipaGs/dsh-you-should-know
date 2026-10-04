@@ -7,6 +7,7 @@ import {
   accumulatedDelta,
   buildReviewPrompt,
   collectContext,
+  createFetchHandlers,
   createRequestHandlers,
   dedupeKey,
   isChildSession,
@@ -600,6 +601,127 @@ test('readJsonBody is bounded and never throws', async () => {
   assert.equal(await hugePending, undefined)
 
   assert.equal(await readJsonBody(undefined, 10), undefined)
+})
+
+// Fetch-native handlers are the carrier the browser half reaches through the
+// Desktop connection. They take a Request and return a Response, keep the same
+// bounds and no-store posture, and never throw into the carrier.
+
+test('fetch notes handler answers a Request with a no-store Response and rejects non-GET', async () => {
+  const calls = []
+  const engine = {
+    notes(sessionId) {
+      calls.push(sessionId)
+      return [{ id: 's1:1', note: 'N', importance: 'high', createdAt: 7 }]
+    },
+    dismiss: () => false,
+  }
+  const handlers = createFetchHandlers(engine)
+
+  const response = await handlers.notes(new Request('http://127.0.0.1/api/dsh-you-should-know/notes?sessionId=s1', { method: 'GET' }))
+  assert.equal(response.status, 200)
+  assert.equal(response.headers.get('cache-control'), 'no-store')
+  assert.match(response.headers.get('content-type'), /application\/json/)
+  assert.deepEqual(await response.json(), { ok: true, notes: [{ id: 's1:1', note: 'N', importance: 'high', createdAt: 7 }] })
+  assert.deepEqual(calls, ['s1'])
+
+  const head = await handlers.notes(new Request('http://127.0.0.1/api/dsh-you-should-know/notes?sessionId=s1', { method: 'HEAD' }))
+  assert.equal(head.status, 200)
+  assert.equal(await head.text(), '', 'a HEAD answer is bodyless')
+
+  const rejected = await handlers.notes(new Request('http://127.0.0.1/api/dsh-you-should-know/notes', { method: 'PUT' }))
+  assert.equal(rejected.status, 405)
+  assert.equal(rejected.headers.get('allow'), 'GET, HEAD')
+})
+
+test('fetch dismiss handler reads a bounded JSON body and rejects invalid input', async () => {
+  const seen = []
+  const engine = {
+    notes: () => [],
+    dismiss(sessionId, noteId) {
+      seen.push([sessionId, noteId])
+      return true
+    },
+  }
+  const handlers = createFetchHandlers(engine)
+
+  const response = await handlers.dismiss(new Request('http://127.0.0.1/api/dsh-you-should-know/dismiss', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ sessionId: 's1', noteId: 's1:2' }),
+  }))
+  assert.equal(response.status, 200)
+  assert.equal(response.headers.get('cache-control'), 'no-store')
+  assert.deepEqual(await response.json(), { ok: true, dismissed: true })
+  assert.deepEqual(seen, [['s1', 's1:2']])
+
+  const malformed = await handlers.dismiss(new Request('http://127.0.0.1/api/dsh-you-should-know/dismiss', { method: 'POST', body: '{not json' }))
+  assert.equal(malformed.status, 400)
+
+  const oversized = await handlers.dismiss(new Request('http://127.0.0.1/api/dsh-you-should-know/dismiss', {
+    method: 'POST',
+    body: JSON.stringify({ sessionId: 's1', noteId: 'x'.repeat(LIMITS.maxBodyChars + 100) }),
+  }))
+  assert.equal(oversized.status, 400, 'the plugin enforces its own small body bound')
+
+  const missing = await handlers.dismiss(new Request('http://127.0.0.1/api/dsh-you-should-know/dismiss', { method: 'POST' }))
+  assert.equal(missing.status, 400)
+})
+
+test('fetch status handler answers a bounded snapshot and rejects non-GET without leaking text', async () => {
+  const secret = 'PRIVATE-MARKER-42'
+  const snapshot = {
+    configured: true,
+    route: { provider: 'p', model: 'm' },
+    routeResolutions: 1,
+    session: { reviewStarts: 1, lastReviewAt: 2, lastOutcome: 'noted', inFlight: false, noteCount: 1 },
+  }
+  const seen = []
+  const engine = {
+    notes: () => [{ id: 's1:1', note: `note ${secret}`, importance: 'high', createdAt: 1 }],
+    dismiss: () => false,
+    status(sessionId) {
+      seen.push(sessionId)
+      return snapshot
+    },
+  }
+  const handlers = createFetchHandlers(engine)
+
+  const response = await handlers.status(new Request('http://127.0.0.1/api/dsh-you-should-know/status?sessionId=s1', { method: 'GET' }))
+  assert.equal(response.status, 200)
+  const text = await response.text()
+  assert.deepEqual(JSON.parse(text), { ok: true, ...snapshot })
+  assert.equal(text.includes(secret), false, 'the status answer never leaks note text')
+  assert.deepEqual(seen, ['s1'])
+
+  const head = await handlers.status(new Request('http://127.0.0.1/api/dsh-you-should-know/status?sessionId=s1', { method: 'HEAD' }))
+  assert.equal(head.status, 200)
+  assert.equal(await head.text(), '', 'a HEAD answer is bodyless')
+
+  const rejected = await handlers.status(new Request('http://127.0.0.1/api/dsh-you-should-know/status', { method: 'DELETE' }))
+  assert.equal(rejected.status, 405)
+})
+
+test('fetch handlers bound the session id and fail quiet instead of throwing', async () => {
+  const calls = []
+  const engine = {
+    notes(sessionId) {
+      calls.push(sessionId)
+      return []
+    },
+    dismiss: () => false,
+    status() {
+      throw new Error('engine exploded')
+    },
+  }
+  const handlers = createFetchHandlers(engine)
+
+  await handlers.notes(new Request(`http://127.0.0.1/api/dsh-you-should-know/notes?sessionId=${'x'.repeat(201)}`, { method: 'GET' }))
+  assert.deepEqual(calls, [''], 'an overlong session id reads nothing')
+
+  const failed = await handlers.status(new Request('http://127.0.0.1/api/dsh-you-should-know/status?sessionId=s1', { method: 'GET' }))
+  assert.equal(failed.status, 500)
+  assert.deepEqual(await failed.json(), { ok: false, error: 'internal' })
 })
 
 /** A registry double that mirrors the public DSH llm APIs without any model call. */
