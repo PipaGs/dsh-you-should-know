@@ -233,6 +233,34 @@ test('a silent or malformed reviewer reply is dropped quietly', async () => {
   }
 })
 
+
+test('a stream of non-text and malformed chunks stays silent', async () => {
+  const calls = []
+  const errors = []
+  const engine = createEngine({
+    config: CONFIGURED,
+    getLlm: () => ({
+      resolveModelInfo: async () => ({}),
+      stream(options) {
+        calls.push(options)
+        return (async function* stream() {
+          yield { type: 'block-start', index: 0, blockType: 'text' }
+          yield { type: 'reasoning-delta', index: 0, text: 'hidden reasoning' }
+          yield { type: 'tool-call', index: 0, id: 't1', name: 'x', arguments: '{}' }
+          yield null
+          yield { type: 'text-delta', index: 1, text: 'still not json' }
+        })()
+      },
+    }),
+    onError: (error) => errors.push(error),
+  })
+  const outcome = await observeAndSettle(engine, sessionWith('s1', [{ turn: 1, answer: 'work' }]))
+  assert.equal(outcome.status, 'silent')
+  assert.deepEqual(engine.notes('s1'), [])
+  assert.equal(calls.length, 1)
+  assert.deepEqual(errors, [])
+})
+
 test('a valid high or critical reply becomes one session-scoped note', async () => {
   const { engine } = engineWith(['{"note":"Rotate the key.","importance":"critical"}'])
   const session = sessionWith('s1', [{ turn: 1, answer: 'work' }])
@@ -326,6 +354,54 @@ test('a turn that produced no visible output is never reviewed', async () => {
   const session = sessionWith('s1', [{ turn: 1 }])
   assert.equal((await observeAndSettle(engine, session)).status, 'empty')
   assert.equal(llm.calls.length, 0)
+})
+
+
+test('a tool-event flood after the answer never hides a completed turn', async () => {
+  const { engine, llm } = engineWith(['{"note":"flooded","importance":"high"}'], { minDeltaChars: 0, cooldownTurns: 1 })
+  const events = []
+  const session = { header: { id: 'flood' }, snapshotEvents: () => events.slice() }
+  const feed = (event) => {
+    events.push(event)
+    return engine.observe(session, event)
+  }
+
+  feed(userEvent(1, 'question'))
+  feed(assistantEvent(2, 1, 'the visible answer'))
+  // Far more non-message events than the raw window holds, all inside turn 1.
+  const flood = LIMITS.maxBufferedEvents + 500
+  for (let index = 0; index < flood; index += 1) {
+    feed({ type: 'tool/result', seq: 3 + index, data: { index } })
+  }
+  const outcome = feed(turnEnd(3 + flood, 1))
+  assert.equal(outcome.status, 'reviewing')
+  const result = await outcome.promise
+  assert.equal(result.status, 'noted')
+  assert.equal(engine.notes('flood').length, 1)
+  const prompt = llm.calls[0].messages[0].content[0].text
+  assert.ok(prompt.includes('the visible answer'), 'the current answer must survive the flood in the excerpt')
+})
+
+test('a tool-event flood already committed at seed time never hides the turn', async () => {
+  const { engine, llm } = engineWith(['{"note":"seeded","importance":"critical"}'], { minDeltaChars: 0, cooldownTurns: 1 })
+  const flood = LIMITS.maxBufferedEvents + 500
+  const events = [userEvent(1, 'question'), assistantEvent(2, 1, 'the seeded answer')]
+  for (let index = 0; index < flood; index += 1) {
+    events.push({ type: 'tool/result', seq: 3 + index, data: { index } })
+  }
+  events.push(turnEnd(3 + flood, 1))
+  const session = {
+    header: { id: 'seedflood' },
+    events,
+    lastEvent: events[events.length - 1],
+    snapshotEvents: () => events.slice(),
+  }
+  const outcome = engine.observe(session, session.lastEvent)
+  assert.equal(outcome.status, 'reviewing')
+  const result = await outcome.promise
+  assert.equal(result.status, 'noted')
+  const prompt = llm.calls[0].messages[0].content[0].text
+  assert.ok(prompt.includes('the seeded answer'), 'the seeded answer must be derived from the full snapshot')
 })
 
 test('notes are scoped per session and dismissal is session-scoped', async () => {

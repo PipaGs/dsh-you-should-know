@@ -35,7 +35,7 @@ The reply must be a single JSON object:
 {"note": "one or two sentences addressed to the human", "importance": "high"}
 ```
 
-`importance` is `"high"` or `"critical"`; `{"note": null, "importance": null}` means "nothing to report". Anything else — prose, a fenced object, a non-object, an unknown importance, a missing field, a truncated object — is dropped quietly. Accepted notes are normalized and deduplicated by their text, so the same advice is never shown twice in one session.
+`importance` is `"high"` or `"critical"`, and a nonempty `note` requires one of those two values. Silence is exactly one shape: `{"note": null, "importance": null}`. Both keys must be present and must agree, so a missing field, a `null` note paired with a real importance, an empty or whitespace note, an unknown importance, prose, a fenced object, a non-object, or a truncated object is dropped quietly. Harmless extra keys are ignored. Accepted notes are normalized and deduplicated by their text, so the same advice is never shown twice in one session.
 
 Qualifying information is deliberately narrow: a contradiction with an explicit user requirement, an overlooked material constraint, a serious correctness/security/safety/data-loss/reliability problem, or an important implication that changes the user's next decision. The reviewer is told to stay silent otherwise and not to summarize, praise, or give style advice.
 
@@ -123,7 +123,7 @@ The browser half registers into `conversation.input.dock` — the full-width slo
 
 - No note: it renders **nothing**.
 - At least one note: it renders a compact card titled **You should know**, marked **critical** when the reviewer said so, with a **Dismiss** button.
-- Dismissal is session-scoped: the note disappears immediately, is remembered for the life of the page, and is also reported to the host so other reads agree.
+- Dismissal is session-scoped: the note disappears immediately, is remembered for the life of the page (bounded to the 200 most recent sessions), and is also reported to the host so other reads agree. Switching to another session stops rendering the previous session's notes in the same frame, before the new poll resolves, so a stale note is never shown or dismissed against the wrong session.
 
 Delivery uses conservative polling. While the page is visible the card polls its route every 7 seconds; polling stops while the tab is hidden and refreshes immediately when it becomes visible again. There is no push channel for out-of-tree plugins in the current public API, so polling is the documented mechanism.
 
@@ -203,11 +203,11 @@ The plugin fails quiet by construction:
 - An explicit override is not validated against the catalog up front; an unknown route simply fails quietly on the first review. The automatic route does consult the live registry and model catalog before it calls anything.
 - The HTTP routes are unauthenticated, like every other in-tree plugin route: they reject cross-origin browser traffic, but any client that can reach the web server and knows a session id can read that session's notes and status counters. Keep the DSH web server on loopback or put your own authentication in front of it.
 - While no route resolves, the engine re-reads the live registry at each qualifying turn until discovery succeeds. Discovery never opens a generation stream, and the cooldown and delta gates bound how often it runs.
-- The reviewer reads the full committed log once per session through the synchronous `snapshotEvents()` accessor, which DSH marks deprecated. After that seed the plugin follows the `session/event` feed and keeps a bounded recent-event window, so steady-state review never re-reads the log; a future DSH that removes the accessor degrades resumed-session context to feed-only instead of breaking the reviewer.
+- The reviewer reads the full committed log once per session through the synchronous `snapshotEvents()` accessor, which DSH marks deprecated. After that seed the plugin follows the `session/event` feed and keeps a bounded recent-event window, so steady-state review never re-reads the log; a future DSH that removes the accessor degrades resumed-session context to feed-only instead of breaking the reviewer. Alongside the raw window it keeps a bounded side buffer of the most recent visible messages and per-turn assistant text, so a long noisy turn — a visible answer followed by thousands of tool events — cannot erase the current answer from the reviewer excerpt or the output gate.
 - The per-session note budget (12) is an internal safety constant, not a config key.
 - At most 200 sessions are tracked at once; the oldest session gives up its slot and its notes when the table is full.
 - The reviewer is a language model. Treat its note as a prompt to check something, not as a verified fact.
-- UI strings are English-only by design.
+- UI strings and all shipped or public text are English-only by design; a source-level test rejects CJK, Cyrillic, Greek, and Hangul ranges in addition to unrelated project references.
 
 ## Development
 
@@ -216,7 +216,7 @@ node --check lib/core.js && node --check lib/index.js && node --check lib/client
 node --test test/*.test.js
 ```
 
-The suite covers adaptive DeepSeek route discovery, the documented and installed-style route variants, arbitrary exact overrides, partial pins, the blank-config gate, no-route fail-quiet and route recovery, live reconfiguration, silent/malformed/valid verdicts, deduplication, cooldown, the delta gate, the bounded event window and gap recovery, session scoping and dismissal, the read-only status diagnostics, route origin checks and bodyless HEAD responses, bounded context, the single-reviewer guard, the browser bundle envelope, and the human-only source invariant. There are no runtime dependencies.
+The suite covers adaptive DeepSeek route discovery, the documented and installed-style route variants, arbitrary exact overrides, partial pins, the blank-config gate, no-route fail-quiet and route recovery, live reconfiguration, the strict verdict shape, silent/malformed/non-text verdicts, deduplication, cooldown, the delta gate, the bounded event window and gap recovery, tool-event flood retention, session scoping and dismissal, the bounded client dismissal memory, the read-only status diagnostics, route origin checks and bodyless HEAD responses, bounded context, the single-reviewer guard, the browser bundle envelope, and the human-only source invariant. There are no runtime dependencies.
 
 ## Related work
 
