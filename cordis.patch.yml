@@ -1,0 +1,4 @@
+# dsh-you-should-know installs one quiet reviewer row.
+- insert:
+    - id: you-should-know
+      name: dsh-you-should-know
