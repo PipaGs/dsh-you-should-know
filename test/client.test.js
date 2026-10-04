@@ -76,6 +76,14 @@ test('the client half declares its services and registers the composer-adjacent 
   assert.equal(registrationsSeen[0].spec.name, 'conversation.input.dock')
   assert.equal(registrationsSeen[0].spec.id, 'you-should-know')
   assert.equal(typeof registrationsSeen[0].component, 'function')
+
+  // The dock's owner props are { session, input }, so the session id must come
+  // from the slot inject face the framework calls with the scope binding key.
+  const injectFace = registrationsSeen[0].spec.inject
+  assert.equal(typeof injectFace, 'function')
+  assert.equal(injectFace('s1').sessionId, 's1')
+  assert.equal(injectFace(undefined).sessionId, '')
+  assert.equal(injectFace(42).sessionId, '')
 })
 
 test('the card renders nothing at all when there is no note', async () => {

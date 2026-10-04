@@ -93,6 +93,39 @@ async function observeAndSettle(engine, session) {
   return outcome
 }
 
+test('a real Session is read through snapshotEvents(), not a private events field', async () => {
+  const { engine, llm, errors } = engineWith(['{"note":"N","importance":"high"}'])
+  const session = sessionWith('s1', [{ turn: 1, answer: 'work' }])
+  // A live Session exposes no public events array; the supported read is
+  // snapshotEvents(). Rebuild the double in that shape so the reviewer path is
+  // exercised the way the host actually calls it.
+  const live = {
+    header: { id: 's1' },
+    snapshotEvents: () => session.events,
+    lastEvent: session.lastEvent,
+  }
+  const outcome = await observeAndSettle(engine, live)
+  assert.equal(outcome.status, 'noted')
+  assert.equal(engine.notes('s1').length, 1)
+  assert.equal(llm.calls.length, 1)
+  assert.deepEqual(errors, [])
+})
+
+test('a Session whose log accessor is unavailable is never reviewed', async () => {
+  const { engine, llm } = engineWith(['{"note":"N","importance":"high"}'])
+  const real = sessionWith('s2', [{ turn: 1, answer: 'work' }])
+  const hostile = {
+    header: { id: 's2' },
+    snapshotEvents() {
+      throw new Error('log unavailable')
+    },
+    lastEvent: real.lastEvent,
+  }
+  const outcome = await observeAndSettle(engine, hostile)
+  assert.equal(outcome.status, 'empty')
+  assert.equal(llm.calls.length, 0)
+})
+
 test('an unconfigured reviewer is completely inert and never calls the model', async () => {
   const llm = fakeLlm(['{"note":"should never run","importance":"critical"}'])
   const engine = createEngine({ config: normalizeConfig(undefined).config, getLlm: () => llm })
