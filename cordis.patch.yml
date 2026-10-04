@@ -1,15 +1,20 @@
 # dsh-you-should-know installs one quiet reviewer row.
 #
-# The row is completely inert until BOTH provider and model name a reviewer
-# route. Set them in your profile's own cordis.patch.yml
-# ($DSH_HOME/profiles/<profile>/cordis.patch.yml); a patch replaces the whole
-# config of the row it matches, so restate every key you want to keep.
+# The built-in defaults already name the DeepSeek reviewer route, so installing
+# the bundle is enough to try a second opinion. The plugin fails quiet when the
+# profile has no DeepSeek route, and setting BOTH provider and model to empty
+# strings disables it entirely. Override any key in your profile's own
+# cordis.patch.yml ($DSH_HOME/profiles/<profile>/cordis.patch.yml); a patch
+# replaces the whole config of the row it matches, so restate every key you want
+# to keep. Current DSH builds register the official route as
+# "deepseek-official" (models such as "deepseek-flash"); use that id when the
+# generic "deepseek" route is not configured.
 - insert:
     - id: you-should-know
       name: dsh-you-should-know
       config:
-        provider: ''
-        model: ''
+        provider: deepseek
+        model: deepseek-chat
         minDeltaChars: 1200
         cooldownTurns: 3
         maxContextMessages: 12

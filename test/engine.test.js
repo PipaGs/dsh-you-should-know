@@ -126,9 +126,84 @@ test('a Session whose log accessor is unavailable is never reviewed', async () =
   assert.equal(llm.calls.length, 0)
 })
 
+test('the event feed keeps one window and reads the committed log once', async () => {
+  const { engine, llm } = engineWith([
+    '{"note":"feed note one","importance":"high"}',
+    '{"note":"feed note two","importance":"high"}',
+  ], { minDeltaChars: 0, cooldownTurns: 1 })
+
+  const events = []
+  let snapshotCalls = 0
+  const session = {
+    header: { id: 'feed' },
+    snapshotEvents() {
+      snapshotCalls += 1
+      return events.slice()
+    },
+  }
+  const feed = (event) => {
+    events.push(event)
+    return engine.observe(session, event)
+  }
+
+  feed(userEvent(1, 'first question'))
+  feed(assistantEvent(2, 1, 'first answer'))
+  const first = feed(turnEnd(3, 1))
+  assert.equal(first.status, 'reviewing')
+  await first.promise
+  assert.equal(snapshotCalls, 1)
+
+  feed(userEvent(4, 'second question'))
+  feed(assistantEvent(5, 2, 'second answer'))
+  const second = feed(turnEnd(6, 2))
+  assert.equal(second.status, 'reviewing')
+  await second.promise
+  assert.equal(snapshotCalls, 1, 'a contiguous feed never re-reads the log')
+  assert.equal(engine.notes('feed').length, 2)
+  assert.equal(llm.calls.length, 2)
+})
+
+test('a feed gap recovers the committed log once and stays correct', async () => {
+  const { engine } = engineWith([
+    '{"note":"resumed finding","importance":"high"}',
+    '{"note":"after the gap","importance":"critical"}',
+  ], { minDeltaChars: 0, cooldownTurns: 1 })
+
+  const events = []
+  let snapshotCalls = 0
+  const session = {
+    header: { id: 'gap' },
+    snapshotEvents() {
+      snapshotCalls += 1
+      return events.slice()
+    },
+  }
+  const feed = (event) => {
+    events.push(event)
+    return engine.observe(session, event)
+  }
+
+  // History published before this engine mounted.
+  events.push(userEvent(1, 'resumed question'), assistantEvent(2, 1, 'resumed answer'))
+  const resumed = feed(turnEnd(3, 1))
+  assert.equal(resumed.status, 'reviewing')
+  await resumed.promise
+  assert.equal(snapshotCalls, 1)
+
+  // A committed event this listener never observed creates a real gap.
+  events.push(userEvent(4, 'gap question'))
+  const gap = feed(assistantEvent(5, 2, 'gap answer'))
+  assert.equal(gap.status, 'ignored')
+  const outcome = feed(turnEnd(6, 2))
+  assert.equal(outcome.status, 'reviewing')
+  await outcome.promise
+  assert.equal(snapshotCalls, 2, 'a gap triggers exactly one recovery read')
+  assert.equal(engine.notes('gap').length, 2)
+})
+
 test('an unconfigured reviewer is completely inert and never calls the model', async () => {
   const llm = fakeLlm(['{"note":"should never run","importance":"critical"}'])
-  const engine = createEngine({ config: normalizeConfig(undefined).config, getLlm: () => llm })
+  const engine = createEngine({ config: normalizeConfig({ provider: '', model: '' }).config, getLlm: () => llm })
   const session = sessionWith('s1', [{ turn: 1, answer: 'work' }])
   const outcome = engine.observe(session, session.lastEvent)
   assert.equal(outcome.status, 'inert')
