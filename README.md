@@ -8,7 +8,7 @@ The product intent is analogous to Claude Code's *You Should Know*, with one del
 
 ## Status
 
-Version `0.2.2`, MIT. Host and browser halves are committed as plain JavaScript, so a `github:` install needs no build step. Scope is intentionally small: one web surface, one reviewer call per qualifying turn, no settings UI.
+Version `0.2.3`, MIT. Host and browser halves are committed as plain JavaScript, so a `github:` install needs no build step. Scope is intentionally small: one web surface, one reviewer call per qualifying turn, no settings UI.
 
 ## What it does
 
@@ -35,7 +35,7 @@ The reply must be a single JSON object:
 {"note": "one or two sentences addressed to the human", "importance": "high"}
 ```
 
-`importance` is `"high"` or `"critical"`; `{"note": null, "importance": null}` means "nothing to report". Anything else — prose, a non-object, an unknown importance, a missing field, a truncated object — is dropped quietly. Accepted notes are normalized and deduplicated by their text, so the same advice is never shown twice in one session.
+`importance` is `"high"` or `"critical"`; `{"note": null, "importance": null}` means "nothing to report". Anything else — prose, a fenced object, a non-object, an unknown importance, a missing field, a truncated object — is dropped quietly. Accepted notes are normalized and deduplicated by their text, so the same advice is never shown twice in one session.
 
 Qualifying information is deliberately narrow: a contradiction with an explicit user requirement, an overlooked material constraint, a serious correctness/security/safety/data-loss/reliability problem, or an important implication that changes the user's next decision. The reviewer is told to stay silent otherwise and not to summarize, praise, or give style advice.
 
