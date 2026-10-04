@@ -1,42 +1,56 @@
 {
   "name": "dsh-you-should-know",
   "version": "0.1.0",
+  "description": "Quiet, human-only second-opinion reviewer for DeepSeek Harness: a separately configured reviewer model watches completed root-agent turns and, only when something important was missed, shows a dismissible card above the composer. It never injects or steers the primary agent.",
   "type": "module",
-  "description": "Quiet independent reviewer plugin for DeepSeek Harness, inspired by Claude Code's You Should Know.",
-  "repository": { "type": "git", "url": "https://github.com/PipaGs/dsh-you-should-know" },
   "license": "MIT",
-  "keywords": ["dsh", "dsh-plugin", "deepseek-harness", "reviewer", "agent"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PipaGs/dsh-you-should-know.git"
+  },
+  "homepage": "https://github.com/PipaGs/dsh-you-should-know#readme",
+  "bugs": {
+    "url": "https://github.com/PipaGs/dsh-you-should-know/issues"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "reviewer",
+    "second-opinion",
+    "human-in-the-loop"
+  ],
   "main": "./lib/index.js",
   "exports": {
     ".": "./lib/index.js",
     "./client": "./lib/client.js",
     "./core": "./lib/core.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
     "./package.json": "./package.json"
   },
-  "files": ["lib", "cordis.patch.yml", "README.md", "LICENSE"],
-  "scripts": { "test": "node --test test/*.test.js" },
-  "engines": { "node": "^22.19 || >=24" },
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "check": "node --check lib/core.js && node --check lib/index.js && node --check lib/client.js",
+    "test": "node --check lib/core.js && node --check lib/index.js && node --check lib/client.js && node --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  },
   "dsh": {
-    "bundle": { "patch": "./cordis.patch.yml" },
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
     "client": {
+      "platform": "web",
       "inject": [
-        "@deepseek-ai/dsh-client-connection",
         "@deepseek-ai/dsh-client-ui-conversation",
         "@deepseek-ai/dsh-client-ui-renderer"
-      ],
-      "platform": "web"
+      ]
     }
-  },
-  "peerDependencies": {
-    "@deepseek-ai/cordis": "^4.0.4",
-    "@deepseek-ai/schemastery": "^3.18.4",
-    "@deepseek-ai/dsh-llm": "^0.2.0-rc.2",
-    "@deepseek-ai/dsh-session": "^0.2.0-rc.2",
-    "@deepseek-ai/dsh-typert-protocol": "^0.2.0-rc.2",
-    "@deepseek-ai/dsh-typert-registry": "^0.2.0-rc.2",
-    "@deepseek-ai/dsh-client-connection": "^0.2.0-rc.2",
-    "@deepseek-ai/dsh-client-ui-conversation": "^0.2.0-rc.2",
-    "@deepseek-ai/dsh-client-ui-renderer": "^0.2.0-rc.2",
-    "react": "^18.2.0"
   }
 }

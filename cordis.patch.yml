@@ -1,4 +1,16 @@
 # dsh-you-should-know installs one quiet reviewer row.
+#
+# The row is completely inert until BOTH provider and model name a reviewer
+# route. Set them in your profile's own cordis.patch.yml
+# ($DSH_HOME/profiles/<profile>/cordis.patch.yml); a patch replaces the whole
+# config of the row it matches, so restate every key you want to keep.
 - insert:
     - id: you-should-know
       name: dsh-you-should-know
+      config:
+        provider: ''
+        model: ''
+        minDeltaChars: 1200
+        cooldownTurns: 3
+        maxContextMessages: 12
+        maxTokens: 700
