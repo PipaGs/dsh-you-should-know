@@ -67,10 +67,10 @@ The bundle contributes one row, `you-should-know`, with the reviewer route left 
 
 Both `provider` and `model` are optional and default to **automatic**. The plugin resolves the automatic route from the live registry without making a model call:
 
-1. It lists the registered provider routes and keeps the DeepSeek family, preferring the documented `deepseek` route, then `deepseek-official`, then `deepseek-account`.
-2. For that route it reads the adapter's own model catalog and picks the cheapest stable chat/flash entry, preferring `deepseek-chat`, then `deepseek-flash`, and avoiding reasoning/pro models.
-3. If the catalog is unavailable it falls back to the conventional pair for a known DeepSeek route (`deepseek`/`deepseek-chat`, `deepseek-official`/`deepseek-flash`, `deepseek-account`/`deepseek-flash`) resolved through model metadata.
-4. If no DeepSeek route is registered, the reviewer stays silent and makes zero model calls.
+1. It lists the registered provider routes and keeps the DeepSeek family (`deepseek`, `deepseek-official`, `deepseek-account`, then any other `deepseek*` route).
+2. It reads each route's own model catalog and ranks the candidates by cost: the exact `deepseek`/`deepseek-chat` pair wins where it resolves, otherwise the cheapest stable chat/flash model any DeepSeek route advertises (`deepseek-chat`, then `deepseek-flash`, avoiding reasoning/pro models), with the provider order above only breaking ties.
+3. If a route's catalog is unavailable it falls back to the conventional pair for a known DeepSeek route (`deepseek`/`deepseek-chat`, `deepseek-official`/`deepseek-flash`, `deepseek-account`/`deepseek-flash`) resolved through model metadata.
+4. If no DeepSeek route resolves, the reviewer stays silent and makes zero model calls.
 
 Setting **both** `provider` and `model` to nonblank strings is an exact override: the pair is used verbatim for any registered route, with no allowlist and no fallback. Setting **only one** of the two pins that half and resolves the other automatically. Setting **either** to an empty string disables the reviewer entirely.
 

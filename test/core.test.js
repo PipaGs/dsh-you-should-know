@@ -484,6 +484,15 @@ test('the automatic route prefers an inexpensive chat/flash model over a reasoni
   assert.deepEqual(route, { provider: 'deepseek-official', model: 'deepseek-v4-flash' })
 })
 
+test('the automatic route prefers a low-cost route over a reasoning-only preferred provider', async () => {
+  const llm = registryLlm({
+    providers: ['deepseek', 'deepseek-official'],
+    models: { deepseek: ['deepseek-reasoner'], 'deepseek-official': ['deepseek-v4-pro', 'deepseek-flash'] },
+  })
+  const route = await resolveReviewerRoute(normalizeConfig(undefined).config, llm)
+  assert.deepEqual(route, { provider: 'deepseek-official', model: 'deepseek-flash' })
+})
+
 test('an explicit nonblank provider and model are used exactly and never rewritten', async () => {
   const llm = registryLlm({ providers: ['deepseek-official'], models: { 'deepseek-official': ['deepseek-flash'] } })
   const { config } = normalizeConfig({ provider: 'anthropic', model: 'claude-sonnet-4' })
