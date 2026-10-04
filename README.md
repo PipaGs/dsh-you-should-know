@@ -24,7 +24,7 @@ The host half observes committed session events and reviews a turn only when **a
 
 When the gates pass, the host sends one request to the configured reviewer route through `ctx.llm.stream`:
 
-- one user message containing the reviewer instruction and a **bounded** excerpt of the most recent conversation (at most `maxContextMessages` text messages, each truncated, total capped);
+- one user message containing the reviewer instruction and a **bounded** excerpt of the most recent conversation: at most `maxContextMessages` visible text messages, each truncated, with a total character cap. Only human `user/message` text and assistant reply text enter the excerpt;
 - **no tools**;
 - `temperature: 0` and `maxTokens`;
 - `reasoningEffort: 'off'` **only** when the model's own metadata advertises an `off` effort; otherwise the field is omitted entirely.
@@ -102,7 +102,7 @@ Delivery uses conservative polling. While the page is visible the card polls its
 
 ## Privacy and cost
 
-- The reviewer receives only the bounded recent conversation excerpt described above; it does not receive tools, the system prompt, attachments, or the session log.
+- The reviewer receives only the bounded excerpt described above: the human's own user messages and the agent's visible replies. Tool results, tool definitions, the system prompt, project instructions, attachments, and the rest of the session log are never sent.
 - Notes are never persisted to the session log and never enter model context. They live in host memory and are lost when the host process exits.
 - Each review is exactly one model call with a hard `maxTokens` cap, and the gates keep calls rare: a completed turn must pass the cooldown, the delta gate, and the per-session budget.
 - Both HTTP routes are served by the same local web server as the rest of the GUI. They expose only note text for a session id; they do not expose credentials or the transcript.
@@ -114,7 +114,7 @@ The plugin fails quiet by construction:
 - a blank or missing `provider`/`model` means zero reviewer calls;
 - a reviewer/model/parser/RPC/browser failure is contained and logged at most as a host warning;
 - a malformed or empty reply is dropped without a note;
-- if the web server is absent (headless profiles) the plugin still evaluates turns but has no way to deliver anything;
+- if the web server is absent (headless profiles) the plugin still evaluates turns but has no delivery path: the notes route and the served browser bundle both live on that server, so nothing is shown;
 - if the package is composed twice, the second row is inert, so there is never more than one reviewer fiber;
 - the `session/event` listener wraps its own work in a try/catch so a reviewer bug cannot disturb primary work.
 

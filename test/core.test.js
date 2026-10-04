@@ -159,6 +159,20 @@ test('textOfBlocks and messageText read only visible text', () => {
   assert.equal(messageText({ type: 'turn/end', seq: 1, data: {} }), null)
 })
 
+test('messageText never leaks machine-authored user-role events to the reviewer', () => {
+  const sources = ['tool', 'agent-instructions', 'agent-message', 'compact-checkpoint', 'schedule', 'team-message']
+  for (const kind of sources) {
+    const event = userEvent(1, 'machine traffic')
+    event.data.source = { kind }
+    assert.equal(messageText(event), null, `source kind ${kind} must stay in the host`)
+  }
+  const missingSource = userEvent(2, 'no source')
+  delete missingSource.data.source
+  assert.equal(messageText(missingSource), null)
+  assert.equal(collectContext([missingSource], 5), '')
+  assert.equal(accumulatedDelta([missingSource], -1), 0)
+})
+
 test('turnOutputText only reads the requested turn', () => {
   const events = [assistantEvent(1, 1, 'one'), assistantEvent(2, 2, 'two')]
   assert.equal(turnOutputText(events, 1), 'one')
