@@ -1,20 +1,35 @@
 # dsh-you-should-know installs one quiet reviewer row.
 #
-# The built-in defaults already name the DeepSeek reviewer route, so installing
-# the bundle is enough to try a second opinion. The plugin fails quiet when the
-# profile has no DeepSeek route, and setting BOTH provider and model to empty
-# strings disables it entirely. Override any key in your profile's own
+# The reviewer route is adaptive by default: the plugin asks the live DSH LLM
+# registry which DeepSeek route the current build mounts and prefers a stable
+# inexpensive chat/flash model. That makes the documented "deepseek" /
+# "deepseek-chat" pair work where it is registered and current builds that
+# register "deepseek-official" (models such as "deepseek-flash") work too,
+# without pinning a route that a given build may not have. The plugin fails
+# quiet when the profile mounts no DeepSeek route, and setting BOTH provider
+# and model to empty strings disables it entirely.
+#
+# To pin one exact route instead, override the key in your profile's own
 # cordis.patch.yml ($DSH_HOME/profiles/<profile>/cordis.patch.yml); a patch
-# replaces the whole config of the row it matches, so restate every key you want
-# to keep. Current DSH builds register the official route as
-# "deepseek-official" (models such as "deepseek-flash"); use that id when the
-# generic "deepseek" route is not configured.
+# replaces the whole config of the row it matches, so restate every key you
+# want to keep:
+#
+#   - id: you-should-know
+#     name: dsh-you-should-know
+#     config:
+#       provider: deepseek-official
+#       model: deepseek-flash
+#       minDeltaChars: 1200
+#       cooldownTurns: 3
+#       maxContextMessages: 12
+#       maxTokens: 700
+#
+# Any registered provider and model are accepted as an exact override; DSH
+# resolves the ids against the profile, so this file deliberately pins none.
 - insert:
     - id: you-should-know
       name: dsh-you-should-know
       config:
-        provider: deepseek
-        model: deepseek-chat
         minDeltaChars: 1200
         cooldownTurns: 3
         maxContextMessages: 12

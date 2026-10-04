@@ -134,11 +134,22 @@ test('an explicitly blank provider or model registers nothing at all', () => {
   }
 })
 
-test('the built-in default is the DeepSeek reviewer route', async () => {
-  const llm = makeLlm(['{"note":null,"importance":null}'])
+/** An LLM double that reports the registry a current DSH 0.2.0-rc.2 mounts. */
+function installedDeepSeekLlm(script) {
+  const llm = makeLlm(script)
+  llm.listProviders = () => [{ id: 'deepseek-official', name: 'DeepSeek' }]
+  llm.listModels = async (provider) => [
+    { provider, id: 'deepseek-flash', name: 'DeepSeek-V41-Flash' },
+    { provider, id: 'deepseek-v4-pro', name: 'DeepSeek-V4-Pro' },
+  ]
+  return llm
+}
+
+test('the built-in default discovers the DeepSeek route a current DSH build registers', async () => {
+  const llm = installedDeepSeekLlm(['{"note":null,"importance":null}'])
   const harness = makeCtx({ llm })
-  // Only provider/model are left to their defaults; the gates are lowered so
-  // one short turn actually reaches the reviewer channel.
+  // The route keys are left out entirely; the gates are lowered so one short
+  // turn actually reaches the reviewer channel.
   apply(harness.ctx, { minDeltaChars: 0, cooldownTurns: 1 })
   assert.equal(harness.listeners.length, 1)
   assert.equal(harness.injected.length, 1)
@@ -148,8 +159,22 @@ test('the built-in default is the DeepSeek reviewer route', async () => {
   listener(session, session.lastEvent)
   await settle()
   assert.equal(llm.calls.length, 1)
-  assert.equal(llm.calls[0].provider, 'deepseek')
-  assert.equal(llm.calls[0].model, 'deepseek-chat')
+  assert.equal(llm.calls[0].provider, 'deepseek-official')
+  assert.equal(llm.calls[0].model, 'deepseek-flash')
+  harness.disposeAll()
+})
+
+test('an automatic row with no DeepSeek provider stays quiet and never calls the model', async () => {
+  const llm = makeLlm([])
+  llm.listProviders = () => [{ id: 'anthropic', name: 'Anthropic' }]
+  llm.listModels = async (provider) => [{ provider, id: 'claude-sonnet-4', name: 'Claude' }]
+  const harness = makeCtx({ llm })
+  apply(harness.ctx, { minDeltaChars: 0, cooldownTurns: 1 })
+  const listener = harness.listeners[0].listener
+  const session = sessionWith('s-none', 1, 'done')
+  listener(session, session.lastEvent)
+  await settle()
+  assert.equal(llm.calls.length, 0)
   harness.disposeAll()
 })
 
@@ -166,26 +191,27 @@ test('a provider and model override reaches the reviewer channel', async () => {
   harness.disposeAll()
 })
 
-test('a live config change takes effect on the next composition', async () => {
-  const firstLlm = makeLlm(['{"note":null,"importance":null}'])
+test('a live config change moves from the automatic route to an explicit override', async () => {
+  const firstLlm = installedDeepSeekLlm(['{"note":null,"importance":null}'])
   const first = makeCtx({ llm: firstLlm })
-  apply(first.ctx, { provider: 'deepseek', model: 'deepseek-chat', minDeltaChars: 0, cooldownTurns: 1 })
+  apply(first.ctx, { minDeltaChars: 0, cooldownTurns: 1 })
   const firstListener = first.listeners[0].listener
   const firstSession = sessionWith('s-live-a', 1, 'done')
   firstListener(firstSession, firstSession.lastEvent)
   await settle()
-  assert.equal(firstLlm.calls[0].provider, 'deepseek')
+  assert.equal(firstLlm.calls[0].provider, 'deepseek-official')
+  assert.equal(firstLlm.calls[0].model, 'deepseek-flash')
   first.disposeAll()
 
   const secondLlm = makeLlm(['{"note":null,"importance":null}'])
   const second = makeCtx({ llm: secondLlm })
-  apply(second.ctx, { provider: 'deepseek-official', model: 'deepseek-flash', minDeltaChars: 0, cooldownTurns: 1 })
+  apply(second.ctx, { provider: 'anthropic', model: 'claude-sonnet', minDeltaChars: 0, cooldownTurns: 1 })
   const secondListener = second.listeners[0].listener
   const secondSession = sessionWith('s-live-b', 1, 'done')
   secondListener(secondSession, secondSession.lastEvent)
   await settle()
-  assert.equal(secondLlm.calls[0].provider, 'deepseek-official')
-  assert.equal(secondLlm.calls[0].model, 'deepseek-flash')
+  assert.equal(secondLlm.calls[0].provider, 'anthropic')
+  assert.equal(secondLlm.calls[0].model, 'claude-sonnet')
   second.disposeAll()
 })
 
