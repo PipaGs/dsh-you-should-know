@@ -67,10 +67,16 @@ test('public-facing text stays English-only and free of unrelated project refere
   }
 })
 
+test('the bundled row leaves the reviewer route to adaptive discovery', async () => {
+  const patch = await read('cordis.patch.yml')
+  assert.equal(/^\s*provider\s*:/m.test(patch), false, 'the bundled row must not pin a provider')
+  assert.equal(/^\s*model\s*:/m.test(patch), false, 'the bundled row must not pin a model')
+})
+
 test('the manifest declares the bundle, the client half, and no build step', async () => {
   const manifest = JSON.parse(await read('package.json'))
   assert.equal(manifest.name, 'dsh-you-should-know')
-  assert.equal(manifest.version, '0.2.0')
+  assert.equal(manifest.version, '0.2.1')
   assert.equal(manifest.license, 'MIT')
   assert.equal(manifest.dsh.manifestVersion, 1)
   assert.equal(manifest.dsh.bundle.patch, './cordis.patch.yml')

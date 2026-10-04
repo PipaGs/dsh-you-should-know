@@ -8,13 +8,13 @@ The product intent is analogous to Claude Code's *You Should Know*, with one del
 
 ## Status
 
-Version `0.2.0`, MIT. Host and browser halves are committed as plain JavaScript, so a `github:` install needs no build step. Scope is intentionally small: one web surface, one reviewer call per qualifying turn, no settings UI.
+Version `0.2.1`, MIT. Host and browser halves are committed as plain JavaScript, so a `github:` install needs no build step. Scope is intentionally small: one web surface, one reviewer call per qualifying turn, no settings UI.
 
 ## What it does
 
 The host half observes committed session events and reviews a turn only when **all** of these hold:
 
-1. `provider` and `model` are both non-empty. The built-in default is DeepSeek (`deepseek` / `deepseek-chat`); setting either key to an empty string registers nothing and keeps the plugin completely inert.
+1. The reviewer route is usable. Both route keys default to automatic adaptive DeepSeek discovery; setting either to an empty string registers nothing and keeps the plugin completely inert, and an automatic row whose build mounts no DeepSeek route resolves to no route and stays quiet.
 2. The event is a `turn/end` whose reason is `completed`. Aborted, blocked, errored, max-tokens, and forked turns are ignored.
 3. The session is a **root** agent session. Sessions with `header.origin === 'subagent'` or a positive `delegationDepth` are ignored.
 4. The turn produced visible assistant text.
@@ -61,16 +61,20 @@ Because the built host and browser halves are committed, installation needs no s
 dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know
 ```
 
-The bundle contributes one row, `you-should-know`, with the DeepSeek reviewer route already set. No further configuration is needed when the profile registers a `deepseek` provider; when it does not, the reviewer call resolves to a terminal provider failure, the plugin shows no note and never touches the agent, and only an unexpected thrown error reaches the host warning log. Restart (or let HMR reload) the profile after changing the profile patch.
+The bundle contributes one row, `you-should-know`, with the reviewer route left automatic. At the first qualifying turn the plugin asks the live LLM registry which DeepSeek route this build mounts and prefers a stable inexpensive chat/flash model from that route's own catalog: the documented `deepseek`/`deepseek-chat` pair where it exists, otherwise `deepseek-official`/`deepseek-flash` on a current build. When the profile mounts no DeepSeek route the plugin shows no note, makes zero model calls, and never touches the agent. Restart (or let HMR reload) the profile after changing the profile patch.
 
 ### Configure
 
-The built-in default is `provider: deepseek`, `model: deepseek-chat`. DSH resolves those ids against the providers the profile actually registers, and both keys accept **any** configured route: there is no allowlist. Two consequences are worth knowing:
+Both `provider` and `model` are optional and default to **automatic**. The plugin resolves the automatic route from the live registry without making a model call:
 
-- Current DSH builds register the official DeepSeek route as `deepseek-official` with models such as `deepseek-flash` and `deepseek-v4-pro`, not as `deepseek`. Set those ids explicitly on such a build.
-- Any other registered route works the same way, for example a pi-ai-declared `openrouter` route or an `anthropic`/OpenAI-compatible endpoint.
+1. It lists the registered provider routes and keeps the DeepSeek family, preferring the documented `deepseek` route, then `deepseek-official`, then `deepseek-account`.
+2. For that route it reads the adapter's own model catalog and picks the cheapest stable chat/flash entry, preferring `deepseek-chat`, then `deepseek-flash`, and avoiding reasoning/pro models.
+3. If the catalog is unavailable it falls back to the conventional pair for a known DeepSeek route (`deepseek`/`deepseek-chat`, `deepseek-official`/`deepseek-flash`, `deepseek-account`/`deepseek-flash`) resolved through model metadata.
+4. If no DeepSeek route is registered, the reviewer stays silent and makes zero model calls.
 
-Pin the official DeepSeek route on a current DSH build:
+Setting **both** `provider` and `model` to nonblank strings is an exact override: the pair is used verbatim for any registered route, with no allowlist and no fallback. Setting **only one** of the two pins that half and resolves the other automatically. Setting **either** to an empty string disables the reviewer entirely.
+
+Pin an exact route (this also disables discovery):
 
 ```yaml
 - id: you-should-know
@@ -98,14 +102,14 @@ Or select any other route the profile registers:
     maxTokens: 700
 ```
 
-A patch replaces the **whole** config of the row it matches, so restate every key you want to keep. Place one `- id: you-should-know` entry in `$DSH_HOME/profiles/<profile>/cordis.patch.yml` (or a `--patch` overlay); do **not** add a second `insert` for the same id, or the row would be composed twice.
+The bundled row pins no route, so this example is only a template. A patch replaces the **whole** config of the row it matches, so restate every key you want to keep. Place one `- id: you-should-know` entry in `$DSH_HOME/profiles/<profile>/cordis.patch.yml` (or a `--patch` overlay); do **not** add a second `insert` for the same id, or the row would be composed twice.
 
 Only the model's *availability in the profile* is required: if the route is missing or the credential is not configured, the reviewer call fails quietly and no note is shown. Declaring a model here does not make it available; it only selects it.
 
 | Key | Default | Validation | Meaning |
 |---|---|---|---|
-| `provider` | `deepseek` | string, trimmed | Reviewer provider route. Empty means the plugin is inert. |
-| `model` | `deepseek-chat` | string, trimmed | Reviewer model id. Empty means the plugin is inert. |
+| `provider` | automatic | string, trimmed | Reviewer provider route. Empty means the plugin is inert. |
+| `model` | automatic | string, trimmed | Reviewer model id. Empty means the plugin is inert. |
 | `minDeltaChars` | `1200` | integer, 0–200000 | Minimum visible characters accumulated since the last review. |
 | `cooldownTurns` | `3` | integer, 1–100 | Minimum number of completed root turns between reviews. |
 | `maxContextMessages` | `12` | integer, 1–100 | Maximum recent text messages sent to the reviewer. |
@@ -135,7 +139,7 @@ Delivery uses conservative polling. While the page is visible the card polls its
 
 The plugin fails quiet by construction:
 
-- a blank `provider`/`model` means zero reviewer calls, and the built-in DeepSeek default also makes no visible change when the profile has no such route: the failed request settles as a provider error result inside the plugin and is never surfaced to the agent;
+- a blank `provider`/`model` means zero reviewer calls, and the automatic DeepSeek route makes no visible change when the profile mounts no such route: discovery resolves to "no route" before any model call is attempted, so nothing is surfaced to the agent;
 - a reviewer/model/parser/RPC/browser failure is contained and logged at most as a host warning;
 - a malformed or empty reply is dropped without a note;
 - if the web server is absent (headless profiles) the plugin still evaluates turns but has no delivery path: the notes route and the served browser bundle both live on that server, so nothing is shown;
@@ -148,7 +152,7 @@ The plugin fails quiet by construction:
 - Dismissal is durable for the page and the host process, not across restarts.
 - Polling is not a push channel: a note can take up to one poll interval to appear.
 - The web card is the only surface; there is no CLI/headless delivery and no settings UI.
-- Provider and model ids are not validated against the catalog up front; an unknown route simply fails quietly on the first review.
+- An explicit override is not validated against the catalog up front; an unknown route simply fails quietly on the first review. The automatic route does consult the live registry and model catalog before it calls anything.
 - The two note routes are unauthenticated, like every other in-tree plugin route: they reject cross-origin browser traffic, but any client that can reach the web server and knows a session id can read that session's notes. Keep the DSH web server on loopback or put your own authentication in front of it.
 - The reviewer reads the full committed log once per session through the synchronous `snapshotEvents()` accessor, which DSH marks deprecated. After that seed the plugin follows the `session/event` feed and keeps a bounded recent-event window, so steady-state review never re-reads the log; a future DSH that removes the accessor degrades resumed-session context to feed-only instead of breaking the reviewer.
 - The per-session note budget (12) is an internal safety constant, not a config key.
@@ -163,7 +167,7 @@ node --check lib/core.js && node --check lib/index.js && node --check lib/client
 node --test test/*.test.js
 ```
 
-The suite covers the DeepSeek defaults, arbitrary provider/model overrides, the blank-config gate, live reconfiguration, silent/malformed/valid verdicts, deduplication, cooldown, the delta gate, the bounded event window and gap recovery, session scoping and dismissal, route origin checks, bounded context, the single-reviewer guard, the browser bundle envelope, and the human-only source invariant. There are no runtime dependencies.
+The suite covers adaptive DeepSeek route discovery, the documented and installed-style route variants, arbitrary exact overrides, partial pins, the blank-config gate, no-route fail-quiet, live reconfiguration, silent/malformed/valid verdicts, deduplication, cooldown, the delta gate, the bounded event window and gap recovery, session scoping and dismissal, route origin checks, bounded context, the single-reviewer guard, the browser bundle envelope, and the human-only source invariant. There are no runtime dependencies.
 
 ## Related work
 

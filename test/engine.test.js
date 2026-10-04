@@ -358,10 +358,10 @@ test('a reviewer failure is contained and never surfaces as a note', async () =>
   assert.equal(errors[0].message, 'provider down')
 })
 
-test('a missing LLM service keeps the plugin quiet', async () => {
+test('a missing LLM service keeps the plugin quiet and is not cached as "no route"', async () => {
   const engine = createEngine({ config: CONFIGURED, getLlm: () => undefined })
   const outcome = await observeAndSettle(engine, sessionWith('s1', [{ turn: 1, answer: 'work' }]))
-  assert.equal(outcome.status, 'silent')
+  assert.equal(outcome.status, 'unroutable')
   assert.deepEqual(engine.notes('s1'), [])
 })
 
@@ -437,4 +437,75 @@ test('an in-flight review blocks a concurrent review of the same session', async
   release()
   await first.promise
   assert.equal(calls.length, 1)
+})
+
+test('an automatic route with no registered DeepSeek provider makes zero generation calls', async () => {
+  const calls = []
+  const llm = {
+    listProviders: () => [{ id: 'anthropic', name: 'Anthropic' }],
+    listModels: async (provider) => [{ provider, id: 'claude-sonnet-4', name: 'Claude' }],
+    resolveModelInfo: async (provider, model) => ({ provider, id: model, name: model }),
+    stream(options) {
+      calls.push(options)
+      throw new Error('must not stream without a route')
+    },
+  }
+  const engine = createEngine({ config: normalizeConfig({ minDeltaChars: 0, cooldownTurns: 1 }).config, getLlm: () => llm })
+  const outcome = await observeAndSettle(engine, sessionWith('s-no-route', [{ turn: 1, answer: 'work' }]))
+  assert.equal(outcome.status, 'unroutable')
+  assert.deepEqual(engine.notes('s-no-route'), [])
+  assert.equal(calls.length, 0)
+})
+
+test('an automatic config resolves the discovered route before its single generation call', async () => {
+  const calls = []
+  const llm = {
+    listProviders: () => [{ id: 'deepseek-official', name: 'DeepSeek' }],
+    listModels: async (provider) => [
+      { provider, id: 'deepseek-v4-pro', name: 'DeepSeek-V4-Pro' },
+      { provider, id: 'deepseek-flash', name: 'DeepSeek-V41-Flash' },
+    ],
+    resolveModelInfo: async (provider, model) => ({ provider, id: model, name: model }),
+    stream(options) {
+      calls.push(options)
+      return (async function* stream() {
+        yield { type: 'text-delta', index: 0, text: '{"note":null,"importance":null}' }
+      })()
+    },
+  }
+  const engine = createEngine({ config: normalizeConfig({ minDeltaChars: 0, cooldownTurns: 1 }).config, getLlm: () => llm })
+  const outcome = await observeAndSettle(engine, sessionWith('s-auto', [{ turn: 1, answer: 'work' }]))
+  assert.equal(outcome.status, 'silent')
+  assert.equal(calls.length, 1)
+  assert.equal(calls[0].provider, 'deepseek-official')
+  assert.equal(calls[0].model, 'deepseek-flash')
+})
+
+test('an automatic route is retried when the LLM service mounts after the first turn', async () => {
+  const calls = []
+  let llm
+  const engine = createEngine({
+    config: normalizeConfig({ minDeltaChars: 0, cooldownTurns: 1 }).config,
+    getLlm: () => llm,
+  })
+  const session = sessionWith('s-late', [{ turn: 1, answer: 'one' }])
+  assert.equal((await observeAndSettle(engine, session)).status, 'unroutable')
+
+  llm = {
+    listProviders: () => [{ id: 'deepseek-official', name: 'DeepSeek' }],
+    listModels: async (provider) => [{ provider, id: 'deepseek-flash', name: 'Flash' }],
+    resolveModelInfo: async (provider, model) => ({ provider, id: model, name: model }),
+    stream(options) {
+      calls.push(options)
+      return (async function* stream() {
+        yield { type: 'text-delta', index: 0, text: '{"note":null,"importance":null}' }
+      })()
+    },
+  }
+  session.events.push(userEvent(90, 'q2'), assistantEvent(91, 2, 'two'), turnEnd(92, 2))
+  session.lastEvent = session.events[session.events.length - 1]
+  assert.equal((await observeAndSettle(engine, session)).status, 'silent')
+  assert.equal(calls.length, 1)
+  assert.equal(calls[0].provider, 'deepseek-official')
+  assert.equal(calls[0].model, 'deepseek-flash')
 })
