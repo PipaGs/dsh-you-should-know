@@ -1003,45 +1003,135 @@ test('Open file navigates through the sidebar resource API and never runs a comm
   view.unmount()
 })
 
-test('Add to chat inserts a draft through the composer action face and never sends', async () => {
-  const inserted = []
-  const other = []
-  const inputActions = {
-    captureInsertion: () => ({ draftRev: 1 }),
-    insertText: (text, span) => { inserted.push({ text, span }); return true },
-    setDraft: (text) => { other.push(['setDraft', text]) },
-    submit: () => { other.push(['submit']) },
-  }
-  const env = await loadBundle({
-    backend: notesBackend([{ id: 'n-1', note: 'Guard the write.', importance: 'high', createdAt: 1, source: { path: 'src/store.js', line: 7 } }]),
-    allowIntervals: true,
-  })
-  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1', inputActions, input: { draft: '' } })
-  await flushAsync()
+// --- Add to chat: composer lifecycle -----------------------------------------
+// The dock writes into the composer through the public InputActions face. This
+// model mirrors the real surface closely enough to reproduce the v0.3.3 Enter
+// gesture: setDraft is the canonical whole-draft programmatic write,
+// captureInsertion/insertText is the deferred-insertion seam, submit is the
+// editor's optimistic send. Focus follows the browser rule verified in
+// Chromium: a mousedown that does not preventDefault moves focus to the button,
+// and a later Enter activates whatever holds focus before the draft keymap.
+const NOTE_WITH_SOURCE = { id: 'n-1', note: 'Guard the write.', importance: 'high', createdAt: 1, source: { path: 'src/store.js', line: 7 } }
+const NOTE_DRAFT = 'Please address this reviewer finding: Guard the write.\nFile: src/store.js:7'
 
-  buttonByText(view.output, 'Add to chat').props.onClick()
-  assert.equal(inserted.length, 1)
-  assert.equal(inserted[0].text, 'Please address this reviewer finding: Guard the write.\nFile: src/store.js:7')
-  assert.deepEqual(inserted[0].span, { draftRev: 1 })
-  assert.deepEqual(other, [], 'Add to chat must never send, steer, or overwrite the draft')
+function createComposer(sessionId, initialDraft = '') {
+  const composer = {
+    sessionId,
+    draft: initialDraft,
+    sent: [],
+    focused: null,
+    deferredCalls: [],
+    inputActions: {
+      setDraft(text) {
+        composer.draft = text
+      },
+      captureInsertion() {
+        composer.deferredCalls.push('captureInsertion')
+        return { start: composer.draft.length, end: composer.draft.length, draftRev: 1 }
+      },
+      insertText(text, span) {
+        composer.deferredCalls.push('insertText')
+        composer.draft = composer.draft.slice(0, span.start) + text + composer.draft.slice(span.end)
+        return true
+      },
+      submit() {
+        composer.sent.push(composer.draft)
+        composer.draft = ''
+      },
+    },
+  }
+  return composer
+}
+
+/** Apply the browser's pointer/focus rule to one rendered control. */
+function pressControl(label, control, composer) {
+  let prevented = false
+  if (typeof control.props.onMouseDown === 'function') {
+    control.props.onMouseDown({ preventDefault() { prevented = true } })
+  }
+  if (!prevented) composer.focused = label
+  control.props.onClick()
+}
+
+/** Enter activates the focused control; with focus in the draft it submits. */
+function pressEnter(view, composer) {
+  if (composer.focused !== null) {
+    const focused = buttonByText(view.output, composer.focused)
+    if (focused !== null) {
+      focused.props.onClick()
+      return
+    }
+  }
+  composer.inputActions.submit()
+}
+
+async function mountAddToChat(composer) {
+  const env = await loadBundle({ backend: notesBackend([NOTE_WITH_SOURCE]), allowIntervals: true })
+  const view = env.runtime.mount(env.dockComponent().component, {
+    sessionId: composer.sessionId,
+    inputActions: composer.inputActions,
+    input: { draft: composer.draft },
+  })
+  await flushAsync()
+  return { env, view }
+}
+
+test('one Add to chat click writes the finding into the draft exactly once and never sends', async () => {
+  const composer = createComposer('s-1')
+  const { view } = await mountAddToChat(composer)
+  pressControl('Add to chat', buttonByText(view.output, 'Add to chat'), composer)
+  assert.equal(composer.draft, NOTE_DRAFT, 'one click inserts the finding once')
+  assert.deepEqual(composer.sent, [], 'Add to chat never sends the draft')
+  assert.deepEqual(composer.deferredCalls, [], 'the deferred-insertion seam is not a programmatic draft write')
   view.unmount()
 })
 
-test('Add to chat appends with a blank line when the composer already holds text', async () => {
-  const inserted = []
-  const inputActions = {
-    captureInsertion: () => ({ draftRev: 2 }),
-    insertText: (text) => { inserted.push(text); return true },
-  }
-  const env = await loadBundle({
-    backend: notesBackend([{ id: 'n-1', note: 'Guard the write.', importance: 'high', createdAt: 1 }]),
-    allowIntervals: true,
-  })
-  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1', inputActions, input: { draft: 'draft in progress' } })
-  await flushAsync()
+test('Add to chat then Enter submits the existing draft and does not replay the insertion', async () => {
+  const composer = createComposer('s-1')
+  const { view } = await mountAddToChat(composer)
+  pressControl('Add to chat', buttonByText(view.output, 'Add to chat'), composer)
+  view.render({ sessionId: 's-1', inputActions: composer.inputActions, input: { draft: composer.draft } })
+  assert.equal(composer.draft, NOTE_DRAFT)
+  pressEnter(view, composer)
+  assert.notEqual(composer.draft, `${NOTE_DRAFT}\n\n${NOTE_DRAFT}`, 'Enter must not replay the finding into the draft')
+  assert.deepEqual(composer.sent, [NOTE_DRAFT], 'Enter submits the built draft exactly once')
+  assert.equal(composer.draft, '', 'the submitted draft is cleared')
+  assert.deepEqual(composer.deferredCalls, [])
+  view.unmount()
+})
 
-  buttonByText(view.output, 'Add to chat').props.onClick()
-  assert.equal(inserted[0], '\n\nPlease address this reviewer finding: Guard the write.')
+test('Add to chat keeps an existing draft and separates the finding with a blank line', async () => {
+  const composer = createComposer('s-1', 'draft in progress')
+  const { view } = await mountAddToChat(composer)
+  pressControl('Add to chat', buttonByText(view.output, 'Add to chat'), composer)
+  assert.equal(composer.draft, `draft in progress\n\n${NOTE_DRAFT}`)
+  assert.deepEqual(composer.sent, [])
+  view.unmount()
+})
+
+test('two deliberate Add to chat clicks add the finding twice', async () => {
+  const composer = createComposer('s-1')
+  const { view } = await mountAddToChat(composer)
+  pressControl('Add to chat', buttonByText(view.output, 'Add to chat'), composer)
+  view.render({ sessionId: 's-1', inputActions: composer.inputActions, input: { draft: composer.draft } })
+  pressControl('Add to chat', buttonByText(view.output, 'Add to chat'), composer)
+  assert.equal(composer.draft, `${NOTE_DRAFT}\n\n${NOTE_DRAFT}`)
+  assert.deepEqual(composer.sent, [], 'neither click sends')
+  view.unmount()
+})
+
+test('a card from a previous session cannot write into the next session draft', async () => {
+  const first = createComposer('s-1')
+  const second = createComposer('s-2')
+  const env = await loadBundle({ backend: notesBackend([NOTE_WITH_SOURCE]), allowIntervals: true })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1', inputActions: first.inputActions, input: { draft: '' } })
+  await flushAsync()
+  const stale = buttonByText(view.output, 'Add to chat')
+  assert.ok(stale, 'the previous session card rendered')
+  view.render({ sessionId: 's-2', inputActions: second.inputActions, input: { draft: '' } })
+  assert.equal(buttonByText(view.output, 'Add to chat'), null, 'the stale card is dropped before the new poll resolves')
+  stale.props.onClick()
+  assert.equal(second.draft, '', 'the stale card never writes into the next session draft')
   view.unmount()
 })
 
