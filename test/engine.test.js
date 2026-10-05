@@ -434,6 +434,31 @@ test('notes are scoped per session and dismissal is session-scoped', async () =>
   assert.equal(engine.dismiss('unknown', id), false)
 })
 
+test('a source persists per note through storage and dismissal and never reaches status', async () => {
+  const { engine } = engineWith([
+    '{"note":"Guard the write.","importance":"high","source":{"path":"src/store.js","line":42}}',
+    '{"note":"A second finding.","importance":"high"}',
+  ])
+  const session = sessionWith('s1', [{ turn: 1, answer: 'one' }])
+  assert.equal((await observeAndSettle(engine, session)).status, 'noted')
+  session.events.push(userEvent(90, 'q2'), assistantEvent(91, 2, 'two'), turnEnd(92, 2))
+  session.lastEvent = session.events[session.events.length - 1]
+  assert.equal((await observeAndSettle(engine, session)).status, 'noted')
+
+  const stored = engine.notes('s1')
+  assert.equal(stored.length, 2)
+  assert.deepEqual(stored[0].source, { path: 'src/store.js', line: 42 })
+  assert.equal(stored[1].source, undefined, 'a finding without a source stores none')
+
+  const snapshot = JSON.stringify(engine.status('s1'))
+  assert.equal(snapshot.includes('src/store.js'), false, 'status never exposes a source path')
+  assert.equal(snapshot.includes('Guard the write.'), false, 'status never exposes note text')
+
+  assert.equal(engine.dismiss('s1', stored[0].id), true)
+  assert.equal(engine.notes('s1').length, 1)
+  assert.deepEqual(engine.notes('s1')[0].source, undefined, 'dismissing one note leaves the other untouched')
+})
+
 test('a reviewer failure is contained and never surfaces as a note', async () => {
   const { engine, errors } = engineWith([new Error('provider down')])
   const outcome = await observeAndSettle(engine, sessionWith('s1', [{ turn: 1, answer: 'work' }]))

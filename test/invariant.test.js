@@ -62,6 +62,18 @@ test('the plugin uses only the sanctioned seams', async () => {
   assert.ok(!client.includes('localStorage'), 'dismissal state stays in the page, not shared storage')
 })
 
+test('the browser half reaches files and the composer only through their public seams', async () => {
+  const client = await read('lib/client.js')
+  assert.ok(client.includes('openResource('), 'file navigation goes through the sidebar resource service')
+  assert.ok(client.includes('dsh-resource://file/session/'), 'the file address follows the documented resource grammar')
+  assert.ok(client.includes('captureInsertion('), 'a draft edit captures the public insertion span')
+  assert.ok(client.includes('insertText('), 'a draft edit goes through the composer input actions')
+  assert.ok(client.includes('setDraft('), 'a composer without insertText still owns the draft write')
+  for (const pattern of [/child_process/, /shell\.openPath/, /openExternal/, /window\.open/, /\bexec\s*\(/, /\bspawn\s*\(/, /\.submit\s*\(/]) {
+    assert.equal(pattern.test(client), false, 'lib/client.js contains an escape hatch (' + pattern + ')')
+  }
+})
+
 test('the English-only scan rejects Cyrillic, Greek, and CJK text', () => {
   for (const sample of ['Привет', 'Ελληνικά', '日本語', '한국어']) {
     assert.equal(NON_LATIN.test(sample), true, `${sample} must be flagged as non-English`)
@@ -89,7 +101,7 @@ test('the bundled row leaves the reviewer route to adaptive discovery', async ()
 test('the manifest declares the bundle, the client half, and no build step', async () => {
   const manifest = JSON.parse(await read('package.json'))
   assert.equal(manifest.name, 'dsh-you-should-know')
-  assert.equal(manifest.version, '0.3.2')
+  assert.equal(manifest.version, '0.3.3')
   assert.equal(manifest.license, 'MIT')
   assert.equal(manifest.dsh.manifestVersion, 1)
   assert.equal(manifest.dsh.bundle.patch, './cordis.patch.yml')
