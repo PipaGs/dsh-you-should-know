@@ -391,7 +391,7 @@ test('the browser polls document-relative api paths with no leading slash', asyn
   view.unmount()
 })
 
-test('the visible outer card uses the shared responsive centered composer column, not the full dock width', async () => {
+test('the visible note card tracks the responsive composer column instead of a fixed cap', async () => {
   const env = await loadDock()
   env.responses.set('A', noteFor('A'))
 
@@ -401,10 +401,22 @@ test('the visible outer card uses the shared responsive centered composer column
   const container = view.output
   assert.ok(container && typeof container === 'object', 'the card renders an outer container element')
   const style = container.props.style
-  assert.equal(style.width, 'calc(100% - 88px)', 'the card must shrink from the full dock width')
-  assert.equal(style.maxWidth, 752, 'the card column is capped at 752px')
-  assert.equal(style.marginInline, 'auto', 'the card column is centered')
+  // The wrapper is the composer root and the section is the composer card:
+  // both take their horizontal constraint from the conversation shell that owns
+  // the composer, so the note ends where the composer ends at every width.
   assert.equal(style.boxSizing, 'border-box', 'the box must include border and padding in its width')
+  assert.equal(style.width, '100%', 'the wrapper fills the dock; the shell supplies the side clearance')
+  assert.equal(style.paddingInline, 'var(--dsh-composer-side-clearance, 16px)', 'the wrapper reserves the composer side clearance')
+  assert.equal(style.alignItems, 'center', 'the column centers like the composer root')
+
+  let card = null
+  walk(container, (entry) => {
+    if (card !== null || typeof entry !== 'object') return
+    if (entry.props && entry.props.role === 'note') card = entry
+  })
+  assert.ok(card, 'the note card renders inside the wrapper')
+  assert.equal(card.props.style.width, '100%', 'the card fills the padded column')
+  assert.equal(card.props.style.maxWidth, 'var(--dsh-composer-card-max-width, 952px)', 'the card caps at the composer card width')
 
   view.unmount()
 })
