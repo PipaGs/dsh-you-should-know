@@ -1,5 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { Readable } from 'node:stream'
 import { apply, name } from '../lib/index.js'
 import { createFetchHandlers } from '../lib/core.js'
 
@@ -355,6 +356,46 @@ test('the plugin registers its browser routes on the connection Fetch carrier', 
   harness.disposeAll()
 })
 
+test('every declared Fetch route crosses the connection bridge for each of its methods', async () => {
+  const harness = makeCtx({ llm: makeLlm([]) })
+  apply(harness.ctx, { provider: 'p', model: 'm' })
+  harness.runInjections()
+
+  // Mirrors HostConnectionService.createSharedFetchHandler + bridge(): one
+  // requestBody mode is declared per path, and the streaming path hands
+  // node:http's body stream to Request. Request rejects a body on GET/HEAD, so
+  // a combined GET/HEAD/POST route that declares streaming breaks its reads.
+  const bridgeRequest = (route, method, body) => {
+    const mode = route.methods.includes(method) ? route.requestBody : 'buffered'
+    const url = new URL(route.path, 'http://127.0.0.1')
+    if (mode !== 'streaming') {
+      return new Request(url, { method, ...(body === undefined ? {} : { body }) })
+    }
+    return new Request(url, {
+      method,
+      body: Readable.toWeb(Readable.from(body === undefined ? [] : [body])),
+      duplex: 'half',
+    })
+  }
+
+  for (const route of harness.fetchRoutes) {
+    for (const method of route.methods) {
+      assert.doesNotThrow(
+        () => bridgeRequest(route, method, method === 'POST' ? '{}' : undefined),
+        method + ' ' + route.path + ' must cross the connection bridge',
+      )
+    }
+  }
+
+  // A buffered POST keeps its body readable by the plugin's stream reader.
+  const session = harness.fetchRoutes.find((route) => route.path === '/api/dsh-you-should-know/session')
+  const buffered = bridgeRequest(session, 'POST', JSON.stringify({ action: 'status' }))
+  assert.equal(await buffered.text(), JSON.stringify({ action: 'status' }))
+  const response = await session.fetch(bridgeRequest(session, 'POST', JSON.stringify({ action: 'resume', sessionId: 's-bridge' })))
+  assert.deepEqual(await response.json(), { ok: true, action: 'resume', resumed: false }, 'a buffered POST body still reaches the handler')
+  harness.disposeAll()
+})
+
 test('a configured plugin observes a turn, serves the note, and dismisses it over Fetch', async () => {
   const llm = makeLlm(['{"note":"The retry path double-charges.","importance":"critical"}'])
   const harness = makeCtx({ llm })
@@ -463,7 +504,7 @@ test('the session route is registered with GET, HEAD, and POST on the Fetch carr
   const route = sessionRouteOf(harness)
   assert.notEqual(route, undefined)
   assert.deepEqual(route.methods, ['GET', 'HEAD', 'POST'])
-  assert.equal(route.requestBody, 'streaming', 'the handler bounds its own POST body')
+  assert.equal(route.requestBody, 'buffered', 'GET/HEAD share the path, so the carrier must buffer')
   assert.equal(typeof route.fetch, 'function')
   harness.disposeAll()
 })
@@ -679,7 +720,7 @@ test('the plugin registers the config route on the connection Fetch carrier', ()
   const config = harness.fetchRoutes.find((route) => route.path === '/api/dsh-you-should-know/config')
   assert.notEqual(config, undefined)
   assert.deepEqual(config.methods, ['GET', 'HEAD', 'POST'])
-  assert.equal(config.requestBody, 'streaming', 'the handler bounds its own POST body')
+  assert.equal(config.requestBody, 'buffered', 'GET/HEAD share the path, so the carrier must buffer')
   assert.equal(typeof config.fetch, 'function')
   harness.disposeAll()
 })

@@ -423,12 +423,15 @@ test('notes are scoped per session and dismissal is session-scoped', async () =>
 
   assert.equal(engine.notes('s1').length, 1)
   assert.equal(engine.notes('s2').length, 1)
+  assert.equal(engine.status('s1').session.noteCount, 1, 'status counts a pending note')
   assert.notEqual(engine.notes('s1')[0].id, engine.notes('s2')[0].id)
 
   const id = engine.notes('s1')[0].id
   assert.equal(engine.dismiss('s1', id), true)
   assert.equal(engine.dismiss('s1', id), false)
   assert.deepEqual(engine.notes('s1'), [])
+  assert.equal(engine.status('s1').session.noteCount, 0, 'a dismissed note is no longer pending')
+  assert.equal(engine.status('s2').session.noteCount, 1, 'dismissal stays session-scoped')
   assert.equal(engine.notes('s2').length, 1)
   assert.equal(engine.dismiss('s2', id), false)
   assert.equal(engine.dismiss('unknown', id), false)
