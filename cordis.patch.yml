@@ -22,7 +22,7 @@
 #       minDeltaChars: 1200
 #       cooldownTurns: 3
 #       maxContextMessages: 12
-#       maxTokens: 700
+#       maxTokens: 768
 #
 # Any registered provider and model are accepted as an exact override; DSH
 # resolves the ids against the profile, so this file deliberately pins none.
@@ -33,4 +33,4 @@
         minDeltaChars: 1200
         cooldownTurns: 3
         maxContextMessages: 12
-        maxTokens: 700
+        maxTokens: 768

@@ -19,6 +19,7 @@ import {
   readJsonBody,
   resolveReviewerRoute,
   sessionIdOf,
+  snapshotConfig,
   textOfBlocks,
   turnOutputText,
 } from '../lib/core.js'
@@ -116,17 +117,37 @@ test('normalizeConfig keeps the plugin loadable when config is malformed or vola
   assert.equal(warnings.length, 6)
 })
 
+test('snapshotConfig unwraps { get() } fields and tolerates plain values', () => {
+  const snapshot = snapshotConfig({
+    provider: { get: () => 'provider-x' },
+    model: 'plain-model',
+    minDeltaChars: 7,
+    maxTokens: { get: () => 256 },
+  })
+  assert.deepEqual(snapshot, { provider: 'provider-x', model: 'plain-model', minDeltaChars: 7, maxTokens: 256 })
+})
+
+test('snapshotConfig passes non-mapping input through and surfaces a throwing ref', () => {
+  assert.equal(snapshotConfig(undefined), undefined)
+  assert.equal(snapshotConfig(null), null)
+  assert.deepEqual(snapshotConfig([]), [])
+  assert.throws(
+    () => snapshotConfig({ provider: { get: () => { throw new Error('broken ref') } } }),
+    /broken ref/,
+  )
+})
+
 test('normalizeConfig accepts in-range overrides and rejects out-of-range values', () => {
   const { config, warnings } = normalizeConfig({
     minDeltaChars: 0,
     cooldownTurns: LIMITS.cooldownTurns.max,
     maxContextMessages: 1,
-    maxTokens: 32,
+    maxTokens: LIMITS.maxTokens.min,
   })
   assert.equal(config.minDeltaChars, 0)
   assert.equal(config.cooldownTurns, LIMITS.cooldownTurns.max)
   assert.equal(config.maxContextMessages, 1)
-  assert.equal(config.maxTokens, 32)
+  assert.equal(config.maxTokens, LIMITS.maxTokens.min)
   assert.deepEqual(warnings, [])
 
   const high = normalizeConfig({ maxTokens: LIMITS.maxTokens.max + 1 })

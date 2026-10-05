@@ -1,6 +1,6 @@
 {
   "name": "dsh-you-should-know",
-  "version": "0.2.5",
+  "version": "0.3.0",
   "description": "Quiet, human-only second-opinion reviewer for DeepSeek Harness: a separately configured reviewer model (DeepSeek by default, any registered provider and model by config) watches completed root-agent turns and, only when something important was missed, shows a dismissible card above the composer. It never injects or steers the primary agent.",
   "type": "module",
   "license": "MIT",
@@ -35,8 +35,8 @@
     "LICENSE"
   ],
   "scripts": {
-    "check": "node --check lib/core.js && node --check lib/index.js && node --check lib/client.js",
-    "test": "node --check lib/core.js && node --check lib/index.js && node --check lib/client.js && node --test test/*.test.js"
+    "check": "node --check lib/core.js && node --check lib/runtime.js && node --check lib/review-profile.js && node --check lib/index.js && node --check lib/client.js",
+    "test": "node --check lib/core.js && node --check lib/runtime.js && node --check lib/review-profile.js && node --check lib/index.js && node --check lib/client.js && node --test test/*.test.js"
   },
   "engines": {
     "node": ">=22.19.0"
@@ -49,9 +49,17 @@
     "client": {
       "platform": "web",
       "inject": [
+        "@deepseek-ai/dsh-client-connection",
         "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-ui-plugin-manager",
         "@deepseek-ai/dsh-client-ui-renderer"
       ]
     }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/schemastery": "^3.18.4"
+  },
+  "devDependencies": {
+    "@deepseek-ai/schemastery": "^3.18.4"
   }
 }

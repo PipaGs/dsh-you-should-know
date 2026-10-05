@@ -8,7 +8,7 @@ The product intent is analogous to Claude Code's *You Should Know*, with one del
 
 ## Status
 
-Version `0.2.5`, MIT. Host and browser halves are committed as plain JavaScript, so a `github:` install needs no build step. Scope is intentionally small: one web surface, one reviewer call per qualifying turn, no settings UI.
+Version `0.3.0`, MIT. Host and browser halves are committed as plain JavaScript, so a `github:` install needs no build step. Scope is intentionally small: a composer-adjacent note card, a Plugins settings card, and a session-header model override, one reviewer call per qualifying turn, and a per-session runtime that retries one transient failure, bounds the queue and the whole call, and pauses on quota without losing the turn.
 
 ## What it does
 
@@ -24,7 +24,7 @@ The host half observes committed session events and reviews a turn only when **a
 
 When the gates pass, the host sends one request to the configured reviewer route through `ctx.llm.stream`:
 
-- one user message containing the reviewer instruction and a **bounded** excerpt of the most recent conversation: at most `maxContextMessages` visible text messages, each truncated, with a total character cap. Only human `user/message` text and assistant reply text enter the excerpt;
+- one system instruction carrying the fixed reviewer policy plus the adaptive profile section below, and one user message containing a **bounded** excerpt of the most recent conversation: at most `maxContextMessages` visible text messages, each truncated, with a total character cap. Only human `user/message` text and assistant reply text enter the excerpt;
 - **no tools**;
 - `temperature: 0` and `maxTokens`;
 - `reasoningEffort: 'off'` **only** when the model's own metadata advertises an `off` effort; otherwise the field is omitted entirely.
@@ -39,6 +39,8 @@ The reply must be a single JSON object:
 
 Qualifying information is deliberately narrow: a contradiction with an explicit user requirement, an overlooked material constraint, a serious correctness/security/safety/data-loss/reliability problem, or an important implication that changes the user's next decision. The reviewer is told to stay silent otherwise and not to summarize, praise, or give style advice.
 
+A review adapts to the conversation through the plugin's review profile. The note is written in the same natural language as the most recent genuine human user message, falling back to the nearest earlier human message when that message is code-only or its language is unclear, and to English when nothing is clear. When the visible conversation reliably shows a programming language through a fenced code tag or a file extension, the instruction also gains a small, bounded set of language-specific correctness skills — at most three, chosen deterministically and never inferred from bare keywords. Each skill is a short plugin-owned checklist of defects that can materially matter: async and promise error flow, listener and resource lifetime, concurrency and races, nullability and type-versus-runtime mismatch, transaction and query semantics, quoting and failure propagation in shell, and similar. They are instruction text only: the reviewer runs no external skill or tool, and the JSON reply contract is unchanged.
+
 ## The human-only invariant
 
 This plugin is architecturally incapable of talking to the agent:
@@ -49,7 +51,7 @@ This plugin is architecturally incapable of talking to the agent:
 - no modification of the primary model context;
 - no approval or tool mechanisms.
 
-Notes live in plugin-owned, in-memory, per-session state. The only consumer is the browser: exact Fetch routes on the host connection, reached under the absolute `/api` transport (`GET`/`HEAD /api/dsh-you-should-know/notes`, `POST /api/dsh-you-should-know/dismiss`, and the read-only `GET`/`HEAD /api/dsh-you-should-know/status`). The connection owns the Host/Origin fence and browser-session authentication, and the Desktop app origin proxies `/api` to the host. The host never hands a note to the model.
+Notes live in plugin-owned, in-memory, per-session state. The only consumer is the browser: exact Fetch routes on the host connection, reached under the absolute `/api` transport (`GET`/`HEAD /api/dsh-you-should-know/notes`, `POST /api/dsh-you-should-know/dismiss`, the read-only `GET`/`HEAD /api/dsh-you-should-know/status`, the `GET`/`HEAD`/`POST /api/dsh-you-should-know/session` model override, and the `GET`/`HEAD`/`POST /api/dsh-you-should-know/config` settings route). The config route writes through the host settings service into the same plugin row and reports itself read-only when that service is absent. The connection owns the Host/Origin fence and browser-session authentication, and the Desktop app origin proxies `/api` to the host. The host never hands a note to the model.
 
 A source-level test (`test/invariant.test.js`) scans the shipped files for every delivery shape that could break this invariant and fails if one appears.
 
@@ -85,7 +87,7 @@ Pin an exact route (this also disables discovery):
     minDeltaChars: 1200
     cooldownTurns: 3
     maxContextMessages: 12
-    maxTokens: 700
+    maxTokens: 768
 ```
 
 Or select any other route the profile registers:
@@ -99,7 +101,7 @@ Or select any other route the profile registers:
     minDeltaChars: 1200
     cooldownTurns: 3
     maxContextMessages: 12
-    maxTokens: 700
+    maxTokens: 768
 ```
 
 The bundled row pins no route, so this example is only a template. A patch replaces the **whole** config of the row it matches, so restate every key you want to keep. Place one `- id: you-should-know` entry in `$DSH_HOME/profiles/<profile>/cordis.patch.yml` (or a `--patch` overlay); do **not** add a second `insert` for the same id, or the row would be composed twice.
@@ -113,19 +115,35 @@ Only the model's *availability in the profile* is required: if the route is miss
 | `minDeltaChars` | `1200` | integer, 0–200000 | Minimum visible characters accumulated since the last review. |
 | `cooldownTurns` | `3` | integer, 1–100 | Minimum number of completed root turns between reviews. |
 | `maxContextMessages` | `12` | integer, 1–100 | Maximum recent text messages sent to the reviewer. |
-| `maxTokens` | `700` | integer, 32–8000 | Output cap for the reviewer call. |
+| `maxTokens` | `768` | integer, 128–16384 | Output cap for the reviewer call. |
 
-Invalid values never fail the load: each one falls back to its conservative default and the host logs one warning. A saved patch change is picked up by the profile's live reload, so later reviews use the new route without reinstalling or restarting. Use a reviewer route that is different from the route the primary agent uses if you want a genuinely independent opinion.
+Invalid values never fail the load: each one falls back to its conservative default and the host logs one warning. Every field is declared volatile in the plugin's `Config` schema, so a profile-patch edit is committed into the running fiber in place and reported as `loader/volatile-update`: later reviews use the new route, gates, and token budget without reinstalling or restarting. A save through the settings card or the config route persists to the same plugin row through the host settings service — automatic mode resets the live fields so a stored pin is really cleared, while a pinned route merges both route keys — and applies to the live engine immediately. Use a reviewer route that is different from the route the primary agent uses if you want a genuinely independent opinion.
 
 ## Web UI
 
-The browser half registers into `conversation.input.dock` — the full-width slot directly above the composer card.
+The browser half registers three surfaces.
+
+**Note card** (`conversation.input.dock`, the full-width slot above the composer):
 
 - No note: it renders **nothing**.
 - At least one note: it renders a compact card titled **You should know**, marked **critical** when the reviewer said so, with a **Dismiss** button.
 - Dismissal is session-scoped: the note disappears immediately, is remembered for the life of the page (bounded to the 200 most recent sessions), and is also reported to the host so other reads agree. Switching to another session stops rendering the previous session's notes in the same frame, before the new poll resolves, so a stale note is never shown or dismissed against the wrong session.
 
-Delivery uses conservative polling. While the page is visible the card polls its route every 7 seconds; polling stops while the tab is hidden and refreshes immediately when it becomes visible again. There is no push channel for out-of-tree plugins in the current public API, so polling is the documented mechanism.
+**Settings card** (`plugins.bundle.config`, the bundle's card in the Plugins settings page):
+
+- It reads the live config and the registered provider/model catalog from the config route and writes back to the same plugin row, so there is no second config store.
+- Provider and model selects list only ids the live registry reports; choosing a provider reloads the model list for it. **Automatic** leaves the route to adaptive discovery, while **Pinned** sends the exact pair.
+- The numeric gates (`minDeltaChars`, `cooldownTurns`, `maxContextMessages`, `maxTokens`) are editable and validated against the same bounds as the row.
+- Save is disabled, and every control explains why, when the host mounts no writable settings service. A pinned route that resolves to nothing is rejected before anything is persisted, with a bounded message.
+- The card refreshes once on mount, on window focus, and on a connection reset; a stale response from an older request generation never overwrites a newer one.
+
+**Session header action** (`conversation.session.header.actions`, scoped to one session):
+
+- It shows the effective reviewer route, whether it comes from the session, the global pin, or adaptive discovery, the runtime status, and the pending-note count.
+- It can pin an exact provider/model for this session only, reset back to the global default, and resume a runtime paused by a quota failure; a non-quota runtime never offers resume.
+- It never renders the transcript and never posts to the primary agent.
+
+Delivery uses conservative polling. While the page is visible the note card polls its route every 7 seconds; polling stops while the tab is hidden and refreshes immediately when it becomes visible again. The two settings surfaces have no interval: they refresh on mount, focus, and connection reset. There is no push channel for out-of-tree plugins in the current public API, so polling is the documented mechanism.
 
 ## Operational verification
 
@@ -143,12 +161,27 @@ It returns bounded JSON:
   "configured": true,
   "route": { "provider": "deepseek-account", "model": "deepseek-flash" },
   "routeResolutions": 1,
+  "effectiveRoute": { "provider": "deepseek-account", "model": "deepseek-flash" },
+  "effectiveRouteSource": "automatic",
   "session": {
     "reviewStarts": 2,
     "lastReviewAt": 1700000000000,
     "lastOutcome": "noted",
     "inFlight": false,
-    "noteCount": 1
+    "noteCount": 1,
+    "runtimeStatus": "idle",
+    "runtime": {
+      "pendingReviews": 0,
+      "completedReviews": 2,
+      "emptyReplies": 0,
+      "unparsedReplies": 0,
+      "transportDrops": 0,
+      "queueDrops": 0,
+      "backlogFlushes": 0,
+      "lastReviewAt": 1700000000000,
+      "lastOutcome": "noted",
+      "runtimeStatus": "idle"
+    }
   }
 }
 ```
@@ -160,11 +193,15 @@ How to read each value:
 | `configured` | `false` only when an explicit blank `provider`/`model` disabled the reviewer; that row registers no routes at all. |
 | `route` | The resolved reviewer route, or `null` when none has resolved yet or the profile mounts no DeepSeek route. |
 | `routeResolutions` | How many times the engine attempted route discovery. It exceeds `1` only when an earlier attempt resolved to no route (or failed transiently) and a later qualifying turn retried. A steady `1` next to a non-null `route` means discovery succeeded once and is cached. |
+| `effectiveRoute` | The route the given session would actually use right now: its per-session override, else the global pin, else the cached automatic discovery. `null` until discovery has run. |
+| `effectiveRouteSource` | `session`, `global`, `automatic`, or `null` when the reviewer is disabled. |
 | `session.reviewStarts` | Qualifying turns that entered the review pipeline, including attempts that ended `unroutable`. |
 | `session.lastReviewAt` | Host timestamp in milliseconds when the last review attempt started, or `null`. |
 | `session.lastOutcome` | Terminal outcome of the last review: `unroutable` (no route), `silent` (reviewer said nothing, or the call failed quietly), `noted` (a note was stored), `duplicate` (the same advice was already stored), `budget` (the per-session note ceiling was reached), or `error` (the pipeline threw unexpectedly). |
 | `session.inFlight` | `true` while one reviewer call is in progress for that session. |
 | `session.noteCount` | Notes ever stored for the session, including dismissed ones. |
+| `session.runtimeStatus` | The per-session scheduler state: `idle`, `reviewing`, `quota_exhausted`, `halted`, `degraded`, or `disposed`. |
+| `session.runtime` | The runtime's bounded counters: pending queue, completed reviews, empty and unparsed replies, transport drops, queue drops, backlog flushes, and the last outcome/timestamp. No conversation, prompt, note, credential, or tool text is ever included. |
 
 An unknown or missing `sessionId` returns `"session": null` with the global route state only. `HEAD` returns the same status line with no body, and a non-`GET`/`HEAD` request is rejected with `405`. The route is read-only, applies the same session-id bound as `/notes` and `/dismiss`, relies on the connection's Host/Origin fence and browser authentication, and never includes conversation text, prompt text, note text, credentials, or tool data.
 
@@ -190,33 +227,37 @@ The plugin fails quiet by construction:
 - a blank `provider`/`model` means zero reviewer calls, and the automatic DeepSeek route makes no visible change when the profile mounts no such route: discovery resolves to "no route" before any model call is attempted, and a later qualifying turn retries discovery, so a route that appears after a transient startup race is picked up without a restart;
 - a reviewer/model/parser/RPC/browser failure is contained and logged at most as a host warning;
 - a malformed or empty reply is dropped without a note;
+- each session owns a bounded FIFO reviewer queue drained one call at a time: at most 32 reviews wait (the newest overflow is dropped), a transient transport/server/timeout failure is retried once after a short delay, and a whole-call deadline also aborts an iterator that ignores its `AbortSignal`;
+- a quota or rate-limit failure pauses the runtime with the current turn retained at the front of the queue, so `resume` from the session header action or the session route replays it in place; a permanent credential, adapter, or unknown-model failure halts further calls for that session; three consecutive transport drops flush the queued backlog so a dead provider cannot build an unbounded retry wall;
+- a live config change that alters the route or the token budget rebuilds every tracked runtime, and disabling disposes them while preserving notes, dedupe, and context, so re-enabling works;
 - if no web server is present (headless profiles) the plugin still evaluates turns but has no delivery path: the connection mounts its `/api` transport only when a web server exists, and the served browser bundle lives there too, so nothing is shown;
 - if the package is composed twice, the second row is inert, so there is never more than one reviewer fiber;
-- the `session/event` listener wraps its own work in a try/catch so a reviewer bug cannot disturb primary work.
+- the `session/event`, `session/disposed`, and `loader/volatile-update` listeners each wrap their own work in a try/catch so a reviewer bug — including a throwing volatile config reference — cannot disturb primary work or escape into the host.
 
 ## Limitations
 
 - Notes are in-memory only; a host restart forgets them.
 - Dismissal is durable for the page and the host process, not across restarts.
 - Polling is not a push channel: a note can take up to one poll interval to appear.
-- The web card is the only surface; there is no CLI/headless delivery and no settings UI.
-- An explicit override is not validated against the catalog up front; an unknown route simply fails quietly on the first review. The automatic route does consult the live registry and model catalog before it calls anything.
+- There is no CLI or headless delivery: the note card, the Plugins settings card, and the session header action are the only surfaces, and all three need the GUI's web server.
+- A route saved through the settings card or the session action is validated against live model metadata before it is persisted; a route written directly into a profile patch is not, and an unknown route simply fails quietly on the first review. The automatic route always consults the live registry and model catalog before it calls anything.
 - The routes require the connection's browser session: they reject cross-origin browser traffic and unauthenticated requests, but any client that holds the GUI's session cookie and knows a session id can read that session's notes and status counters. Keep the DSH web server on loopback and treat the browser session as the access boundary.
 - While no route resolves, the engine re-reads the live registry at each qualifying turn until discovery succeeds. Discovery never opens a generation stream, and the cooldown and delta gates bound how often it runs.
 - The reviewer reads the full committed log once per session through the synchronous `snapshotEvents()` accessor, which DSH marks deprecated. After that seed the plugin follows the `session/event` feed and keeps a bounded recent-event window, so steady-state review never re-reads the log; a future DSH that removes the accessor degrades resumed-session context to feed-only instead of breaking the reviewer. Alongside the raw window it keeps a bounded side buffer of the most recent visible messages and per-turn assistant text, so a long noisy turn — a visible answer followed by thousands of tool events — cannot erase the current answer from the reviewer excerpt or the output gate.
 - The per-session note budget (12) is an internal safety constant, not a config key.
-- At most 200 sessions are tracked at once; the oldest session gives up its slot and its notes when the table is full.
+- At most 200 sessions are tracked at once; the oldest session gives up its slot, its notes, and its model override when the table is full.
+- At most 200 per-session model overrides are retained, and a `session/disposed` event forgets the session's notes, dedupe, override, and runtime together.
 - The reviewer is a language model. Treat its note as a prompt to check something, not as a verified fact.
 - UI strings and all shipped or public text are English-only by design; a source-level test rejects CJK, Cyrillic, Greek, and Hangul ranges in addition to unrelated project references.
 
 ## Development
 
 ```sh
-node --check lib/core.js && node --check lib/index.js && node --check lib/client.js
+node --check lib/core.js && node --check lib/runtime.js && node --check lib/review-profile.js && node --check lib/index.js && node --check lib/client.js
 node --test test/*.test.js
 ```
 
-The suite covers adaptive DeepSeek route discovery, the documented and installed-style route variants, arbitrary exact overrides, partial pins, the blank-config gate, no-route fail-quiet and route recovery, live reconfiguration, the strict verdict shape, silent/malformed/non-text verdicts, deduplication, cooldown, the delta gate, the bounded event window and gap recovery, tool-event flood retention, session scoping and dismissal, the bounded client dismissal memory, the read-only status diagnostics, connection Fetch route registration with Request/Response semantics and bodyless HEAD responses, the document-relative browser URLs, bounded context, the single-reviewer guard, the browser bundle envelope, and the human-only source invariant. There are no runtime dependencies.
+The suite covers adaptive DeepSeek route discovery, the documented and installed-style route variants, arbitrary exact overrides, partial pins, the blank-config gate, no-route fail-quiet and route recovery, live reconfiguration, the strict verdict shape, silent/malformed/non-text verdicts, deduplication, cooldown, the delta gate, the bounded event window and gap recovery, tool-event flood retention, session scoping and dismissal, the bounded client dismissal memory, the read-only status diagnostics, connection Fetch route registration with Request/Response semantics and bodyless HEAD responses, the document-relative browser URLs, bounded context, the adaptive response-language directive, deterministic language-skill detection with a three-skill cap and no keyword guessing, the single-reviewer guard, the browser bundle envelope, and the human-only source invariant. It also covers the per-session runtime queue and counters, transient retry and permanent/quota classification, the whole-call deadline, backlog flushing, and resume; the volatile config live-update path; the settings persistence split (reset for automatic, merge for pinned); the config and session routes; the settings card and session-header model override; and the adaptive review profile. The package declares no runtime dependencies of its own: its only non-relative import is the host-provided `@deepseek-ai/schemastery` Config schema, and there is no build step.
 
 ## Related work
 
