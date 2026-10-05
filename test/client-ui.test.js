@@ -8,6 +8,7 @@ const SOURCE_URL = new URL('../lib/client.js', import.meta.url)
 const CARD_SLOT = 'plugins.bundle.config'
 const CARD_KEY = 'dsh-you-should-know'
 const ACTION_SLOT = 'conversation.session.header.actions'
+const CARD_SLOT_DOCK = 'conversation.input.dock'
 
 // --- Deterministic React-hook runtime -----------------------------------------
 // Enough to mount the settings card and the header action, flush effects, drive
@@ -285,7 +286,7 @@ async function loadBundle(options = {}) {
     window: windowMock,
     document: documentMock,
     fetch: fetchMock,
-    setInterval: () => {
+    setInterval: options.allowIntervals === true ? () => 1 : () => {
       throw new Error('the settings and session surfaces must not poll')
     },
     clearInterval: () => {},
@@ -339,6 +340,11 @@ async function loadBundle(options = {}) {
     assert.ok(entry, 'the session header action must be registered')
     return entry
   }
+  function dockComponent() {
+    const entry = seen.find((item) => typeof item === 'object' && item.spec && item.spec.name === CARD_SLOT_DOCK)
+    assert.ok(entry, 'the note card dock must be registered')
+    return entry
+  }
 
   return {
     runtime,
@@ -347,6 +353,7 @@ async function loadBundle(options = {}) {
     module: mod,
     cardComponent,
     actionComponent,
+    dockComponent,
     connection,
     resets,
     fireFocus() {
@@ -733,6 +740,173 @@ test('the session action never renders a transcript or posts to the primary agen
   assert.equal(textOf(view.output).includes(secret), false)
   for (const call of env.calls) {
     assert.equal(call.url.startsWith('api/dsh-you-should-know/'), true, 'only plugin-owned document-relative routes are used')
+  }
+  view.unmount()
+})
+
+
+// --- Composer-aligned note card geometry ---------------------------------------
+// The composer geometry below is quoted from the installed DSH conversation shell
+// (@deepseek-ai/dsh-client-ui-conversation, ConversationRoot.module.css and the
+// composer module), so this suite fails if the build moves or the plugin stops
+// matching it:
+//   .ST7X_W_body         { --dsh-composer-side-clearance:16px;
+//                          --dsh-composer-card-max-width:calc(var(--dsh-chat-content-width) + 32px) }
+//   .ST7X_W_embeddedBody { --dsh-composer-side-clearance:8px;
+//                          --dsh-composer-card-max-width:min(calc(100% - 16px), 952px) }
+//   .yhfFVG_root         { padding:0 var(--dsh-composer-side-clearance) 4px; align-items:center; display:flex }
+//   .yhfFVG_card         { box-sizing:border-box; width:100%; max-width:var(--dsh-composer-card-max-width) }
+
+/** The custom properties the conversation body defines for one shell variant. */
+function composerVariables(variant) {
+  if (variant === 'embedded') {
+    return {
+      '--dsh-composer-side-clearance': '8px',
+      '--dsh-composer-card-max-width': 'min(calc(100% - 16px), 952px)',
+    }
+  }
+  return {
+    '--dsh-composer-side-clearance': '16px',
+    '--dsh-chat-content-width': '768px',
+    '--dsh-composer-card-max-width': 'calc(var(--dsh-chat-content-width) + 32px)',
+  }
+}
+
+/** Split a comma-separated argument list at the top level of nested parentheses. */
+function splitArguments(text) {
+  const parts = []
+  let depth = 0
+  let current = ''
+  for (const char of text) {
+    if (char === '(') depth += 1
+    if (char === ')') depth -= 1
+    if (char === ',' && depth === 0) {
+      parts.push(current)
+      current = ''
+      continue
+    }
+    current += char
+  }
+  parts.push(current)
+  return parts
+}
+
+/** Split a calc() sum at its top-level plus and minus operators. */
+function splitTerms(text) {
+  const terms = []
+  let depth = 0
+  let current = ''
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index]
+    if (char === '(') depth += 1
+    if (char === ')') depth -= 1
+    if (depth === 0 && (char === '+' || char === '-') && index > 0 && /\s/.test(text[index - 1])) {
+      terms.push(current)
+      current = char
+      continue
+    }
+    current += char
+  }
+  terms.push(current)
+  return terms.filter((term) => term.trim() !== '')
+}
+
+/** Resolve the subset of CSS lengths the composer and the dock use. */
+function resolveLength(expression, basis, variables = {}) {
+  const text = String(expression).trim()
+  const call = /^([a-z-]+)\(([\s\S]*)\)$/i.exec(text)
+  if (call !== null) {
+    const name = call[1].toLowerCase()
+    const args = splitArguments(call[2])
+    if (name === 'var') {
+      const variable = args[0].trim()
+      if (Object.hasOwn(variables, variable)) return resolveLength(variables[variable], basis, variables)
+      assert.ok(args.length > 1, variable + ' needs a fallback')
+      return resolveLength(args.slice(1).join(','), basis, variables)
+    }
+    if (name === 'min') return Math.min(...args.map((arg) => resolveLength(arg, basis, variables)))
+    if (name === 'max') return Math.max(...args.map((arg) => resolveLength(arg, basis, variables)))
+    if (name === 'calc') {
+      return splitTerms(args[0]).reduce((total, term, index) => {
+        const sign = term.trim().startsWith('-') ? -1 : 1
+        const value = resolveLength(term.replace(/^[+-]/, ''), basis, variables)
+        return index === 0 ? sign * value : total + sign * value
+      }, 0)
+    }
+    throw new Error('unsupported CSS function ' + name)
+  }
+  if (text.endsWith('%')) return (basis * Number.parseFloat(text)) / 100
+  if (text.endsWith('px')) return Number.parseFloat(text)
+  throw new Error('unsupported CSS length ' + text)
+}
+
+/** The width the composer card resolves to inside a container of containerWidth. */
+function composerCardWidth(containerWidth, variant, variables) {
+  const clearance = resolveLength(variables['--dsh-composer-side-clearance'], containerWidth, variables)
+  const content = containerWidth - 2 * clearance
+  const cardMax = resolveLength(variables['--dsh-composer-card-max-width'], content, variables)
+  return Math.min(content, cardMax)
+}
+
+/** The width the note card resolves to from its own rendered inline styles. */
+function dockCardWidth(wrapperStyle, cardStyle, containerWidth, variables) {
+  const clearance = resolveLength(wrapperStyle.paddingInline, containerWidth, variables)
+  const content = containerWidth - 2 * clearance
+  const cardMax = resolveLength(cardStyle.maxWidth, content, variables)
+  return Math.min(content, cardMax)
+}
+
+function notesBackend(notes) {
+  return async (url) => {
+    if (url.startsWith('api/dsh-you-should-know/notes')) return { status: 200, body: { ok: true, notes } }
+    return { status: 200, body: { ok: true } }
+  }
+}
+
+async function mountNoteCard() {
+  const env = await loadBundle({
+    backend: notesBackend([{ id: 'n-1', note: 'One important thing.', importance: 'high' }]),
+    allowIntervals: true,
+  })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1' })
+  await flushAsync()
+  return { env, view }
+}
+
+test('the note card wrapper mirrors the composer root instead of a fixed column', async () => {
+  const { view } = await mountNoteCard()
+  const wrapper = view.output
+  const card = findByType(wrapper, 'section')
+  assert.equal(wrapper.type, 'div', 'the dock renders a wrapper')
+  assert.ok(card, 'the note renders inside the wrapper')
+  assert.equal(wrapper.props.style.boxSizing, 'border-box')
+  assert.equal(wrapper.props.style.width, '100%', 'the wrapper fills the dock')
+  assert.equal(wrapper.props.style.paddingInline, 'var(--dsh-composer-side-clearance, 16px)', 'the wrapper uses the composer side clearance')
+  assert.equal(wrapper.props.style.alignItems, 'center', 'the column is centered like the composer root')
+  assert.equal(card.props.style.boxSizing, 'border-box')
+  assert.equal(card.props.style.width, '100%', 'the card fills the padded column')
+  assert.equal(card.props.style.maxWidth, 'var(--dsh-composer-card-max-width, 952px)', 'the card caps at the composer card width')
+  view.unmount()
+})
+
+test('the note card resolves to the exact composer card width at every breakpoint', async () => {
+  const { view } = await mountNoteCard()
+  const wrapperStyle = view.output.props.style
+  const cardStyle = findByType(view.output, 'section').props.style
+  for (const variant of ['composer', 'embedded']) {
+    const variables = composerVariables(variant)
+    for (const containerWidth of [560, 720, 900, 1200, 1600]) {
+      assert.equal(
+        dockCardWidth(wrapperStyle, cardStyle, containerWidth, variables),
+        composerCardWidth(containerWidth, variant, variables),
+        variant + ' shell at ' + containerWidth + 'px',
+      )
+    }
+    assert.equal(
+      resolveLength(wrapperStyle.paddingInline, 1000, variables),
+      resolveLength(variables['--dsh-composer-side-clearance'], 1000, variables),
+      variant + ' shell side clearance',
+    )
   }
   view.unmount()
 })
