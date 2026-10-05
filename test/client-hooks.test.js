@@ -390,3 +390,21 @@ test('the browser polls document-relative api paths with no leading slash', asyn
   assert.equal(env.dismissUrls.at(-1), 'api/dsh-you-should-know/dismiss', 'the dismiss post must be document-relative')
   view.unmount()
 })
+
+test('the visible outer card uses the shared responsive centered composer column, not the full dock width', async () => {
+  const env = await loadDock()
+  env.responses.set('A', noteFor('A'))
+
+  const view = env.runtime.mount(env.Dock, { sessionId: 'A' })
+  await flushAsync()
+
+  const container = view.output
+  assert.ok(container && typeof container === 'object', 'the card renders an outer container element')
+  const style = container.props.style
+  assert.equal(style.width, 'calc(100% - 88px)', 'the card must shrink from the full dock width')
+  assert.equal(style.maxWidth, 752, 'the card column is capped at 752px')
+  assert.equal(style.marginInline, 'auto', 'the card column is centered')
+  assert.equal(style.boxSizing, 'border-box', 'the box must include border and padding in its width')
+
+  view.unmount()
+})
