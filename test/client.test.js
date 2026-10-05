@@ -55,15 +55,19 @@ test('the client half declares its services and registers the composer-adjacent 
     return fakeReact()
   })
   assert.equal(mod.name, 'dsh-you-should-know')
-  assert.deepEqual(Array.from(mod.inject), ['slots'])
+  assert.deepEqual(Array.from(mod.inject), ['slots', 'connection'])
 
   const registrationsSeen = []
   const injections = []
   const ctx = {
+    connection: { on() {} },
     slots: {
       inject(slot, callback) {
         injections.push(slot)
-        callback()
+        const result = callback()
+        if (result && typeof result[Symbol.iterator] === 'function' && typeof result.next === 'function') {
+          for (const _ of result) { /* the registration happened during iteration */ }
+        }
       },
       register(spec, component) {
         registrationsSeen.push({ spec, component })
@@ -71,15 +75,20 @@ test('the client half declares its services and registers the composer-adjacent 
     },
   }
   mod.apply(ctx)
-  assert.deepEqual(injections, ['conversation.input.dock'])
-  assert.equal(registrationsSeen.length, 1)
+  assert.deepEqual(injections, [
+    'conversation.input.dock',
+    'plugins.bundle.config',
+    'conversation.session.header.actions',
+  ])
+  const dock = registrationsSeen.find((entry) => entry.spec.name === 'conversation.input.dock')
+  assert.ok(dock, 'the composer-adjacent dock is registered')
   assert.equal(registrationsSeen[0].spec.name, 'conversation.input.dock')
   assert.equal(registrationsSeen[0].spec.id, 'you-should-know')
   assert.equal(typeof registrationsSeen[0].component, 'function')
 
   // The dock's owner props are { session, input }, so the session id must come
   // from the slot inject face the framework calls with the scope binding key.
-  const injectFace = registrationsSeen[0].spec.inject
+  const injectFace = dock.spec.inject
   assert.equal(typeof injectFace, 'function')
   assert.equal(injectFace('s1').sessionId, 's1')
   assert.equal(injectFace(undefined).sessionId, '')
