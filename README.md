@@ -2,13 +2,13 @@
 
 A quiet, **human-only** second-opinion watcher for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness).
 
-A separately configured reviewer model — DeepSeek out of the box, any registered route by config — looks at each completed root-agent turn and speaks up only when the human most likely missed something important. When it does, a compact **You should know** card appears above the composer. It is dismissible, it is never written into the conversation, and it never reaches the primary agent.
+A separately configured reviewer model — DeepSeek out of the box, any registered route by config — looks at each completed root-agent turn and speaks up only when the human most likely missed something important. When it does, a compact **You should know** card appears above the composer. It is dismissible, offers **Add to chat** without ever sending, is never written into the conversation, and never reaches the primary agent.
 
 The product intent is analogous to Claude Code's *You Should Know*, with one deliberately harder constraint: here the note is for the human only.
 
 ## Status
 
-Version `0.3.2`, MIT. Host and browser halves are committed as plain JavaScript, so a `github:` install needs no build step. Scope is intentionally small: a composer-adjacent note card, a Plugins settings card, and a session-header model override, one reviewer call per qualifying turn, and a per-session runtime that retries one transient failure, bounds the queue and the whole call, and pauses on quota without losing the turn.
+Version `0.3.3`, MIT. Host and browser halves are committed as plain JavaScript, so a `github:` install needs no build step. Scope is intentionally small: a composer-adjacent note card, a Plugins settings card, and a session-header model override, one reviewer call per qualifying turn, and a per-session runtime that retries one transient failure, bounds the queue and the whole call, and pauses on quota without losing the turn.
 
 ## What it does
 
@@ -32,10 +32,10 @@ When the gates pass, the host sends one request to the configured reviewer route
 The reply must be a single JSON object:
 
 ```json
-{"note": "one or two sentences addressed to the human", "importance": "high"}
+{"note": "one or two sentences addressed to the human", "importance": "high", "source": {"path": "src/store.js", "line": 42}}
 ```
 
-`importance` is `"high"` or `"critical"`, and a nonempty `note` requires one of those two values. Silence is exactly one shape: `{"note": null, "importance": null}`. Both keys must be present and must agree, so a missing field, a `null` note paired with a real importance, an empty or whitespace note, an unknown importance, prose, a fenced object, a non-object, or a truncated object is dropped quietly. Harmless extra keys are ignored. Accepted notes are normalized and deduplicated by their text, so the same advice is never shown twice in one session.
+`importance` is `"high"` or `"critical"`, and a nonempty `note` requires one of those two values. `source` is optional: when the finding is tied to a concrete file whose exact path appears verbatim in the untrusted excerpt, it carries that path and, only when the excerpt states it, a positive 1-based `line`. The reviewer is told never to synthesize, normalize, or guess a path, and to omit the source entirely when no exact path appears. A present but malformed source — a non-object, a missing, blank, oversized, or control-character path, a URL such as `http:`, `javascript:`, or `data:`, or a non-positive or non-integer line — drops the whole reply quietly. Silence is exactly one shape and never carries a source: `{"note": null, "importance": null}`. Both keys must be present and must agree, so a missing field, a `null` note paired with a real importance, an empty or whitespace note, an unknown importance, prose, a fenced object, a non-object, or a truncated object is dropped quietly. Harmless extra keys are ignored. Accepted notes are normalized and deduplicated by their text, so the same advice is never shown twice in one session.
 
 Qualifying information is deliberately narrow: a contradiction with an explicit user requirement, an overlooked material constraint, a serious correctness/security/safety/data-loss/reliability problem, or an important implication that changes the user's next decision. The reviewer is told to stay silent otherwise and not to summarize, praise, or give style advice.
 
@@ -60,7 +60,7 @@ A source-level test (`test/invariant.test.js`) scans the shipped files for every
 Because the built host and browser halves are committed, installation needs no source build. Install an **immutable release ref**, not the default branch:
 
 ```sh
-dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.3.2
+dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.3.3
 ```
 
 A bare `github:PipaGs/dsh-you-should-know` address is resolved by pnpm and saved as that same value every time. The Desktop plugin manager learns which package an install produced by diffing the profile's dependencies before and after pnpm runs, and falls back to matching the typed address against a package name. A bare default-branch address changes nothing on the second run, and that fallback does not understand a Git address, so the manager reports that the installed package could not be told from the dependency change. A ref-pinned address is saved verbatim, so each install and upgrade is attributed to `dsh-you-should-know`. In the Desktop **Add plugin** dialog, enter the same pinned address. To move to a later release, install its tag; to install the exact version already present, remove the plugin first.
@@ -128,7 +128,9 @@ The browser half registers three surfaces.
 **Note card** (`conversation.input.dock`, the full-width slot above the composer):
 
 - No note: it renders **nothing**.
-- At least one note: it renders a compact card titled **You should know**, marked **critical** when the reviewer said so, with a **Dismiss** button.
+- At least one note: it renders all undismissed notes for the current session as a bounded, oldest-first stack — newest nearest the composer, capped at the same 12-note per-session budget the host enforces — each a compact card titled **You should know**, marked **critical** when the reviewer said so. Every card carries **Add to chat** and **Dismiss**.
+- A card whose finding names an exact file shows that path as copyable text. When the client's right-Sidebar navigation service is mounted, an **Open file** action opens it at the stated line through the public `dsh-resource://file/session/<sessionId>/<path>` resource address; it runs no shell command and never accepts an arbitrary URL. With no navigation service the card shows the copyable path and no link.
+- **Add to chat** inserts a short draft into the current composer through the public composer action face (`captureInsertion()` plus `insertText`, or `setDraft` when that is all the composer exposes): `Please address this reviewer finding: <note>`, plus `File: path:line` when a source is present. It never sends, steers, or appends to the transcript, and it appends after a blank line when the composer already holds a draft.
 - Dismissal is session-scoped: the note disappears immediately, is remembered for the life of the page (bounded to the 200 most recent sessions), and is also reported to the host so other reads agree. Switching to another session stops rendering the previous session's notes in the same frame, before the new poll resolves, so a stale note is never shown or dismissed against the wrong session.
 
 **Settings card** (`plugins.bundle.config`, the bundle's card in the Plugins settings page):
@@ -205,7 +207,7 @@ How to read each value:
 | `session.runtimeStatus` | The per-session scheduler state: `idle`, `reviewing`, `quota_exhausted`, `halted`, `degraded`, or `disposed`. |
 | `session.runtime` | The runtime's bounded counters: pending queue, completed reviews, empty and unparsed replies, transport drops, queue drops, backlog flushes, and the last outcome/timestamp. No conversation, prompt, note, credential, or tool text is ever included. |
 
-An unknown or missing `sessionId` returns `"session": null` with the global route state only. `HEAD` returns the same status line with no body, and a non-`GET`/`HEAD` request is rejected with `405`. The route is read-only, applies the same session-id bound as `/notes` and `/dismiss`, relies on the connection's Host/Origin fence and browser authentication, and never includes conversation text, prompt text, note text, credentials, or tool data.
+An unknown or missing `sessionId` returns `"session": null` with the global route state only. `HEAD` returns the same status line with no body, and a non-`GET`/`HEAD` request is rejected with `405`. The route is read-only, applies the same session-id bound as `/notes` and `/dismiss`, relies on the connection's Host/Origin fence and browser authentication, and never includes conversation text, prompt text, note text, source paths, credentials, or tool data.
 
 Typical readings:
 
@@ -219,7 +221,7 @@ Typical readings:
 - The reviewer receives only the bounded excerpt described above: the human's own user messages and the agent's visible replies. Tool results, tool definitions, the system prompt, project instructions, attachments, and the rest of the session log are never sent.
 - Notes are never persisted to the session log and never enter model context. They live in host memory and are lost when the host process exits.
 - Each review is exactly one model call with a hard `maxTokens` cap, and the gates keep calls rare: a completed turn must pass the cooldown, the delta gate, and the per-session budget.
-- The routes are Fetch handlers on the connection carrier, mounted under the same `/api` transport as the rest of the GUI. They expose only note text for a session id plus the bounded status counters; they do not expose credentials, prompt text, conversation text, or the transcript. The connection rejects cross-origin browser traffic (a foreign `Host`/`Origin`, or a request without a valid browser session) so a random web page cannot dismiss notes or read diagnostics.
+- The routes are Fetch handlers on the connection carrier, mounted under the same `/api` transport as the rest of the GUI. They expose only note text and its optional source path for a session id plus the bounded status counters; they do not expose credentials, prompt text, conversation text, or the transcript. The connection rejects cross-origin browser traffic (a foreign `Host`/`Origin`, or a request without a valid browser session) so a random web page cannot dismiss notes or read diagnostics.
 - The reviewer prompt declares the conversation excerpt untrusted data, so instructions embedded in a user or assistant message are not followed as reviewer instructions.
 
 ## Failure model
@@ -246,7 +248,7 @@ The plugin fails quiet by construction:
 - The routes require the connection's browser session: they reject cross-origin browser traffic and unauthenticated requests, but any client that holds the GUI's session cookie and knows a session id can read that session's notes and status counters. Keep the DSH web server on loopback and treat the browser session as the access boundary.
 - While no route resolves, the engine re-reads the live registry at each qualifying turn until discovery succeeds. Discovery never opens a generation stream, and the cooldown and delta gates bound how often it runs.
 - The reviewer reads the full committed log once per session through the synchronous `snapshotEvents()` accessor, which DSH marks deprecated. After that seed the plugin follows the `session/event` feed and keeps a bounded recent-event window, so steady-state review never re-reads the log; a future DSH that removes the accessor degrades resumed-session context to feed-only instead of breaking the reviewer. Alongside the raw window it keeps a bounded side buffer of the most recent visible messages and per-turn assistant text, so a long noisy turn — a visible answer followed by thousands of tool events — cannot erase the current answer from the reviewer excerpt or the output gate.
-- The per-session note budget (12) is an internal safety constant, not a config key.
+- Notes accumulate per session up to an internal budget of 12; the budget is a safety constant, not a config key, and the card renders every undismissed note within it.
 - At most 200 sessions are tracked at once; the oldest session gives up its slot, its notes, and its model override when the table is full.
 - At most 200 per-session model overrides are retained, and a `session/disposed` event forgets the session's notes, dedupe, override, and runtime together.
 - The reviewer is a language model. Treat its note as a prompt to check something, not as a verified fact.
@@ -259,7 +261,7 @@ node --check lib/core.js && node --check lib/runtime.js && node --check lib/revi
 node --test test/*.test.js
 ```
 
-The suite covers adaptive DeepSeek route discovery, the documented and installed-style route variants, arbitrary exact overrides, partial pins, the blank-config gate, no-route fail-quiet and route recovery, live reconfiguration, the strict verdict shape, silent/malformed/non-text verdicts, deduplication, cooldown, the delta gate, the bounded event window and gap recovery, tool-event flood retention, session scoping and dismissal, the bounded client dismissal memory, the read-only status diagnostics, connection Fetch route registration with Request/Response semantics and bodyless HEAD responses, the document-relative browser URLs, bounded context, the adaptive response-language directive, deterministic language-skill detection with a three-skill cap and no keyword guessing, the single-reviewer guard, the browser bundle envelope, and the human-only source invariant. It also covers the per-session runtime queue and counters, transient retry and permanent/quota classification, the whole-call deadline, backlog flushing, and resume; the volatile config live-update path; the settings persistence split (reset for automatic, merge for pinned); the config and session routes; the settings card and session-header model override; and the adaptive review profile. The package declares no runtime dependencies of its own: its only non-relative import is the host-provided `@deepseek-ai/schemastery` Config schema, and there is no build step.
+The suite covers adaptive DeepSeek route discovery, the documented and installed-style route variants, arbitrary exact overrides, partial pins, the blank-config gate, no-route fail-quiet and route recovery, live reconfiguration, the strict verdict shape, silent/malformed/non-text verdicts, deduplication, cooldown, the delta gate, the bounded event window and gap recovery, tool-event flood retention, session scoping and dismissal, the optional note source schema and its exact-path-only prompt invariant, the per-note source storage and dismissal, the bounded multi-note stack and its deliberate order, the copyable-source and Open file navigation seams, the Add to chat draft write with its never-send guarantee, the bounded client dismissal memory, the read-only status diagnostics, connection Fetch route registration with Request/Response semantics and bodyless HEAD responses, the document-relative browser URLs, bounded context, the adaptive response-language directive, deterministic language-skill detection with a three-skill cap and no keyword guessing, the single-reviewer guard, the browser bundle envelope, and the human-only source invariant. It also covers the per-session runtime queue and counters, transient retry and permanent/quota classification, the whole-call deadline, backlog flushing, and resume; the volatile config live-update path; the settings persistence split (reset for automatic, merge for pinned); the config and session routes; the settings card and session-header model override; and the adaptive review profile. The package declares no runtime dependencies of its own: its only non-relative import is the host-provided `@deepseek-ai/schemastery` Config schema, and there is no build step.
 
 ## Related work
 

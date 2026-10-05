@@ -137,10 +137,16 @@ function textOf(node) {
   return parts.join('')
 }
 
+/** The note card's dismissal control; the dock now also offers Add to chat. */
 function findButton(node) {
   let found = null
   walk(node, (entry) => {
-    if (found === null && typeof entry === 'object' && entry.type === 'button') found = entry
+    if (found !== null || typeof entry !== 'object' || entry.type !== 'button') return
+    const inner = []
+    walk(entry, (child) => {
+      if (typeof child === 'string') inner.push(child)
+    })
+    if (inner.join(' ').includes('Dismiss')) found = entry
   })
   return found
 }

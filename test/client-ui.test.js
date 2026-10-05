@@ -327,6 +327,12 @@ async function loadBundle(options = {}) {
       },
     },
     connection,
+    // The cross-plugin right-Sidebar navigation face the client opens files
+    // through. Undefined by default, so the fallback copyable path is exercised.
+    get(name) {
+      return name === 'sidebarRight' ? options.sidebarRight : undefined
+    },
+    sidebarRight: options.sidebarRight,
   }
   mod.apply(ctx)
 
@@ -908,5 +914,147 @@ test('the note card resolves to the exact composer card width at every breakpoin
       variant + ' shell side clearance',
     )
   }
+  view.unmount()
+})
+
+// --- Note source and human-controlled actions ----------------------------------
+
+test('the note card renders every undismissed note oldest-first and dismisses only the clicked one', async () => {
+  const env = await loadBundle({
+    backend: notesBackend([
+      { id: 'n-new', note: 'Newer finding.', importance: 'high', createdAt: 200 },
+      { id: 'n-old', note: 'Older finding.', importance: 'critical', createdAt: 100 },
+    ]),
+    allowIntervals: true,
+  })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1' })
+  await flushAsync()
+
+  const cards = findAll(view.output, 'section')
+  assert.equal(cards.length, 2, 'every undismissed note renders in the stack')
+  assert.match(textOf(cards[0]), /Older finding\./, 'the oldest note renders first')
+  assert.match(textOf(cards[1]), /Newer finding\./, 'the newest note sits nearest the composer')
+
+  buttonByText(cards[0], 'Dismiss').props.onClick()
+  const remaining = findAll(view.output, 'section')
+  assert.equal(remaining.length, 1, 'Dismiss removes exactly one note')
+  assert.match(textOf(remaining[0]), /Newer finding\./)
+
+  const posts = env.calls.filter((call) => call.url === 'api/dsh-you-should-know/dismiss')
+  assert.equal(posts.length, 1)
+  assert.deepEqual(JSON.parse(posts[0].init.body), { sessionId: 's-1', noteId: 'n-old' })
+  view.unmount()
+})
+
+test('the note card renders a source row only when the note carries a valid one', async () => {
+  const env = await loadBundle({
+    backend: notesBackend([
+      { id: 'n-1', note: 'With source.', importance: 'high', createdAt: 1, source: { path: 'src/a.js', line: 12 } },
+      { id: 'n-2', note: 'No source.', importance: 'high', createdAt: 2 },
+      { id: 'n-3', note: 'Unsafe source.', importance: 'high', createdAt: 3, source: { path: 'javascript:alert(1)' } },
+    ]),
+    allowIntervals: true,
+  })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1' })
+  await flushAsync()
+
+  const cards = findAll(view.output, 'section')
+  assert.equal(cards.length, 3)
+  assert.match(textOf(cards[0]), /src\/a\.js:12/)
+  assert.equal(textOf(cards[1]).includes('src/'), false, 'a note without a source renders no path')
+  assert.equal(findAll(cards[2], 'code').length, 0, 'an unsafe path renders nothing')
+  view.unmount()
+})
+
+test('a source without a file-navigation service renders copyable text and no fake link', async () => {
+  const env = await loadBundle({
+    backend: notesBackend([{ id: 'n-1', note: 'Fix it.', importance: 'high', createdAt: 1, source: { path: 'src/a.js', line: 12 } }]),
+    allowIntervals: true,
+  })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1' })
+  await flushAsync()
+
+  assert.equal(buttonByText(view.output, 'Open file'), null, 'no navigation service means no link')
+  const code = findAll(view.output, 'code')
+  assert.equal(code.length, 1)
+  assert.equal(textOf(code[0]), 'src/a.js:12')
+  view.unmount()
+})
+
+test('Open file navigates through the sidebar resource API and never runs a command', async () => {
+  const opened = []
+  const env = await loadBundle({
+    backend: notesBackend([{ id: 'n-1', note: 'Fix it.', importance: 'high', createdAt: 1, source: { path: 'src/a.js', line: 12 } }]),
+    allowIntervals: true,
+    sidebarRight: { openResource: (address, options) => opened.push({ address, options }) },
+  })
+  const dock = env.dockComponent()
+  const face = dock.spec.inject('s-1')
+  assert.equal(typeof face.onOpenFile, 'function', 'an available navigation service exposes the open action')
+  const view = env.runtime.mount(dock.component, { ...face, inputActions: null, input: null })
+  await flushAsync()
+
+  const open = buttonByText(view.output, 'Open file')
+  assert.ok(open, 'the source renders an Open file action')
+  open.props.onClick()
+  assert.equal(opened.length, 1)
+  assert.equal(opened[0].address, 'dsh-resource://file/session/s-1/src/a.js')
+  assert.equal(opened[0].options.params.line, 12)
+  view.unmount()
+})
+
+test('Add to chat inserts a draft through the composer action face and never sends', async () => {
+  const inserted = []
+  const other = []
+  const inputActions = {
+    captureInsertion: () => ({ draftRev: 1 }),
+    insertText: (text, span) => { inserted.push({ text, span }); return true },
+    setDraft: (text) => { other.push(['setDraft', text]) },
+    submit: () => { other.push(['submit']) },
+  }
+  const env = await loadBundle({
+    backend: notesBackend([{ id: 'n-1', note: 'Guard the write.', importance: 'high', createdAt: 1, source: { path: 'src/store.js', line: 7 } }]),
+    allowIntervals: true,
+  })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1', inputActions, input: { draft: '' } })
+  await flushAsync()
+
+  buttonByText(view.output, 'Add to chat').props.onClick()
+  assert.equal(inserted.length, 1)
+  assert.equal(inserted[0].text, 'Please address this reviewer finding: Guard the write.\nFile: src/store.js:7')
+  assert.deepEqual(inserted[0].span, { draftRev: 1 })
+  assert.deepEqual(other, [], 'Add to chat must never send, steer, or overwrite the draft')
+  view.unmount()
+})
+
+test('Add to chat appends with a blank line when the composer already holds text', async () => {
+  const inserted = []
+  const inputActions = {
+    captureInsertion: () => ({ draftRev: 2 }),
+    insertText: (text) => { inserted.push(text); return true },
+  }
+  const env = await loadBundle({
+    backend: notesBackend([{ id: 'n-1', note: 'Guard the write.', importance: 'high', createdAt: 1 }]),
+    allowIntervals: true,
+  })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1', inputActions, input: { draft: 'draft in progress' } })
+  await flushAsync()
+
+  buttonByText(view.output, 'Add to chat').props.onClick()
+  assert.equal(inserted[0], '\n\nPlease address this reviewer finding: Guard the write.')
+  view.unmount()
+})
+
+test('Add to chat fails quietly when the composer action face is unavailable', async () => {
+  const env = await loadBundle({
+    backend: notesBackend([{ id: 'n-1', note: 'Guard the write.', importance: 'high', createdAt: 1 }]),
+    allowIntervals: true,
+  })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1' })
+  await flushAsync()
+
+  const button = buttonByText(view.output, 'Add to chat')
+  assert.ok(button, 'the action is offered even when the composer cannot accept it')
+  assert.doesNotThrow(() => button.props.onClick())
   view.unmount()
 })

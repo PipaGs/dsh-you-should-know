@@ -260,6 +260,76 @@ test('parseVerdict truncates an overlong note instead of rejecting it', () => {
   assert.ok(verdict.note.endsWith('…'))
 })
 
+test('parseVerdict accepts a valid finding with an optional source object', () => {
+  assert.deepEqual(
+    parseVerdict('{"note":"Guard the write.","importance":"high","source":{"path":"src/store.js"}}'),
+    { note: 'Guard the write.', importance: 'high', source: { path: 'src/store.js' } },
+  )
+  assert.deepEqual(
+    parseVerdict('{"note":"Guard the write.","importance":"critical","source":{"path":"src/store.js","line":42}}'),
+    { note: 'Guard the write.', importance: 'critical', source: { path: 'src/store.js', line: 42 } },
+  )
+  assert.deepEqual(
+    parseVerdict('{"note":"Absolute path.","importance":"high","source":{"path":"/Users/me/repo/a.ts"}}'),
+    { note: 'Absolute path.', importance: 'high', source: { path: '/Users/me/repo/a.ts' } },
+  )
+  assert.deepEqual(
+    parseVerdict('{"note":"Bounded line.","importance":"high","source":{"path":"a.js","line":1000000}}'),
+    { note: 'Bounded line.', importance: 'high', source: { path: 'a.js', line: 1000000 } },
+  )
+})
+
+test('parseVerdict trims an exact path and ignores harmless extra source keys', () => {
+  assert.deepEqual(
+    parseVerdict('{"note":"Trimmed.","importance":"high","source":{"path":"  src/a.js  ","column":9}}'),
+    { note: 'Trimmed.', importance: 'high', source: { path: 'src/a.js' } },
+  )
+  assert.deepEqual(
+    parseVerdict('{"note":"Windows.","importance":"high","source":{"path":"C:\\\\repo\\\\src\\\\a.ts"}}'),
+    { note: 'Windows.', importance: 'high', source: { path: 'C:\\repo\\src\\a.ts' } },
+  )
+})
+
+test('parseVerdict rejects a malformed or unsafe source with the whole reply', () => {
+  const malformed = [
+    '"src/a.js"',
+    '["src/a.js"]',
+    '42',
+    'null',
+    'true',
+    '{}',
+    '{"line":3}',
+    '{"path":null}',
+    '{"path":42}',
+    '{"path":""}',
+    '{"path":"   "}',
+    '{"path":"a\\u0000b"}',
+    '{"path":"http://example.com/a.js"}',
+    '{"path":"https://example.com/a.js"}',
+    '{"path":"javascript:alert(1)"}',
+    '{"path":"data:text/plain,x"}',
+    '{"path":"file:///etc/hosts"}',
+    '{"path":"a.js","line":0}',
+    '{"path":"a.js","line":-1}',
+    '{"path":"a.js","line":1.5}',
+    '{"path":"a.js","line":"3"}',
+  ]
+  for (const source of malformed) {
+    const raw = '{"note":"A","importance":"high","source":' + source + '}'
+    assert.equal(parseVerdict(raw), null, 'expected null for ' + raw)
+  }
+  const tooLong = JSON.stringify({ note: 'A', importance: 'high', source: { path: 'x'.repeat(LIMITS.maxSourcePathChars + 1) } })
+  assert.equal(parseVerdict(tooLong), null)
+  const tooHigh = JSON.stringify({ note: 'A', importance: 'high', source: { path: 'a.js', line: LIMITS.maxSourceLine + 1 } })
+  assert.equal(parseVerdict(tooHigh), null)
+})
+
+test('silence stays exactly note plus importance and never carries a source', () => {
+  assert.deepEqual(parseVerdict('{"note":null,"importance":null}'), { note: null, importance: null })
+  assert.equal(parseVerdict('{"note":null,"importance":null,"source":{"path":"a.js"}}'), null)
+  assert.equal(parseVerdict('{"note":null,"importance":null,"source":null}'), null)
+})
+
 test('dedupeKey normalizes case, punctuation, and whitespace', () => {
   assert.equal(dedupeKey('  Use HTTPS!!  '), 'use https')
   assert.equal(dedupeKey('use-https'), 'use https')
@@ -352,6 +422,15 @@ test('the reviewer instruction states every usefulness and safety constraint', (
   assert.match(REVIEW_INSTRUCTIONS, /correctness, security, safety, data-loss, or reliability/)
   assert.match(REVIEW_INSTRUCTIONS, /changes what the user should do next/)
   assert.match(REVIEW_INSTRUCTIONS, /Stay silent otherwise/)
+})
+
+test('the reviewer instruction sources a note only from a verbatim path and keeps the exact silence shape', () => {
+  assert.match(REVIEW_INSTRUCTIONS, /"source"/)
+  assert.match(REVIEW_INSTRUCTIONS, /"path": "relative\/or\/absolute\/path"/)
+  assert.match(REVIEW_INSTRUCTIONS, /exact file path/i)
+  assert.match(REVIEW_INSTRUCTIONS, /never (synthesize|invent|guess|normalize)/i)
+  assert.match(REVIEW_INSTRUCTIONS, /omit the source/i)
+  assert.ok(REVIEW_INSTRUCTIONS.includes('{"note": null, "importance": null}'), 'the documented silence shape stays byte-exact')
 })
 
 test('an instruction embedded in the excerpt stays inside the untrusted marked block', () => {
