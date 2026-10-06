@@ -3,14 +3,17 @@ import assert from 'node:assert/strict'
 import {
   DEFAULT_REVIEW_MODE,
   MAX_ADDITIONAL_INSTRUCTIONS_CHARS,
+  MAX_CUSTOM_PROMPT_CHARS,
   REVIEW_MODES,
   REVIEW_MODE_LABELS,
   admitsFinding,
+  admitsVerdict,
   buildStrictnessSection,
   isReviewMode,
   normalizeReviewMode,
   reviewModeProfile,
 } from '../lib/review-strictness.js'
+import { Config } from '../lib/index.js'
 
 test('the five stable mode ids carry the exact display names', () => {
   assert.deepEqual(REVIEW_MODES, ['relaxed', 'balanced', 'strict', 'paranoid', 'custom'])
@@ -363,4 +366,112 @@ test('status exposes mode ids and counters but never the instruction text', () =
   assert.equal(snapshot.includes(secret), false, 'status never carries instruction text')
   assert.equal(JSON.stringify(engine.sessionConfig('s1')).includes(secret), false, 'the session view never carries instruction text')
   assert.equal(engine.status('s1').reviewerMode, 'paranoid')
+})
+
+// --- Review fixes: Paranoid enforcement and schema bounds ----------------------
+
+test('Paranoid admits a high finding only with a concrete action', () => {
+  assert.equal(admitsVerdict('paranoid', { note: 'N', importance: 'high' }), false)
+  assert.equal(admitsVerdict('paranoid', { note: 'N', importance: 'high', action: 'Fix X' }), true)
+  assert.equal(admitsVerdict('paranoid', { note: 'N', importance: 'high', action: '   ' }), false)
+  assert.equal(admitsVerdict('paranoid', { note: 'N', importance: 'critical' }), true)
+  for (const id of ['balanced', 'strict', 'custom']) {
+    assert.equal(admitsVerdict(id, { note: 'N', importance: 'high' }), true, id)
+  }
+  assert.equal(admitsVerdict('balanced', { note: 'N', importance: 'medium' }), false)
+  assert.equal(admitsVerdict('balanced', null), false)
+})
+
+test('the engine applies the Paranoid action requirement deterministically', async () => {
+  const noAction = engineWith(['{"note":"H","importance":"high"}'], { reviewerMode: 'paranoid' })
+  const dropped = await observeAndSettle(noAction.engine, sessionWith('p1', [{ turn: 1, answer: 'work' }]))
+  assert.equal(dropped.status, 'silent')
+  assert.equal(noAction.engine.notes('p1').length, 0)
+
+  const withAction = engineWith(['{"note":"H","importance":"high","action":"Fix the retry"}'], { reviewerMode: 'paranoid' })
+  const kept = await observeAndSettle(withAction.engine, sessionWith('p2', [{ turn: 1, answer: 'work' }]))
+  assert.equal(kept.status, 'noted')
+  assert.equal(withAction.engine.notes('p2').length, 1)
+})
+
+test('the Config schema bounds the strictness fields', () => {
+  // A volatile schema field comes back as a live reference; its get() is the value.
+  const parsed = Config({ reviewerMode: 'relaxed', additionalInstructions: 'x' })
+  assert.equal(parsed.reviewerMode.get(), 'relaxed')
+  assert.equal(parsed.additionalInstructions.get(), 'x')
+  assert.throws(() => Config({ reviewerMode: 'loose' }))
+  const max = 'y'.repeat(MAX_ADDITIONAL_INSTRUCTIONS_CHARS)
+  assert.equal(Config({ additionalInstructions: max }).additionalInstructions.get().length, MAX_ADDITIONAL_INSTRUCTIONS_CHARS)
+  assert.throws(() => Config({ additionalInstructions: max + 'y' }))
+  assert.throws(() => Config({ customReviewerPrompt: 'z'.repeat(MAX_CUSTOM_PROMPT_CHARS + 1) }))
+})
+
+// --- Custom reviewer prompt --------------------------------------------------
+
+test('customReviewerPrompt defaults to empty and is preserved exactly', () => {
+  assert.equal(normalizeConfig(undefined).config.customReviewerPrompt, '')
+  const text = '  Focus on API contracts.\nKeep: exact bytes.  '
+  assert.equal(normalizeConfig({ customReviewerPrompt: text }).config.customReviewerPrompt, text)
+  const oversized = normalizeConfig({ customReviewerPrompt: 'x'.repeat(MAX_CUSTOM_PROMPT_CHARS + 1) })
+  assert.equal(oversized.config.customReviewerPrompt, '')
+  assert.equal(oversized.warnings.length, 1)
+  assert.equal(normalizeConfig({ customReviewerPrompt: 42 }).config.customReviewerPrompt, '')
+  assert.equal(normalizeConfig({ customReviewerPrompt: 'a\u0000b' }).config.customReviewerPrompt, '')
+})
+
+test('a saved custom prompt replaces only the strictness profile, base policy first', () => {
+  const custom = 'Inspect every database write for a missing transaction boundary.'
+  const prompt = buildReviewerSystemPrompt([{ role: 'user', text: 'hello' }], {
+    mode: 'custom',
+    customReviewerPrompt: custom,
+    additionalInstructions: 'Also check retries.',
+  })
+  assert.ok(prompt.startsWith(REVIEW_INSTRUCTIONS), 'the base policy is always prepended')
+  assert.ok(prompt.includes('Strictness profile: Custom.'))
+  assert.ok(prompt.includes(custom), 'the custom prompt is preserved verbatim')
+  assert.ok(prompt.includes('BEGIN CUSTOM REVIEWER PROMPT'))
+  assert.ok(prompt.includes('Also check retries.'), 'the additional overlay is still appended')
+  assert.ok(prompt.indexOf('Never invent facts') < prompt.indexOf(custom), 'base constraints precede the custom prompt')
+  assert.ok(prompt.indexOf(custom) < prompt.indexOf('Also check retries.'), 'the overlay follows the custom prompt')
+  assert.equal(prompt.includes('apply the Balanced materiality and threshold'), false, 'the built-in Custom fragment is replaced')
+})
+
+test('a blank Custom prompt falls back to the Balanced profile and threshold', () => {
+  for (const blank of ['', '   ', '\n\t']) {
+    const section = buildStrictnessSection('custom', '', blank)
+    assert.match(section, /Balanced/)
+    assert.equal(section.includes('BEGIN CUSTOM REVIEWER PROMPT'), false)
+  }
+  assert.equal(admitsVerdict('custom', { note: 'H', importance: 'high' }), true)
+  assert.equal(admitsFinding('custom', 'high'), true)
+})
+
+test('switching away from Custom keeps the saved prompt and switching back restores it', () => {
+  const custom = 'Watch for a stale cache on every write.'
+  const { engine } = engineWith([], { reviewerMode: 'strict', customReviewerPrompt: custom })
+  assert.equal(engine.config().customReviewerPrompt, custom)
+  engine.updateConfig({ ...CONFIGURED, reviewerMode: 'custom', customReviewerPrompt: custom })
+  assert.equal(engine.config().customReviewerPrompt, custom)
+  engine.updateConfig({ ...CONFIGURED, reviewerMode: 'paranoid', customReviewerPrompt: custom })
+  assert.equal(engine.config().customReviewerPrompt, custom, 'switching away does not erase it')
+  engine.updateConfig({ ...CONFIGURED, reviewerMode: 'custom', customReviewerPrompt: custom })
+  assert.equal(engine.config().customReviewerPrompt, custom, 'switching back restores it')
+})
+
+test('a session in Custom mode reuses the global custom prompt', async () => {
+  const custom = 'SESSION-REUSE-PROMPT-MARKER'
+  const { engine, llm } = engineWith(['{"note":null,"importance":null}'], { reviewerMode: 'balanced', customReviewerPrompt: custom })
+  assert.deepEqual(engine.setSessionMode('s1', 'custom'), { ok: true })
+  await observeAndSettle(engine, sessionWith('s1', [{ turn: 1, answer: 'work' }]))
+  assert.ok(llm.calls[0].system.includes(custom), 'the global custom prompt is used for the session Custom review')
+  assert.ok(llm.calls[0].system.includes('BEGIN CUSTOM REVIEWER PROMPT'))
+})
+
+test('status and the session view expose no custom-prompt text', () => {
+  const secret = 'PRIVATE-CUSTOM-PROMPT-99'
+  const { engine } = engineWith([], { reviewerMode: 'custom', customReviewerPrompt: secret, additionalInstructions: secret })
+  assert.equal(JSON.stringify(engine.status('s1')).includes(secret), false)
+  assert.equal(JSON.stringify(engine.sessionConfig('s1')).includes(secret), false)
+  assert.equal('customReviewerPrompt' in engine.status('s1'), false)
+  assert.equal('customReviewerPrompt' in engine.sessionConfig('s1'), false)
 })
