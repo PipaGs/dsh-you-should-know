@@ -478,6 +478,7 @@ test('notes handler answers with the session notes and rejects non-GET', async (
       this.calls.push(sessionId)
       return [{ id: 's1:1', note: 'N', importance: 'high', createdAt: 7 }]
     },
+    historyCount: () => 1,
     dismiss() {
       return false
     },
@@ -487,12 +488,12 @@ test('notes handler answers with the session notes and rejects non-GET', async (
   const ok = fakeResponse()
   await handlers.notes({ method: 'GET', url: '/dsh-you-should-know/notes?sessionId=s1' }, ok)
   assert.equal(ok.status, 200)
-  assert.deepEqual(JSON.parse(ok.body), { ok: true, notes: [{ id: 's1:1', note: 'N', importance: 'high', createdAt: 7 }] })
+  assert.deepEqual(JSON.parse(ok.body), { ok: true, notes: [{ id: 's1:1', note: 'N', importance: 'high', createdAt: 7 }], historyCount: 1 })
   assert.equal(engine.calls.at(-1), 's1')
 
   const missing = fakeResponse()
   await handlers.notes({ method: 'GET', url: '/dsh-you-should-know/notes' }, missing)
-  assert.deepEqual(JSON.parse(missing.body), { ok: true, notes: [{ id: 's1:1', note: 'N', importance: 'high', createdAt: 7 }] })
+  assert.deepEqual(JSON.parse(missing.body), { ok: true, notes: [{ id: 's1:1', note: 'N', importance: 'high', createdAt: 7 }], historyCount: 1 })
   assert.equal(engine.calls.at(-1), '')
 
   const rejected = fakeResponse()
@@ -546,6 +547,73 @@ test('dismiss handler forwards a parsed body and reports the outcome', async () 
   assert.equal(wrongMethod.status, 405)
 })
 
+test('history handler answers with the bounded history and rejects non-GET', async () => {
+  const seen = []
+  const entry = { id: 's1:2', note: 'N', importance: 'high', createdAt: 7, resolved: true, resolution: 'dismissed', resolvedAt: 8 }
+  const engine = {
+    notes: () => [],
+    historyCount: () => 1,
+    history(sessionId) {
+      seen.push(sessionId)
+      return [entry]
+    },
+    dismiss: () => false,
+  }
+  const handlers = createRequestHandlers(engine)
+
+  const ok = fakeResponse()
+  await handlers.history({ method: 'GET', url: '/dsh-you-should-know/history?sessionId=s1' }, ok)
+  assert.equal(ok.status, 200)
+  assert.deepEqual(JSON.parse(ok.body), { ok: true, history: [entry] })
+  assert.deepEqual(seen, ['s1'])
+
+  const head = fakeResponse()
+  await handlers.history({ method: 'HEAD', url: '/dsh-you-should-know/history?sessionId=s1' }, head)
+  assert.equal(head.status, 200)
+  assert.equal(head.body, '')
+
+  const rejected = fakeResponse()
+  await handlers.history({ method: 'POST', url: '/dsh-you-should-know/history' }, rejected)
+  assert.equal(rejected.status, 405)
+
+  const foreign = fakeResponse()
+  await handlers.history({ method: 'GET', url: '/dsh-you-should-know/history?sessionId=s1', headers: { origin: 'https://evil.example', host: '127.0.0.1:3080' } }, foreign)
+  assert.equal(foreign.status, 403, 'history rejects a foreign Origin')
+})
+
+test('dismiss handler accepts an exact resolution action and rejects an unknown one', async () => {
+  const seen = []
+  const engine = {
+    notes: () => [],
+    historyCount: () => 0,
+    dismiss() {
+      throw new Error('an explicit action must not use the legacy path')
+    },
+    resolve(sessionId, noteId, resolution) {
+      seen.push([sessionId, noteId, resolution])
+      return true
+    },
+  }
+  const handlers = createRequestHandlers(engine)
+
+  const request = bodyRequest(JSON.stringify({ sessionId: 's1', noteId: 's1:2', action: 'added_to_chat' }))
+  const response = fakeResponse()
+  const pending = handlers.dismiss(request, response)
+  await request.emitBody()
+  await pending
+  assert.deepEqual(seen, [['s1', 's1:2', 'added_to_chat']])
+  assert.deepEqual(JSON.parse(response.body), { ok: true, resolved: true, resolution: 'added_to_chat' })
+
+  const invalid = bodyRequest(JSON.stringify({ sessionId: 's1', noteId: 's1:2', action: 'forgotten' }))
+  const invalidResponse = fakeResponse()
+  const invalidPending = handlers.dismiss(invalid, invalidResponse)
+  await invalid.emitBody()
+  await invalidPending
+  assert.equal(invalidResponse.status, 400)
+  assert.deepEqual(JSON.parse(invalidResponse.body), { ok: false, error: 'invalid-action' })
+  assert.deepEqual(seen, [['s1', 's1:2', 'added_to_chat']], 'an invalid action never reaches the engine')
+})
+
 test('notes and dismiss reject a foreign Origin', async () => {
   const seen = []
   const engine = {
@@ -553,6 +621,7 @@ test('notes and dismiss reject a foreign Origin', async () => {
       seen.push(['notes', sessionId])
       return []
     },
+    historyCount: () => 0,
     dismiss() {
       throw new Error('dismiss must not run for a foreign origin')
     },
@@ -576,7 +645,7 @@ test('notes and dismiss reject a foreign Origin', async () => {
 })
 
 test('a HEAD notes request answers without a body', async () => {
-  const engine = { notes: () => [{ id: 's1:1', note: 'N', importance: 'high', createdAt: 1 }], dismiss: () => false }
+  const engine = { notes: () => [{ id: 's1:1', note: 'N', importance: 'high', createdAt: 1 }], historyCount: () => 0, dismiss: () => false }
   const handlers = createRequestHandlers(engine)
   const response = fakeResponse()
   await handlers.notes({ method: 'HEAD', url: '/dsh-you-should-know/notes?sessionId=s1' }, response)
@@ -679,6 +748,7 @@ test('an overlong or non-string session id reads nothing', async () => {
       calls.push(sessionId)
       return []
     },
+    historyCount: () => 0,
     dismiss() {
       return false
     },
@@ -714,6 +784,7 @@ test('fetch notes handler answers a Request with a no-store Response and rejects
       calls.push(sessionId)
       return [{ id: 's1:1', note: 'N', importance: 'high', createdAt: 7 }]
     },
+    historyCount: () => 1,
     dismiss: () => false,
   }
   const handlers = createFetchHandlers(engine)
@@ -722,7 +793,7 @@ test('fetch notes handler answers a Request with a no-store Response and rejects
   assert.equal(response.status, 200)
   assert.equal(response.headers.get('cache-control'), 'no-store')
   assert.match(response.headers.get('content-type'), /application\/json/)
-  assert.deepEqual(await response.json(), { ok: true, notes: [{ id: 's1:1', note: 'N', importance: 'high', createdAt: 7 }] })
+  assert.deepEqual(await response.json(), { ok: true, notes: [{ id: 's1:1', note: 'N', importance: 'high', createdAt: 7 }], historyCount: 1 })
   assert.deepEqual(calls, ['s1'])
 
   const head = await handlers.notes(new Request('http://127.0.0.1/api/dsh-you-should-know/notes?sessionId=s1', { method: 'HEAD' }))
@@ -768,6 +839,70 @@ test('fetch dismiss handler reads a bounded JSON body and rejects invalid input'
   assert.equal(missing.status, 400)
 })
 
+test('fetch history handler answers a Request with a no-store Response and rejects non-GET', async () => {
+  const calls = []
+  const entry = { id: 's1:1', note: 'N', importance: 'high', createdAt: 7, resolved: false }
+  const engine = {
+    notes: () => [],
+    historyCount: () => 1,
+    history(sessionId) {
+      calls.push(sessionId)
+      return [entry]
+    },
+    dismiss: () => false,
+  }
+  const handlers = createFetchHandlers(engine)
+
+  const response = await handlers.history(new Request('http://127.0.0.1/api/dsh-you-should-know/history?sessionId=s1', { method: 'GET' }))
+  assert.equal(response.status, 200)
+  assert.equal(response.headers.get('cache-control'), 'no-store')
+  assert.match(response.headers.get('content-type'), /application\/json/)
+  assert.deepEqual(await response.json(), { ok: true, history: [entry] })
+  assert.deepEqual(calls, ['s1'])
+
+  const head = await handlers.history(new Request('http://127.0.0.1/api/dsh-you-should-know/history?sessionId=s1', { method: 'HEAD' }))
+  assert.equal(head.status, 200)
+  assert.equal(await head.text(), '', 'a HEAD answer is bodyless')
+
+  const rejected = await handlers.history(new Request('http://127.0.0.1/api/dsh-you-should-know/history', { method: 'DELETE' }))
+  assert.equal(rejected.status, 405)
+  assert.equal(rejected.headers.get('allow'), 'GET, HEAD')
+})
+
+test('fetch dismiss handler accepts an exact resolution action and rejects an unknown one', async () => {
+  const seen = []
+  const engine = {
+    notes: () => [],
+    historyCount: () => 0,
+    dismiss() {
+      throw new Error('an explicit action must not use the legacy path')
+    },
+    resolve(sessionId, noteId, resolution) {
+      seen.push([sessionId, noteId, resolution])
+      return true
+    },
+  }
+  const handlers = createFetchHandlers(engine)
+
+  const response = await handlers.dismiss(new Request('http://127.0.0.1/api/dsh-you-should-know/dismiss', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ sessionId: 's1', noteId: 's1:2', action: 'dismissed' }),
+  }))
+  assert.equal(response.status, 200)
+  assert.deepEqual(await response.json(), { ok: true, resolved: true, resolution: 'dismissed' })
+  assert.deepEqual(seen, [['s1', 's1:2', 'dismissed']])
+
+  const invalid = await handlers.dismiss(new Request('http://127.0.0.1/api/dsh-you-should-know/dismiss', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ sessionId: 's1', noteId: 's1:2', action: 42 }),
+  }))
+  assert.equal(invalid.status, 400)
+  assert.deepEqual(await invalid.json(), { ok: false, error: 'invalid-action' })
+  assert.deepEqual(seen, [['s1', 's1:2', 'dismissed']], 'an invalid action never reaches the engine')
+})
+
 test('fetch status handler answers a bounded snapshot and rejects non-GET without leaking text', async () => {
   const secret = 'PRIVATE-MARKER-42'
   const snapshot = {
@@ -809,6 +944,7 @@ test('fetch handlers bound the session id and fail quiet instead of throwing', a
       calls.push(sessionId)
       return []
     },
+    historyCount: () => 0,
     dismiss: () => false,
     status() {
       throw new Error('engine exploded')

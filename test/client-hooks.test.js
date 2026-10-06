@@ -288,9 +288,9 @@ test('dismiss hides the note immediately and posts the original session id and n
   assert.ok(button, 'the note renders with a dismiss control')
 
   button.props.onClick()
-  assert.equal(textOf(view.output), '', 'the note is hidden synchronously')
+  assert.equal(findButton(view.output), null, 'the note is hidden synchronously')
   await flushAsync()
-  assert.deepEqual(env.dismissCalls, [{ sessionId: 'A', noteId: 'A:1' }])
+  assert.deepEqual(env.dismissCalls, [{ sessionId: 'A', noteId: 'A:1', action: 'dismissed' }])
   view.unmount()
 })
 
@@ -308,7 +308,7 @@ test('a critical note renders as critical and dismisses with its own session and
   assert.ok(button, 'the critical note renders with a dismiss control')
   button.props.onClick()
   await flushAsync()
-  assert.deepEqual(env.dismissCalls, [{ sessionId: 'C', noteId: 'C:7' }])
+  assert.deepEqual(env.dismissCalls, [{ sessionId: 'C', noteId: 'C:7', action: 'dismissed' }])
   view.unmount()
 })
 
@@ -371,11 +371,12 @@ test('a note is shown again on the next poll if the host has not accepted the di
   const button = findButton(view.output)
   button.props.onClick()
   await flushAsync()
-  // Local memory keeps it hidden even though the host keeps serving it.
-  assert.equal(view.output, null)
+  // Local memory keeps it hidden even though the host keeps serving it; the
+  // compact History affordance may remain, but the active card never returns.
+  assert.equal(findButton(view.output), null, 'the dismissed card leaves the active stack')
   env.runIntervals()
   await flushAsync()
-  assert.equal(view.output, null)
+  assert.equal(findButton(view.output), null, 'the host note never returns to the active stack')
   view.unmount()
 })
 

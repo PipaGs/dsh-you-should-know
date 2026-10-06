@@ -512,6 +512,122 @@ test('a note with no ASCII alphanumerics is still stored once, then deduplicated
   assert.equal(engine.notes('s1').length, 1)
 })
 
+test('resolve records an exact action and removes the note from the active list', async () => {
+  const { engine } = engineWith(['{"note":"first","importance":"high"}'])
+  await observeAndSettle(engine, sessionWith('s1', [{ turn: 1, answer: 'one' }]))
+  const id = engine.notes('s1')[0].id
+
+  assert.equal(engine.resolve('s1', id, 'added_to_chat'), true)
+  assert.deepEqual(engine.notes('s1'), [], 'a resolved note leaves the active list')
+  assert.equal(engine.resolve('s1', id, 'dismissed'), false, 'a resolved note is never resolved twice')
+
+  const [entry] = engine.history('s1')
+  assert.equal(entry.id, id)
+  assert.equal(entry.resolved, true)
+  assert.equal(entry.resolution, 'added_to_chat')
+  assert.equal(entry.resolvedAt, 1700000000000, 'resolvedAt comes from the injected clock')
+  assert.equal(engine.historyCount('s1'), 1)
+})
+
+test('resolve rejects an unknown action and leaves the note active', async () => {
+  const { engine } = engineWith(['{"note":"first","importance":"high"}'])
+  await observeAndSettle(engine, sessionWith('s1', [{ turn: 1, answer: 'one' }]))
+  const id = engine.notes('s1')[0].id
+
+  assert.equal(engine.resolve('s1', id, 'forgotten'), false)
+  assert.equal(engine.resolve('s1', id, ''), false)
+  assert.equal(engine.resolve('s1', id, undefined), false)
+  assert.equal(engine.resolve('s1', id, 'DISMISSED'), false, 'the action value is exact')
+  assert.equal(engine.notes('s1').length, 1, 'a rejected action never resolves the note')
+  assert.equal(engine.notes('s1')[0].resolved, undefined, 'the active view stays unresolved')
+})
+
+test('history includes active and resolved notes newest-first with lifecycle metadata', async () => {
+  const { engine } = engineWith([
+    '{"note":"first","importance":"high","source":{"path":"src/a.js","line":3}}',
+    '{"note":"second","importance":"critical"}',
+    '{"note":"third","importance":"high"}',
+  ])
+  const session = sessionWith('s1', [{ turn: 1, answer: 'one' }])
+  await observeAndSettle(engine, session)
+  for (let turn = 2; turn <= 3; turn += 1) {
+    session.events.push(userEvent(100 + turn * 3, 'q' + turn), assistantEvent(101 + turn * 3, turn, 'a' + turn), turnEnd(102 + turn * 3, turn))
+    session.lastEvent = session.events[session.events.length - 1]
+    await observeAndSettle(engine, session)
+  }
+
+  const active = engine.notes('s1')
+  assert.equal(active.length, 3)
+  assert.equal(engine.resolve('s1', active[0].id, 'added_to_chat'), true)
+  assert.equal(engine.resolve('s1', active[1].id, 'dismissed'), true)
+
+  const history = engine.history('s1')
+  assert.equal(history.length, 3, 'history keeps every stored note')
+  assert.deepEqual(history.map((entry) => entry.note), ['third', 'second', 'first'], 'newest first, by creation order')
+  assert.equal(history[0].resolved, false)
+  assert.equal(history[0].resolution, undefined)
+  assert.equal(history[0].resolvedAt, undefined)
+  assert.equal(history[1].resolved, true)
+  assert.equal(history[1].resolution, 'dismissed')
+  assert.equal(history[2].resolution, 'added_to_chat')
+  assert.deepEqual(history[2].source, { path: 'src/a.js', line: 3 })
+  assert.equal(engine.historyCount('s1'), 3)
+})
+
+test('history stays bounded by the per-session note budget', async () => {
+  const extra = 3
+  const total = LIMITS.maxNotesPerSession + extra
+  const script = []
+  for (let index = 0; index < total; index += 1) script.push('{"note":"unique ' + index + '","importance":"high"}')
+  const { engine } = engineWith(script)
+  const session = sessionWith('s1', [{ turn: 1, answer: 'a0' }])
+  let outcome = await observeAndSettle(engine, session)
+  for (let turn = 2; turn <= total; turn += 1) {
+    session.events.push(userEvent(200 + turn * 3, 'q' + turn), assistantEvent(201 + turn * 3, turn, 'a' + turn), turnEnd(202 + turn * 3, turn))
+    session.lastEvent = session.events[session.events.length - 1]
+    outcome = await observeAndSettle(engine, session)
+  }
+  assert.equal(outcome.status, 'budget')
+  assert.equal(engine.history('s1').length, LIMITS.maxNotesPerSession)
+
+  for (const note of engine.notes('s1')) engine.resolve('s1', note.id, 'dismissed')
+  assert.deepEqual(engine.notes('s1'), [])
+  assert.equal(engine.history('s1').length, LIMITS.maxNotesPerSession, 'resolved notes stay inside the same bound')
+})
+
+test('history is session-scoped, survives a model change, and forget clears it', async () => {
+  const { engine } = engineWith(['{"note":"a","importance":"high"}', '{"note":"b","importance":"high"}'])
+  await observeAndSettle(engine, sessionWith('s1', [{ turn: 1, answer: 'one' }]))
+  await observeAndSettle(engine, sessionWith('s2', [{ turn: 1, answer: 'one' }]))
+
+  const first = engine.notes('s1')[0].id
+  assert.equal(engine.resolve('s1', first, 'added_to_chat'), true)
+  assert.equal(engine.history('s1').length, 1)
+  assert.equal(engine.history('s2').length, 1, 'history never leaks across sessions')
+  assert.equal(engine.history('s2')[0].resolved, false)
+  assert.equal(engine.history('unknown').length, 0)
+  assert.equal(engine.historyCount('s2'), 1)
+
+  engine.forget('s1')
+  assert.deepEqual(engine.history('s1'), [])
+  assert.equal(engine.historyCount('s1'), 0)
+})
+
+test('status exposes an active and a history count without note or source text', async () => {
+  const secret = 'PRIVATE-MARKER-77'
+  const { engine } = engineWith(['{"note":"note ' + secret + '","importance":"high","source":{"path":"src/secret.js"}}'])
+  await observeAndSettle(engine, sessionWith('s1', [{ turn: 1, answer: 'one' }]))
+  const id = engine.notes('s1')[0].id
+  assert.equal(engine.resolve('s1', id, 'dismissed'), true)
+
+  const snapshot = engine.status('s1')
+  assert.equal(snapshot.session.noteCount, 0, 'the active count drops after a resolve')
+  assert.equal(snapshot.session.historyCount, 1, 'the history count keeps the resolved note')
+  const text = JSON.stringify(snapshot)
+  assert.equal(text.includes(secret), false, 'status never exposes note text')
+  assert.equal(text.includes('src/secret.js'), false, 'status never exposes a source path')
+})
+
 test('the tracked-session table is bounded and evicts the oldest session', async () => {
   const { engine } = engineWith(['{"note":"first","importance":"high"}'])
   await observeAndSettle(engine, sessionWith('s1', [{ turn: 1, answer: 'one' }]))
