@@ -78,6 +78,16 @@ test('the browser half reaches files and the composer only through their public 
   }
 })
 
+test('Add to chat can only compose the draft and never hands the action to the agent', async () => {
+  const client = stripComments(await read('lib/client.js'))
+  assert.ok(client.includes('Fix this reviewer finding:'), 'the actionless fallback is an imperative repair wrapper')
+  assert.ok(client.includes('noteActionOf('), 'the action is the preferred draft source')
+  for (const { label, pattern } of FORBIDDEN) {
+    assert.equal(pattern.test(client), false, 'Add to chat must not reach the agent: ' + label)
+  }
+  assert.equal(/\.submit\s*\(/.test(client), false, 'Add to chat must not auto-send the draft')
+})
+
 test('the English-only scan rejects Cyrillic, Greek, and CJK text', () => {
   for (const sample of ['Привет', 'Ελληνικά', '日本語', '한국어']) {
     assert.equal(NON_LATIN.test(sample), true, `${sample} must be flagged as non-English`)
@@ -105,7 +115,7 @@ test('the bundled row leaves the reviewer route to adaptive discovery', async ()
 test('the manifest declares the bundle, the client half, and no build step', async () => {
   const manifest = JSON.parse(await read('package.json'))
   assert.equal(manifest.name, 'dsh-you-should-know')
-  assert.equal(manifest.version, '0.3.5')
+  assert.equal(manifest.version, '0.3.6')
   assert.equal(manifest.license, 'MIT')
   assert.equal(manifest.dsh.manifestVersion, 1)
   assert.equal(manifest.dsh.bundle.patch, './cordis.patch.yml')
