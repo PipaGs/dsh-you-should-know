@@ -93,6 +93,7 @@ test('GET config returns the live config, a sorted deduped catalog, and writabil
     model: 'a-model',
     reviewerMode: 'balanced',
     additionalInstructions: '',
+    customReviewerPrompt: '',
     minDeltaChars: 5,
     cooldownTurns: 2,
     maxContextMessages: 12,
@@ -166,6 +167,7 @@ test('POST automatic clears the pinned route, persists the row patch, and update
     disabled: false,
     reviewerMode: 'balanced',
     additionalInstructions: '',
+    customReviewerPrompt: '',
     minDeltaChars: 3,
     cooldownTurns: 4,
     maxContextMessages: 6,
@@ -191,6 +193,7 @@ test('POST pinned validates through resolveModelInfo before persistence and upda
     disabled: false,
     reviewerMode: 'balanced',
     additionalInstructions: '',
+    customReviewerPrompt: '',
     minDeltaChars: 1200,
     cooldownTurns: 3,
     maxContextMessages: 12,
@@ -363,4 +366,66 @@ test('the settings read carries the instructions while the status diagnostics ne
   const statusText = await statusResponse.text()
   assert.equal(statusText.includes(secret), false, 'status stays diagnostic only')
   assert.equal(JSON.parse(statusText).reviewerMode, 'custom')
+})
+
+// --- Custom reviewer prompt config --------------------------------------------
+
+test('POST persists the custom reviewer prompt and GET returns it for the settings form', async () => {
+  const { engine } = engineWith()
+  const settings = settingsDouble()
+  const handlers = handlersFor(engine, { settings })
+  const text = '  Custom strictness profile text.  '
+  const response = await post(handlers, {
+    mode: 'automatic',
+    minDeltaChars: 0,
+    cooldownTurns: 1,
+    reviewerMode: 'custom',
+    customReviewerPrompt: text,
+    additionalInstructions: 'overlay',
+  })
+  assert.equal(response.status, 200)
+  const body = await response.json()
+  assert.equal(body.config.customReviewerPrompt, text)
+  assert.equal(body.config.additionalInstructions, 'overlay')
+  assert.equal(engine.config().customReviewerPrompt, text)
+  assert.equal(settings.replaces[0].section.customReviewerPrompt, text)
+})
+
+test('POST rejects an invalid or oversized custom reviewer prompt without persisting', async () => {
+  const { engine } = engineWith()
+  const settings = settingsDouble()
+  const handlers = handlersFor(engine, { settings })
+  const wrongType = await post(handlers, { mode: 'automatic', customReviewerPrompt: 42 })
+  assert.equal(wrongType.status, 400)
+  assert.deepEqual(await wrongType.json(), { ok: false, error: 'invalid-config' })
+  const oversized = await post(handlers, { mode: 'automatic', customReviewerPrompt: 'x'.repeat(4001) })
+  assert.equal(oversized.status, 400)
+  assert.deepEqual(await oversized.json(), { ok: false, error: 'invalid-config' })
+  assert.deepEqual(settings.replaces, [])
+  assert.deepEqual(settings.updates, [])
+})
+
+test('a persisted custom reviewer prompt survives a reload through the host row', async () => {
+  const settings = settingsDouble()
+  const text = 'RELOAD-MARKER custom strictness profile'
+  const first = engineWith()
+  const handlers = handlersFor(first.engine, { getLlm: () => catalogLlm(), settings })
+  await post(handlers, { mode: 'automatic', minDeltaChars: 0, cooldownTurns: 1, reviewerMode: 'custom', customReviewerPrompt: text })
+  const persisted = settings.replaces[0].section
+  // A fresh engine built from the persisted row is the restart equivalent.
+  const reloaded = createEngine({ config: normalizeConfig(persisted).config, getLlm: () => catalogLlm() })
+  assert.equal(reloaded.config().customReviewerPrompt, text)
+  assert.equal(reloaded.sessionConfig('s1').effectiveMode, 'custom')
+  assert.equal('customReviewerPrompt' in reloaded.status('s1'), false, 'status stays diagnostic only')
+})
+
+test('the status and session routes never leak the custom reviewer prompt', async () => {
+  const secret = 'PRIVATE-CUSTOM-ROUTE-77'
+  const { engine } = engineWith({ reviewerMode: 'custom', customReviewerPrompt: secret })
+  const handlers = createFetchHandlers(engine)
+  const statusText = await (await handlers.status(new Request('http://127.0.0.1/api/dsh-you-should-know/status?sessionId=s1', { method: 'GET' }))).text()
+  const sessionText = await (await handlers.session(new Request('http://127.0.0.1/api/dsh-you-should-know/session?sessionId=s1', { method: 'GET' }))).text()
+  assert.equal(statusText.includes(secret), false)
+  assert.equal(sessionText.includes(secret), false)
+  assert.equal('customReviewerPrompt' in JSON.parse(statusText), false)
 })

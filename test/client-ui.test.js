@@ -488,6 +488,7 @@ test('Save posts the exact bounded config for the selected route', async () => {
     model: 'z1',
     reviewerMode: 'balanced',
     additionalInstructions: '',
+    customReviewerPrompt: '',
     minDeltaChars: 42,
     cooldownTurns: 7,
     maxContextMessages: 4,
@@ -1629,5 +1630,53 @@ test('the session header shows the effective mode and its source', async () => {
   await flushAsync()
   assert.match(textOf(view.output), /Mode: Paranoid/)
   assert.equal(findByAria(view.output, 'Session reviewer mode').props.value, 'paranoid')
+  view.unmount()
+})
+
+test('the settings card shows the custom prompt only in Custom mode and posts it exactly', async () => {
+  const env = await loadBundle({ backend: configBackend() })
+  const view = env.runtime.mount(env.cardComponent().component, { connection: env.connection })
+  await flushAsync()
+  assert.equal(findByAria(view.output, 'Custom reviewer prompt'), null, 'hidden outside Custom mode')
+
+  findByAria(view.output, 'Reviewer mode').props.onChange({ target: { value: 'custom' } })
+  const field = findByAria(view.output, 'Custom reviewer prompt')
+  assert.ok(field, 'shown in Custom mode')
+  const text = '  Watch every write.\nKeep exact.  '
+  field.props.onChange({ target: { value: text } })
+
+  findByAria(view.output, 'Reviewer mode').props.onChange({ target: { value: 'strict' } })
+  assert.equal(findByAria(view.output, 'Custom reviewer prompt'), null, 'hidden again')
+  findByAria(view.output, 'Reviewer mode').props.onChange({ target: { value: 'custom' } })
+  assert.equal(findByAria(view.output, 'Custom reviewer prompt').props.value, text, 'the saved value is restored')
+
+  buttonByText(view.output, 'Save').props.onClick()
+  await flushAsync()
+  const post = env.calls.find((call) => call.init && call.init.method === 'POST')
+  const payload = JSON.parse(post.init.body)
+  assert.equal(payload.customReviewerPrompt, text)
+  assert.equal(payload.reviewerMode, 'custom')
+  view.unmount()
+})
+
+test('the settings card populates the saved custom prompt from the live config', async () => {
+  const env = await loadBundle({
+    backend: configBackend({ overrides: { config: { mode: 'automatic', reviewerMode: 'custom', customReviewerPrompt: 'saved custom text', additionalInstructions: 'overlay', minDeltaChars: 1200, cooldownTurns: 3, maxContextMessages: 12, maxTokens: 768 } } }),
+  })
+  const view = env.runtime.mount(env.cardComponent().component, { connection: env.connection })
+  await flushAsync()
+  assert.equal(findByAria(view.output, 'Custom reviewer prompt').props.value, 'saved custom text')
+  assert.equal(findByAria(view.output, 'Additional reviewer instructions').props.value, 'overlay')
+  view.unmount()
+})
+
+test('the session header has no per-session custom prompt field and notes the global reuse', async () => {
+  const state = sessionState({ effectiveMode: 'custom', effectiveModeSource: 'session', sessionModeOverride: 'custom', globalMode: 'balanced' })
+  const env = await loadBundle({ backend: sessionBackend(state) })
+  const view = env.runtime.mount(env.actionComponent().component, { sessionId: 's-1' })
+  buttonByText(view.output, 'Reviewer').props.onClick()
+  await flushAsync()
+  assert.equal(findByAria(view.output, 'Custom reviewer prompt'), null, 'no per-session custom prompt field')
+  assert.match(textOf(view.output), /Custom uses the global custom reviewer prompt/)
   view.unmount()
 })
