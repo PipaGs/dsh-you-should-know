@@ -760,6 +760,8 @@ test('engine status reports route and per-session activity without conversation 
 
   assert.deepEqual(engine.status('unseen'), {
     configured: true,
+    reviewerMode: 'balanced',
+    effectiveMode: 'balanced',
     route: null,
     routeResolutions: 0,
     effectiveRoute: null,
@@ -802,6 +804,8 @@ test('engine status reports an unconfigured reviewer without a session', () => {
   const engine = createEngine({ config: normalizeConfig({ provider: '', model: '' }).config, getLlm: () => undefined })
   assert.deepEqual(engine.status('anything'), {
     configured: false,
+    reviewerMode: 'balanced',
+    effectiveMode: 'balanced',
     route: null,
     routeResolutions: 0,
     effectiveRoute: null,
@@ -1320,6 +1324,10 @@ test('an automatic route reports source automatic and the resolved route once di
     effectiveRoute: null,
     effectiveRouteSource: 'automatic',
     sessionOverride: null,
+    effectiveMode: 'balanced',
+    effectiveModeSource: 'global',
+    sessionModeOverride: null,
+    globalMode: 'balanced',
   })
   assert.equal((await observeAndSettle(engine, sessionWith('s-auto', [{ turn: 1, answer: 'one' }]))).status, 'silent')
   assert.deepEqual(engine.sessionConfig('s-auto').effectiveRoute, { provider: 'deepseek-account', model: 'deepseek-flash' })
