@@ -839,3 +839,41 @@ test('the config route reports read-only and refuses to persist without a settin
   assert.deepEqual(await saved.json(), { ok: false, error: 'settings-unavailable' })
   harness.disposeAll()
 })
+
+test('the session route POST set-mode and reset-mode isolate the strictness mode', async () => {
+  const llm = makeLlm(['{"note":"hi","importance":"high"}', '{"note":"hi","importance":"high"}'])
+  const harness = makeCtx({ llm })
+  apply(harness.ctx, { provider: 'p', model: 'm', minDeltaChars: 0, cooldownTurns: 1, reviewerMode: 'relaxed' })
+  harness.runInjections()
+  const route = sessionRouteOf(harness)
+
+  const set = await route.fetch(postSession('set-mode', { sessionId: 's1', mode: 'strict' }))
+  assert.equal(set.status, 200)
+  const setBody = await set.json()
+  assert.equal(setBody.ok, true)
+  assert.equal(setBody.action, 'set-mode')
+  assert.equal(setBody.effectiveMode, 'strict')
+  assert.equal(setBody.effectiveModeSource, 'session')
+  assert.equal(setBody.sessionModeOverride, 'strict')
+  assert.equal(setBody.globalMode, 'relaxed', 'a session override never mutates the global mode')
+
+  const other = await (await route.fetch(new Request(sessionUrl('s2'), { method: 'GET' }))).json()
+  assert.equal(other.effectiveMode, 'relaxed')
+  assert.equal(other.sessionModeOverride, null)
+
+  const reset = await route.fetch(postSession('reset-mode', { sessionId: 's1' }))
+  assert.equal(reset.status, 200)
+  const resetBody = await reset.json()
+  assert.equal(resetBody.effectiveMode, 'relaxed')
+  assert.equal(resetBody.sessionModeOverride, null)
+  assert.equal(resetBody.removed, true)
+
+  const invalid = await route.fetch(postSession('set-mode', { sessionId: 's1', mode: 'loose' }))
+  assert.equal(invalid.status, 400)
+  assert.deepEqual(await invalid.json(), { ok: false, error: 'invalid-mode' })
+
+  const oversized = await route.fetch(postSession('set-mode', { sessionId: 's1', mode: 'x'.repeat(9000) }))
+  assert.equal(oversized.status, 400)
+  assert.deepEqual(await oversized.json(), { ok: false, error: 'invalid-body' })
+  harness.disposeAll()
+})

@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 
-const SHIPPED = ['lib/core.js', 'lib/review-profile.js', 'lib/index.js', 'lib/client.js']
+const SHIPPED = ['lib/core.js', 'lib/review-profile.js', 'lib/review-strictness.js', 'lib/index.js', 'lib/client.js']
 const PUBLIC = ['package.json', 'cordis.patch.yml', 'README.md', 'LICENSE']
 
 async function read(path) {
@@ -115,7 +115,7 @@ test('the bundled row leaves the reviewer route to adaptive discovery', async ()
 test('the manifest declares the bundle, the client half, and no build step', async () => {
   const manifest = JSON.parse(await read('package.json'))
   assert.equal(manifest.name, 'dsh-you-should-know')
-  assert.equal(manifest.version, '0.3.6')
+  assert.equal(manifest.version, '0.3.7')
   assert.equal(manifest.license, 'MIT')
   assert.equal(manifest.dsh.manifestVersion, 1)
   assert.equal(manifest.dsh.bundle.patch, './cordis.patch.yml')
