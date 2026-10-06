@@ -8,7 +8,7 @@ The product intent is analogous to Claude Code's *You Should Know*, with one del
 
 ## Status
 
-Version `0.3.6`, MIT. Host and browser halves are committed as plain JavaScript, so a `github:` install needs no build step. Scope is intentionally small: a composer-adjacent note card with a bounded notification history, a Plugins settings card, and a session-header model override, one reviewer call per qualifying turn, and a per-session runtime that retries one transient failure, bounds the queue and the whole call, and pauses on quota without losing the turn.
+Version `0.3.7`, MIT. Host and browser halves are committed as plain JavaScript, so a `github:` install needs no build step. Scope is intentionally small: a composer-adjacent note card with a bounded notification history, a Plugins settings card with a reviewer strictness mode and optional additional reviewer instructions, and a session-header mode and model override, one reviewer call per qualifying turn, and a per-session runtime that retries one transient failure, bounds the queue and the whole call, and pauses on quota without losing the turn.
 
 ## What it does
 
@@ -24,7 +24,7 @@ The host half observes committed session events and reviews a turn only when **a
 
 When the gates pass, the host sends one request to the configured reviewer route through `ctx.llm.stream`:
 
-- one system instruction carrying the fixed reviewer policy plus the adaptive profile section below, and one user message containing a **bounded** excerpt of the most recent conversation: at most `maxContextMessages` visible text messages, each truncated, with a total character cap. Only human `user/message` text and assistant reply text enter the excerpt;
+- one system instruction composed in a fixed order: the base reviewer policy, then the strictness profile for the effective mode, then the human's additional reviewer instructions when present, then the adaptive profile section below. The base policy always outranks the profile and the custom text. Alongside it goes one user message containing a **bounded** excerpt of the most recent conversation: at most `maxContextMessages` visible text messages, each truncated, with a total character cap. Only human `user/message` text and assistant reply text enter the excerpt;
 - **no tools**;
 - `temperature: 0` and `maxTokens`;
 - `reasoningEffort: 'off'` **only** when the model's own metadata advertises an `off` effort; otherwise the field is omitted entirely.
@@ -40,6 +40,24 @@ The reply must be a single JSON object:
 Qualifying information is deliberately narrow: a contradiction with an explicit user requirement, an overlooked material constraint, a serious correctness/security/safety/data-loss/reliability problem, or an important implication that changes the user's next decision. The reviewer is told to stay silent otherwise and not to summarize, praise, or give style advice.
 
 A review adapts to the conversation through the plugin's review profile. The note is written in the same natural language as the most recent genuine human user message, falling back to the nearest earlier human message when that message is code-only or its language is unclear, and to English when nothing is clear. When the visible conversation reliably shows a programming language through a fenced code tag or a file extension, the instruction also gains a small, bounded set of language-specific correctness skills — at most three, chosen deterministically and never inferred from bare keywords. Each skill is a short plugin-owned checklist of defects that can materially matter: async and promise error flow, listener and resource lifetime, concurrency and races, nullability and type-versus-runtime mismatch, transaction and query semantics, quoting and failure propagation in shell, and similar. They are instruction text only: the reviewer runs no external skill or tool, and the JSON reply contract is unchanged.
+
+### Reviewer strictness modes and additional instructions
+
+Each review runs under exactly one mode. The five modes are `Relaxed`, `Balanced`, `Strict`, `Paranoid`, and `Custom`; the default is `Balanced`. The mode changes both the areas of scrutiny in the reviewer instruction and the notification threshold — the minimum `importance` the engine will actually store as a note:
+
+| Mode | Areas of scrutiny | Notification threshold |
+|---|---|---|
+| `Relaxed` | Only obvious, material problems: real bugs, violated explicit requirements, security or data-loss risks, clearly wrong behavior. | Stores only `critical`; a `high` finding is dropped. |
+| `Balanced` | Material overlooked problems: bugs, requirement violations, invalid states, API contract errors, race conditions, security issues, and important error-handling or test gaps. | Stores `high` and `critical`. |
+| `Strict` | `Balanced` plus edge cases, stale state, race conditions, API contracts, exception paths, incorrect or redundant network behavior, material performance problems, and meaningful missing tests. | Stores `high` and `critical`. |
+| `Paranoid` | Aggressively searches hidden failure modes and regressions: assumptions, concurrency, stale or unknown state, partial failures, retries, cleanup, lifecycle, boundaries, security, data loss, side effects, and API incompatibility. | Stores `high` and `critical`; a lower-confidence `high` note must state its uncertainty and carry a concrete action. |
+| `Custom` | Shaped by the human's additional reviewer instructions, with the `Balanced` materiality floor. | Stores `high` and `critical`. |
+
+No mode ever admits a style, formatting, lint, naming, or preference finding, and no mode can relax the base policy: the exact JSON reply contract, the verbatim-path rule for `source`, the untrusted-excerpt rule, and the no-fabrication rule always win. The threshold is deterministic — the reviewer's own `importance` value is what the engine gates on — so a malformed or non-text reply is dropped exactly as before.
+
+**Additional reviewer instructions** are an optional bounded string (up to 2000 characters) that the human sets in the settings card or the plugin row. The text is preserved verbatim, never translated or rewritten, and is appended after the strictness profile only when it is non-blank. Blank instructions are allowed in every mode; for `Custom` they keep the `Balanced` materiality floor. A session in `Custom` mode reuses the global additional instructions: there is no separate per-session instruction field, which keeps the session header small.
+
+The reviewer's **response language** is still inferred from the latest genuine human message, independently of the mode, and the mode names are always rendered in English.
 
 ## The human-only invariant
 
@@ -60,7 +78,7 @@ A source-level test (`test/invariant.test.js`) scans the shipped files for every
 Because the built host and browser halves are committed, installation needs no source build. Install an **immutable release ref**, not the default branch:
 
 ```sh
-dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.3.6
+dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.3.7
 ```
 
 A bare `github:PipaGs/dsh-you-should-know` address is resolved by pnpm and saved as that same value every time. The Desktop plugin manager learns which package an install produced by diffing the profile's dependencies before and after pnpm runs, and falls back to matching the typed address against a package name. A bare default-branch address changes nothing on the second run, and that fallback does not understand a Git address, so the manager reports that the installed package could not be told from the dependency change. A ref-pinned address is saved verbatim, so each install and upgrade is attributed to `dsh-you-should-know`. In the Desktop **Add plugin** dialog, enter the same pinned address. To move to a later release, install its tag; to install the exact version already present, remove the plugin first.
@@ -118,6 +136,8 @@ Only the model's *availability in the profile* is required: if the route is miss
 | `cooldownTurns` | `3` | integer, 1–100 | Minimum number of completed root turns between reviews. |
 | `maxContextMessages` | `12` | integer, 1–100 | Maximum recent text messages sent to the reviewer. |
 | `maxTokens` | `768` | integer, 128–16384 | Output cap for the reviewer call. |
+| `reviewerMode` | `balanced` | one of `relaxed`, `balanced`, `strict`, `paranoid`, `custom` | Reviewer strictness mode; it also sets the notification threshold. |
+| `additionalInstructions` | empty | string, at most 2000 characters | Extra reviewer instructions, appended after the strictness profile and preserved verbatim. It never replaces or exposes the base policy. |
 
 Invalid values never fail the load: each one falls back to its conservative default and the host logs one warning. Every field is declared volatile in the plugin's `Config` schema, so a profile-patch edit is committed into the running fiber in place and reported as `loader/volatile-update`: later reviews use the new route, gates, and token budget without reinstalling or restarting. A save through the settings card or the config route persists to the same plugin row through the host settings service — automatic mode resets the live fields so a stored pin is really cleared, while a pinned route merges both route keys — and applies to the live engine immediately. Use a reviewer route that is different from the route the primary agent uses if you want a genuinely independent opinion.
 
@@ -138,6 +158,7 @@ The browser half registers three surfaces.
 
 - It reads the live config and the registered provider/model catalog from the config route and writes back to the same plugin row, so there is no second config store.
 - Provider and model selects list only ids the live registry reports; choosing a provider reloads the model list for it. **Automatic** leaves the route to adaptive discovery, while **Pinned** sends the exact pair.
+- **Reviewer mode** selects one of the five modes and shows a one-line description of the selected mode. **Additional reviewer instructions** is an optional bounded textarea, preserved exactly as entered. Neither control can edit the base reviewer policy.
 - The numeric gates (`minDeltaChars`, `cooldownTurns`, `maxContextMessages`, `maxTokens`) are editable and validated against the same bounds as the row.
 - Save is disabled, and every control explains why, when the host mounts no writable settings service. A pinned route that resolves to nothing is rejected before anything is persisted, with a bounded message.
 - The card refreshes once on mount, on window focus, and on a connection reset; a stale response from an older request generation never overwrites a newer one.
@@ -145,7 +166,7 @@ The browser half registers three surfaces.
 **Session header action** (`conversation.session.header.actions`, scoped to one session):
 
 - It shows the effective reviewer route, whether it comes from the session, the global pin, or adaptive discovery, the runtime status, and the pending-note count.
-- It can pin an exact provider/model for this session only, reset back to the global default, and resume a runtime paused by a quota failure; a non-quota runtime never offers resume.
+- It can pin an exact provider/model for this session only, choose a session-only reviewer mode (**Default** plus the five modes) that never mutates the global setting, reset the model back to the global default, and resume a runtime paused by a quota failure; a non-quota runtime never offers resume.
 - It never renders the transcript and never posts to the primary agent.
 
 Delivery uses conservative polling. While the page is visible the note card polls its route every 7 seconds; polling stops while the tab is hidden and refreshes immediately when it becomes visible again. The two settings surfaces have no interval: they refresh on mount, focus, and connection reset. There is no push channel for out-of-tree plugins in the current public API, so polling is the documented mechanism.
@@ -164,6 +185,8 @@ It returns bounded JSON:
 {
   "ok": true,
   "configured": true,
+  "reviewerMode": "balanced",
+  "effectiveMode": "balanced",
   "route": { "provider": "deepseek-account", "model": "deepseek-flash" },
   "routeResolutions": 1,
   "effectiveRoute": { "provider": "deepseek-account", "model": "deepseek-flash" },
@@ -196,6 +219,8 @@ How to read each value:
 | Field | Meaning |
 |---|---|
 | `configured` | `false` only when an explicit blank `provider`/`model` disabled the reviewer; that row registers no routes at all. |
+| `reviewerMode` | The global strictness mode id. |
+| `effectiveMode` | The mode the given session would use right now: its session override, else the global mode. |
 | `route` | The resolved reviewer route, or `null` when none has resolved yet or the profile mounts no DeepSeek route. |
 | `routeResolutions` | How many times the engine attempted route discovery. It exceeds `1` only when an earlier attempt resolved to no route (or failed transiently) and a later qualifying turn retried. A steady `1` next to a non-null `route` means discovery succeeded once and is cached. |
 | `effectiveRoute` | The route the given session would actually use right now: its per-session override, else the global pin, else the cached automatic discovery. `null` until discovery has run. |
@@ -252,18 +277,19 @@ The plugin fails quiet by construction:
 - The reviewer reads the full committed log once per session through the synchronous `snapshotEvents()` accessor, which DSH marks deprecated. After that seed the plugin follows the `session/event` feed and keeps a bounded recent-event window, so steady-state review never re-reads the log; a future DSH that removes the accessor degrades resumed-session context to feed-only instead of breaking the reviewer. Alongside the raw window it keeps a bounded side buffer of the most recent visible messages and per-turn assistant text, so a long noisy turn — a visible answer followed by thousands of tool events — cannot erase the current answer from the reviewer excerpt or the output gate.
 - Notes accumulate per session up to an internal budget of 12; the budget is a safety constant, not a config key. Resolved notes stay inside it, so the active stack and the history are both bounded and the history never grows without bound.
 - At most 200 sessions are tracked at once; the oldest session gives up its slot, its notes, and its model override when the table is full.
-- At most 200 per-session model overrides are retained, and a `session/disposed` event forgets the session's notes, dedupe, override, and runtime together.
+- At most 200 per-session model and mode overrides are retained, and a `session/disposed` event forgets the session's notes, dedupe, overrides, and runtime together.
+- A session in `Custom` mode reuses the global additional reviewer instructions; there is no per-session instruction field in the session header.
 - The reviewer is a language model. Treat its note as a prompt to check something, not as a verified fact.
 - UI strings and all shipped or public text are English-only by design; a source-level test rejects CJK, Cyrillic, Greek, and Hangul ranges in addition to unrelated project references.
 
 ## Development
 
 ```sh
-node --check lib/core.js && node --check lib/runtime.js && node --check lib/review-profile.js && node --check lib/index.js && node --check lib/client.js
+node --check lib/core.js && node --check lib/runtime.js && node --check lib/review-profile.js && node --check lib/review-strictness.js && node --check lib/index.js && node --check lib/client.js
 node --test test/*.test.js
 ```
 
-The suite covers adaptive DeepSeek route discovery, the documented and installed-style route variants, arbitrary exact overrides, partial pins, the blank-config gate, no-route fail-quiet and route recovery, live reconfiguration, the strict verdict shape, silent/malformed/non-text verdicts, deduplication, cooldown, the delta gate, the bounded event window and gap recovery, tool-event flood retention, session scoping and dismissal, the optional note source schema and its exact-path-only prompt invariant, the per-note source storage and dismissal, the bounded multi-note stack and its deliberate order, the copyable-source and Open file navigation seams, the Add to chat draft write with its one-click-one-insertion and Enter-submits-only lifecycle and its never-send guarantee, the connection bridge route shape for the combined GET/HEAD/POST routes, the status pending-note count after dismissal, the bounded client resolution memory, the resolve API with its exact `dismissed` and `added_to_chat` actions, the bounded and session-isolated notification history and its UI, the read-only status diagnostics, connection Fetch route registration with Request/Response semantics and bodyless HEAD responses, the document-relative browser URLs, bounded context, the adaptive response-language directive, deterministic language-skill detection with a three-skill cap and no keyword guessing, the single-reviewer guard, the browser bundle envelope, and the human-only source invariant. It also covers the per-session runtime queue and counters, transient retry and permanent/quota classification, the whole-call deadline, backlog flushing, and resume; the volatile config live-update path; the settings persistence split (reset for automatic, merge for pinned); the config and session routes; the settings card and session-header model override; and the adaptive review profile. The package declares no runtime dependencies of its own: its only non-relative import is the host-provided `@deepseek-ai/schemastery` Config schema, and there is no build step.
+The suite covers adaptive DeepSeek route discovery, the documented and installed-style route variants, arbitrary exact overrides, partial pins, the blank-config gate, no-route fail-quiet and route recovery, live reconfiguration, the strict verdict shape, silent/malformed/non-text verdicts, deduplication, cooldown, the delta gate, the bounded event window and gap recovery, tool-event flood retention, session scoping and dismissal, the optional note source schema and its exact-path-only prompt invariant, the per-note source storage and dismissal, the bounded multi-note stack and its deliberate order, the copyable-source and Open file navigation seams, the Add to chat draft write with its one-click-one-insertion and Enter-submits-only lifecycle and its never-send guarantee, the connection bridge route shape for the combined GET/HEAD/POST routes, the status pending-note count after dismissal, the bounded client resolution memory, the resolve API with its exact `dismissed` and `added_to_chat` actions, the bounded and session-isolated notification history and its UI, the read-only status diagnostics, connection Fetch route registration with Request/Response semantics and bodyless HEAD responses, the document-relative browser URLs, bounded context, the adaptive response-language directive, deterministic language-skill detection with a three-skill cap and no keyword guessing, the single-reviewer guard, the browser bundle envelope, and the human-only source invariant. It also covers the per-session runtime queue and counters, transient retry and permanent/quota classification, the whole-call deadline, backlog flushing, and resume; the volatile config live-update path; the settings persistence split (reset for automatic, merge for pinned); the config and session routes; the settings card and session-header model override; the adaptive review profile, and the reviewer strictness modes with their deterministic threshold gating, verbatim additional-instruction composition, diagnostics non-leak, and per-session mode override isolation. The package declares no runtime dependencies of its own: its only non-relative import is the host-provided `@deepseek-ai/schemastery` Config schema, and there is no build step.
 
 ## Related work
 
