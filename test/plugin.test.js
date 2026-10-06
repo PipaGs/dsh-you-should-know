@@ -336,6 +336,7 @@ test('the plugin registers its browser routes on the connection Fetch carrier', 
   assert.deepEqual(harness.fetchRoutes.map((route) => route.path).sort(), [
     '/api/dsh-you-should-know/config',
     '/api/dsh-you-should-know/dismiss',
+    '/api/dsh-you-should-know/history',
     '/api/dsh-you-should-know/notes',
     '/api/dsh-you-should-know/session',
     '/api/dsh-you-should-know/status',
@@ -345,6 +346,11 @@ test('the plugin registers its browser routes on the connection Fetch carrier', 
   assert.deepEqual(notes.methods, ['GET', 'HEAD'])
   assert.equal(notes.requestBody, 'buffered')
   assert.equal(typeof notes.fetch, 'function')
+
+  const history = harness.fetchRoutes.find((route) => route.path === '/api/dsh-you-should-know/history')
+  assert.deepEqual(history.methods, ['GET', 'HEAD'])
+  assert.equal(history.requestBody, 'buffered')
+  assert.equal(typeof history.fetch, 'function')
 
   const dismiss = harness.fetchRoutes.find((route) => route.path === '/api/dsh-you-should-know/dismiss')
   assert.deepEqual(dismiss.methods, ['POST'])
@@ -414,6 +420,7 @@ test('a configured plugin observes a turn, serves the note, and dismisses it ove
   assert.equal(listed.ok, true)
   assert.equal(listed.notes.length, 1)
   assert.equal(listed.notes[0].importance, 'critical')
+  assert.equal(listed.historyCount, 1, 'the notes payload also carries the bounded history count')
 
   const dismissRoute = harness.fetchRoutes.find((route) => route.path === '/api/dsh-you-should-know/dismiss')
   const dismissResponse = await dismissRoute.fetch(new Request('http://127.0.0.1/api/dsh-you-should-know/dismiss', {
@@ -425,6 +432,53 @@ test('a configured plugin observes a turn, serves the note, and dismisses it ove
 
   const afterResponse = await notesRoute.fetch(new Request('http://127.0.0.1/api/dsh-you-should-know/notes?sessionId=s1', { method: 'GET' }))
   assert.deepEqual((await afterResponse.json()).notes, [])
+  harness.disposeAll()
+})
+
+test('the Fetch resolve route records an exact action and history keeps the note', async () => {
+  const llm = makeLlm(['{"note":"Added to the draft.","importance":"high","source":{"path":"src/a.js","line":4}}'])
+  const harness = makeCtx({ llm })
+  apply(harness.ctx, { provider: 'p', model: 'm', minDeltaChars: 0, cooldownTurns: 1 })
+  harness.runInjections()
+
+  const listener = listenerOf(harness, 'session/event')
+  const session = sessionWith('s1', 1, 'done')
+  listener(session, session.lastEvent)
+  await settle()
+
+  const notesRoute = harness.fetchRoutes.find((route) => route.path === '/api/dsh-you-should-know/notes')
+  const historyRoute = harness.fetchRoutes.find((route) => route.path === '/api/dsh-you-should-know/history')
+  const listed = await (await notesRoute.fetch(new Request('http://127.0.0.1/api/dsh-you-should-know/notes?sessionId=s1', { method: 'GET' }))).json()
+  assert.equal(listed.historyCount, 1)
+  const noteId = listed.notes[0].id
+
+  const resolveRoute = harness.fetchRoutes.find((route) => route.path === '/api/dsh-you-should-know/dismiss')
+  const resolved = await resolveRoute.fetch(new Request('http://127.0.0.1/api/dsh-you-should-know/dismiss', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ sessionId: 's1', noteId, action: 'added_to_chat' }),
+  }))
+  assert.deepEqual(await resolved.json(), { ok: true, resolved: true, resolution: 'added_to_chat' })
+
+  const after = await (await notesRoute.fetch(new Request('http://127.0.0.1/api/dsh-you-should-know/notes?sessionId=s1', { method: 'GET' }))).json()
+  assert.deepEqual(after.notes, [], 'a resolved note leaves the active list')
+  assert.equal(after.historyCount, 1)
+
+  const history = await (await historyRoute.fetch(new Request('http://127.0.0.1/api/dsh-you-should-know/history?sessionId=s1', { method: 'GET' }))).json()
+  assert.equal(history.history.length, 1)
+  assert.equal(history.history[0].id, noteId)
+  assert.equal(history.history[0].resolved, true)
+  assert.equal(history.history[0].resolution, 'added_to_chat')
+  assert.deepEqual(history.history[0].source, { path: 'src/a.js', line: 4 })
+  assert.equal(typeof history.history[0].resolvedAt, 'number')
+
+  const invalid = await resolveRoute.fetch(new Request('http://127.0.0.1/api/dsh-you-should-know/dismiss', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ sessionId: 's1', noteId, action: 'forgotten' }),
+  }))
+  assert.equal(invalid.status, 400)
+  assert.deepEqual(await invalid.json(), { ok: false, error: 'invalid-action' })
   harness.disposeAll()
 })
 
@@ -644,12 +698,17 @@ test('session/disposed forgets the session notes and its override', async () => 
   const notesRoute = harness.fetchRoutes.find((route) => route.path === '/api/dsh-you-should-know/notes')
   assert.equal((await (await notesRoute.fetch(new Request(notesUrl, { method: 'GET' }))).json()).notes.length, 1)
 
+  const historyUrl = 'http://127.0.0.1/api/dsh-you-should-know/history?sessionId=s1'
+  const historyRoute = harness.fetchRoutes.find((route) => route.path === '/api/dsh-you-should-know/history')
+  assert.equal((await (await historyRoute.fetch(new Request(historyUrl, { method: 'GET' }))).json()).history.length, 1)
+
   const disposedListener = listenerOf(harness, 'session/disposed')
   assert.equal(typeof disposedListener, 'function')
   disposedListener({ header: { id: 's1' } })
 
   const after = await (await notesRoute.fetch(new Request(notesUrl, { method: 'GET' }))).json()
   assert.deepEqual(after.notes, [])
+  assert.deepEqual((await (await historyRoute.fetch(new Request(historyUrl, { method: 'GET' }))).json()).history, [], 'disposal clears history too')
 
   assert.doesNotThrow(() => disposedListener({ get header() { throw new Error('hostile session') } }))
   assert.doesNotThrow(() => disposedListener('s1'))

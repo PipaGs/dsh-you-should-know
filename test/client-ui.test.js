@@ -282,14 +282,15 @@ async function loadBundle(options = {}) {
     return jsonResponse(200, { ok: true })
   }
 
+  const intervals = []
   const sandbox = {
     window: windowMock,
     document: documentMock,
     fetch: fetchMock,
-    setInterval: options.allowIntervals === true ? () => 1 : () => {
+    setInterval: options.allowIntervals === true ? (fn) => { intervals.push(fn); return intervals.length } : () => {
       throw new Error('the settings and session surfaces must not poll')
     },
-    clearInterval: () => {},
+    clearInterval: (id) => { if (id) intervals[id - 1] = null },
     setTimeout,
     clearTimeout,
     encodeURIComponent,
@@ -355,6 +356,7 @@ async function loadBundle(options = {}) {
   return {
     runtime,
     calls,
+    intervals,
     seen,
     module: mod,
     cardComponent,
@@ -362,6 +364,9 @@ async function loadBundle(options = {}) {
     dockComponent,
     connection,
     resets,
+    runIntervals() {
+      for (const fn of intervals) if (fn) fn()
+    },
     fireFocus() {
       // Snapshot: a refresh may subscribe a new listener while we iterate.
       for (const listener of [...windowListeners.focus]) listener()
@@ -869,6 +874,18 @@ function notesBackend(notes) {
   }
 }
 
+/** A backend that serves the active notes plus the bounded per-session history. */
+function historyBackend(options = {}) {
+  const notes = options.notes || []
+  const history = options.history || []
+  const historyCount = Number.isInteger(options.historyCount) ? options.historyCount : history.length
+  return async (url) => {
+    if (url.startsWith('api/dsh-you-should-know/history')) return { status: 200, body: { ok: true, history } }
+    if (url.startsWith('api/dsh-you-should-know/notes')) return { status: 200, body: { ok: true, notes, historyCount } }
+    return { status: 200, body: { ok: true } }
+  }
+}
+
 async function mountNoteCard() {
   const env = await loadBundle({
     backend: notesBackend([{ id: 'n-1', note: 'One important thing.', importance: 'high' }]),
@@ -942,7 +959,7 @@ test('the note card renders every undismissed note oldest-first and dismisses on
 
   const posts = env.calls.filter((call) => call.url === 'api/dsh-you-should-know/dismiss')
   assert.equal(posts.length, 1)
-  assert.deepEqual(JSON.parse(posts[0].init.body), { sessionId: 's-1', noteId: 'n-old' })
+  assert.deepEqual(JSON.parse(posts[0].init.body), { sessionId: 's-1', noteId: 'n-old', action: 'dismissed' })
   view.unmount()
 })
 
@@ -1109,14 +1126,14 @@ test('Add to chat keeps an existing draft and separates the finding with a blank
   view.unmount()
 })
 
-test('two deliberate Add to chat clicks add the finding twice', async () => {
+test('a second Add to chat click is impossible because the resolved card is gone', async () => {
   const composer = createComposer('s-1')
   const { view } = await mountAddToChat(composer)
   pressControl('Add to chat', buttonByText(view.output, 'Add to chat'), composer)
   view.render({ sessionId: 's-1', inputActions: composer.inputActions, input: { draft: composer.draft } })
-  pressControl('Add to chat', buttonByText(view.output, 'Add to chat'), composer)
-  assert.equal(composer.draft, `${NOTE_DRAFT}\n\n${NOTE_DRAFT}`)
-  assert.deepEqual(composer.sent, [], 'neither click sends')
+  assert.equal(buttonByText(view.output, 'Add to chat'), null, 'the resolved card leaves the stack')
+  assert.equal(composer.draft, NOTE_DRAFT, 'the finding is inserted exactly once')
+  assert.deepEqual(composer.sent, [], 'no click sends')
   view.unmount()
 })
 
@@ -1146,5 +1163,222 @@ test('Add to chat fails quietly when the composer action face is unavailable', a
   const button = buttonByText(view.output, 'Add to chat')
   assert.ok(button, 'the action is offered even when the composer cannot accept it')
   assert.doesNotThrow(() => button.props.onClick())
+  view.unmount()
+})
+
+// --- Notification history -----------------------------------------------------
+
+/** The history-fetch count for one environment. */
+function historyFetchCount(env) {
+  return env.calls.filter((call) => call.url.startsWith('api/dsh-you-should-know/history')).length
+}
+
+test('Add to chat resolves the note, removes the card immediately, and posts added_to_chat', async () => {
+  const composer = createComposer('s-1')
+  const { env, view } = await mountAddToChat(composer)
+  pressControl('Add to chat', buttonByText(view.output, 'Add to chat'), composer)
+  assert.equal(composer.draft, NOTE_DRAFT, 'one click inserts the finding once')
+  assert.equal(buttonByText(view.output, 'Add to chat'), null, 'the resolved card leaves the stack immediately')
+  assert.deepEqual(composer.sent, [], 'Add to chat never sends')
+
+  const posts = env.calls.filter((call) => call.url === 'api/dsh-you-should-know/dismiss')
+  assert.equal(posts.length, 1, 'one click posts exactly one resolve transition')
+  assert.deepEqual(JSON.parse(posts[0].init.body), { sessionId: 's-1', noteId: 'n-1', action: 'added_to_chat' })
+  view.unmount()
+})
+
+test('Add to chat then Enter submits the existing draft once and never replays the insertion', async () => {
+  const composer = createComposer('s-1')
+  const { view } = await mountAddToChat(composer)
+  pressControl('Add to chat', buttonByText(view.output, 'Add to chat'), composer)
+  assert.equal(buttonByText(view.output, 'Add to chat'), null, 'the card is gone after the resolve')
+  view.render({ sessionId: 's-1', inputActions: composer.inputActions, input: { draft: composer.draft } })
+  pressEnter(view, composer)
+  assert.notEqual(composer.draft, NOTE_DRAFT + '\n\n' + NOTE_DRAFT, 'Enter never replays the finding')
+  assert.deepEqual(composer.sent, [NOTE_DRAFT], 'Enter submits the built draft exactly once')
+  assert.equal(composer.draft, '', 'the submitted draft is cleared')
+  assert.deepEqual(composer.deferredCalls, [])
+  view.unmount()
+})
+
+test('Add to chat that cannot write the draft leaves the card active and never resolves', async () => {
+  const env = await loadBundle({
+    backend: notesBackend([NOTE_WITH_SOURCE]),
+    allowIntervals: true,
+  })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1', inputActions: null, input: null })
+  await flushAsync()
+
+  const button = buttonByText(view.output, 'Add to chat')
+  assert.ok(button, 'the action is offered even when the composer cannot accept it')
+  button.props.onClick()
+  assert.ok(buttonByText(view.output, 'Add to chat'), 'a failed draft write keeps the card active')
+  assert.equal(env.calls.filter((call) => call.url === 'api/dsh-you-should-know/dismiss').length, 0, 'a failed draft write never resolves the note')
+  view.unmount()
+})
+
+test('a resolved Add to chat card cannot be re-inserted or re-resolved', async () => {
+  const composer = createComposer('s-1')
+  const { env, view } = await mountAddToChat(composer)
+  pressControl('Add to chat', buttonByText(view.output, 'Add to chat'), composer)
+  view.render({ sessionId: 's-1', inputActions: composer.inputActions, input: { draft: composer.draft } })
+  assert.equal(buttonByText(view.output, 'Add to chat'), null, 'the resolved card never returns')
+  assert.equal(composer.draft, NOTE_DRAFT, 'no second insertion happens')
+  assert.equal(env.calls.filter((call) => call.url === 'api/dsh-you-should-know/dismiss').length, 1, 'exactly one resolve transition is posted')
+  view.unmount()
+})
+
+test('History opens on demand, shows every state, and never polls while closed', async () => {
+  const env = await loadBundle({
+    backend: historyBackend({
+      notes: [{ id: 'n-active', note: 'Active finding.', importance: 'high', createdAt: 1700000000000, source: { path: 'src/a.js', line: 4 } }],
+      history: [
+        { id: 'n-chat', note: 'Added finding.', importance: 'critical', createdAt: 1700000000000, resolved: true, resolution: 'added_to_chat', resolvedAt: 1700000001000, source: { path: 'src/b.js', line: 9 } },
+        { id: 'n-done', note: 'Dismissed finding.', importance: 'high', createdAt: 1600000000000, resolved: true, resolution: 'dismissed', resolvedAt: 1600000001000 },
+        { id: 'n-active', note: 'Active finding.', importance: 'high', createdAt: 1700000000000, resolved: false, source: { path: 'src/a.js', line: 4 } },
+      ],
+    }),
+    allowIntervals: true,
+  })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1' })
+  await flushAsync()
+  assert.equal(historyFetchCount(env), 0, 'history is never fetched while closed')
+  env.runIntervals()
+  await flushAsync()
+  assert.equal(historyFetchCount(env), 0, 'the note poll never fetches history')
+
+  const open = buttonByText(view.output, 'History')
+  assert.ok(open, 'the compact History action renders')
+  open.props.onClick()
+  await flushAsync()
+  assert.equal(historyFetchCount(env), 1, 'opening history refreshes it exactly once')
+
+  const text = textOf(view.output)
+  assert.match(text, /State: Added to chat/)
+  assert.match(text, /State: Dismissed/)
+  assert.match(text, /State: Active/)
+  assert.match(text, /Added finding\./)
+  assert.match(text, /Dismissed finding\./)
+  assert.match(text, /Active finding\./)
+  assert.match(text, /2023-11-14 22:13 UTC/, 'the timestamp renders deterministically')
+  assert.match(text, /src\/b\.js:9/, 'the source path renders with its line')
+
+  buttonByText(view.output, 'Hide history').props.onClick()
+  await flushAsync()
+  env.runIntervals()
+  await flushAsync()
+  assert.equal(historyFetchCount(env), 1, 'a closed history never polls')
+  view.unmount()
+})
+
+test('a resolved history entry is read-only and cannot be re-resolved', async () => {
+  const env = await loadBundle({
+    backend: historyBackend({
+      notes: [],
+      history: [
+        { id: 'n-chat', note: 'Added finding.', importance: 'critical', createdAt: 10, resolved: true, resolution: 'added_to_chat', resolvedAt: 11 },
+        { id: 'n-done', note: 'Dismissed finding.', importance: 'high', createdAt: 9, resolved: true, resolution: 'dismissed', resolvedAt: 10 },
+      ],
+    }),
+    allowIntervals: true,
+  })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1' })
+  await flushAsync()
+
+  const open = buttonByText(view.output, 'History')
+  assert.ok(open, 'history with no active note still offers the action')
+  open.props.onClick()
+  await flushAsync()
+
+  assert.equal(buttonByText(view.output, 'Dismiss'), null, 'a resolved entry offers no Dismiss')
+  assert.equal(buttonByText(view.output, 'Add to chat'), null, 'a resolved entry offers no Add to chat')
+  assert.equal(env.calls.filter((call) => call.url === 'api/dsh-you-should-know/dismiss').length, 0, 'nothing can be re-resolved')
+  view.unmount()
+})
+
+test('an active history entry keeps Add to chat while a resolved one stays read-only', async () => {
+  const composer = createComposer('s-1')
+  const env = await loadBundle({
+    backend: historyBackend({
+      notes: [],
+      history: [
+        { id: 'n-active', note: 'Active finding.', importance: 'high', createdAt: 10, resolved: false },
+        { id: 'n-done', note: 'Dismissed finding.', importance: 'high', createdAt: 9, resolved: true, resolution: 'dismissed', resolvedAt: 10 },
+      ],
+    }),
+    allowIntervals: true,
+  })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1', inputActions: composer.inputActions, input: { draft: '' } })
+  await flushAsync()
+  buttonByText(view.output, 'History').props.onClick()
+  await flushAsync()
+
+  const addButtons = findAll(view.output, 'button').filter((button) => textOf(button).includes('Add to chat'))
+  const dismissButtons = findAll(view.output, 'button').filter((button) => textOf(button).includes('Dismiss'))
+  assert.equal(addButtons.length, 1, 'only the active entry offers Add to chat')
+  assert.equal(dismissButtons.length, 1, 'only the active entry offers Dismiss')
+
+  addButtons[0].props.onClick()
+  assert.equal(composer.draft, 'Please address this reviewer finding: Active finding.', 'the history entry writes the draft once')
+  const posts = env.calls.filter((call) => call.url === 'api/dsh-you-should-know/dismiss')
+  assert.equal(posts.length, 1)
+  assert.deepEqual(JSON.parse(posts[0].init.body), { sessionId: 's-1', noteId: 'n-active', action: 'added_to_chat' })
+  view.unmount()
+})
+
+test('history refreshes after a resolve while it stays open', async () => {
+  const composer = createComposer('s-1')
+  const env = await loadBundle({
+    backend: historyBackend({
+      notes: [{ id: 'n-active', note: 'Active finding.', importance: 'high', createdAt: 10 }],
+      history: [
+        { id: 'n-active', note: 'Active finding.', importance: 'high', createdAt: 10, resolved: false },
+        { id: 'n-old', note: 'Old finding.', importance: 'high', createdAt: 9, resolved: true, resolution: 'dismissed', resolvedAt: 10 },
+      ],
+    }),
+    allowIntervals: true,
+  })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1', inputActions: composer.inputActions, input: { draft: '' } })
+  await flushAsync()
+  buttonByText(view.output, 'History').props.onClick()
+  await flushAsync()
+  assert.equal(historyFetchCount(env), 1)
+
+  buttonByText(view.output, 'Dismiss').props.onClick()
+  await flushAsync()
+  assert.equal(historyFetchCount(env), 2, 'a resolve refreshes the open history')
+  view.unmount()
+})
+
+test('a stale history response for session A never populates session B', async () => {
+  let releaseA
+  const gateA = new Promise((resolve) => { releaseA = resolve })
+  const backend = async (url) => {
+    if (url.startsWith('api/dsh-you-should-know/history')) {
+      if (url.includes('sessionId=A')) {
+        await gateA
+        return { status: 200, body: { ok: true, history: [{ id: 'A:1', note: 'Alpha finding.', importance: 'high', createdAt: 1, resolved: false }] } }
+      }
+      return { status: 200, body: { ok: true, history: [{ id: 'B:1', note: 'Beta finding.', importance: 'high', createdAt: 2, resolved: false }] } }
+    }
+    if (url.startsWith('api/dsh-you-should-know/notes')) {
+      const sessionId = new URL(url, 'http://localhost').searchParams.get('sessionId')
+      return { status: 200, body: { ok: true, notes: [], historyCount: sessionId === 'A' ? 1 : 1 } }
+    }
+    return { status: 200, body: { ok: true } }
+  }
+  const env = await loadBundle({ backend, allowIntervals: true })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 'A' })
+  await flushAsync()
+  buttonByText(view.output, 'History').props.onClick()
+  await flushAsync()
+
+  view.render({ sessionId: 'B' })
+  await flushAsync()
+  assert.match(textOf(view.output), /Beta finding\./)
+
+  releaseA()
+  await flushAsync()
+  assert.doesNotMatch(textOf(view.output), /Alpha finding\./, 'a stale history response never crosses sessions')
   view.unmount()
 })

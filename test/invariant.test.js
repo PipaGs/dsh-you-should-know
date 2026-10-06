@@ -56,10 +56,11 @@ test('the plugin uses only the sanctioned seams', async () => {
   assert.ok(index.includes('connection.fetch.register('), 'notes are served over the connection Fetch carrier')
   assert.ok(client.includes("'api/dsh-you-should-know/notes'"), 'the notes poll is document-relative for the Desktop app origin')
   assert.ok(client.includes("'api/dsh-you-should-know/dismiss'"), 'the dismiss post is document-relative for the Desktop app origin')
+  assert.ok(client.includes("'api/dsh-you-should-know/history'"), 'the history read is document-relative for the Desktop app origin')
   assert.equal(client.includes("'/dsh-you-should-know/"), false, 'no origin-root absolute route remains in the browser half')
   assert.ok(client.includes('conversation.input.dock'), 'the card lives in the composer-adjacent slot')
   assert.ok(client.includes("ctx.slots.inject("), 'the card registers through the slot system')
-  assert.ok(!client.includes('localStorage'), 'dismissal state stays in the page, not shared storage')
+  assert.ok(!client.includes('localStorage'), 'resolution state stays in the page, not shared storage')
 })
 
 test('the browser half reaches files and the composer only through their public seams', async () => {
@@ -104,7 +105,7 @@ test('the bundled row leaves the reviewer route to adaptive discovery', async ()
 test('the manifest declares the bundle, the client half, and no build step', async () => {
   const manifest = JSON.parse(await read('package.json'))
   assert.equal(manifest.name, 'dsh-you-should-know')
-  assert.equal(manifest.version, '0.3.4')
+  assert.equal(manifest.version, '0.3.5')
   assert.equal(manifest.license, 'MIT')
   assert.equal(manifest.dsh.manifestVersion, 1)
   assert.equal(manifest.dsh.bundle.patch, './cordis.patch.yml')
