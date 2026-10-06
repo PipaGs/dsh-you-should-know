@@ -486,6 +486,8 @@ test('Save posts the exact bounded config for the selected route', async () => {
     mode: 'pinned',
     provider: 'zeta',
     model: 'z1',
+    reviewerMode: 'balanced',
+    additionalInstructions: '',
     minDeltaChars: 42,
     cooldownTurns: 7,
     maxContextMessages: 4,
@@ -598,6 +600,14 @@ function sessionBackend(state) {
       if (body.action === 'reset-model') {
         state.session = { ...state.session, effectiveRoute: { provider: 'alpha', model: 'a-model' }, effectiveRouteSource: 'global', sessionOverride: null }
         return { status: 200, body: { ok: true, action: 'reset-model', removed: true, ...state.session } }
+      }
+      if (body.action === 'set-mode') {
+        state.session = { ...state.session, effectiveMode: body.mode, effectiveModeSource: 'session', sessionModeOverride: body.mode }
+        return { status: 200, body: { ok: true, action: 'set-mode', ...state.session } }
+      }
+      if (body.action === 'reset-mode') {
+        state.session = { ...state.session, effectiveMode: 'balanced', effectiveModeSource: 'global', sessionModeOverride: null, globalMode: 'balanced' }
+        return { status: 200, body: { ok: true, action: 'reset-mode', removed: true, ...state.session } }
       }
       if (body.action === 'resume') {
         state.session = { ...state.session, session: { ...state.session.session, runtimeStatus: 'idle', runtime: { runtimeStatus: 'idle' } } }
@@ -1529,5 +1539,95 @@ test('a stale history response for session A never populates session B', async (
   releaseA()
   await flushAsync()
   assert.doesNotMatch(textOf(view.output), /Alpha finding\./, 'a stale history response never crosses sessions')
+  view.unmount()
+})
+
+// --- Reviewer strictness modes in the UI ---------------------------------------
+
+test('the settings card renders the exact five reviewer modes with a mode helper line', async () => {
+  const env = await loadBundle({ backend: configBackend() })
+  const view = env.runtime.mount(env.cardComponent().component, { connection: env.connection })
+  await flushAsync()
+
+  const select = findByAria(view.output, 'Reviewer mode')
+  assert.ok(select, 'the reviewer mode select renders')
+  assert.deepEqual(Array.from(select.props.children, (option) => option.props.children), ['Relaxed', 'Balanced', 'Strict', 'Paranoid', 'Custom'])
+  assert.deepEqual(Array.from(select.props.children, (option) => option.props.value), ['relaxed', 'balanced', 'strict', 'paranoid', 'custom'])
+  assert.equal(select.props.value, 'balanced', 'the default mode is Balanced')
+  assert.match(textOf(view.output), /Material overlooked problems/, 'the Balanced helper line renders')
+  assert.ok(findByAria(view.output, 'Additional reviewer instructions'), 'the instructions field renders')
+
+  select.props.onChange({ target: { value: 'paranoid' } })
+  assert.match(textOf(view.output), /Aggressively searches hidden failure modes/, 'the helper line follows the mode')
+  view.unmount()
+})
+
+test('Save posts the reviewer mode and the exact additional instructions', async () => {
+  const env = await loadBundle({ backend: configBackend() })
+  const view = env.runtime.mount(env.cardComponent().component, { connection: env.connection })
+  await flushAsync()
+
+  findByAria(view.output, 'Reviewer mode').props.onChange({ target: { value: 'custom' } })
+  const text = '  Check tenant isolation.\nKeep exact bytes.  '
+  findByAria(view.output, 'Additional reviewer instructions').props.onChange({ target: { value: text } })
+  buttonByText(view.output, 'Save').props.onClick()
+  await flushAsync()
+
+  const post = env.calls.find((call) => call.init && call.init.method === 'POST')
+  assert.ok(post, 'Save POSTs the config')
+  const payload = JSON.parse(post.init.body)
+  assert.equal(payload.reviewerMode, 'custom')
+  assert.equal(payload.additionalInstructions, text)
+  assert.equal(payload.mode, 'automatic')
+  view.unmount()
+})
+
+test('the settings card populates the mode and instructions from the live config', async () => {
+  const env = await loadBundle({
+    backend: configBackend({ overrides: { config: { mode: 'automatic', reviewerMode: 'strict', additionalInstructions: 'live custom text', minDeltaChars: 1200, cooldownTurns: 3, maxContextMessages: 12, maxTokens: 768 } } }),
+  })
+  const view = env.runtime.mount(env.cardComponent().component, { connection: env.connection })
+  await flushAsync()
+  assert.equal(findByAria(view.output, 'Reviewer mode').props.value, 'strict')
+  assert.equal(findByAria(view.output, 'Additional reviewer instructions').props.value, 'live custom text')
+  view.unmount()
+})
+
+test('the session header offers Default plus the five modes and never posts global config', async () => {
+  const state = sessionState()
+  const env = await loadBundle({ backend: sessionBackend(state) })
+  const view = env.runtime.mount(env.actionComponent().component, { sessionId: 's-1' })
+  buttonByText(view.output, 'Reviewer').props.onClick()
+  await flushAsync()
+
+  const select = findByAria(view.output, 'Session reviewer mode')
+  assert.ok(select, 'the session mode select renders')
+  assert.deepEqual(Array.from(select.props.children, (option) => option.props.children), ['Default', 'Relaxed', 'Balanced', 'Strict', 'Paranoid', 'Custom'])
+  assert.deepEqual(Array.from(select.props.children, (option) => option.props.value), ['', 'relaxed', 'balanced', 'strict', 'paranoid', 'custom'])
+  assert.equal(select.props.value, '', 'Default is selected without a session override')
+
+  findByAria(view.output, 'Session reviewer mode').props.onChange({ target: { value: 'paranoid' } })
+  await flushAsync()
+  assert.deepEqual(state.sessionPosts.at(-1), { action: 'set-mode', sessionId: 's-1', mode: 'paranoid' })
+  assert.equal(
+    env.calls.some((call) => call.url.startsWith('api/dsh-you-should-know/config') && call.init && call.init.method === 'POST'),
+    false,
+    'a session mode override never writes the global config route',
+  )
+
+  findByAria(view.output, 'Session reviewer mode').props.onChange({ target: { value: '' } })
+  await flushAsync()
+  assert.deepEqual(state.sessionPosts.at(-1), { action: 'reset-mode', sessionId: 's-1' })
+  view.unmount()
+})
+
+test('the session header shows the effective mode and its source', async () => {
+  const state = sessionState({ effectiveMode: 'paranoid', effectiveModeSource: 'session', sessionModeOverride: 'paranoid', globalMode: 'balanced' })
+  const env = await loadBundle({ backend: sessionBackend(state) })
+  const view = env.runtime.mount(env.actionComponent().component, { sessionId: 's-1' })
+  buttonByText(view.output, 'Reviewer').props.onClick()
+  await flushAsync()
+  assert.match(textOf(view.output), /Mode: Paranoid/)
+  assert.equal(findByAria(view.output, 'Session reviewer mode').props.value, 'paranoid')
   view.unmount()
 })

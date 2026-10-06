@@ -23,9 +23,14 @@
 #       cooldownTurns: 3
 #       maxContextMessages: 12
 #       maxTokens: 768
+#       reviewerMode: balanced
+#       additionalInstructions: ''
 #
 # Any registered provider and model are accepted as an exact override; DSH
 # resolves the ids against the profile, so this file deliberately pins none.
+# The optional reviewerMode (relaxed, balanced, strict, paranoid, custom) and
+# additionalInstructions keys are bounded and live-updatable; a row that omits
+# them keeps the Balanced default and empty instructions.
 - insert:
     - id: you-should-know
       name: dsh-you-should-know

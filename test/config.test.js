@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { createConfigHandlers, createEngine, normalizeConfig } from '../lib/core.js'
+import { createConfigHandlers, createEngine, createFetchHandlers, normalizeConfig } from '../lib/core.js'
 
 const ROW_ID = 'you-should-know'
 
@@ -91,6 +91,8 @@ test('GET config returns the live config, a sorted deduped catalog, and writabil
     mode: 'pinned',
     provider: 'alpha',
     model: 'a-model',
+    reviewerMode: 'balanced',
+    additionalInstructions: '',
     minDeltaChars: 5,
     cooldownTurns: 2,
     maxContextMessages: 12,
@@ -162,6 +164,8 @@ test('POST automatic clears the pinned route, persists the row patch, and update
     provider: '',
     model: '',
     disabled: false,
+    reviewerMode: 'balanced',
+    additionalInstructions: '',
     minDeltaChars: 3,
     cooldownTurns: 4,
     maxContextMessages: 6,
@@ -185,6 +189,8 @@ test('POST pinned validates through resolveModelInfo before persistence and upda
     provider: 'alpha',
     model: 'a-model',
     disabled: false,
+    reviewerMode: 'balanced',
+    additionalInstructions: '',
     minDeltaChars: 1200,
     cooldownTurns: 3,
     maxContextMessages: 12,
@@ -306,4 +312,55 @@ test('the config route turns an unexpected engine failure into a bounded 500', a
   const response = await get(handlers)
   assert.equal(response.status, 500)
   assert.deepEqual(await response.json(), { ok: false, error: 'internal' })
+})
+
+// --- Reviewer strictness mode config ------------------------------------------
+
+test('POST persists the reviewer mode and additional instructions, and GET returns them', async () => {
+  const { engine } = engineWith()
+  const settings = settingsDouble()
+  const handlers = handlersFor(engine, { settings })
+  const text = '  Watch for partial writes.\nKeep exact.  '
+  const response = await post(handlers, { mode: 'automatic', reviewerMode: 'paranoid', additionalInstructions: text })
+  assert.equal(response.status, 200)
+  const body = await response.json()
+  assert.equal(body.config.reviewerMode, 'paranoid')
+  assert.equal(body.config.additionalInstructions, text)
+  assert.equal(engine.config().reviewerMode, 'paranoid')
+  assert.equal(engine.config().additionalInstructions, text)
+  assert.deepEqual(settings.replaces[0].section, { reviewerMode: 'paranoid', additionalInstructions: text })
+})
+
+test('POST rejects an unknown reviewer mode without persisting or changing the engine', async () => {
+  const { engine } = engineWith({ provider: 'alpha', model: 'a-model' })
+  const settings = settingsDouble()
+  const handlers = handlersFor(engine, { getLlm: () => catalogLlm(), settings })
+  const response = await post(handlers, { mode: 'automatic', reviewerMode: 'loose' })
+  assert.equal(response.status, 400)
+  assert.deepEqual(await response.json(), { ok: false, error: 'invalid-config' })
+  assert.deepEqual(settings.replaces, [])
+  assert.equal(engine.config().reviewerMode, 'balanced')
+})
+
+test('POST rejects an oversized additional-instructions string without persisting', async () => {
+  const { engine } = engineWith()
+  const settings = settingsDouble()
+  const handlers = handlersFor(engine, { settings })
+  const response = await post(handlers, { mode: 'automatic', additionalInstructions: 'x'.repeat(2001) })
+  assert.equal(response.status, 400)
+  assert.deepEqual(await response.json(), { ok: false, error: 'invalid-config' })
+  assert.deepEqual(settings.replaces, [])
+})
+
+test('the settings read carries the instructions while the status diagnostics never do', async () => {
+  const secret = 'PRIVATE-INSTRUCTION-77'
+  const { engine } = engineWith({ reviewerMode: 'custom', additionalInstructions: secret })
+  const handlers = handlersFor(engine, { settings: settingsDouble() })
+  const configText = await (await get(handlers)).text()
+  assert.ok(configText.includes(secret), 'the settings form can render the editable text')
+  const statusHandlers = createFetchHandlers(engine)
+  const statusResponse = await statusHandlers.status(new Request('http://127.0.0.1/api/dsh-you-should-know/status?sessionId=s1', { method: 'GET' }))
+  const statusText = await statusResponse.text()
+  assert.equal(statusText.includes(secret), false, 'status stays diagnostic only')
+  assert.equal(JSON.parse(statusText).reviewerMode, 'custom')
 })
