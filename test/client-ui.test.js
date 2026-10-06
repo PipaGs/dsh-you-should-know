@@ -1144,6 +1144,43 @@ test('Add to chat appends File only when the action does not already name the ex
   secondMount.view.unmount()
 })
 
+test('Add to chat appends File when the action names only a longer path that contains the source path', async () => {
+  const composer = createComposer('s-1')
+  const note = {
+    ...NOTE_ACTION,
+    action: 'Fix src/a.js.map handling so the bridge does not time out.',
+    source: { path: 'src/a.js', line: 4 },
+  }
+  const { view } = await mountNotes([note], composer)
+  pressControl('Add to chat', buttonByText(view.output, 'Add to chat'), composer)
+  assert.equal(composer.draft, 'Fix src/a.js.map handling so the bridge does not time out.\nFile: src/a.js:4', 'a longer token is not the exact source path')
+  view.unmount()
+})
+
+test('Add to chat does not duplicate File when the action names the exact path with punctuation', async () => {
+  const composer = createComposer('s-1')
+  const note = { ...NOTE_ACTION, action: 'Fix `src/a.js` handling.', source: { path: 'src/a.js', line: 4 } }
+  const { view } = await mountNotes([note], composer)
+  pressControl('Add to chat', buttonByText(view.output, 'Add to chat'), composer)
+  assert.equal(composer.draft, 'Fix `src/a.js` handling.', 'the exact path is already named')
+  view.unmount()
+})
+
+test('a stale action card cannot write into the next session draft', async () => {
+  const first = createComposer('s-1')
+  const second = createComposer('s-2')
+  const env = await loadBundle({ backend: notesBackend([NOTE_ACTION]), allowIntervals: true })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1', inputActions: first.inputActions, input: { draft: '' } })
+  await flushAsync()
+  const stale = buttonByText(view.output, 'Add to chat')
+  assert.ok(stale, 'the previous session action card rendered')
+  view.render({ sessionId: 's-2', inputActions: second.inputActions, input: { draft: '' } })
+  assert.equal(buttonByText(view.output, 'Add to chat'), null, 'the stale action card is dropped before the new poll resolves')
+  stale.props.onClick()
+  assert.equal(second.draft, '', 'the stale action card never writes into the next session draft')
+  view.unmount()
+})
+
 test('a note without an action falls back to an imperative wrapper', async () => {
   const composer = createComposer('s-1')
   const legacy = { id: 'n-legacy', note: 'Guard the write.', importance: 'high', createdAt: 1, source: { path: 'src/store.js', line: 7 } }
