@@ -324,6 +324,35 @@ test('parseVerdict rejects a malformed or unsafe source with the whole reply', (
   assert.equal(parseVerdict(tooHigh), null)
 })
 
+test('parseVerdict accepts a bounded optional action beside the note', () => {
+  assert.deepEqual(
+    parseVerdict('{"note":"The loading state never clears.","importance":"high","action":"Fix the route registration."}'),
+    { note: 'The loading state never clears.', importance: 'high', action: 'Fix the route registration.' },
+  )
+  assert.deepEqual(
+    parseVerdict('{"note":"N.","importance":"critical","source":{"path":"src/a.js","line":3},"action":"  Guard the write.  "}'),
+    { note: 'N.', importance: 'critical', source: { path: 'src/a.js', line: 3 }, action: 'Guard the write.' },
+  )
+})
+
+test('parseVerdict rejects a malformed or oversized action with the whole reply', () => {
+  const malformed = ['42', 'null', 'true', '{}', '[]', '""', '"   "']
+  for (const action of malformed) {
+    const raw = '{"note":"A","importance":"high","action":' + action + '}'
+    assert.equal(parseVerdict(raw), null, 'expected null for ' + raw)
+  }
+  const tooLong = JSON.stringify({ note: 'A', importance: 'high', action: 'x'.repeat(LIMITS.maxActionChars + 1) })
+  assert.equal(parseVerdict(tooLong), null)
+  const atLimit = JSON.stringify({ note: 'A', importance: 'high', action: 'x'.repeat(LIMITS.maxActionChars) })
+  assert.equal(parseVerdict(atLimit).action.length, LIMITS.maxActionChars)
+})
+
+test('silence forbids an action as well as a source', () => {
+  assert.deepEqual(parseVerdict('{"note":null,"importance":null}'), { note: null, importance: null })
+  assert.equal(parseVerdict('{"note":null,"importance":null,"action":"Fix it."}'), null)
+  assert.equal(parseVerdict('{"note":null,"importance":null,"source":{"path":"a.js"},"action":"Fix it."}'), null)
+})
+
 test('silence stays exactly note plus importance and never carries a source', () => {
   assert.deepEqual(parseVerdict('{"note":null,"importance":null}'), { note: null, importance: null })
   assert.equal(parseVerdict('{"note":null,"importance":null,"source":{"path":"a.js"}}'), null)
@@ -431,6 +460,18 @@ test('the reviewer instruction sources a note only from a verbatim path and keep
   assert.match(REVIEW_INSTRUCTIONS, /never (synthesize|invent|guess|normalize)/i)
   assert.match(REVIEW_INSTRUCTIONS, /omit the source/i)
   assert.ok(REVIEW_INSTRUCTIONS.includes('{"note": null, "importance": null}'), 'the documented silence shape stays byte-exact')
+})
+
+test('the reviewer instruction separates the human note from the agent action', () => {
+  assert.match(REVIEW_INSTRUCTIONS, /"action"/)
+  assert.match(REVIEW_INSTRUCTIONS, /written for the human/)
+  assert.match(REVIEW_INSTRUCTIONS, /written for the coding agent/)
+  assert.match(REVIEW_INSTRUCTIONS, /says what to change/)
+  assert.match(REVIEW_INSTRUCTIONS, /Do not simply restate the problem/)
+  assert.match(REVIEW_INSTRUCTIONS, /Never add stylistic/)
+  assert.match(REVIEW_INSTRUCTIONS, /only when a valid source object/)
+  assert.match(REVIEW_INSTRUCTIONS, /The loading state never clears because GET \/session returns 400\./)
+  assert.match(REVIEW_INSTRUCTIONS, /Fix the \/session route registration so GET\/HEAD do not use a streaming request body/)
 })
 
 test('an instruction embedded in the excerpt stays inside the untrusted marked block', () => {

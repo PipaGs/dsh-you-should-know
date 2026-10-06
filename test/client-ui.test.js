@@ -1029,7 +1029,7 @@ test('Open file navigates through the sidebar resource API and never runs a comm
 // Chromium: a mousedown that does not preventDefault moves focus to the button,
 // and a later Enter activates whatever holds focus before the draft keymap.
 const NOTE_WITH_SOURCE = { id: 'n-1', note: 'Guard the write.', importance: 'high', createdAt: 1, source: { path: 'src/store.js', line: 7 } }
-const NOTE_DRAFT = 'Please address this reviewer finding: Guard the write.\nFile: src/store.js:7'
+const NOTE_DRAFT = 'Fix this reviewer finding: Guard the write.\nFile: src/store.js:7'
 
 function createComposer(sessionId, initialDraft = '') {
   const composer = {
@@ -1092,6 +1092,155 @@ async function mountAddToChat(composer) {
   await flushAsync()
   return { env, view }
 }
+
+const NOTE_ACTION = {
+  id: 'n-action',
+  note: 'The loading state never clears because GET /session returns 400.',
+  importance: 'high',
+  createdAt: 1,
+  action: 'Fix the /session route registration so GET/HEAD do not use a streaming request body, and add a regression test for the live bridge behavior.',
+}
+const NOTE_ACTION_DRAFT = 'Fix the /session route registration so GET/HEAD do not use a streaming request body, and add a regression test for the live bridge behavior.'
+
+/** Mount the dock with an explicit note list and composer face. */
+async function mountNotes(notes, composer) {
+  const env = await loadBundle({ backend: notesBackend(notes), allowIntervals: true })
+  const view = env.runtime.mount(env.dockComponent().component, {
+    sessionId: composer.sessionId,
+    inputActions: composer.inputActions,
+    input: { draft: composer.draft },
+  })
+  await flushAsync()
+  return { env, view }
+}
+
+test('Add to chat inserts the actionable repair instruction instead of the human note', async () => {
+  const composer = createComposer('s-1')
+  const { view } = await mountNotes([NOTE_ACTION], composer)
+  pressControl('Add to chat', buttonByText(view.output, 'Add to chat'), composer)
+  assert.equal(composer.draft, NOTE_ACTION_DRAFT, 'the action is the draft, not the finding prose')
+  assert.equal(composer.draft.includes(NOTE_ACTION.note), false, 'the notification text is never inserted')
+  assert.deepEqual(composer.sent, [], 'Add to chat never sends')
+  view.unmount()
+})
+
+test('Add to chat appends File only when the action does not already name the exact source path', async () => {
+  const first = createComposer('s-1')
+  const withSource = { ...NOTE_ACTION, source: { path: 'src/live-bridge.js', line: 12 } }
+  const firstMount = await mountNotes([withSource], first)
+  pressControl('Add to chat', buttonByText(firstMount.view.output, 'Add to chat'), first)
+  assert.equal(first.draft, NOTE_ACTION_DRAFT + '\nFile: src/live-bridge.js:12')
+  firstMount.view.unmount()
+
+  const second = createComposer('s-2')
+  const mentionsPath = {
+    ...NOTE_ACTION,
+    action: 'Fix src/live-bridge.js so the bridge does not time out.',
+    source: { path: 'src/live-bridge.js', line: 12 },
+  }
+  const secondMount = await mountNotes([mentionsPath], second)
+  pressControl('Add to chat', buttonByText(secondMount.view.output, 'Add to chat'), second)
+  assert.equal(second.draft, 'Fix src/live-bridge.js so the bridge does not time out.', 'an action that already names the exact path gets no duplicate File line')
+  secondMount.view.unmount()
+})
+
+test('Add to chat appends File when the action names only a longer path that contains the source path', async () => {
+  const composer = createComposer('s-1')
+  const note = {
+    ...NOTE_ACTION,
+    action: 'Fix src/a.js.map handling so the bridge does not time out.',
+    source: { path: 'src/a.js', line: 4 },
+  }
+  const { view } = await mountNotes([note], composer)
+  pressControl('Add to chat', buttonByText(view.output, 'Add to chat'), composer)
+  assert.equal(composer.draft, 'Fix src/a.js.map handling so the bridge does not time out.\nFile: src/a.js:4', 'a longer token is not the exact source path')
+  view.unmount()
+})
+
+test('Add to chat does not duplicate File when the action names the exact path with punctuation', async () => {
+  const composer = createComposer('s-1')
+  const note = { ...NOTE_ACTION, action: 'Fix `src/a.js` handling.', source: { path: 'src/a.js', line: 4 } }
+  const { view } = await mountNotes([note], composer)
+  pressControl('Add to chat', buttonByText(view.output, 'Add to chat'), composer)
+  assert.equal(composer.draft, 'Fix `src/a.js` handling.', 'the exact path is already named')
+  view.unmount()
+})
+
+test('a stale action card cannot write into the next session draft', async () => {
+  const first = createComposer('s-1')
+  const second = createComposer('s-2')
+  const env = await loadBundle({ backend: notesBackend([NOTE_ACTION]), allowIntervals: true })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1', inputActions: first.inputActions, input: { draft: '' } })
+  await flushAsync()
+  const stale = buttonByText(view.output, 'Add to chat')
+  assert.ok(stale, 'the previous session action card rendered')
+  view.render({ sessionId: 's-2', inputActions: second.inputActions, input: { draft: '' } })
+  assert.equal(buttonByText(view.output, 'Add to chat'), null, 'the stale action card is dropped before the new poll resolves')
+  stale.props.onClick()
+  assert.equal(second.draft, '', 'the stale action card never writes into the next session draft')
+  view.unmount()
+})
+
+test('a note without an action falls back to an imperative wrapper', async () => {
+  const composer = createComposer('s-1')
+  const legacy = { id: 'n-legacy', note: 'Guard the write.', importance: 'high', createdAt: 1, source: { path: 'src/store.js', line: 7 } }
+  const { view } = await mountNotes([legacy], composer)
+  pressControl('Add to chat', buttonByText(view.output, 'Add to chat'), composer)
+  assert.equal(composer.draft, 'Fix this reviewer finding: Guard the write.\nFile: src/store.js:7')
+  assert.equal(composer.draft.includes('Please address this reviewer finding:'), false, 'the old notification wrapper is gone')
+  view.unmount()
+})
+
+test('Add to chat keeps an existing draft and separates the action with a blank line', async () => {
+  const composer = createComposer('s-1', 'draft in progress')
+  const { view } = await mountNotes([NOTE_ACTION], composer)
+  pressControl('Add to chat', buttonByText(view.output, 'Add to chat'), composer)
+  assert.equal(composer.draft, 'draft in progress\n\n' + NOTE_ACTION_DRAFT)
+  assert.deepEqual(composer.sent, [])
+  view.unmount()
+})
+
+test('Add to chat with an action resolves the note and removes the card', async () => {
+  const composer = createComposer('s-1')
+  const { env, view } = await mountNotes([NOTE_ACTION], composer)
+  pressControl('Add to chat', buttonByText(view.output, 'Add to chat'), composer)
+  assert.equal(buttonByText(view.output, 'Add to chat'), null, 'the resolved card leaves the stack immediately')
+  const posts = env.calls.filter((call) => call.url === 'api/dsh-you-should-know/dismiss')
+  assert.equal(posts.length, 1)
+  assert.deepEqual(JSON.parse(posts[0].init.body), { sessionId: 's-1', noteId: 'n-action', action: 'added_to_chat' })
+  view.unmount()
+})
+
+test('Add to chat then Enter submits the action draft once and never replays it', async () => {
+  const composer = createComposer('s-1')
+  const { view } = await mountNotes([NOTE_ACTION], composer)
+  pressControl('Add to chat', buttonByText(view.output, 'Add to chat'), composer)
+  view.render({ sessionId: 's-1', inputActions: composer.inputActions, input: { draft: composer.draft } })
+  pressEnter(view, composer)
+  assert.notEqual(composer.draft, NOTE_ACTION_DRAFT + '\n\n' + NOTE_ACTION_DRAFT, 'Enter never replays the insertion')
+  assert.deepEqual(composer.sent, [NOTE_ACTION_DRAFT], 'Enter submits the action once')
+  assert.equal(composer.draft, '', 'the submitted draft is cleared')
+  assert.deepEqual(composer.deferredCalls, [])
+  view.unmount()
+})
+
+test('History keeps showing the human finding rather than the action', async () => {
+  const env = await loadBundle({
+    backend: historyBackend({
+      notes: [],
+      history: [{ ...NOTE_ACTION, resolved: true, resolution: 'added_to_chat', resolvedAt: 1 }],
+    }),
+    allowIntervals: true,
+  })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1' })
+  await flushAsync()
+  buttonByText(view.output, 'History').props.onClick()
+  await flushAsync()
+  const text = textOf(view.output)
+  assert.match(text, /The loading state never clears because GET \/session returns 400\./)
+  assert.equal(text.includes('Fix the /session route registration'), false, 'the history keeps the finding and not the action')
+  view.unmount()
+})
 
 test('one Add to chat click writes the finding into the draft exactly once and never sends', async () => {
   const composer = createComposer('s-1')
@@ -1319,7 +1468,7 @@ test('an active history entry keeps Add to chat while a resolved one stays read-
   assert.equal(dismissButtons.length, 1, 'only the active entry offers Dismiss')
 
   addButtons[0].props.onClick()
-  assert.equal(composer.draft, 'Please address this reviewer finding: Active finding.', 'the history entry writes the draft once')
+  assert.equal(composer.draft, 'Fix this reviewer finding: Active finding.', 'the history entry writes the draft once')
   const posts = env.calls.filter((call) => call.url === 'api/dsh-you-should-know/dismiss')
   assert.equal(posts.length, 1)
   assert.deepEqual(JSON.parse(posts[0].init.body), { sessionId: 's-1', noteId: 'n-active', action: 'added_to_chat' })

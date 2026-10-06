@@ -462,6 +462,32 @@ test('a source persists per note through storage and dismissal and never reaches
   assert.deepEqual(engine.notes('s1')[0].source, undefined, 'dismissing one note leaves the other untouched')
 })
 
+test('an action persists per note through storage and history and never reaches status', async () => {
+  const { engine } = engineWith([
+    '{"note":"Guard the write.","importance":"high","source":{"path":"src/store.js","line":42},"action":"Fix the store write and add a regression test."}',
+    '{"note":"A second finding.","importance":"high"}',
+  ])
+  const session = sessionWith('s1', [{ turn: 1, answer: 'one' }])
+  assert.equal((await observeAndSettle(engine, session)).status, 'noted')
+  session.events.push(userEvent(90, 'q2'), assistantEvent(91, 2, 'two'), turnEnd(92, 2))
+  session.lastEvent = session.events[session.events.length - 1]
+  assert.equal((await observeAndSettle(engine, session)).status, 'noted')
+
+  const stored = engine.notes('s1')
+  assert.equal(stored[0].action, 'Fix the store write and add a regression test.')
+  assert.deepEqual(stored[0].source, { path: 'src/store.js', line: 42 })
+  assert.equal(stored[1].action, undefined, 'a finding without an action stores none')
+
+  const snapshot = JSON.stringify(engine.status('s1'))
+  assert.equal(snapshot.includes('Fix the store write'), false, 'status never exposes an action')
+  assert.equal(snapshot.includes('Guard the write.'), false, 'status never exposes note text')
+
+  assert.equal(engine.resolve('s1', stored[0].id, 'added_to_chat'), true)
+  const entry = engine.history('s1').find((item) => item.id === stored[0].id)
+  assert.equal(entry.note, 'Guard the write.', 'history keeps the human note')
+  assert.equal(entry.action, 'Fix the store write and add a regression test.', 'history keeps the action')
+})
+
 test('a reviewer failure is contained and never surfaces as a note', async () => {
   const { engine, errors } = engineWith([new Error('provider down')])
   const outcome = await observeAndSettle(engine, sessionWith('s1', [{ turn: 1, answer: 'work' }]))
