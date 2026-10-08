@@ -20,6 +20,7 @@ import {
   installSpec,
   latestReleaseTag,
   localDateKey,
+  mergeUpdateState,
   millisUntilNextLocalMidnight,
   nextLocalMidnight,
   normalizeUpdateState,
@@ -32,6 +33,10 @@ function at(year, monthIndex, day, hour = 0, minute = 0) {
 }
 
 const HOUR = 3600000
+
+function tick() {
+  return new Promise((resolve) => setTimeout(resolve, 0))
+}
 
 function releaseBody(tag, extra = {}) {
   return JSON.stringify({ tag_name: tag, draft: false, prerelease: false, ...extra })
@@ -394,4 +399,131 @@ test('a missing web fetch service fails quietly instead of throwing', async () =
   const outcome = await checker.checkNow()
   assert.equal(outcome.ok, false)
   assert.equal(h.errors.length, 1)
+})
+
+test('mergeUpdateState keeps a progress field a stale snapshot omits, while preferences follow it', () => {
+  const current = normalizeUpdateState({
+    autoCheckUpdates: false,
+    updateBehavior: 'automatic',
+    lastAutoCheckDate: '2026-06-15',
+    lastSeenLatestVersion: 'v0.4.0',
+    dismissedUpdateVersion: 'v0.4.0',
+  })
+  const stale = mergeUpdateState(current, { autoCheckUpdates: true, updateBehavior: 'notify-only' })
+  assert.equal(stale.autoCheckUpdates, true, 'preferences follow the snapshot')
+  assert.equal(stale.updateBehavior, 'notify-only')
+  assert.equal(stale.lastAutoCheckDate, '2026-06-15', 'a progress field is not erased by an empty snapshot value')
+  assert.equal(stale.lastSeenLatestVersion, 'v0.4.0')
+  assert.equal(stale.dismissedUpdateVersion, 'v0.4.0')
+  const fresh = mergeUpdateState(current, {
+    autoCheckUpdates: true,
+    updateBehavior: 'ask-before-update',
+    lastAutoCheckDate: '2026-06-16',
+    lastSeenLatestVersion: 'v0.5.0',
+  })
+  assert.equal(fresh.lastAutoCheckDate, '2026-06-16')
+  assert.equal(fresh.lastSeenLatestVersion, 'v0.5.0')
+  assert.equal(fresh.dismissedUpdateVersion, 'v0.4.0', 'an empty dismissal keeps the current one')
+})
+
+test('an automatic trigger coalesced with an in-flight manual check still stamps the day', async () => {
+  const calls = []
+  let release
+  const gate = new Promise((resolve) => {
+    release = resolve
+  })
+  const h = checkerHarness({
+    initial: { lastAutoCheckDate: '2026-06-14' },
+    now: at(2026, 5, 15, 0, 30),
+    webFetch: async (request, signal) => {
+      calls.push({ request, signal })
+      await gate
+      return { statusCode: 200, body: { kind: 'text', content: releaseBody('v0.4.0') }, truncated: false }
+    },
+  })
+  const manual = h.checker.checkNow()
+  await tick()
+  // The day-first automatic trigger fires while the manual request is in flight.
+  h.checker.start()
+  h.fire(h.zeroTimers()[0])
+  await tick()
+  release()
+  await manual
+  await h.checker.whenIdle()
+  assert.equal(calls.length, 1, 'both triggers share one network request')
+  assert.equal(h.store.state.lastSeenLatestVersion, 'v0.4.0')
+  assert.equal(h.store.state.lastAutoCheckDate, '2026-06-15', 'the automatic trigger still stamps the day')
+})
+
+test('an immediate timer armed during an in-flight automatic check does not run a second check', async () => {
+  const calls = []
+  let release
+  const gate = new Promise((resolve) => {
+    release = resolve
+  })
+  const h = checkerHarness({
+    initial: { lastAutoCheckDate: '2026-06-14' },
+    now: at(2026, 5, 15, 0, 30),
+    webFetch: async (request) => {
+      calls.push(request)
+      await gate
+      return { statusCode: 200, body: { kind: 'text', content: releaseBody('v0.4.0') }, truncated: false }
+    },
+  })
+  h.checker.start()
+  h.fire(h.zeroTimers()[0])
+  await tick()
+  h.checker.refresh()
+  release()
+  await h.checker.whenIdle()
+  for (const id of h.zeroTimers()) h.fire(id)
+  await h.checker.whenIdle()
+  assert.equal(calls.length, 1, 'the local day is checked exactly once')
+  assert.equal(h.store.state.lastAutoCheckDate, '2026-06-15')
+})
+
+test('a rejected persist fails the check instead of reporting an unrecorded version', async () => {
+  const errors = []
+  const state = normalizeUpdateState({})
+  const checker = createUpdateChecker({
+    currentVersion: '0.3.8',
+    getState: () => state,
+    persist: async () => {
+      throw new Error('settings are read-only')
+    },
+    webFetch: async () => ({ statusCode: 200, body: { kind: 'text', content: releaseBody('v0.4.0') }, truncated: false }),
+    now: () => at(2026, 5, 15, 10, 0),
+    setTimer: () => 1,
+    clearTimer: () => {},
+    onError: (error) => errors.push(error),
+  })
+  checker.start()
+  const outcome = await checker.checkNow()
+  assert.equal(outcome.ok, false)
+  assert.equal(outcome.result, 'failed')
+  assert.equal(checker.status().latestTag, '', 'no version is reported when it could not be recorded')
+  assert.equal(checker.status().lastResult, 'failed')
+  assert.ok(errors.length >= 1)
+  checker.stop()
+})
+
+test('a request that never settles is aborted by the timeout and fails', async () => {
+  const h = checkerHarness({ webFetch: () => new Promise(() => {}) })
+  const pending = h.checker.checkNow()
+  const ids = [...h.timers.keys()]
+  assert.equal(ids.length, 1, 'the request timeout is the only armed timer')
+  h.fire(ids[0])
+  const outcome = await pending
+  assert.equal(outcome.ok, false)
+  assert.equal(outcome.result, 'failed')
+})
+
+test('stop cancels the armed timers and marks the last result failed', () => {
+  const h = checkerHarness({ initial: { lastAutoCheckDate: '2026-06-14' }, now: at(2026, 5, 15, 0, 30) })
+  h.checker.start()
+  assert.equal(h.zeroTimers().length, 1)
+  assert.equal(h.midnightTimers().length, 1)
+  h.checker.stop()
+  assert.equal(h.timers.size, 0)
+  assert.equal(h.checker.status().lastResult, 'failed')
 })
