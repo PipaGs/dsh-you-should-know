@@ -340,6 +340,7 @@ test('the plugin registers its browser routes on the connection Fetch carrier', 
     '/api/dsh-you-should-know/notes',
     '/api/dsh-you-should-know/session',
     '/api/dsh-you-should-know/status',
+    '/api/dsh-you-should-know/update',
   ])
 
   const notes = harness.fetchRoutes.find((route) => route.path === '/api/dsh-you-should-know/notes')

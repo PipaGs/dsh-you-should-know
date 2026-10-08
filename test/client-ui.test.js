@@ -1680,3 +1680,183 @@ test('the session header has no per-session custom prompt field and notes the gl
   assert.match(textOf(view.output), /Custom uses the global custom reviewer prompt/)
   view.unmount()
 })
+
+// --- Update settings and notification -----------------------------------------
+
+const UPDATE_STATUS = {
+  currentVersion: '0.3.8',
+  latestVersion: '0.4.0',
+  latestTag: 'v0.4.0',
+  installSpec: 'github:PipaGs/dsh-you-should-know#v0.4.0',
+  updateAvailable: true,
+  dismissed: false,
+  dismissedVersion: '',
+  autoCheckUpdates: true,
+  updateBehavior: 'ask-before-update',
+  automaticSupported: false,
+  lastAutoCheckDate: '2026-06-15',
+  lastCheckedAt: null,
+  lastResult: null,
+}
+
+/**
+ * A backend that serves the config GET (carrying the bounded update status) and
+ * the update POST route. It records every update-route body so a test can prove
+ * exactly which action the browser sent.
+ */
+function updateBackend(overrides = {}, options = {}) {
+  const status = { ...UPDATE_STATUS, ...overrides }
+  const posts = []
+  async function backend(url, init = {}) {
+    if (init.method === 'POST' && url === 'api/dsh-you-should-know/update') {
+      const body = JSON.parse(init.body)
+      posts.push(body)
+      if (body.action === 'check') {
+        return { status: 200, body: { ok: true, result: 'update-available', update: { ...status, lastResult: 'update-available' } } }
+      }
+      if (body.action === 'set-preferences') {
+        if (typeof body.autoCheckUpdates === 'boolean') status.autoCheckUpdates = body.autoCheckUpdates
+        if (typeof body.updateBehavior === 'string') status.updateBehavior = body.updateBehavior
+        return { status: 200, body: { ok: true, action: 'set-preferences', update: { ...status } } }
+      }
+      if (body.action === 'dismiss') {
+        status.dismissed = true
+        status.dismissedVersion = body.version
+        return { status: 200, body: { ok: true, action: 'dismiss', update: { ...status } } }
+      }
+    }
+    return {
+      status: 200,
+      body: {
+        ok: true,
+        writable: options.writable !== false,
+        config: { mode: 'automatic', reviewerMode: 'balanced', additionalInstructions: '', customReviewerPrompt: '', minDeltaChars: 1200, cooldownTurns: 3, maxContextMessages: 12, maxTokens: 768 },
+        catalog: { providers: [] },
+        update: { ...status },
+      },
+    }
+  }
+  return { backend, posts, status }
+}
+
+function mountSettingsCard(env) {
+  return env.runtime.mount(env.cardComponent().component, { connection: env.connection })
+}
+
+test('the update settings render the controls and versions from the single config read', async () => {
+  const backend = updateBackend()
+  const env = await loadBundle({ backend: backend.backend })
+  const view = mountSettingsCard(env)
+  await flushAsync()
+  assert.equal(env.calls.length, 1, 'update status comes with the config read, not a second request')
+  assert.equal(findByAria(view.output, 'Check for updates automatically').props.checked, true)
+  const behavior = findByAria(view.output, 'Update behavior')
+  assert.equal(behavior.props.value, 'ask-before-update')
+  // Array.from keeps the comparison in the test realm; the options array was
+  // built inside the vm sandbox and carries that realm's prototype.
+  assert.deepEqual(Array.from(behavior.props.children).map((option) => option.props.value), ['notify-only', 'ask-before-update', 'automatic'])
+  assert.deepEqual(Array.from(behavior.props.children).map((option) => option.props.children), ['Notify only', 'Ask before update', 'Automatic'])
+  assert.ok(buttonByText(view.output, 'Check for updates'), 'the manual check button renders')
+  assert.match(textOf(view.output), /0\.3\.8/)
+  assert.match(textOf(view.output), /v0\.4\.0/)
+  view.unmount()
+})
+
+test('changing the automatic-check toggle persists the boolean through the update route', async () => {
+  const backend = updateBackend()
+  const env = await loadBundle({ backend: backend.backend })
+  const view = mountSettingsCard(env)
+  await flushAsync()
+  findByAria(view.output, 'Check for updates automatically').props.onChange({ target: { checked: false } })
+  await flushAsync()
+  assert.deepEqual(backend.posts, [{ action: 'set-preferences', autoCheckUpdates: false }])
+  assert.equal(findByAria(view.output, 'Check for updates automatically').props.checked, false)
+  view.unmount()
+})
+
+test('the behavior select persists each value and Automatic shows the exact unsupported helper', async () => {
+  const backend = updateBackend()
+  const env = await loadBundle({ backend: backend.backend })
+  const view = mountSettingsCard(env)
+  await flushAsync()
+  findByAria(view.output, 'Update behavior').props.onChange({ target: { value: 'notify-only' } })
+  await flushAsync()
+  assert.deepEqual(backend.posts.at(-1), { action: 'set-preferences', updateBehavior: 'notify-only' })
+  findByAria(view.output, 'Update behavior').props.onChange({ target: { value: 'automatic' } })
+  await flushAsync()
+  assert.deepEqual(backend.posts.at(-1), { action: 'set-preferences', updateBehavior: 'automatic' })
+  assert.match(textOf(view.output), /Automatic installation is not supported by this DSH version/)
+  view.unmount()
+})
+
+test('the Check for updates button runs one manual check and shows deterministic feedback', async () => {
+  const backend = updateBackend()
+  const env = await loadBundle({ backend: backend.backend })
+  const view = mountSettingsCard(env)
+  await flushAsync()
+  buttonByText(view.output, 'Check for updates').props.onClick()
+  await flushAsync()
+  assert.deepEqual(backend.posts, [{ action: 'check' }])
+  assert.match(textOf(view.output), /Update available/)
+  view.unmount()
+})
+
+test('the update card shows the exact pinned spec and the restart note, and installs nothing', async () => {
+  const backend = updateBackend()
+  const env = await loadBundle({ backend: backend.backend })
+  const view = mountSettingsCard(env)
+  await flushAsync()
+  assert.match(textOf(view.output), /v0\.4\.0/)
+  assert.match(textOf(view.output), /github:PipaGs\/dsh-you-should-know#v0\.4\.0/)
+  assert.match(textOf(view.output), /Restart/)
+  assert.ok(findByAria(view.output, 'Copy install spec'))
+  assert.equal(typeof env.module.installBundle, 'undefined', 'the browser half exposes no install call')
+  assert.equal(backend.posts.length, 0, 'rendering the notice mutates nothing')
+  view.unmount()
+})
+
+test('dismissing a version hides its card while a newer release surfaces again', async () => {
+  const backend = updateBackend()
+  const env = await loadBundle({ backend: backend.backend })
+  const view = mountSettingsCard(env)
+  await flushAsync()
+  findByAria(view.output, 'Dismiss update').props.onClick()
+  await flushAsync()
+  assert.deepEqual(backend.posts, [{ action: 'dismiss', version: 'v0.4.0' }])
+  assert.equal(findByAria(view.output, 'Copy install spec'), null, 'the dismissed version stays hidden')
+  view.unmount()
+
+  const newer = updateBackend({ latestTag: 'v0.5.0', latestVersion: '0.5.0', installSpec: 'github:PipaGs/dsh-you-should-know#v0.5.0', dismissed: false, dismissedVersion: 'v0.4.0' })
+  const env2 = await loadBundle({ backend: newer.backend })
+  const view2 = mountSettingsCard(env2)
+  await flushAsync()
+  assert.ok(findByAria(view2.output, 'Copy install spec'), 'a newer release surfaces again')
+  assert.match(textOf(view2.output), /v0\.5\.0/)
+  view2.unmount()
+})
+
+test('without an update status the card still offers the conservative defaults and no notice', async () => {
+  const env = await loadBundle({
+    backend: async () => ({
+      status: 200,
+      body: { ok: true, writable: true, config: { mode: 'automatic', minDeltaChars: 1200, cooldownTurns: 3, maxContextMessages: 12, maxTokens: 768 }, catalog: { providers: [] } },
+    }),
+  })
+  const view = mountSettingsCard(env)
+  await flushAsync()
+  assert.equal(findByAria(view.output, 'Check for updates automatically').props.checked, true)
+  assert.equal(findByAria(view.output, 'Update behavior').props.value, 'ask-before-update')
+  assert.equal(findByAria(view.output, 'Copy install spec'), null)
+  view.unmount()
+})
+
+test('a read-only host disables the update controls too', async () => {
+  const backend = updateBackend({}, { writable: false })
+  const env = await loadBundle({ backend: backend.backend })
+  const view = mountSettingsCard(env)
+  await flushAsync()
+  assert.equal(findByAria(view.output, 'Check for updates automatically').props.disabled, true)
+  assert.equal(findByAria(view.output, 'Update behavior').props.disabled, true)
+  assert.equal(buttonByText(view.output, 'Check for updates').props.disabled, true)
+  view.unmount()
+})

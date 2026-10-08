@@ -80,7 +80,7 @@ A source-level test (`test/invariant.test.js`) scans the shipped files for every
 Because the built host and browser halves are committed, installation needs no source build. Install an **immutable release ref**, not the default branch:
 
 ```sh
-dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.3.7
+dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.3.8
 ```
 
 A bare `github:PipaGs/dsh-you-should-know` address is resolved by pnpm and saved as that same value every time. The Desktop plugin manager learns which package an install produced by diffing the profile's dependencies before and after pnpm runs, and falls back to matching the typed address against a package name. A bare default-branch address changes nothing on the second run, and that fallback does not understand a Git address, so the manager reports that the installed package could not be told from the dependency change. A ref-pinned address is saved verbatim, so each install and upgrade is attributed to `dsh-you-should-know`. In the Desktop **Add plugin** dialog, enter the same pinned address. To move to a later release, install its tag; to install the exact version already present, remove the plugin first.
@@ -165,6 +165,7 @@ The browser half registers three surfaces.
 - The numeric gates (`minDeltaChars`, `cooldownTurns`, `maxContextMessages`, `maxTokens`) are editable and validated against the same bounds as the row.
 - Save is disabled, and every control explains why, when the host mounts no writable settings service. A pinned route that resolves to nothing is rejected before anything is persisted, with a bounded message.
 - The card refreshes once on mount, on window focus, and on a connection reset; a stale response from an older request generation never overwrites a newer one.
+- An **Updates** group shows the current and latest version, a **Check for updates automatically** toggle (default on), an **Update behavior** select (default **Ask before update**), and a **Check for updates** button. When a newer release exists it shows `current -> latest` and the exact pinned address with a copy action and a dismiss action. It reads the update status with the same single config read and never makes a second request just to render.
 
 **Session header action** (`conversation.session.header.actions`, scoped to one session):
 
@@ -173,6 +174,41 @@ The browser half registers three surfaces.
 - It never renders the transcript and never posts to the primary agent.
 
 Delivery uses conservative polling. While the page is visible the note card polls its route every 7 seconds; polling stops while the tab is hidden and refreshes immediately when it becomes visible again. The two settings surfaces have no interval: they refresh on mount, focus, and connection reset. There is no push channel for out-of-tree plugins in the current public API, so polling is the documented mechanism.
+
+## Update checking
+
+The plugin can tell you when a newer release exists. It **checks**; it does not install. Current DSH has no native background plugin auto-update and no public update method, so every behavior below ends at a notice plus a pinned install address you approve through the normal Plugins flow.
+
+**Cadence.** Checking is host-side and read-only, and runs at most once per local calendar day:
+
+1. On plugin startup, if today has no successful automatic check yet, exactly one automatic check runs.
+2. If the host stays up past local midnight, one timer fires at the next local midnight and runs that day's check; the following midnight is armed again from the local calendar, so a DST day is 23 or 25 hours rather than a hardcoded 24.
+3. A failed automatic check (network error, timeout, non-2xx, oversized or malformed body, or a tag that is not stable) does **not** stamp the day, so the next startup retries that same day. It never retries in a tight loop.
+4. A manual **Check for updates** bypasses the once-per-day guard and can run at any time.
+
+Only a successful automatic check records the local date. The preference and the tiny state (the last successful local date, the last seen release tag, a dismissal, and the update behavior) persist in the same `you-should-know` plugin row through the host settings service. Nothing is kept in browser storage.
+
+**Release source.** The check reads `https://api.github.com/repos/PipaGs/dsh-you-should-know/releases/latest` through the host's public `ctx.web` fetch seam. That endpoint names the newest published non-draft, non-prerelease release, so a branch head can never become an update. Only a stable `vMAJOR.MINOR.PATCH` tag is accepted; a prerelease, build suffix, branch name, or malformed tag is ignored, and an equal or older version is not an update. The response is bounded (64 KiB and a 10-second timeout) and any bad response fails quietly.
+
+**Privacy.** The request carries no user data: no conversation text, note, custom reviewer prompt, session id, provider or model id, or other plugin state. It is a single anonymous `GET` to the release endpoint with only ordinary HTTP metadata and the shared web seam's product `User-Agent`.
+
+**Update behavior.** The preference is stored even when it cannot take effect on the running DSH:
+
+| Behavior | What happens on current DSH |
+|---|---|
+| **Notify only** | Fully supported. When a newer release exists, the settings card shows `current -> latest` and the exact pinned address. Nothing is installed. |
+| **Ask before update** | Supported as a notice. This DSH version exposes no approved plugin update API that a plugin may call without bypassing human approval, so it degrades to **Notify only** and asks you to install through the Plugins flow. |
+| **Automatic** | Not available. Automatic installation is not supported by this DSH version, so the preference is stored for a future compatible DSH but nothing is installed; no shell, package manager, profile file, or internal service is ever used. |
+
+**Installing a found release.** The exact address is `github:PipaGs/dsh-you-should-know#vX.Y.Z`. Install it through the Plugins settings (the **Add plugin** dialog or the profile dependency), then **restart DSH Desktop** so the new JavaScript generation loads. Dismissing a version hides its notice for that version only; a newer release surfaces again.
+
+| Key | Default | Validation | Meaning |
+|---|---|---|---|
+| `autoCheckUpdates` | `true` | boolean | Whether the once-per-day automatic check runs. |
+| `updateBehavior` | `ask-before-update` | one of `notify-only`, `ask-before-update`, `automatic` | Stored preference; see the table above. |
+| `lastAutoCheckDate` | empty | `YYYY-MM-DD` local date | The last successful automatic check; never stamped by a failure or a manual check. |
+| `lastSeenLatestVersion` | empty | stable `vX.Y.Z` tag | The last release the check read; non-stable values are discarded. |
+| `dismissedUpdateVersion` | empty | stable `vX.Y.Z` tag | The version whose notice the human dismissed. |
 
 ## Operational verification
 
@@ -253,6 +289,7 @@ Typical readings:
 - Each review is exactly one model call with a hard `maxTokens` cap, and the gates keep calls rare: a completed turn must pass the cooldown, the delta gate, and the per-session budget.
 - The routes are Fetch handlers on the connection carrier, mounted under the same `/api` transport as the rest of the GUI. They expose only the note text, its optional source path, and its optional agent-facing repair action for a session id plus the bounded status counters; they do not expose credentials, prompt text, conversation text, or the transcript. The connection rejects cross-origin browser traffic (a foreign `Host`/`Origin`, or a request without a valid browser session) so a random web page cannot dismiss notes or read diagnostics.
 - The reviewer prompt declares the conversation excerpt untrusted data, so instructions embedded in a user or assistant message are not followed as reviewer instructions.
+- The update check is the only additional outbound request. It sends one anonymous `GET` to the GitHub releases endpoint and carries no conversation text, note, custom reviewer prompt, session id, provider or model id, or other plugin state.
 
 ## Failure model
 
@@ -283,16 +320,19 @@ The plugin fails quiet by construction:
 - At most 200 per-session model and mode overrides are retained, and a `session/disposed` event forgets the session's notes, dedupe, overrides, and runtime together.
 - A session in `Custom` mode reuses the global additional reviewer instructions; there is no per-session instruction field in the session header.
 - The reviewer is a language model. Treat its note as a prompt to check something, not as a verified fact.
+- Current DSH has no native plugin auto-update and no public update API a plugin may call, so the plugin only checks and notifies; installing a found release, and the Desktop restart it needs, stay manual.
 - UI strings and all shipped or public text are English-only by design; a source-level test rejects CJK, Cyrillic, Greek, and Hangul ranges in addition to unrelated project references.
 
 ## Development
 
 ```sh
-node --check lib/core.js && node --check lib/runtime.js && node --check lib/review-profile.js && node --check lib/review-strictness.js && node --check lib/index.js && node --check lib/client.js
+node --check lib/core.js && node --check lib/runtime.js && node --check lib/review-profile.js && node --check lib/review-strictness.js && node --check lib/update.js && node --check lib/index.js && node --check lib/client.js
 node --test test/*.test.js
 ```
 
 The suite covers adaptive DeepSeek route discovery, the documented and installed-style route variants, arbitrary exact overrides, partial pins, the blank-config gate, no-route fail-quiet and route recovery, live reconfiguration, the strict verdict shape, silent/malformed/non-text verdicts, deduplication, cooldown, the delta gate, the bounded event window and gap recovery, tool-event flood retention, session scoping and dismissal, the optional note source schema and its exact-path-only prompt invariant, the per-note source storage and dismissal, the bounded multi-note stack and its deliberate order, the copyable-source and Open file navigation seams, the Add to chat draft write with its one-click-one-insertion and Enter-submits-only lifecycle and its never-send guarantee, the connection bridge route shape for the combined GET/HEAD/POST routes, the status pending-note count after dismissal, the bounded client resolution memory, the resolve API with its exact `dismissed` and `added_to_chat` actions, the bounded and session-isolated notification history and its UI, the read-only status diagnostics, connection Fetch route registration with Request/Response semantics and bodyless HEAD responses, the document-relative browser URLs, bounded context, the adaptive response-language directive, deterministic language-skill detection with a three-skill cap and no keyword guessing, the single-reviewer guard, the browser bundle envelope, and the human-only source invariant. It also covers the per-session runtime queue and counters, transient retry and permanent/quota classification, the whole-call deadline, backlog flushing, and resume; the volatile config live-update path; the settings persistence split (reset for automatic, merge for pinned); the config and session routes; the settings card and session-header model override; the adaptive review profile, the reviewer strictness modes with their deterministic threshold gating, verbatim additional-instruction composition, diagnostics non-leak, and per-session mode override isolation, and the editable Custom reviewer prompt with its verbatim replacement composition and host-row persistence. The package declares no runtime dependencies of its own: its only non-relative import is the host-provided `@deepseek-ai/schemastery` Config schema, and there is no build step.
+
+The suite also covers the update checker: the stable-tag parser and comparator, the latest-release payload (drafts and prereleases ignored), the exact pinned install-spec string, the once-per-day scheduler (startup due/not-due, the failed check that does not stamp, the manual check that bypasses the guard, crossing midnight, disabling, and re-enabling), local-midnight calendar math across a DST transition, bounded and malformed responses, the request payload (only the release URL and a cancellation signal), the update route and its persistence, the update fields in the row schema, the preservation of the update state across an automatic reviewer save, and the settings card's update controls, notice, dismissal, and no-install guarantee.
 
 ## Related work
 
