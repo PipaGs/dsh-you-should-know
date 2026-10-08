@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 
-const SHIPPED = ['lib/core.js', 'lib/review-profile.js', 'lib/review-strictness.js', 'lib/index.js', 'lib/client.js']
+const SHIPPED = ['lib/core.js', 'lib/review-profile.js', 'lib/review-strictness.js', 'lib/update.js', 'lib/index.js', 'lib/client.js']
 const PUBLIC = ['package.json', 'cordis.patch.yml', 'README.md', 'LICENSE']
 
 async function read(path) {
@@ -63,6 +63,33 @@ test('the plugin uses only the sanctioned seams', async () => {
   assert.ok(!client.includes('localStorage'), 'resolution state stays in the page, not shared storage')
 })
 
+test('no shipped source can install, upgrade, or self-modify the plugin', async () => {
+  const unsafe = [
+    { label: 'plugin-manager install call', pattern: /installBundle/ },
+    { label: 'plugin-manager access', pattern: /pluginManager/ },
+    { label: 'child-process escape', pattern: /child_process/ },
+    { label: 'package-manager invocation', pattern: /\b(?:pnpm|yarn)\b/ },
+    { label: 'npm invocation', pattern: /\bnpm\s+(?:install|add|update|i)\b/ },
+    // A regexp .exec() is not a shell escape; only the child-process APIs are.
+    { label: 'shell execution', pattern: /\b(?:execSync|spawn|spawnSync)\s*\(/ },
+    { label: 'profile file write', pattern: /writeFile/ },
+    { label: 'browser storage', pattern: /localStorage/ },
+  ]
+  // The update checker is the only module that talks about installing; it must
+  // not reach for any install or self-modify seam even in its own prose.
+  for (const { label, pattern } of unsafe) {
+    assert.equal(pattern.test(await read('lib/update.js')), false, 'lib/update.js contains ' + label + ' (' + pattern + ')')
+  }
+  // Every shipped file is scanned with comments removed, so a documented
+  // command in prose never hides an executable path.
+  for (const path of SHIPPED) {
+    const code = stripComments(await read(path))
+    for (const { label, pattern } of unsafe) {
+      assert.equal(pattern.test(code), false, path + ' contains ' + label + ' (' + pattern + ')')
+    }
+  }
+})
+
 test('the browser half reaches files and the composer only through their public seams', async () => {
   const client = await read('lib/client.js')
   assert.ok(client.includes('openResource('), 'file navigation goes through the sidebar resource service')
@@ -115,7 +142,7 @@ test('the bundled row leaves the reviewer route to adaptive discovery', async ()
 test('the manifest declares the bundle, the client half, and no build step', async () => {
   const manifest = JSON.parse(await read('package.json'))
   assert.equal(manifest.name, 'dsh-you-should-know')
-  assert.equal(manifest.version, '0.3.7')
+  assert.equal(manifest.version, '0.3.8')
   assert.equal(manifest.license, 'MIT')
   assert.equal(manifest.dsh.manifestVersion, 1)
   assert.equal(manifest.dsh.bundle.patch, './cordis.patch.yml')
