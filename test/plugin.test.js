@@ -878,3 +878,77 @@ test('the session route POST set-mode and reset-mode isolate the strictness mode
   assert.deepEqual(await oversized.json(), { ok: false, error: 'invalid-body' })
   harness.disposeAll()
 })
+
+test('the plugin runs the day-first automatic update check through the web and settings seams', async () => {
+  const webCalls = []
+  const updates = []
+  const web = {
+    async fetch(request) {
+      webCalls.push(request)
+      return { statusCode: 200, body: { kind: 'text', content: JSON.stringify({ tag_name: 'v0.4.0', draft: false, prerelease: false }) }, truncated: false, url: request.url }
+    },
+  }
+  const settings = {
+    async update(key, patch) {
+      updates.push({ key, patch })
+    },
+    async replace() {},
+  }
+  const harness = makeCtx({ llm: makeLlm([]), web, settings })
+  apply(harness.ctx, { provider: 'p', model: 'm' })
+
+  const deadline = Date.now() + 2000
+  while (updates.length === 0 && Date.now() < deadline) await settle()
+
+  assert.equal(webCalls.length, 1, 'one automatic check runs on the first activation of the day')
+  assert.deepEqual(Object.keys(webCalls[0]), ['url'], 'the request carries only the release URL')
+  assert.equal(typeof webCalls[0].url, 'string')
+  assert.equal(updates.length, 1)
+  assert.equal(updates[0].key, 'you-should-know')
+  assert.equal(updates[0].patch.lastSeenLatestVersion, 'v0.4.0')
+  const now = new Date()
+  const today = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0')
+  assert.equal(updates[0].patch.lastAutoCheckDate, today, 'only a successful automatic check stamps the local date')
+  harness.disposeAll()
+
+  // A restart in the same local day, with the stamped date persisted, must not
+  // make a second automatic request.
+  const again = makeCtx({ llm: makeLlm([]), web, settings })
+  apply(again.ctx, { provider: 'p', model: 'm', lastAutoCheckDate: today, lastSeenLatestVersion: 'v0.4.0' })
+  await settle()
+  await settle()
+  assert.equal(webCalls.length, 1, 'a same-day restart does not repeat the check')
+  again.disposeAll()
+})
+
+test('a volatile config edit reaches the update state without a remount', async () => {
+  const today = new Date()
+  const dateKey = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0')
+  const settingsUpdates = []
+  const web = { fetch: async () => ({ statusCode: 200, body: { kind: 'text', content: JSON.stringify({ tag_name: 'v0.4.0' }) }, truncated: false }) }
+  const settings = {
+    async update(key, patch) {
+      settingsUpdates.push({ key, patch })
+    },
+    async replace() {},
+  }
+  const harness = makeCtx({ llm: makeLlm([]), web, settings })
+  const rawConfig = { provider: 'p', model: 'm', autoCheckUpdates: true, updateBehavior: 'ask-before-update', lastAutoCheckDate: dateKey, lastSeenLatestVersion: 'v0.4.0' }
+  apply(harness.ctx, rawConfig)
+  harness.runInjections()
+  assert.equal(settingsUpdates.length, 0, 'a day already checked makes no automatic request')
+
+  const listener = harness.listeners.find((entry) => entry.eventName === 'loader/volatile-update').listener
+  rawConfig.autoCheckUpdates = false
+  rawConfig.updateBehavior = 'notify-only'
+  listener()
+  await settle()
+
+  const route = harness.fetchRoutes.find((candidate) => candidate.path === '/api/dsh-you-should-know/update')
+  const body = await (await route.fetch(new Request('http://127.0.0.1/api/dsh-you-should-know/update', { method: 'GET' }))).json()
+  assert.equal(body.update.autoCheckUpdates, false)
+  assert.equal(body.update.updateBehavior, 'notify-only')
+  assert.equal(body.update.lastAutoCheckDate, dateKey, 'the persisted date survives the volatile edit')
+  assert.equal(body.update.latestTag, 'v0.4.0')
+  harness.disposeAll()
+})
