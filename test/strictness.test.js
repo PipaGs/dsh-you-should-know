@@ -203,6 +203,14 @@ async function observeAndSettle(engine, session) {
 
 // --- Config defaults, migration, and bounds -----------------------------------
 
+test('the config schema accepts a bounded hourly reviewer-call budget', () => {
+  // A volatile schema field is handed back as the loader's live reference.
+  assert.equal(Config({ maxReviewerCallsPerHour: 24 }).maxReviewerCallsPerHour.get(), 24)
+  assert.equal(Config({}).maxReviewerCallsPerHour.get(), 12)
+  assert.throws(() => Config({ maxReviewerCallsPerHour: 0 }))
+  assert.throws(() => Config({ maxReviewerCallsPerHour: 61 }))
+})
+
 test('a missing or v0.3.6 config migrates to Balanced with empty instructions', () => {
   const absent = normalizeConfig(undefined).config
   assert.equal(absent.reviewerMode, 'balanced')
@@ -352,10 +360,20 @@ test('a live global config update changes the effective mode for subsequent revi
   assert.equal(before.status, 'silent')
   engine.updateConfig({ ...CONFIGURED, reviewerMode: 'strict' })
   assert.equal(engine.sessionConfig('s1').effectiveMode, 'strict')
-  const after = await observeAndSettle(engine, sessionWith('s1', [
+  // The one quiet verdict above doubled the effective cooldown, so the next
+  // turn is intentionally skipped and the following one is reviewed.
+  const session = sessionWith('s1', [
     { turn: 1, answer: 'work' },
     { turn: 2, answer: 'more work' },
-  ]))
+    { turn: 3, answer: 'even more work' },
+  ])
+  const ends = session.events.filter((event) => event.type === 'turn/end')
+  assert.equal(ends.length, 3)
+  const skipped = engine.observe(session, ends[1])
+  assert.equal(skipped.promise, undefined)
+  assert.equal(skipped.status, 'cooldown')
+  const pending = engine.observe({ ...session, lastEvent: ends[2] }, ends[2])
+  const after = pending.promise ? await pending.promise : pending
   assert.equal(after.status, 'noted')
 })
 

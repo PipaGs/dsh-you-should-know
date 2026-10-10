@@ -493,6 +493,7 @@ test('Save posts the exact bounded config for the selected route', async () => {
     cooldownTurns: 7,
     maxContextMessages: 4,
     maxTokens: 512,
+    maxReviewerCallsPerHour: 12,
   })
   view.unmount()
 })
@@ -1858,5 +1859,169 @@ test('a read-only host disables the update controls too', async () => {
   assert.equal(findByAria(view.output, 'Check for updates automatically').props.disabled, true)
   assert.equal(findByAria(view.output, 'Update behavior').props.disabled, true)
   assert.equal(buttonByText(view.output, 'Check for updates').props.disabled, true)
+  view.unmount()
+})
+
+// --- v0.4.0 feedback and Explain ----------------------------------------------
+
+test('the note card offers Knew it, Thanks, and Explain alongside the existing actions', async () => {
+  const env = await loadBundle({
+    backend: notesBackend([{ id: 'n-1', note: 'One important thing.', importance: 'high', createdAt: 1 }]),
+    allowIntervals: true,
+  })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1' })
+  await flushAsync()
+  const card = findByType(view.output, 'section')
+  for (const label of ['Add to chat', 'Dismiss', 'Knew it', 'Thanks', 'Explain']) {
+    assert.ok(buttonByText(card, label), label + ' is present')
+  }
+  view.unmount()
+})
+
+test('Knew it and Thanks post their exact resolutions and remove the card', async () => {
+  const env = await loadBundle({
+    backend: notesBackend([
+      { id: 'n-1', note: 'First finding.', importance: 'high', createdAt: 1 },
+      { id: 'n-2', note: 'Second finding.', importance: 'high', createdAt: 2 },
+    ]),
+    allowIntervals: true,
+  })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1' })
+  await flushAsync()
+  buttonByText(view.output, 'Knew it').props.onClick()
+  await flushAsync()
+  assert.equal(findAll(view.output, 'section').length, 1, 'Knew it removes exactly its own card')
+  buttonByText(view.output, 'Thanks').props.onClick()
+  await flushAsync()
+  assert.equal(findAll(view.output, 'section').length, 0, 'Thanks removes the last card')
+  const posts = env.calls
+    .filter((call) => call.url === 'api/dsh-you-should-know/dismiss')
+    .map((call) => JSON.parse(call.init.body))
+  assert.deepEqual(posts, [
+    { sessionId: 's-1', noteId: 'n-1', action: 'knew_it' },
+    { sessionId: 's-1', noteId: 'n-2', action: 'thanks' },
+  ])
+  view.unmount()
+})
+
+test('Explain is collapsed by default, expands inline, and reuses the cached text', async () => {
+  const explainPosts = []
+  const env = await loadBundle({
+    backend: async (url, init = {}) => {
+      if (url.startsWith('api/dsh-you-should-know/explain')) {
+        explainPosts.push(JSON.parse(init.body))
+        return { status: 200, body: { ok: true, cached: false, explanation: 'It matters because the cache is stale.' } }
+      }
+      if (url.startsWith('api/dsh-you-should-know/notes')) {
+        return { status: 200, body: { ok: true, notes: [{ id: 'n-1', note: 'One important thing.', importance: 'high', createdAt: 1 }] } }
+      }
+      return { status: 200, body: { ok: true } }
+    },
+    allowIntervals: true,
+  })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1' })
+  await flushAsync()
+  assert.equal(findByAria(view.output, 'Explanation'), null, 'collapsed by default')
+  buttonByText(view.output, 'Explain').props.onClick()
+  await flushAsync()
+  assert.ok(findByAria(view.output, 'Explanation'), 'the explanation expands inline')
+  assert.match(textOf(view.output), /cache is stale/)
+  assert.deepEqual(explainPosts, [{ sessionId: 's-1', noteId: 'n-1' }])
+
+  buttonByText(view.output, 'Hide explanation').props.onClick()
+  await flushAsync()
+  assert.equal(findByAria(view.output, 'Explanation'), null, 'it collapses again')
+  buttonByText(view.output, 'Explain').props.onClick()
+  await flushAsync()
+  assert.match(textOf(view.output), /cache is stale/)
+  assert.equal(explainPosts.length, 1, 'the cached explanation needs no second request')
+  view.unmount()
+})
+
+test('a failed Explain shows a retry and never blocks the other card actions', async () => {
+  let attempts = 0
+  const env = await loadBundle({
+    backend: async (url) => {
+      if (url.startsWith('api/dsh-you-should-know/explain')) {
+        attempts += 1
+        if (attempts === 1) return { status: 200, body: { ok: false, error: 'failed' } }
+        return { status: 200, body: { ok: true, cached: false, explanation: 'Second attempt worked.' } }
+      }
+      if (url.startsWith('api/dsh-you-should-know/notes')) {
+        return { status: 200, body: { ok: true, notes: [{ id: 'n-1', note: 'One thing.', importance: 'high', createdAt: 1 }] } }
+      }
+      return { status: 200, body: { ok: true } }
+    },
+    allowIntervals: true,
+  })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1' })
+  await flushAsync()
+  buttonByText(view.output, 'Explain').props.onClick()
+  await flushAsync()
+  assert.match(textOf(view.output), /Could not load an explanation/)
+  assert.ok(buttonByText(view.output, 'Dismiss'), 'the other actions stay available')
+  findByAria(view.output, 'Retry explanation').props.onClick()
+  await flushAsync()
+  assert.match(textOf(view.output), /Second attempt worked/)
+  assert.equal(attempts, 2)
+  view.unmount()
+})
+
+test('a note that already carries an explanation expands it without a request', async () => {
+  const env = await loadBundle({
+    backend: notesBackend([{ id: 'n-1', note: 'One thing.', importance: 'high', createdAt: 1, explanation: 'Cached reasoning.' }]),
+    allowIntervals: true,
+  })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1' })
+  await flushAsync()
+  buttonByText(view.output, 'Explain').props.onClick()
+  await flushAsync()
+  assert.match(textOf(view.output), /Cached reasoning/)
+  assert.equal(env.calls.filter((call) => call.url === 'api/dsh-you-should-know/explain').length, 0)
+  view.unmount()
+})
+
+test('History renders every resolution state distinctly and shows a bounded explanation', async () => {
+  const env = await loadBundle({
+    backend: historyBackend({
+      notes: [{ id: 'n-active', note: 'Active finding.', importance: 'high', createdAt: 5 }],
+      historyCount: 5,
+      history: [
+        { id: 'n-active', note: 'Active finding.', importance: 'high', createdAt: 5, resolved: false },
+        { id: 'n-dismissed', note: 'Dismissed finding.', importance: 'high', createdAt: 4, resolved: true, resolution: 'dismissed' },
+        { id: 'n-added', note: 'Added finding.', importance: 'high', createdAt: 3, resolved: true, resolution: 'added_to_chat' },
+        { id: 'n-knew', note: 'Known finding.', importance: 'high', createdAt: 2, resolved: true, resolution: 'knew_it', explanation: 'Why it matters.' },
+        { id: 'n-thanks', note: 'Thanked finding.', importance: 'high', createdAt: 1, resolved: true, resolution: 'thanks' },
+      ],
+    }),
+    allowIntervals: true,
+  })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1' })
+  await flushAsync()
+  buttonByText(view.output, 'History').props.onClick()
+  await flushAsync()
+  const entries = findAll(view.output, 'section').filter((node) => node.props && node.props.role === 'history-entry')
+  assert.equal(entries.length, 5)
+  assert.deepEqual(entries.map((entry) => entry.props['data-state']).sort(), ['active', 'added_to_chat', 'dismissed', 'knew_it', 'thanks'])
+  const rendered = textOf(view.output)
+  for (const label of ['State: Active', 'State: Dismissed', 'State: Added to chat', 'State: Knew it', 'State: Thanks']) {
+    assert.ok(rendered.includes(label), label + ' is rendered distinctly')
+  }
+  assert.match(rendered, /Why it matters\./)
+  view.unmount()
+})
+
+test('the settings card renders and posts the hourly reviewer-call budget', async () => {
+  const env = await loadBundle({ backend: configBackend() })
+  const view = env.runtime.mount(env.cardComponent().component, { connection: env.connection })
+  await flushAsync()
+  const field = findByAria(view.output, 'Max reviewer calls per hour')
+  assert.ok(field, 'the budget field renders')
+  assert.equal(field.props.value, '12', 'the conservative host default is shown')
+  field.props.onChange({ target: { value: '24' } })
+  buttonByText(view.output, 'Save').props.onClick()
+  await flushAsync()
+  const post = env.calls.find((call) => call.init && call.init.method === 'POST')
+  assert.equal(JSON.parse(post.init.body).maxReviewerCallsPerHour, 24)
   view.unmount()
 })
