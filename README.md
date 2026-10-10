@@ -71,7 +71,7 @@ This plugin is architecturally incapable of talking to the agent:
 - no modification of the primary model context;
 - no approval or tool mechanisms.
 
-Notes live in plugin-owned, in-memory, per-session state. The only consumer is the browser: exact Fetch routes on the host connection, reached under the absolute `/api` transport (`GET`/`HEAD /api/dsh-you-should-know/notes` for the active list plus a bounded history count, `GET`/`HEAD /api/dsh-you-should-know/history` for the bounded, newest-first per-session history, `POST /api/dsh-you-should-know/dismiss` to apply exactly one resolution action, the read-only `GET`/`HEAD /api/dsh-you-should-know/status`, the `GET`/`HEAD`/`POST /api/dsh-you-should-know/session` model override, and the `GET`/`HEAD`/`POST /api/dsh-you-should-know/config` settings route). The resolve route accepts exactly `dismissed` or `added_to_chat`; an absent action is the legacy manual dismissal. The config route writes through the host settings service into the same plugin row and reports itself read-only when that service is absent. The connection owns the Host/Origin fence and browser-session authentication, and the Desktop app origin proxies `/api` to the host. The host never hands a note to the model.
+Notes live in plugin-owned, in-memory, per-session state. The only consumer is the browser: exact Fetch routes on the host connection, reached under the absolute `/api` transport (`GET`/`HEAD /api/dsh-you-should-know/notes` for the active list plus a bounded history count, `GET`/`HEAD /api/dsh-you-should-know/history` for the bounded, newest-first per-session history, `POST /api/dsh-you-should-know/dismiss` to apply exactly one resolution action, the read-only `GET`/`HEAD /api/dsh-you-should-know/status`, the `GET`/`HEAD`/`POST /api/dsh-you-should-know/session` model override, and the `GET`/`HEAD`/`POST /api/dsh-you-should-know/config` settings route, and the read-only `GET`/`HEAD /api/dsh-you-should-know/self-check` diagnostics route). The resolve route accepts exactly `dismissed` or `added_to_chat`; an absent action is the legacy manual dismissal. The config route writes through the host settings service into the same plugin row and reports itself read-only when that service is absent. The connection owns the Host/Origin fence and browser-session authentication, and the Desktop app origin proxies `/api` to the host. The host never hands a note to the model.
 
 A source-level test (`test/invariant.test.js`) scans the shipped files for every delivery shape that could break this invariant and fails if one appears.
 
@@ -80,7 +80,7 @@ A source-level test (`test/invariant.test.js`) scans the shipped files for every
 Because the built host and browser halves are committed, installation needs no source build. Install an **immutable release ref**, not the default branch:
 
 ```sh
-dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.4.0
+dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.4.1
 ```
 
 A bare `github:PipaGs/dsh-you-should-know` address is resolved by pnpm and saved as that same value every time. The Desktop plugin manager learns which package an install produced by diffing the profile's dependencies before and after pnpm runs, and falls back to matching the typed address against a package name. A bare default-branch address changes nothing on the second run, and that fallback does not understand a Git address, so the manager reports that the installed package could not be told from the dependency change. A ref-pinned address is saved verbatim, so each install and upgrade is attributed to `dsh-you-should-know`. In the Desktop **Add plugin** dialog, enter the same pinned address. To move to a later release, install its tag; to install the exact version already present, remove the plugin first.
@@ -242,7 +242,21 @@ Only a successful automatic check records the local date. The preference and the
 
 ## Operational verification
 
-The host exposes a read-only `GET`/`HEAD /api/dsh-you-should-know/status?sessionId=<id>` route on the connection transport so you can prove the reviewer is working without reading any conversation text. Because it sits behind the same browser-session authentication as the rest of `/api`, a bare `curl` gets `401`; read it from the page the GUI already authenticated, for example from the browser console:
+### Run self-check from the GUI
+
+The supported way to verify the live plugin is the **Run self-check** control in **Settings -> Plugins -> You Should Know -> Diagnostics**. It calls the read-only `GET`/`HEAD /api/dsh-you-should-know/self-check` route through the same connection Fetch carrier and browser session as every other plugin route, and it reports the running plugin version, the installed package version, the aggregate runtime status, the effective reviewer mode, the registered route names, the feature flags, and the bounded update state. It reads no conversation text and handles no token itself.
+
+A healthy result shows the running plugin version and the enabled capabilities. When the route reports `healthy: false`, the card shows **Not healthy** with the reason it can state from the bounded payload: the reviewer is not configured, a named route has no handler, or the aggregate runtime status is not `idle`/`reviewing`. When the installed package version differs from the running module version, the card shows **Restart required**. When either version cannot be read, it says the comparison is unavailable instead of guessing.
+
+### The 401 from curl is expected
+
+Every `/api/*` route on the local DSH host is authenticated. An unauthenticated `curl` to a plugin route, for example `curl http://127.0.0.1:<port>/api/dsh-you-should-know/self-check`, returns `401` before the plugin route is reached: the connection's Host/Origin fence and browser-session authentication run first, so the plugin handler never sees the request. **That is expected host behavior, not a plugin failure, and it is why external read-only verification needs the authenticated page.**
+
+Do not disable, relax, or bypass DSH authentication to work around the `401`, and never paste a session cookie or process token into a `curl` command. The plugin deliberately exposes no unauthenticated health endpoint, and adding one would move the plugin's diagnostics outside the host's access boundary.
+
+### Read the status route from the authenticated page
+
+The plugin also exposes a read-only `GET`/`HEAD /api/dsh-you-should-know/status?sessionId=<id>` route on the connection transport so you can prove the reviewer is working without reading any conversation text. Read it from the page the GUI already authenticated, for example from the browser console:
 
 ```js
 await (await fetch('api/dsh-you-should-know/status?sessionId=<session-id>')).json()
@@ -316,6 +330,44 @@ Typical readings:
 - `route: null` with a growing `routeResolutions`: the first qualifying turn ran before the profile mounted a usable DeepSeek route. Since `0.2.2` the engine retries discovery at each later qualifying turn, so the route can appear without a host restart; the next noted review shows the resolved pair.
 - `route` present but `session.reviewStarts: 0`: no turn has passed the output, cooldown, and delta gates for that session yet.
 - `lastOutcome: "noted"` with `noteCount >= 1`: the reviewer produced at least one note for this session.
+
+### Self-check response schema
+
+The self-check route answers only from in-process state and returns bounded JSON. It never calls a network endpoint, so it cannot recurse into the routes it describes, and it carries no note, action, source, explanation, evidence, custom prompt, additional instruction, provider secret, or session transcript text:
+
+```json
+{
+  "ok": true,
+  "authTransport": "host-authenticated-connection",
+  "healthy": true,
+  "configured": true,
+  "pluginVersion": "0.4.1",
+  "runtimeVersion": "0.4.1",
+  "installedVersion": "0.4.1",
+  "runtimeStatus": "idle",
+  "reviewerMode": "balanced",
+  "routes": [{ "name": "self-check", "methods": ["GET", "HEAD"], "registered": true }],
+  "capabilities": { "feedback": true, "explain": true, "evidence": true, "episodeTrigger": true, "adaptiveBudget": true, "updateChecker": true },
+  "update": { "currentVersion": "0.4.1", "latestVersion": "", "latestTag": "", "updateAvailable": false, "dismissed": false, "autoCheckUpdates": true, "updateBehavior": "ask-before-update", "lastAutoCheckDate": "", "lastCheckedAt": null, "lastResult": null }
+}
+```
+
+| Field | Meaning |
+|---|---|
+| `authTransport` | Always `host-authenticated-connection`: the route is served by the same authenticated connection carrier as every other plugin route. |
+| `healthy` | `true` only when the reviewer is configured, every route has a handler, and `runtimeStatus` is `idle` or `reviewing`. The Settings card shows **Not healthy** with the reported reason otherwise. |
+| `configured` | Whether the loaded config keeps the reviewer enabled. A blank `provider`/`model` sets `disabled`, so the row registers no routes and this is `false`. |
+| `pluginVersion` / `runtimeVersion` | The running module's version constant, or `null` when it is unusable. |
+| `installedVersion` | The version in the plugin's own installed `package.json`, or `null` when the manifest cannot be read. A value that differs from the running version is the honest restart signal. |
+| `runtimeStatus` | The aggregate scheduler state across live sessions: `idle`, `reviewing`, `degraded`, `quota_exhausted`, `halted`, or `disposed`, most severe first, or `unknown`. |
+| `reviewerMode` | The effective global strictness mode id, or `null`. |
+| `routes` | One entry per registered route with its name, HTTP methods, and whether a handler is actually present. The list is the same compile-time table the host registers from, so it cannot drift. |
+| `capabilities` | The feature flags `feedback`, `explain`, `evidence`, `episodeTrigger`, `adaptiveBudget`, and `updateChecker`. |
+| `update` | The bounded update-checker state: version tags, the behavior enum, the local check date, and the last result. Derived install specs and unknown fields are dropped. |
+
+### No public CLI path for external verification
+
+This DSH build exposes no documented public CLI command or authenticated local client that can call a plugin route without handling the raw session secret. The `dsh` CLI boots a profile and forwards `plugin` arguments to pnpm; the plugin's routes are otherwise reachable only through the browser-authenticated connection. No wrapper, script, or no-auth endpoint is invented here to work around that: `Run self-check` in the GUI is the supported path, and the `401` from a bare `curl` stays the expected answer.
 
 ## Privacy and cost
 
