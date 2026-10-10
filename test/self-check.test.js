@@ -28,8 +28,10 @@ const EXPECTED_ROUTES = [
 const ALL_HANDLERS = Object.fromEntries(ROUTE_CAPABILITIES.map((capability) => [capability.name, () => {}]))
 
 const ALLOWED_TOP_LEVEL = ['ok', 'authTransport', 'healthy', 'configured', 'pluginVersion', 'runtimeVersion', 'installedVersion', 'runtimeStatus', 'reviewerMode', 'routes', 'capabilities', 'update']
-const ALLOWED_UPDATE = ['currentVersion', 'latestVersion', 'latestTag', 'updateAvailable', 'dismissed', 'autoCheckUpdates', 'updateBehavior', 'lastAutoCheckDate', 'lastCheckedAt', 'lastResult']
-const FORBIDDEN_KEYS = new Set(['note', 'notes', 'action', 'source', 'explanation', 'evidenceText', 'customReviewerPrompt', 'additionalInstructions', 'provider', 'model', 'session', 'messages', 'transcript', 'systemPrompt', 'prompt'])
+const ALLOWED_UPDATE = ['currentVersion', 'latestVersion', 'latestTag', 'installSpec', 'source', 'updateAvailable', 'dismissed', 'autoCheckUpdates', 'updateBehavior', 'automaticSupported', 'lastAutoCheckDate', 'lastCheckedAt', 'lastResult']
+// The bounded update source is a compile-time constant label, not a note
+// source; the note/evidence source stays forbidden everywhere else.
+const FORBIDDEN_KEYS = new Set(['note', 'notes', 'action', 'explanation', 'evidenceText', 'customReviewerPrompt', 'additionalInstructions', 'provider', 'model', 'session', 'messages', 'transcript', 'systemPrompt', 'prompt'])
 
 function keyPaths(value, path = '') {
   if (Array.isArray(value)) return value.flatMap((entry, index) => keyPaths(entry, path + '[' + index + ']'))
@@ -46,7 +48,7 @@ async function manifestVersion() {
 }
 
 const baseDiagnostics = { configured: true, reviewerMode: 'balanced', runtimeStatus: 'idle' }
-const baseUpdate = { currentVersion: '0.4.1', latestVersion: '0.4.1', latestTag: 'v0.4.1', updateAvailable: false, dismissed: false, autoCheckUpdates: true, updateBehavior: 'ask-before-update', lastAutoCheckDate: '', lastCheckedAt: null, lastResult: null }
+const baseUpdate = { currentVersion: '0.4.1', latestVersion: '0.4.1', latestTag: 'v0.4.1', installSpec: 'github:PipaGs/dsh-you-should-know#v0.4.1', source: 'git-tags', updateAvailable: false, dismissed: false, autoCheckUpdates: true, updateBehavior: 'ask-before-update', automaticSupported: false, lastAutoCheckDate: '', lastCheckedAt: null, lastResult: null }
 
 function build(overrides = {}) {
   return buildSelfCheckPayload({
@@ -133,11 +135,17 @@ test('the self-check payload never carries note, action, source, explanation, ev
 })
 
 test('the update summary keeps only the bounded enum, version, and date fields', () => {
-  const payload = build({ update: { ...baseUpdate, installSpec: 'github:PipiaGs/dsh-you-should-know#v0.4.1', secret: 'sk-live', notes: 'finding text' } })
+  const payload = build({ update: { ...baseUpdate, secret: 'sk-live', notes: 'finding text' } })
   assert.deepEqual(Object.keys(payload.update).sort(), ALLOWED_UPDATE.slice().sort())
   assert.equal(JSON.stringify(payload).includes('sk-live'), false)
   assert.equal(JSON.stringify(payload).includes('finding text'), false)
-  assert.equal(JSON.stringify(payload).includes('github:'), false)
+})
+
+test('the self-check reports the Git tag source and the exact pinned target spec', () => {
+  const payload = build()
+  assert.equal(payload.update.source, 'git-tags')
+  assert.equal(payload.update.installSpec, 'github:PipaGs/dsh-you-should-know#v0.4.1')
+  assert.equal(payload.update.automaticSupported, false)
 })
 
 test('the self-check payload bounds every version and enum value', () => {
@@ -165,6 +173,20 @@ test('updateSummary bounds strings and numbers and drops unknown fields', () => 
     secret: 'sk-live',
   })
   assert.deepEqual(summary, { currentVersion: '0.4.1', latestTag: 'v0.4.1', updateAvailable: true, dismissed: false })
+})
+
+test('updateSummary drops a malformed or oversized install spec instead of forwarding it', () => {
+  for (const installSpec of [
+    'https://evil.example/package.tgz',
+    'github:PipaGs/dsh-you-should-know#main',
+    'github:PipaGs/dsh-you-should-know#v0.4.1-rc.1',
+    'github:' + 'a'.repeat(160) + '#v0.4.1',
+    'github:PipaGs/dsh-you-should-know#v0.4.1\nEVIL',
+  ]) {
+    assert.equal(Object.hasOwn(updateSummary({ installSpec }), 'installSpec'), false, installSpec + ' must be dropped')
+  }
+  assert.equal(updateSummary({ installSpec: '' }).installSpec, '', 'an unknown target stays an explicit empty string')
+  assert.equal(updateSummary({ installSpec: 'github:PipaGs/dsh-you-should-know#v0.4.1' }).installSpec, 'github:PipaGs/dsh-you-should-know#v0.4.1')
 })
 
 test('the two running-version names are one value by design', () => {
