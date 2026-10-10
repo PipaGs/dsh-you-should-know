@@ -84,6 +84,28 @@ test('Knew it resolves the exact note with its own state and suppresses the same
   assert.equal(h.engine.history('s1').length, 1, 'a suppressed finding is never stored')
 })
 
+test('Knew it suppresses a near-duplicate finding that exact delivery dedupe would not', async () => {
+  const h = harness([note('The cache never clears.'), note('The cache never clears when the session ends.')])
+  const feed = feedSession('s1')
+  await observe(h.engine, feed.session, feed.turn('q1', 'a1'))
+  const first = h.engine.notes('s1')[0]
+  assert.equal(h.engine.resolve('s1', first.id, 'knew_it'), true)
+  const outcome = await observe(h.engine, feed.session, feed.turn('q2', 'a2'))
+  assert.equal(outcome.status, 'suppressed')
+  assert.equal(h.engine.notes('s1').length, 0)
+  assert.equal(h.engine.history('s1').length, 1)
+})
+
+test('a near-duplicate remains eligible when the human did not mark the finding known', async () => {
+  const h = harness([note('The cache never clears.'), note('The cache never clears when the session ends.')])
+  const feed = feedSession('s1')
+  await observe(h.engine, feed.session, feed.turn('q1', 'a1'))
+  // No Knew it: the reworded finding is a genuinely new note, so it is stored.
+  const outcome = await observe(h.engine, feed.session, feed.turn('q2', 'a2'))
+  assert.equal(outcome.status, 'noted')
+  assert.equal(h.engine.notes('s1').length, 2)
+})
+
 test('an unrelated finding remains eligible after a Knew it', async () => {
   const h = harness([note('The cache never clears.'), note('The retry drops the error.'), note('The cache never clears.')])
   const feed = feedSession('s1')

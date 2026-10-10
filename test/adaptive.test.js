@@ -35,6 +35,20 @@ test('the known-fingerprint set is bounded and evicts the oldest entry', () => {
   assert.equal(set.size, 0)
 })
 
+test('the known-fingerprint set matches a near-duplicate but never an unrelated finding', () => {
+  const set = createFingerprintSet(4)
+  set.add('the cache never clears')
+  assert.equal(set.matches('the cache never clears'), true, 'the exact fingerprint matches')
+  assert.equal(set.matches('the cache never clears when the session ends'), true, 'a near-duplicate that keeps the distinctive terms matches')
+  assert.equal(set.matches('the retry drops the original error'), false, 'an unrelated finding stays eligible')
+  assert.equal(set.matches(''), false)
+  assert.equal(set.matches(undefined), false)
+  const short = createFingerprintSet(2)
+  short.add('cache')
+  assert.equal(short.matches('cache'), true)
+  assert.equal(short.matches('cache invalidation'), false, 'fewer than the minimum shared tokens is never a match')
+})
+
 test('the default known-fingerprint cap is a small documented constant', () => {
   assert.equal(MAX_KNOWN_FINGERPRINTS, 32)
   const set = createFingerprintSet()
@@ -53,6 +67,18 @@ test('the hourly budget counts only calls inside the sliding window', () => {
   assert.deepEqual(reviewerBudget(state, 3, start + 4000), { used: 3, remaining: 0, max: 3 })
   // Exactly one window later the first call leaves the window.
   assert.deepEqual(reviewerBudget(state, 3, start + REVIEWER_HOURLY_WINDOW_MS + 1), { used: 2, remaining: 1, max: 3 })
+})
+
+test('the explainer has its own bounded sliding window, independent of reviews', () => {
+  const state = createAdaptiveState()
+  const start = 1_700_000_000_000
+  assert.deepEqual(state.explainCallTimes, [])
+  recordReviewerCall(state, start)
+  assert.deepEqual(reviewerBudget(state, 2, start + 1), { used: 1, remaining: 1, max: 2 })
+  assert.deepEqual(reviewerBudget(state, 2, start + 1, 'explainCallTimes'), { used: 0, remaining: 2, max: 2 })
+  recordReviewerCall(state, start + 1, 'explainCallTimes')
+  assert.deepEqual(reviewerBudget(state, 2, start + 2, 'explainCallTimes'), { used: 1, remaining: 1, max: 2 })
+  assert.deepEqual(reviewerBudget(state, 2, start + 2), { used: 1, remaining: 1, max: 2 }, 'review accounting is unchanged')
 })
 
 test('a quiet outcome grows the streak and a useful outcome resets it', () => {

@@ -17,7 +17,7 @@ function explanationStream(text) {
   })()
 }
 
-function harness(script) {
+function harness(script, overrides = {}) {
   const calls = []
   const errors = []
   const replies = [...script]
@@ -35,7 +35,7 @@ function harness(script) {
     },
   }
   const engine = createEngine({
-    config: normalizeConfig({ provider: 'p', model: 'm', minDeltaChars: 0, cooldownTurns: 1 }).config,
+    config: normalizeConfig({ provider: 'p', model: 'm', minDeltaChars: 0, cooldownTurns: 1, ...overrides }).config,
     getLlm: () => llm,
     now: () => 1700000000000,
     onError: (error) => errors.push(error),
@@ -171,14 +171,38 @@ test('Explain rejects an unknown session or note without a provider call', async
   assert.equal(h.calls.length, 1)
 })
 
-test('Explain never injects, steers, or sends anything to the primary agent', async () => {
+test('Explain makes only a bounded model call and leaves the session untouched', async () => {
   const h = harness([REVIEW, EXPLAIN])
   const feed = feedSession('s1')
   await observe(h.engine, feed.session, feed.turn('q1', 'a1'))
   const note = h.engine.notes('s1')[0]
-  await h.engine.explain('s1', note.id)
+  const result = await h.engine.explain('s1', note.id)
+  assert.equal(result.ok, true)
+  // The finding is unchanged and still active: nothing was resolved or appended.
+  const history = h.engine.history('s1')
+  assert.equal(history.length, 1)
+  assert.equal(history[0].resolved, false)
+  assert.equal(h.engine.notes('s1').length, 1)
+  // The only calls are model streams with the exact bounded option shape: no
+  // tools, no session handle, and no delivery field of any kind.
+  const expectedKeys = ['maxTokens', 'messages', 'model', 'provider', 'signal', 'system', 'temperature']
   for (const call of h.calls) {
-    assert.equal(typeof call.provider, 'string')
-    assert.equal(typeof call.system, 'string')
+    assert.deepEqual(Object.keys(call).sort(), expectedKeys.slice().sort())
+    assert.equal('tools' in call, false)
+    assert.equal(Array.isArray(call.messages), true)
+    assert.equal(call.messages.length, 1)
   }
+})
+
+test('Explain attempts are charged against a separate bounded hourly budget', async () => {
+  const h = harness([REVIEW, new Error('provider down')], { maxReviewerCallsPerHour: 1 })
+  const feed = feedSession('s1')
+  await observe(h.engine, feed.session, feed.turn('q1', 'a1'))
+  const note = h.engine.notes('s1')[0]
+  assert.equal((await h.engine.explain('s1', note.id)).ok, false)
+  const limited = await h.engine.explain('s1', note.id)
+  assert.equal(limited.ok, false)
+  assert.equal(limited.error, 'rate_limited')
+  assert.equal(h.calls.length, 2, 'a rate-limited Explain makes no provider call')
+  assert.equal(h.engine.status('s1').session.explainCallsLastHour, 1)
 })
