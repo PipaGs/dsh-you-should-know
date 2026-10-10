@@ -207,7 +207,7 @@ test('a live config change moves from the automatic route to an explicit overrid
 })
 
 test('a changed volatile provider/model ref updates the live reviewer route', async () => {
-  const llm = makeLlm(['{"note":null,"importance":null}', '{"note":null,"importance":null}'])
+  const llm = makeLlm(['{"note":"first finding","importance":"high"}', '{"note":"second finding","importance":"high"}'])
   const harness = makeCtx({ llm })
   let route = { provider: 'vendor-one', model: 'model-one' }
   // DSH commits volatile row values into their running references in place, so
@@ -336,6 +336,7 @@ test('the plugin registers its browser routes on the connection Fetch carrier', 
   assert.deepEqual(harness.fetchRoutes.map((route) => route.path).sort(), [
     '/api/dsh-you-should-know/config',
     '/api/dsh-you-should-know/dismiss',
+    '/api/dsh-you-should-know/explain',
     '/api/dsh-you-should-know/history',
     '/api/dsh-you-should-know/notes',
     '/api/dsh-you-should-know/session',
@@ -360,6 +361,11 @@ test('the plugin registers its browser routes on the connection Fetch carrier', 
   const status = harness.fetchRoutes.find((route) => route.path === '/api/dsh-you-should-know/status')
   assert.deepEqual(status.methods, ['GET', 'HEAD'])
   assert.equal(status.requestBody, 'buffered')
+
+  const explain = harness.fetchRoutes.find((route) => route.path === '/api/dsh-you-should-know/explain')
+  assert.deepEqual(explain.methods, ['POST'])
+  assert.equal(explain.requestBody, 'buffered')
+  assert.equal(typeof explain.fetch, 'function')
   harness.disposeAll()
 })
 
@@ -601,7 +607,7 @@ test('the session route serves the effective route and its source without leakin
 })
 
 test('the session route POST set-model and reset-model change the reviewer route', async () => {
-  const llm = makeLlm(['{"note":null,"importance":null}', '{"note":null,"importance":null}'])
+  const llm = makeLlm(['{"note":"first finding","importance":"high"}', '{"note":"second finding","importance":"high"}'])
   const harness = makeCtx({ llm })
   apply(harness.ctx, { provider: 'p', model: 'm', minDeltaChars: 0, cooldownTurns: 1 })
   harness.runInjections()

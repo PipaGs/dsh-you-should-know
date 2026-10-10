@@ -890,18 +890,21 @@ test('a resolved automatic route is cached across later turns', async () => {
     resolveModelInfo: async (provider, model) => ({ provider, id: model, name: model }),
     stream(options) {
       calls.push(options)
+      // A distinct note per turn keeps the adaptive quiet streak at zero, so
+      // this test still observes two consecutive reviewer calls.
+      const text = '{"note":"cache note ' + calls.length + '","importance":"high"}'
       return (async function* stream() {
-        yield { type: 'text-delta', index: 0, text: '{"note":null,"importance":null}' }
+        yield { type: 'text-delta', index: 0, text }
       })()
     },
   }
   const engine = createEngine({ config: normalizeConfig({ minDeltaChars: 0, cooldownTurns: 1 }).config, getLlm: () => llm })
   const session = sessionWith('s-cache', [{ turn: 1, answer: 'one' }])
-  assert.equal((await observeAndSettle(engine, session)).status, 'silent')
+  assert.equal((await observeAndSettle(engine, session)).status, 'noted')
 
   session.events.push(userEvent(90, 'q2'), assistantEvent(91, 2, 'two'), turnEnd(92, 2))
   session.lastEvent = session.events[session.events.length - 1]
-  assert.equal((await observeAndSettle(engine, session)).status, 'silent')
+  assert.equal((await observeAndSettle(engine, session)).status, 'noted')
   assert.equal(calls.length, 2)
   assert.equal(providerReads, 1, 'a resolved route is discovered once and cached')
 })
@@ -1148,12 +1151,12 @@ test('setSessionModel rejects an unusable session id or a blank route half', asy
 
 test('resetSessionModel deletes the override and rebuilds the runtime toward the global route', async () => {
   const { engine, llm } = engineWith([
-    '{"note":null,"importance":null}',
-    '{"note":null,"importance":null}',
+    '{"note":"first finding","importance":"high"}',
+    '{"note":"second finding","importance":"high"}',
   ])
   assert.deepEqual(await engine.setSessionModel('s1', 'vendor', 'model-x'), { ok: true })
   const session = sessionWith('s1', [{ turn: 1, answer: 'one' }])
-  assert.equal((await observeAndSettle(engine, session)).status, 'silent')
+  assert.equal((await observeAndSettle(engine, session)).status, 'noted')
 
   assert.deepEqual(engine.resetSessionModel('s1'), { ok: true, removed: true })
   assert.equal(engine.sessionConfig('s1').effectiveRouteSource, 'global')
@@ -1162,7 +1165,7 @@ test('resetSessionModel deletes the override and rebuilds the runtime toward the
 
   session.events.push(userEvent(90, 'q2'), assistantEvent(91, 2, 'two'), turnEnd(92, 2))
   session.lastEvent = session.events[session.events.length - 1]
-  assert.equal((await observeAndSettle(engine, session)).status, 'silent')
+  assert.equal((await observeAndSettle(engine, session)).status, 'noted')
   assert.deepEqual(llm.calls.map((call) => [call.provider, call.model]), [
     ['vendor', 'model-x'],
     ['p', 'm'],
@@ -1211,11 +1214,11 @@ test('forget removes the session state and its override together', async () => {
 
 test('updateConfig applies a new route live and rebuilds the per-session runtime', async () => {
   const { engine, llm } = engineWith([
-    '{"note":null,"importance":null}',
-    '{"note":null,"importance":null}',
+    '{"note":"first finding","importance":"high"}',
+    '{"note":"second finding","importance":"high"}',
   ])
   const session = sessionWith('s1', [{ turn: 1, answer: 'one' }])
-  assert.equal((await observeAndSettle(engine, session)).status, 'silent')
+  assert.equal((await observeAndSettle(engine, session)).status, 'noted')
   assert.equal(engine.status('s1').session.runtime.reviewStarts, 1)
 
   const updated = engine.updateConfig({ provider: 'other', model: 'model-z', minDeltaChars: 0, cooldownTurns: 1 })
@@ -1226,7 +1229,7 @@ test('updateConfig applies a new route live and rebuilds the per-session runtime
 
   session.events.push(userEvent(90, 'q2'), assistantEvent(91, 2, 'two'), turnEnd(92, 2))
   session.lastEvent = session.events[session.events.length - 1]
-  assert.equal((await observeAndSettle(engine, session)).status, 'silent')
+  assert.equal((await observeAndSettle(engine, session)).status, 'noted')
   assert.deepEqual(llm.calls.map((call) => [call.provider, call.model]), [
     ['p', 'm'],
     ['other', 'model-z'],
@@ -1235,8 +1238,8 @@ test('updateConfig applies a new route live and rebuilds the per-session runtime
 
 test('updateConfig rebuilds the runtime when the token budget changes', async () => {
   const { engine } = engineWith([
-    '{"note":null,"importance":null}',
-    '{"note":null,"importance":null}',
+    '{"note":"first finding","importance":"high"}',
+    '{"note":"second finding","importance":"high"}',
   ])
   const session = sessionWith('s1', [{ turn: 1, answer: 'one' }])
   await observeAndSettle(engine, session)
@@ -1248,7 +1251,7 @@ test('updateConfig rebuilds the runtime when the token budget changes', async ()
 
   session.events.push(userEvent(90, 'q2'), assistantEvent(91, 2, 'two'), turnEnd(92, 2))
   session.lastEvent = session.events[session.events.length - 1]
-  assert.equal((await observeAndSettle(engine, session)).status, 'silent')
+  assert.equal((await observeAndSettle(engine, session)).status, 'noted')
 })
 
 test('updateConfig disabling disposes runtimes but preserves notes, and re-enabling works', async () => {
