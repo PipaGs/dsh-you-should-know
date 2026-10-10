@@ -2032,6 +2032,7 @@ const SELF_CHECK = {
   ok: true,
   authTransport: 'host-authenticated-connection',
   healthy: true,
+  configured: true,
   pluginVersion: '0.4.1',
   runtimeVersion: '0.4.1',
   installedVersion: '0.4.1',
@@ -2132,6 +2133,20 @@ test('a running version that differs from the installed package shows Restart re
   await flushAsync()
   assert.match(textOf(view.output), /Restart required/)
   assert.notEqual(findByState(view.output, 'restart-required'), null)
+  view.unmount()
+})
+
+test('a not-healthy payload is never shown as Healthy and names why', async () => {
+  const harness = selfCheckBackend({ ...SELF_CHECK, healthy: false, configured: false, routes: [{ name: 'explain', methods: ['POST'], registered: false }] })
+  const env = await loadBundle({ backend: harness.backend })
+  const view = mountSettingsCard(env)
+  await flushAsync()
+  buttonByText(view.output, 'Run self-check').props.onClick()
+  await flushAsync()
+  assert.equal(textOf(view.output).includes('Healthy - running'), false)
+  assert.notEqual(findByState(view.output, 'unhealthy'), null, 'the not-healthy state renders distinctly')
+  assert.match(textOf(view.output), /not configured/)
+  assert.match(textOf(view.output), /unregistered routes: explain/)
   view.unmount()
 })
 

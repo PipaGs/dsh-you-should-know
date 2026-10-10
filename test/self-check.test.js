@@ -25,7 +25,7 @@ const EXPECTED_ROUTES = [
 
 const ALL_HANDLERS = Object.fromEntries(ROUTE_CAPABILITIES.map((capability) => [capability.name, () => {}]))
 
-const ALLOWED_TOP_LEVEL = ['ok', 'authTransport', 'healthy', 'pluginVersion', 'runtimeVersion', 'installedVersion', 'runtimeStatus', 'reviewerMode', 'routes', 'capabilities', 'update']
+const ALLOWED_TOP_LEVEL = ['ok', 'authTransport', 'healthy', 'configured', 'pluginVersion', 'runtimeVersion', 'installedVersion', 'runtimeStatus', 'reviewerMode', 'routes', 'capabilities', 'update']
 const ALLOWED_UPDATE = ['currentVersion', 'latestVersion', 'latestTag', 'updateAvailable', 'dismissed', 'autoCheckUpdates', 'updateBehavior', 'lastAutoCheckDate', 'lastCheckedAt', 'lastResult']
 const FORBIDDEN_KEYS = new Set(['note', 'notes', 'action', 'source', 'explanation', 'evidenceText', 'customReviewerPrompt', 'additionalInstructions', 'provider', 'model', 'session', 'messages', 'transcript', 'systemPrompt', 'prompt'])
 
@@ -102,6 +102,17 @@ test('the self-check payload returns only allowed fields', () => {
   assert.equal(payload.installedVersion, '0.4.1')
   assert.equal(payload.runtimeStatus, 'idle')
   assert.equal(payload.reviewerMode, 'balanced')
+})
+
+test('healthy is false when the reviewer is disabled or a runtime is not working', () => {
+  assert.equal(build().healthy, true)
+  assert.equal(build().configured, true)
+  assert.equal(build({ diagnostics: { ...baseDiagnostics, configured: false } }).healthy, false)
+  for (const runtimeStatus of ['halted', 'quota_exhausted', 'disposed', 'degraded', 'unknown']) {
+    assert.equal(build({ diagnostics: { ...baseDiagnostics, runtimeStatus } }).healthy, false, runtimeStatus + ' must not read as healthy')
+  }
+  assert.equal(build({ diagnostics: { ...baseDiagnostics, runtimeStatus: 'reviewing' } }).healthy, true)
+  assert.equal(build({ handlers: {} }).healthy, false, 'a missing handler must not read as healthy')
 })
 
 test('the self-check payload never carries note, action, source, explanation, evidence, or prompt text', () => {
