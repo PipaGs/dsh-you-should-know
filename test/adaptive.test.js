@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import {
   MAX_KNOWN_FINGERPRINTS,
   createFingerprintSet,
+  fingerprintsMatch,
 } from '../lib/feedback.js'
 import {
   MAX_QUIET_COOLDOWN_MULTIPLIER,
@@ -47,6 +48,25 @@ test('the known-fingerprint set matches a near-duplicate but never an unrelated 
   short.add('cache')
   assert.equal(short.matches('cache'), true)
   assert.equal(short.matches('cache invalidation'), false, 'fewer than the minimum shared tokens is never a match')
+})
+
+test('a repeated token never inflates the overlap and the match is symmetric', () => {
+  assert.equal(fingerprintsMatch('retry retry failed', 'retry timeout failed'), false)
+  assert.equal(fingerprintsMatch('retry timeout failed', 'retry retry failed'), false)
+  const set = createFingerprintSet(2)
+  set.add('retry retry failed')
+  assert.equal(set.matches('retry timeout failed'), false)
+})
+
+test('a difference past the token cap is never treated as a near-duplicate', () => {
+  const prefix = Array.from({ length: 64 }, (_, index) => 'token' + index).join(' ')
+  const left = prefix + ' tailone'
+  const right = prefix + ' tailtwo'
+  assert.equal(fingerprintsMatch(left, right), false)
+  assert.equal(fingerprintsMatch(left, left), true, 'an exact over-cap fingerprint still matches')
+  const set = createFingerprintSet(2)
+  set.add(left)
+  assert.equal(set.matches(right), false)
 })
 
 test('the default known-fingerprint cap is a small documented constant', () => {
