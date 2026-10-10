@@ -246,7 +246,7 @@ Only a successful automatic check records the local date. The preference and the
 
 The supported way to verify the live plugin is the **Run self-check** control in **Settings -> Plugins -> You Should Know -> Diagnostics**. It calls the read-only `GET`/`HEAD /api/dsh-you-should-know/self-check` route through the same connection Fetch carrier and browser session as every other plugin route, and it reports the running plugin version, the installed package version, the aggregate runtime status, the effective reviewer mode, the registered route names, the feature flags, and the bounded update state. It reads no conversation text and handles no token itself.
 
-A healthy result shows the running plugin version and the enabled capabilities. When the installed package version differs from the running module version, the card shows **Restart required**. When the installed version cannot be read, it says so instead of guessing.
+A healthy result shows the running plugin version and the enabled capabilities. When the route reports `healthy: false`, the card shows **Not healthy** with the reason it can state from the bounded payload: the reviewer is not configured, a named route has no handler, or the aggregate runtime status is not `idle`/`reviewing`. When the installed package version differs from the running module version, the card shows **Restart required**. When either version cannot be read, it says the comparison is unavailable instead of guessing.
 
 ### The 401 from curl is expected
 
@@ -340,6 +340,7 @@ The self-check route answers only from in-process state and returns bounded JSON
   "ok": true,
   "authTransport": "host-authenticated-connection",
   "healthy": true,
+  "configured": true,
   "pluginVersion": "0.4.1",
   "runtimeVersion": "0.4.1",
   "installedVersion": "0.4.1",
@@ -354,6 +355,8 @@ The self-check route answers only from in-process state and returns bounded JSON
 | Field | Meaning |
 |---|---|
 | `authTransport` | Always `host-authenticated-connection`: the route is served by the same authenticated connection carrier as every other plugin route. |
+| `healthy` | `true` only when the reviewer is configured, every route has a handler, and `runtimeStatus` is `idle` or `reviewing`. The Settings card shows **Not healthy** with the reported reason otherwise. |
+| `configured` | Whether an explicit blank provider/model disabled the reviewer. It is `false` on a row that registers no routes. |
 | `pluginVersion` / `runtimeVersion` | The running module's version constant, or `null` when it is unusable. |
 | `installedVersion` | The version in the plugin's own installed `package.json`, or `null` when the manifest cannot be read. A value that differs from the running version is the honest restart signal. |
 | `runtimeStatus` | The aggregate scheduler state across live sessions: `idle`, `reviewing`, `degraded`, `quota_exhausted`, `halted`, or `disposed`, most severe first, or `unknown`. |
