@@ -5,8 +5,10 @@ import {
   LIMITS,
   REVIEW_INSTRUCTIONS,
   accumulatedDelta,
+  aggregateRuntimeStatus,
   buildReviewPrompt,
   collectContext,
+  createEngine,
   createFetchHandlers,
   createRequestHandlers,
   dedupeKey,
@@ -1126,4 +1128,23 @@ test('an explicit model alone resolves to the provider that advertises it', asyn
   })
   const route = await resolveReviewerRoute(normalizeConfig({ model: 'deepseek-flash' }).config, llm)
   assert.deepEqual(route, { provider: 'deepseek-official', model: 'deepseek-flash' })
+})
+
+// --- Authenticated self-check diagnostics aggregate ----------------------------
+
+test('aggregateRuntimeStatus reports the most severe live runtime state', () => {
+  assert.equal(aggregateRuntimeStatus([]), 'idle')
+  assert.equal(aggregateRuntimeStatus(['idle', 'reviewing']), 'reviewing')
+  assert.equal(aggregateRuntimeStatus(['reviewing', 'degraded']), 'degraded')
+  assert.equal(aggregateRuntimeStatus(['degraded', 'quota_exhausted']), 'quota_exhausted')
+  assert.equal(aggregateRuntimeStatus(['quota_exhausted', 'halted']), 'halted')
+  assert.equal(aggregateRuntimeStatus(['halted', 'disposed']), 'disposed')
+  assert.equal(aggregateRuntimeStatus(['not-a-state', 'idle']), 'idle')
+})
+
+test('engine.diagnostics reports the effective mode and a bounded runtime status', () => {
+  const engine = createEngine({ config: normalizeConfig({ provider: 'p', model: 'm' }).config, getLlm: () => undefined })
+  assert.deepEqual(engine.diagnostics(), { configured: true, reviewerMode: 'balanced', runtimeStatus: 'idle' })
+  engine.dispose()
+  assert.equal(engine.diagnostics().runtimeStatus, 'disposed')
 })

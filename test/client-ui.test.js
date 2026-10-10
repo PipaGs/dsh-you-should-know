@@ -2025,3 +2025,123 @@ test('the settings card renders and posts the hourly reviewer-call budget', asyn
   assert.equal(JSON.parse(post.init.body).maxReviewerCallsPerHour, 24)
   view.unmount()
 })
+
+// --- Authenticated self-check diagnostics --------------------------------------
+
+const SELF_CHECK = {
+  ok: true,
+  authTransport: 'host-authenticated-connection',
+  healthy: true,
+  pluginVersion: '0.4.1',
+  runtimeVersion: '0.4.1',
+  installedVersion: '0.4.1',
+  runtimeStatus: 'idle',
+  reviewerMode: 'balanced',
+  routes: [
+    { name: 'notes', methods: ['GET', 'HEAD'], registered: true },
+    { name: 'self-check', methods: ['GET', 'HEAD'], registered: true },
+  ],
+  capabilities: { feedback: true, explain: true, evidence: true, episodeTrigger: true, adaptiveBudget: true, updateChecker: true },
+  update: { currentVersion: '0.4.1', latestTag: 'v0.4.1' },
+}
+
+function findByState(node, state) {
+  let found = null
+  walk(node, (entry) => {
+    if (found !== null || typeof entry !== 'object') return
+    if (entry.props && entry.props['data-state'] === state) found = entry
+  })
+  return found
+}
+
+/** Serves the config GET and the authenticated self-check GET. */
+function selfCheckBackend(selfCheck, options = {}) {
+  const calls = []
+  async function backend(url, init = {}) {
+    calls.push({ url, init })
+    if (url === 'api/dsh-you-should-know/self-check') {
+      if (options.fail === true) return { status: 500, body: { ok: false, error: 'internal' } }
+      return { status: 200, body: selfCheck }
+    }
+    return {
+      status: 200,
+      body: {
+        ok: true,
+        writable: true,
+        config: { mode: 'automatic', reviewerMode: 'balanced', additionalInstructions: '', customReviewerPrompt: '', minDeltaChars: 1200, cooldownTurns: 3, maxContextMessages: 12, maxTokens: 768 },
+        catalog: { providers: [] },
+        update: null,
+      },
+    }
+  }
+  return { backend, calls }
+}
+
+test('the settings card offers a Diagnostics control that runs the self-check on demand', async () => {
+  const harness = selfCheckBackend(SELF_CHECK)
+  const env = await loadBundle({ backend: harness.backend })
+  const view = mountSettingsCard(env)
+  await flushAsync()
+  assert.match(textOf(view.output), /Diagnostics/)
+  const button = buttonByText(view.output, 'Run self-check')
+  assert.ok(button, 'the Run self-check control renders')
+  assert.equal(findByState(view.output, 'healthy'), null, 'no result is shown before the run')
+  button.props.onClick()
+  view.unmount()
+})
+
+test('Run self-check calls the document-relative route through the authenticated session, never a token', async () => {
+  const harness = selfCheckBackend(SELF_CHECK)
+  const env = await loadBundle({ backend: harness.backend })
+  const view = mountSettingsCard(env)
+  await flushAsync()
+  buttonByText(view.output, 'Run self-check').props.onClick()
+  await flushAsync()
+  const call = harness.calls.find((entry) => entry.url === 'api/dsh-you-should-know/self-check')
+  assert.ok(call, 'the self-check request targets the plugin route')
+  assert.equal(call.init.method, undefined, 'the self-check is a GET')
+  assert.equal(call.init.cache, 'no-store')
+  assert.equal(call.init.credentials, undefined, 'the browser session credentials are never overridden')
+  assert.equal(call.init.headers, undefined, 'the browser half attaches no auth header itself')
+  assert.match(textOf(view.output), /Healthy/)
+  assert.match(textOf(view.output), /0\.4\.1/)
+  assert.match(textOf(view.output), /feedback/)
+  assert.match(textOf(view.output), /explain/)
+  view.unmount()
+})
+
+test('the self-check shows checking, then a bounded failure state', async () => {
+  const harness = selfCheckBackend(SELF_CHECK, { fail: true })
+  const env = await loadBundle({ backend: harness.backend })
+  const view = mountSettingsCard(env)
+  await flushAsync()
+  buttonByText(view.output, 'Run self-check').props.onClick()
+  assert.notEqual(findByState(view.output, 'checking'), null, 'the checking state renders immediately')
+  await flushAsync()
+  assert.match(textOf(view.output), /Self-check failed/)
+  assert.notEqual(findByState(view.output, 'failed'), null, 'the failed state renders distinctly')
+  view.unmount()
+})
+
+test('a running version that differs from the installed package shows Restart required', async () => {
+  const harness = selfCheckBackend({ ...SELF_CHECK, installedVersion: '0.4.2' })
+  const env = await loadBundle({ backend: harness.backend })
+  const view = mountSettingsCard(env)
+  await flushAsync()
+  buttonByText(view.output, 'Run self-check').props.onClick()
+  await flushAsync()
+  assert.match(textOf(view.output), /Restart required/)
+  assert.notEqual(findByState(view.output, 'restart-required'), null)
+  view.unmount()
+})
+
+test('an unavailable installed version is not guessed into a restart notice', async () => {
+  const harness = selfCheckBackend({ ...SELF_CHECK, installedVersion: null })
+  const env = await loadBundle({ backend: harness.backend })
+  const view = mountSettingsCard(env)
+  await flushAsync()
+  buttonByText(view.output, 'Run self-check').props.onClick()
+  await flushAsync()
+  assert.equal(textOf(view.output).includes('Restart required'), false)
+  view.unmount()
+})
