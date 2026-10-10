@@ -339,6 +339,7 @@ test('the plugin registers its browser routes on the connection Fetch carrier', 
     '/api/dsh-you-should-know/explain',
     '/api/dsh-you-should-know/history',
     '/api/dsh-you-should-know/notes',
+    '/api/dsh-you-should-know/self-check',
     '/api/dsh-you-should-know/session',
     '/api/dsh-you-should-know/status',
     '/api/dsh-you-should-know/update',
@@ -366,6 +367,67 @@ test('the plugin registers its browser routes on the connection Fetch carrier', 
   assert.deepEqual(explain.methods, ['POST'])
   assert.equal(explain.requestBody, 'buffered')
   assert.equal(typeof explain.fetch, 'function')
+
+  const selfCheck = harness.fetchRoutes.find((route) => route.path === '/api/dsh-you-should-know/self-check')
+  assert.deepEqual(selfCheck.methods, ['GET', 'HEAD'])
+  assert.equal(selfCheck.requestBody, 'buffered')
+  assert.equal(typeof selfCheck.fetch, 'function')
+  harness.disposeAll()
+})
+
+test('the authenticated self-check route reports only the bounded running plugin state', async () => {
+  const llm = installedDeepSeekLlm([])
+  const harness = makeCtx({ llm })
+  apply(harness.ctx, { provider: 'p', model: 'm' })
+  harness.runInjections()
+
+  const route = harness.fetchRoutes.find((candidate) => candidate.path === '/api/dsh-you-should-know/self-check')
+  assert.notEqual(route, undefined)
+
+  const response = await route.fetch(new Request('http://127.0.0.1/api/dsh-you-should-know/self-check', { method: 'GET' }))
+  assert.equal(response.status, 200)
+  assert.equal(response.headers.get('cache-control'), 'no-store')
+  const body = await response.json()
+  assert.equal(body.ok, true)
+  assert.equal(body.authTransport, 'host-authenticated-connection')
+  assert.equal(body.pluginVersion, '0.4.1')
+  assert.equal(body.runtimeVersion, '0.4.1')
+  assert.equal(body.installedVersion, '0.4.1')
+  assert.equal(body.runtimeStatus, 'idle')
+  assert.equal(body.reviewerMode, 'balanced')
+  assert.equal(body.healthy, true)
+  assert.deepEqual(body.routes.map((entry) => entry.name), ['notes', 'history', 'dismiss', 'status', 'session', 'explain', 'config', 'update', 'self-check'])
+  assert.equal(body.routes.every((entry) => entry.registered === true), true)
+  assert.deepEqual(Object.keys(body.capabilities).sort(), ['adaptiveBudget', 'episodeTrigger', 'evidence', 'explain', 'feedback', 'updateChecker'])
+  assert.equal(body.capabilities.feedback, true)
+  assert.equal(body.capabilities.explain, true)
+  assert.equal(body.capabilities.updateChecker, true)
+  assert.equal(typeof body.update.currentVersion, 'string')
+
+  // No route may leak conversation-derived or prompt-derived fields.
+  const keys = []
+  const walk = (value) => {
+    if (Array.isArray(value)) {
+      for (const entry of value) walk(entry)
+      return
+    }
+    if (value === null || typeof value !== 'object') return
+    for (const [key, entry] of Object.entries(value)) {
+      keys.push(key)
+      walk(entry)
+    }
+  }
+  walk(body)
+  for (const banned of ['note', 'notes', 'action', 'source', 'explanation', 'customReviewerPrompt', 'additionalInstructions', 'provider', 'model', 'session', 'transcript']) {
+    assert.equal(keys.includes(banned), false, 'the self-check must not carry ' + banned)
+  }
+
+  const head = await route.fetch(new Request('http://127.0.0.1/api/dsh-you-should-know/self-check', { method: 'HEAD' }))
+  assert.equal(head.status, 200)
+  assert.equal(await head.text(), '')
+
+  const post = await route.fetch(new Request('http://127.0.0.1/api/dsh-you-should-know/self-check', { method: 'POST', body: '{}' }))
+  assert.equal(post.status, 405)
   harness.disposeAll()
 })
 
