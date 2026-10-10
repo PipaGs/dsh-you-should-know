@@ -2,7 +2,7 @@
 
 A quiet, **human-only** second-opinion watcher for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness).
 
-A separately configured reviewer model — DeepSeek out of the box, any registered route by config — looks at each completed root-agent turn and speaks up only when the human most likely missed something important. When it does, a compact **You should know** card appears above the composer. It is dismissible, offers **Add to chat** without ever sending, is never written into the conversation, and never reaches the primary agent. A successful **Add to chat** resolves the note and removes it from the active stack, and each session keeps a bounded, in-memory **History** of what happened.
+A separately configured reviewer model — DeepSeek out of the box, any registered route by config — looks at each completed root-agent turn and speaks up only when the human most likely missed something important. When it does, a compact **You should know** card appears above the composer. It is dismissible, offers **Add to chat** without ever sending, is never written into the conversation, and never reaches the primary agent. The card also carries three human-only feedback actions: **Knew it** suppresses that finding's fingerprint for the session, **Thanks** closes the finding and returns the adaptive cadence to normal, and **Explain** opens one bounded, cached explanation of why the finding matters. A successful **Add to chat** also counts as useful and resets backoff. Each session keeps a bounded, in-memory **History** of what happened.
 
 The product intent is analogous to Claude Code's *You Should Know*, with one deliberately harder constraint: here the note is for the human only.
 
@@ -17,14 +17,14 @@ The host half observes committed session events and reviews a turn only when **a
 1. The reviewer route is usable. Both route keys default to automatic adaptive DeepSeek discovery; setting either to an empty string registers nothing and keeps the plugin completely inert, and an automatic row whose build mounts no DeepSeek route resolves to no route and stays quiet.
 2. The event is a `turn/end` whose reason is `completed`. Aborted, blocked, errored, max-tokens, and forked turns are ignored.
 3. The session is a **root** agent session. Sessions with `header.origin === 'subagent'` or a positive `delegationDepth` are ignored.
-4. The turn produced visible assistant text.
-5. The turn is outside the per-session cooldown (`cooldownTurns`).
-6. The visible conversation text accumulated since the last review is at least `minDeltaChars`.
+4. The turn is a **meaningful episode** or passes the text-delta gate. An episode is meaningful when its public events carry tool activity (`tool/call`/`tool/result`), a `subagent/catalog` occurrence, a subagent result relay, or a workflow event inside the turn's sequence range. A meaningful episode is review-eligible even when the assistant prose is short; a turn with no such activity still needs visible assistant text and at least `minDeltaChars` accumulated visible characters, so a short ordinary Q&A stays ineligible.
+5. The turn is outside the **effective cooldown**: `cooldownTurns` multiplied by the bounded quiet streak (see adaptive cadence below).
+6. The session is within its sliding one-hour reviewer-call budget (`maxReviewerCallsPerHour`). A skipped review makes no model call.
 7. The session has not already used its internal note budget (12 notes per session).
 
 When the gates pass, the host sends one request to the configured reviewer route through `ctx.llm.stream`:
 
-- one system instruction composed in a fixed order: the base reviewer policy, then the strictness profile for the effective mode, then the human's additional reviewer instructions when present, then the adaptive profile section below. The base policy always outranks the profile and the custom text. Alongside it goes one user message containing a **bounded** excerpt of the most recent conversation: at most `maxContextMessages` visible text messages, each truncated, with a total character cap. Only human `user/message` text and assistant reply text enter the excerpt;
+- one system instruction composed in a fixed order: the base reviewer policy, then the strictness profile for the effective mode, then the human's additional reviewer instructions when present, then the adaptive profile section below. The base policy always outranks the profile and the custom text. Alongside it goes one user message containing a **bounded** excerpt of the most recent conversation: at most `maxContextMessages` visible text messages, each truncated, with a total character cap. Only human `user/message` text and assistant reply text enter the excerpt. When the completed turn is a meaningful episode, one bounded evidence capsule is appended to that same untrusted user message with explicit markers; the trusted system instruction is unchanged;
 - **no tools**;
 - `temperature: 0` and `maxTokens`;
 - `reasoningEffort: 'off'` **only** when the model's own metadata advertises an `off` effort; otherwise the field is omitted entirely.
@@ -80,7 +80,7 @@ A source-level test (`test/invariant.test.js`) scans the shipped files for every
 Because the built host and browser halves are committed, installation needs no source build. Install an **immutable release ref**, not the default branch:
 
 ```sh
-dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.3.8
+dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.4.0
 ```
 
 A bare `github:PipaGs/dsh-you-should-know` address is resolved by pnpm and saved as that same value every time. The Desktop plugin manager learns which package an install produced by diffing the profile's dependencies before and after pnpm runs, and falls back to matching the typed address against a package name. A bare default-branch address changes nothing on the second run, and that fallback does not understand a Git address, so the manager reports that the installed package could not be told from the dependency change. A ref-pinned address is saved verbatim, so each install and upgrade is attributed to `dsh-you-should-know`. In the Desktop **Add plugin** dialog, enter the same pinned address. To move to a later release, install its tag; to install the exact version already present, remove the plugin first.
@@ -110,6 +110,7 @@ Pin an exact route (this also disables discovery):
     cooldownTurns: 3
     maxContextMessages: 12
     maxTokens: 768
+    maxReviewerCallsPerHour: 12
 ```
 
 Or select any other route the profile registers:
@@ -124,6 +125,7 @@ Or select any other route the profile registers:
     cooldownTurns: 3
     maxContextMessages: 12
     maxTokens: 768
+    maxReviewerCallsPerHour: 12
 ```
 
 The bundled row pins no route, so this example is only a template. A patch replaces the **whole** config of the row it matches, so restate every key you want to keep. Place one `- id: you-should-know` entry in `$DSH_HOME/profiles/<profile>/cordis.patch.yml` (or a `--patch` overlay); do **not** add a second `insert` for the same id, or the row would be composed twice.
@@ -138,6 +140,7 @@ Only the model's *availability in the profile* is required: if the route is miss
 | `cooldownTurns` | `3` | integer, 1–100 | Minimum number of completed root turns between reviews. |
 | `maxContextMessages` | `12` | integer, 1–100 | Maximum recent text messages sent to the reviewer. |
 | `maxTokens` | `768` | integer, 128–16384 | Output cap for the reviewer call. |
+| `maxReviewerCallsPerHour` | `12` | integer, 1–60 | Sliding one-hour cap on reviewer calls per session. A skipped review makes no model call. |
 | `reviewerMode` | `balanced` | one of `relaxed`, `balanced`, `strict`, `paranoid`, `custom` | Reviewer strictness mode; it also sets the notification threshold. |
 | `additionalInstructions` | empty | string, at most 2000 characters | Extra reviewer instructions for every mode, appended after the strictness profile and preserved verbatim. It never replaces or exposes the base policy. |
 | `customReviewerPrompt` | empty | string, at most 4000 characters | Custom-mode strictness profile, preserved verbatim and used only when the mode is `custom`; blank falls back to Balanced. |
@@ -151,18 +154,21 @@ The browser half registers three surfaces.
 **Note card** (`conversation.input.dock`, the full-width slot above the composer):
 
 - No active note and no history: it renders **nothing**.
-- An active note or any history: it renders all unresolved notes for the current session as a bounded, oldest-first stack — newest nearest the composer, capped at the same 12-note per-session budget the host enforces — each a compact card titled **You should know**, marked **critical** when the reviewer said so. Every card carries **Add to chat** and **Dismiss**, and the same column offers a compact **History** action.
+- An active note or any history: it renders all unresolved notes for the current session as a bounded, oldest-first stack — newest nearest the composer, capped at the same 12-note per-session budget the host enforces — each a compact card titled **You should know**, marked **critical** when the reviewer said so. Every card carries **Add to chat**, **Dismiss**, **Knew it**, **Thanks**, and **Explain**, and the same column offers a compact **History** action.
+- **Knew it** resolves the note with `knew_it` and adds the exact finding fingerprint to a small, bounded (32-entry) per-session known set, so the same or a similar finding is suppressed for the rest of the session instead of being shown again; it is deliberately not treated as a useful new discovery.
+- **Thanks** resolves the note with `thanks` and means the finding was useful, so the adaptive quiet streak returns to normal. A successful **Add to chat** has the same effect.
+- **Explain** expands one bounded explanation inline, collapsed by default. It fetches it once from the host route, shows a loading state and a retryable error state without blocking the other card actions, and reuses the cached text on later opens; a produced explanation also appears in History.
 - A card whose finding names an exact file shows that path as copyable text. When the client's right-Sidebar navigation service is mounted, an **Open file** action opens it at the stated line through the public `dsh-resource://file/session/<sessionId>/<path>` resource address; it runs no shell command and never accepts an arbitrary URL. With no navigation service the card shows the copyable path and no link.
 - **Add to chat** writes a short draft into the current composer through the public programmatic draft action (`inputActions.setDraft`). When the finding carries an `action`, that agent-facing repair instruction is the draft and the human note stays on the card; the source is appended as a separate `File: path:line` line only when the action does not already name the exact path. A finding with no action (an older note) falls back to an imperative wrapper around the note: `Fix this reviewer finding: <note>`, plus `File: path:line` when a source is present. It never sends, steers, or appends to the transcript, and it appends after a blank line when the composer already holds a draft. The button keeps the draft focused, so pressing Enter afterwards submits the draft instead of re-activating the button and inserting the finding again. Only when the draft write succeeds does the note resolve with `added_to_chat` and leave the stack; a failed draft write leaves the card exactly as it was, with no host transition.
 - **Dismiss** resolves the note with `dismissed` and removes it from the stack. Resolution is session-scoped, immediate, remembered for the life of the page (bounded to the 200 most recent sessions), and reported to the host so every read agrees. Switching to another session stops rendering the previous session's notes in the same frame, before the new poll resolves, so a stale note is never shown or resolved against the wrong session.
-- **History** opens a lightweight, read-only panel for the current session: every stored note, newest first, with its importance, the human note text (never the agent-facing action), a deterministic UTC timestamp, its optional source path/line, and its state — **Active**, **Dismissed**, or **Added to chat**. Active entries keep **Add to chat** and **Dismiss**; resolved entries keep only their copyable source and **Open file**, so a resolved note can never be resolved again. The panel reads once when opened and refreshes after a resolve or a reconnect; it never polls while closed. History is in-memory and per-session, bounded by the same 12-note cap, and clears when the session is disposed or the host restarts.
+- **History** opens a lightweight, read-only panel for the current session: every stored note, newest first, with its importance, the human note text (never the agent-facing action), a deterministic UTC timestamp, its optional source path/line, and its state — **Active**, **Dismissed**, **Added to chat**, **Knew it**, or **Thanks** — plus its bounded explanation when one has been produced. Active entries keep **Add to chat** and **Dismiss**; resolved entries keep only their copyable source and **Open file**, so a resolved note can never be resolved again. The panel reads once when opened and refreshes after a resolve or a reconnect; it never polls while closed. History is in-memory and per-session, bounded by the same 12-note cap, and clears when the session is disposed or the host restarts.
 
 **Settings card** (`plugins.bundle.config`, the bundle's card in the Plugins settings page):
 
 - It reads the live config and the registered provider/model catalog from the config route and writes back to the same plugin row, so there is no second config store.
 - Provider and model selects list only ids the live registry reports; choosing a provider reloads the model list for it. **Automatic** leaves the route to adaptive discovery, while **Pinned** sends the exact pair.
 - **Reviewer mode** selects one of the five modes and shows a one-line description of the selected mode. A `Custom reviewer prompt` textarea appears only in `Custom` mode; it replaces the strictness profile and is preserved exactly. **Additional reviewer instructions** is a separate optional bounded textarea for every mode. None of these controls can edit or reveal the base reviewer policy.
-- The numeric gates (`minDeltaChars`, `cooldownTurns`, `maxContextMessages`, `maxTokens`) are editable and validated against the same bounds as the row.
+- The numeric gates (`minDeltaChars`, `cooldownTurns`, `maxContextMessages`, `maxTokens`, `maxReviewerCallsPerHour`) are editable and validated against the same bounds as the row.
 - Save is disabled, and every control explains why, when the host mounts no writable settings service. A pinned route that resolves to nothing is rejected before anything is persisted, with a bounded message.
 - The card refreshes once on mount, on window focus, and on a connection reset; a stale response from an older request generation never overwrites a newer one.
 - An **Updates** group shows the current and latest version, a **Check for updates automatically** toggle (default on), an **Update behavior** select (default **Ask before update**), and a **Check for updates** button. When a newer release exists it shows `current -> latest` and the exact pinned address with a copy action and a dismiss action. It reads the update status with the same single config read and never makes a second request just to render.
@@ -174,6 +180,30 @@ The browser half registers three surfaces.
 - It never renders the transcript and never posts to the primary agent.
 
 Delivery uses conservative polling. While the page is visible the note card polls its route every 7 seconds; polling stops while the tab is hidden and refreshes immediately when it becomes visible again. The two settings surfaces have no interval: they refresh on mount, focus, and connection reset. There is no push channel for out-of-tree plugins in the current public API, so polling is the documented mechanism.
+
+### Feedback, Explain, and adaptive cadence
+
+**Feedback resolutions.** The resolve route accepts exactly `dismissed`, `added_to_chat`, `knew_it`, and `thanks`; an absent action is still the legacy manual dismissal. Each is stored on the note and rendered distinctly in the History panel. `knew_it` and `thanks` close the finding exactly like the other resolutions, but they also drive the adaptive state:
+
+- `knew_it` adds the note's normalized fingerprint to a bounded, per-session known set (32 entries, oldest evicted). A later finding whose fingerprint matches is suppressed for that session before the ordinary delivery dedupe, so it is never stored and never rendered. It does not reset the quiet streak.
+- `thanks` and a successful **Add to chat** mark a useful discovery and reset the quiet streak to zero so the reviewer returns to normal cadence.
+
+**Adaptive budget and backoff.** Each session owns two bounded, in-memory adaptive counters, disposed with the session:
+
+- a sliding one-hour budget of at most `maxReviewerCallsPerHour` reviewer calls (default `12`, range 1–60). The budget is checked before any provider work, so a skipped review makes no model call, and the status snapshot reports the used and remaining counts;
+- a quiet streak that grows by one for every consecutive null or suppressed verdict (`silent`, `duplicate`, `suppressed`). The effective cooldown is `cooldownTurns` multiplied by `min(quietStreak + 1, 4)`, so a run of unhelpful reviews spaces the reviewer out deterministically while the cap bounds it. A useful emitted finding, **Thanks**, or a successful **Add to chat** resets the streak; **Knew it** does not.
+
+**Episode evidence.** The completed turn is the episode boundary. The plugin reads only the allowlisted public event metadata of that turn: `tool/call` turn/step/callId/name, `tool/result` turn/step/toolCallId/isError and structured `error.code`, `turn/end` reason kind and error code, `subagent/catalog` child id and mode, a subagent result relay's sender session id, and the documented `path` and `diffs[].path` members of a tool's presentation meta. It never reads raw `arguments`, message `content`, `meta.oldText`/`meta.newText`, `error.message`, or a rendered shell exit code. The rendered capsule is short (at most 1200 characters, 8 tools, 8 paths, and 4 subagent entries) and is placed inside the untrusted user message behind explicit BEGIN/END markers with a line stating that it can only corroborate a finding already grounded in the conversation. A capsule never appears in the system instruction, the status route, or any diagnostics.
+
+**Explain.** The `POST /api/dsh-you-should-know/explain` route performs one separate bounded call on the session's effective reviewer route, using the same session/global route resolution and the same effective language. It receives the stored finding, the already-approved visible excerpt, and the note's bounded evidence capsule, and returns one JSON object `{"explanation": "..."}` capped at 1200 characters. A success is cached on the note (and therefore in History); a repeated request returns the cache; a concurrent request shares the in-flight call; and any provider, timeout, or parser failure is fail-quiet and retryable, leaving the finding active. Explain never resolves the note, never appends to the session, and never injects, steers, follows up, or sends anything to the primary agent.
+
+**Output language.** The effective human-facing language follows this priority:
+
+1. the explicit host user-language setting, when one is stored. DSH has no host-side locale service; the locale plugin persists the choice as the `preference` field of its `locale` settings namespace, and the plugin reads it through the public `settings.describe()` form projection. The value is validated as a bounded BCP-47-like tag before use, so a hostile value falls through;
+2. the latest genuine human user message in the visible excerpt, which the reviewer resolves itself (the existing behavior);
+3. English.
+
+Internal trusted prompts, JSON keys, and importance values are always English regardless.
 
 ## Update checking
 
@@ -266,11 +296,15 @@ How to read each value:
 | `effectiveRouteSource` | `session`, `global`, `automatic`, or `null` when the reviewer is disabled. |
 | `session.reviewStarts` | Qualifying turns that entered the review pipeline, including attempts that ended `unroutable`. |
 | `session.lastReviewAt` | Host timestamp in milliseconds when the last review attempt started, or `null`. |
-| `session.lastOutcome` | Terminal outcome of the last review: `unroutable` (no route), `silent` (reviewer said nothing, or the call failed quietly), `noted` (a note was stored), `duplicate` (the same advice was already stored), `budget` (the per-session note ceiling was reached), or `error` (the pipeline threw unexpectedly). |
+| `session.lastOutcome` | Terminal outcome of the last review: `unroutable` (no route), `silent` (reviewer said nothing, or the call failed quietly), `noted` (a note was stored), `duplicate` (the same advice was already stored), `suppressed` (the fingerprint was marked **Knew it**), `budget` (the per-session note ceiling was reached), `rate_limited` (the hourly budget was exhausted, so no model call was made), or `error` (the pipeline threw unexpectedly). |
 | `session.inFlight` | `true` while one reviewer call is in progress for that session. |
 | `session.noteCount` | Unresolved notes the human can still act on for the session. |
 | `session.historyCount` | Notes stored for the session, resolved or not; bounded by the same 12-note per-session cap. |
 | `session.runtimeStatus` | The per-session scheduler state: `idle`, `reviewing`, `quota_exhausted`, `halted`, `degraded`, or `disposed`. |
+| `session.quietStreak` | Consecutive null/suppressed verdicts; it multiplies the effective cooldown up to a fixed cap. |
+| `session.reviewerCallsLastHour` | Reviewer calls attempted in the sliding one-hour window. |
+| `session.reviewerBudgetRemaining` | Calls still allowed in the window under `maxReviewerCallsPerHour`. |
+| `session.knownFingerprintCount` | Findings the human marked **Knew it** for this session; bounded to 32. |
 | `session.runtime` | The runtime's bounded counters: pending queue, completed reviews, empty and unparsed replies, transport drops, queue drops, backlog flushes, and the last outcome/timestamp. No conversation, prompt, note, credential, or tool text is ever included. |
 
 An unknown or missing `sessionId` returns `"session": null` with the global route state only. `HEAD` returns the same status line with no body, and a non-`GET`/`HEAD` request is rejected with `405`. The route is read-only, applies the same session-id bound as `/notes` and `/dismiss`, relies on the connection's Host/Origin fence and browser authentication, and never includes conversation text, prompt text, note text, source paths, credentials, or tool data.
@@ -284,9 +318,9 @@ Typical readings:
 
 ## Privacy and cost
 
-- The reviewer receives only the bounded excerpt described above: the human's own user messages and the agent's visible replies. Tool results, tool definitions, the system prompt, project instructions, attachments, and the rest of the session log are never sent.
+- The reviewer receives only the bounded excerpt described above: the human's own user messages and the agent's visible replies. Tool results, tool definitions, the system prompt, project instructions, attachments, and the rest of the session log are never sent. A meaningful episode additionally contributes one bounded evidence capsule of allowlisted public event metadata only — tool names, failure identity, turn reason, structured presentation-meta paths, and subagent provenance. Raw tool arguments, raw stdout/stderr, rendered output, message content, opaque tool `meta`, custom prompts, and conversation beyond the excerpt never enter it.
 - Notes are never persisted to the session log and never enter model context. They live in host memory and are lost when the host process exits.
-- Each review is exactly one model call with a hard `maxTokens` cap, and the gates keep calls rare: a completed turn must pass the cooldown, the delta gate, and the per-session budget.
+- Each review is exactly one model call with a hard `maxTokens` cap, and the gates keep calls rare: a completed turn must pass the effective cooldown and the sliding hourly budget, and a non-meaningful turn additionally needs the delta gate. **Explain** is a separate, one-shot bounded call on the same reviewer route, made only when the human presses the button, cached per note after a success, and never sent automatically.
 - The routes are Fetch handlers on the connection carrier, mounted under the same `/api` transport as the rest of the GUI. They expose only the note text, its optional source path, and its optional agent-facing repair action for a session id plus the bounded status counters; they do not expose credentials, prompt text, conversation text, or the transcript. The connection rejects cross-origin browser traffic (a foreign `Host`/`Origin`, or a request without a valid browser session) so a random web page cannot dismiss notes or read diagnostics.
 - The reviewer prompt declares the conversation excerpt untrusted data, so instructions embedded in a user or assistant message are not followed as reviewer instructions.
 - The update check is the only additional outbound request. It sends one anonymous `GET` to the GitHub releases endpoint and carries no conversation text, note, custom reviewer prompt, session id, provider or model id, or other plugin state.
@@ -303,6 +337,7 @@ The plugin fails quiet by construction:
 - a live config change that alters the route or the token budget rebuilds every tracked runtime, and disabling disposes them while preserving notes, dedupe, and context, so re-enabling works;
 - if no web server is present (headless profiles) the plugin still evaluates turns but has no delivery path: the connection mounts its `/api` transport only when a web server exists, and the served browser bundle lives there too, so nothing is shown;
 - if the package is composed twice, the second row is inert, so there is never more than one reviewer fiber;
+- an **Explain** failure (provider, timeout, or unparsable reply) is fail-quiet: the finding stays active and unchanged, the card shows a bounded retryable error, and a failure never poisons the cache;
 - the `session/event`, `session/disposed`, and `loader/volatile-update` listeners each wrap their own work in a try/catch so a reviewer bug — including a throwing volatile config reference — cannot disturb primary work or escape into the host.
 
 ## Limitations
@@ -321,12 +356,14 @@ The plugin fails quiet by construction:
 - A session in `Custom` mode reuses the global additional reviewer instructions; there is no per-session instruction field in the session header.
 - The reviewer is a language model. Treat its note as a prompt to check something, not as a verified fact.
 - Current DSH has no native plugin auto-update and no public update API a plugin may call, so the plugin only checks and notifies; installing a found release, and the Desktop restart it needs, stay manual.
+- The explicit host language seam is the `locale` settings namespace's `preference` field, read through the public `settings.describe()` form projection; DSH exposes no host-side locale service, and with no stored preference the host has no language signal at all. The message branch of the priority is model-side language inference, so it is not deterministic the way the host-tag branch is.
+- Structured shell exit codes and touched file paths are only partly available from public event metadata: `tool/result` carries paths only for tools that define a presentation meta, and a shell exit code appears only inside rendered output text, which the capsule deliberately excludes. Both are reported as unavailable rather than read from raw arguments or output.
 - UI strings and all shipped or public text are English-only by design; a source-level test rejects CJK, Cyrillic, Greek, and Hangul ranges in addition to unrelated project references.
 
 ## Development
 
 ```sh
-node --check lib/core.js && node --check lib/runtime.js && node --check lib/review-profile.js && node --check lib/review-strictness.js && node --check lib/update.js && node --check lib/index.js && node --check lib/client.js
+node --check lib/core.js && node --check lib/runtime.js && node --check lib/review-profile.js && node --check lib/review-strictness.js && node --check lib/language.js && node --check lib/feedback.js && node --check lib/adaptive.js && node --check lib/evidence.js && node --check lib/explain.js && node --check lib/update.js && node --check lib/index.js && node --check lib/client.js
 node --test test/*.test.js
 ```
 
