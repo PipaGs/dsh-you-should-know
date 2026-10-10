@@ -3,6 +3,12 @@ import assert from 'node:assert/strict'
 import { Readable } from 'node:stream'
 import { apply, name } from '../lib/index.js'
 import { createFetchHandlers } from '../lib/core.js'
+import { TAG_DISCOVERY_COMMAND } from '../lib/update.js'
+
+/** One realistic git ls-remote --tags --refs stdout body. */
+function updateTagListing(...tags) {
+  return tags.map((tag, index) => String(index + 1).padStart(40, '0') + '\trefs/tags/' + tag).join('\n') + '\n'
+}
 
 function makeLlm(script) {
   const calls = []
@@ -390,9 +396,9 @@ test('the authenticated self-check route reports only the bounded running plugin
   const body = await response.json()
   assert.equal(body.ok, true)
   assert.equal(body.authTransport, 'host-authenticated-connection')
-  assert.equal(body.pluginVersion, '0.4.1')
-  assert.equal(body.runtimeVersion, '0.4.1')
-  assert.equal(body.installedVersion, '0.4.1')
+  assert.equal(body.pluginVersion, '0.4.2')
+  assert.equal(body.runtimeVersion, '0.4.2')
+  assert.equal(body.installedVersion, '0.4.2')
   assert.equal(body.runtimeStatus, 'idle')
   assert.equal(body.reviewerMode, 'balanced')
   assert.equal(body.healthy, true)
@@ -418,8 +424,17 @@ test('the authenticated self-check route reports only the bounded running plugin
     }
   }
   walk(body)
-  for (const banned of ['note', 'notes', 'action', 'source', 'explanation', 'customReviewerPrompt', 'additionalInstructions', 'provider', 'model', 'session', 'transcript']) {
+  // The bounded update source is a compile-time constant label, not a note
+  // source; it is asserted separately below. Every other field name stays
+  // banned.
+  for (const banned of ['note', 'notes', 'action', 'explanation', 'customReviewerPrompt', 'additionalInstructions', 'provider', 'model', 'session', 'transcript']) {
     assert.equal(keys.includes(banned), false, 'the self-check must not carry ' + banned)
+  }
+  assert.equal(body.update.source, 'git-tags')
+  assert.equal(body.update.automaticSupported, false)
+  assert.equal(typeof body.update.installSpec, 'string')
+  if (body.update.installSpec !== '') {
+    assert.match(body.update.installSpec, /^github:PipaGs\/dsh-you-should-know#v\d+\.\d+\.\d+$/)
   }
 
   const head = await route.fetch(new Request('http://127.0.0.1/api/dsh-you-should-know/self-check', { method: 'HEAD' }))
@@ -947,13 +962,16 @@ test('the session route POST set-mode and reset-mode isolate the strictness mode
   harness.disposeAll()
 })
 
-test('the plugin runs the day-first automatic update check through the web and settings seams', async () => {
-  const webCalls = []
+test('the plugin runs the day-first automatic update check through the shell and settings seams', async () => {
+  const shellCalls = []
   const updates = []
-  const web = {
-    async fetch(request) {
-      webCalls.push(request)
-      return { statusCode: 200, body: { kind: 'text', content: JSON.stringify({ tag_name: 'v0.4.0', draft: false, prerelease: false }) }, truncated: false, url: request.url }
+  const shell = {
+    resolve(request) {
+      shellCalls.push(request)
+      return { ...request, onExpiry: 'kill' }
+    },
+    async execute() {
+      return { result: async () => ({ exitCode: 0, signal: null, timedOut: false, aborted: false, timeoutMs: 1000, stdout: { text: updateTagListing('v0.4.0'), truncated: false }, stderr: { text: '', truncated: false } }) }
     },
   }
   const settings = {
@@ -962,15 +980,15 @@ test('the plugin runs the day-first automatic update check through the web and s
     },
     async replace() {},
   }
-  const harness = makeCtx({ llm: makeLlm([]), web, settings })
+  const harness = makeCtx({ llm: makeLlm([]), shell, settings })
   apply(harness.ctx, { provider: 'p', model: 'm' })
 
   const deadline = Date.now() + 2000
   while (updates.length === 0 && Date.now() < deadline) await settle()
 
-  assert.equal(webCalls.length, 1, 'one automatic check runs on the first activation of the day')
-  assert.deepEqual(Object.keys(webCalls[0]), ['url'], 'the request carries only the release URL')
-  assert.equal(typeof webCalls[0].url, 'string')
+  assert.equal(shellCalls.length, 1, 'one automatic check runs on the first activation of the day')
+  assert.equal(shellCalls[0].command, TAG_DISCOVERY_COMMAND, 'the request is the one fixed discovery command')
+  assert.equal(Object.hasOwn(shellCalls[0], 'url'), false, 'the request carries no release URL')
   assert.equal(updates.length, 1)
   assert.equal(updates[0].key, 'you-should-know')
   assert.equal(updates[0].patch.lastSeenLatestVersion, 'v0.4.0')
@@ -981,11 +999,11 @@ test('the plugin runs the day-first automatic update check through the web and s
 
   // A restart in the same local day, with the stamped date persisted, must not
   // make a second automatic request.
-  const again = makeCtx({ llm: makeLlm([]), web, settings })
+  const again = makeCtx({ llm: makeLlm([]), shell, settings })
   apply(again.ctx, { provider: 'p', model: 'm', lastAutoCheckDate: today, lastSeenLatestVersion: 'v0.4.0' })
   await settle()
   await settle()
-  assert.equal(webCalls.length, 1, 'a same-day restart does not repeat the check')
+  assert.equal(shellCalls.length, 1, 'a same-day restart does not repeat the check')
   again.disposeAll()
 })
 
@@ -993,14 +1011,21 @@ test('a volatile config edit reaches the update state without a remount', async 
   const today = new Date()
   const dateKey = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0')
   const settingsUpdates = []
-  const web = { fetch: async () => ({ statusCode: 200, body: { kind: 'text', content: JSON.stringify({ tag_name: 'v0.4.0' }) }, truncated: false }) }
+  const shell = {
+    resolve(request) {
+      return { ...request, onExpiry: 'kill' }
+    },
+    async execute() {
+      return { result: async () => ({ exitCode: 0, signal: null, timedOut: false, aborted: false, timeoutMs: 1000, stdout: { text: updateTagListing('v0.4.0'), truncated: false }, stderr: { text: '', truncated: false } }) }
+    },
+  }
   const settings = {
     async update(key, patch) {
       settingsUpdates.push({ key, patch })
     },
     async replace() {},
   }
-  const harness = makeCtx({ llm: makeLlm([]), web, settings })
+  const harness = makeCtx({ llm: makeLlm([]), shell, settings })
   const rawConfig = { provider: 'p', model: 'm', autoCheckUpdates: true, updateBehavior: 'ask-before-update', lastAutoCheckDate: dateKey, lastSeenLatestVersion: 'v0.4.0' }
   apply(harness.ctx, rawConfig)
   harness.runInjections()

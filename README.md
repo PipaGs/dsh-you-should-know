@@ -8,7 +8,7 @@ The product intent is analogous to Claude Code's *You Should Know*, with one del
 
 ## Status
 
-Version `0.3.7`, MIT. Host and browser halves are committed as plain JavaScript, so a `github:` install needs no build step. Scope is intentionally small: a composer-adjacent note card with a bounded notification history, a Plugins settings card with a reviewer strictness mode and optional additional reviewer instructions, and a session-header mode and model override, one reviewer call per qualifying turn, and a per-session runtime that retries one transient failure, bounds the queue and the whole call, and pauses on quota without losing the turn.
+Version `0.4.2`, MIT. Host and browser halves are committed as plain JavaScript, so a `github:` install needs no build step. Scope is intentionally small: a composer-adjacent note card with a bounded notification history, a Plugins settings card with a reviewer strictness mode and optional additional reviewer instructions, and a session-header mode and model override, one reviewer call per qualifying turn, and a per-session runtime that retries one transient failure, bounds the queue and the whole call, and pauses on quota without losing the turn.
 
 ## What it does
 
@@ -80,7 +80,7 @@ A source-level test (`test/invariant.test.js`) scans the shipped files for every
 Because the built host and browser halves are committed, installation needs no source build. Install an **immutable release ref**, not the default branch:
 
 ```sh
-dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.4.1
+dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.4.2
 ```
 
 A bare `github:PipaGs/dsh-you-should-know` address is resolved by pnpm and saved as that same value every time. The Desktop plugin manager learns which package an install produced by diffing the profile's dependencies before and after pnpm runs, and falls back to matching the typed address against a package name. A bare default-branch address changes nothing on the second run, and that fallback does not understand a Git address, so the manager reports that the installed package could not be told from the dependency change. A ref-pinned address is saved verbatim, so each install and upgrade is attributed to `dsh-you-should-know`. In the Desktop **Add plugin** dialog, enter the same pinned address. To move to a later release, install its tag; to install the exact version already present, remove the plugin first.
@@ -171,7 +171,7 @@ The browser half registers three surfaces.
 - The numeric gates (`minDeltaChars`, `cooldownTurns`, `maxContextMessages`, `maxTokens`, `maxReviewerCallsPerHour`) are editable and validated against the same bounds as the row.
 - Save is disabled, and every control explains why, when the host mounts no writable settings service. A pinned route that resolves to nothing is rejected before anything is persisted, with a bounded message.
 - The card refreshes once on mount, on window focus, and on a connection reset; a stale response from an older request generation never overwrites a newer one.
-- An **Updates** group shows the current and latest version, a **Check for updates automatically** toggle (default on), an **Update behavior** select (default **Ask before update**), and a **Check for updates** button. When a newer release exists it shows `current -> latest` and the exact pinned address with a copy action and a dismiss action. It reads the update status with the same single config read and never makes a second request just to render.
+- An **Updates** group shows the current and latest version, the update source (`Git tags`), the exact target address once a stable tag is known, a **Check for updates automatically** toggle (default on), an **Update behavior** select (default **Ask before update**), and a **Check for updates** button. When a newer release exists it shows `current -> latest` and the exact pinned address with a copy action and a dismiss action, and states that it never installs by itself. It reads the update status with the same single config read and never makes a second request just to render.
 
 **Session header action** (`conversation.session.header.actions`, scoped to one session):
 
@@ -213,14 +213,14 @@ The plugin can tell you when a newer release exists. It **checks**; it does not 
 
 1. On plugin startup, if today has no successful automatic check yet, exactly one automatic check runs.
 2. If the host stays up past local midnight, one timer fires at the next local midnight and runs that day's check; the following midnight is armed again from the local calendar, so a DST day is 23 or 25 hours rather than a hardcoded 24.
-3. A failed automatic check (network error, timeout, non-2xx, oversized or malformed body, or a tag that is not stable) does **not** stamp the day, so the next startup retries that same day. It never retries in a tight loop.
+3. A failed automatic check (a nonzero `git` exit, a signal or timeout, a truncated or oversized listing, malformed output, or a listing with no stable tag) does **not** stamp the day, so the next startup retries that same day. It never retries in a tight loop.
 4. A manual **Check for updates** bypasses the once-per-day guard and can run at any time.
 
 Only a successful automatic check records the local date. The preference and the tiny state (the last successful local date, the last seen release tag, a dismissal, and the update behavior) persist in the same `you-should-know` plugin row through the host settings service. Nothing is kept in browser storage.
 
-**Release source.** The check reads `https://api.github.com/repos/PipaGs/dsh-you-should-know/releases/latest` through the host's public `ctx.web` fetch seam. That endpoint names the newest published non-draft, non-prerelease release, so a branch head can never become an update. Only a stable `vMAJOR.MINOR.PATCH` tag is accepted; a prerelease, build suffix, branch name, or malformed tag is ignored, and an equal or older version is not an update. The decoded response is size-checked (at most 64 KiB accepted) and the request has a 10-second timeout; the shared web seam also enforces its own download and body caps. Any bad response fails quietly.
+**Release source.** The check discovers tags from the public Git repository with one fixed-shape, read-only command, `git ls-remote --tags --refs https://github.com/PipaGs/dsh-you-should-know.git`, run through the host's documented public `ctx.shell` seam. The command is a compile-time literal: no user input, version, branch, or repository value is ever interpolated into it, it lists tag refs only, and a direct seam caller receives the deployment sandbox policy. The repository URL is a trusted constant, the process environment disables the interactive credential prompt, and the command carries no cookie, token, or Authorization header. Only a stable `vMAJOR.MINOR.PATCH` tag is accepted; a prerelease, build suffix, branch name, or malformed tag is ignored, and an equal or older version is not an update. The listing is bounded in bytes and lines and parsed strictly: a malformed line rejects the whole listing instead of guessing, the command has a 10-second timeout, and truncated output is refused. Any bad result fails quietly. This path deliberately does not use the public GitHub Releases API, because the web fetch seam can be unreachable where `git ls-remote` still works.
 
-**Privacy.** The request carries no user data: no conversation text, note, custom reviewer prompt, session id, provider or model id, or other plugin state. It is a single anonymous `GET` to the release endpoint with only ordinary HTTP metadata and the shared web seam's product `User-Agent`.
+**Privacy.** The command carries no user data: no conversation text, note, custom reviewer prompt, session id, provider or model id, or other plugin state. It is a single anonymous read of a public repository's tags, and the process is spawned under the deployment sandbox policy.
 
 **Update behavior.** The preference is stored even when it cannot take effect on the running DSH:
 
@@ -228,9 +228,9 @@ Only a successful automatic check records the local date. The preference and the
 |---|---|
 | **Notify only** | Fully supported. When a newer release exists, the settings card shows `current -> latest` and the exact pinned address. Nothing is installed. |
 | **Ask before update** | Supported as a notice. This DSH version exposes no approved plugin update API that a plugin may call without bypassing human approval, so it degrades to **Notify only** and asks you to install through the Plugins flow. |
-| **Automatic** | Not available. Automatic installation is not supported by this DSH version, so the preference is stored for a future compatible DSH but nothing is installed; no shell, package manager, profile file, or internal service is ever used. |
+| **Automatic** | Not available. Automatic installation is not supported by this DSH version, so the preference is stored for a future compatible DSH but nothing is installed; no package manager, profile file, or internal install service is ever used, and the only command the plugin ever runs is the fixed read-only tag listing. |
 
-**Installing a found release.** The exact address is `github:PipaGs/dsh-you-should-know#vX.Y.Z`. Install it through the Plugins settings (the **Add plugin** dialog or the profile dependency), then **restart DSH Desktop** so the new JavaScript generation loads. Dismissing a version hides its notice for that version only; a newer release surfaces again.
+**Installing a found release.** The plugin never installs, upgrades, or mutates an installation. The exact address is `github:PipaGs/dsh-you-should-know#vX.Y.Z`. Install it through the Plugins settings (the **Add plugin** dialog or the profile dependency), then **restart DSH Desktop** so the new JavaScript generation loads. Dismissing a version hides its notice for that version only; a newer release surfaces again.
 
 | Key | Default | Validation | Meaning |
 |---|---|---|---|
@@ -341,14 +341,14 @@ The self-check route answers only from in-process state and returns bounded JSON
   "authTransport": "host-authenticated-connection",
   "healthy": true,
   "configured": true,
-  "pluginVersion": "0.4.1",
-  "runtimeVersion": "0.4.1",
-  "installedVersion": "0.4.1",
+  "pluginVersion": "0.4.2",
+  "runtimeVersion": "0.4.2",
+  "installedVersion": "0.4.2",
   "runtimeStatus": "idle",
   "reviewerMode": "balanced",
   "routes": [{ "name": "self-check", "methods": ["GET", "HEAD"], "registered": true }],
   "capabilities": { "feedback": true, "explain": true, "evidence": true, "episodeTrigger": true, "adaptiveBudget": true, "updateChecker": true },
-  "update": { "currentVersion": "0.4.1", "latestVersion": "", "latestTag": "", "updateAvailable": false, "dismissed": false, "autoCheckUpdates": true, "updateBehavior": "ask-before-update", "lastAutoCheckDate": "", "lastCheckedAt": null, "lastResult": null }
+  "update": { "currentVersion": "0.4.2", "latestVersion": "", "latestTag": "", "installSpec": "", "source": "git-tags", "updateAvailable": false, "dismissed": false, "autoCheckUpdates": true, "updateBehavior": "ask-before-update", "automaticSupported": false, "lastAutoCheckDate": "", "lastCheckedAt": null, "lastResult": null }
 }
 ```
 
@@ -363,7 +363,7 @@ The self-check route answers only from in-process state and returns bounded JSON
 | `reviewerMode` | The effective global strictness mode id, or `null`. |
 | `routes` | One entry per registered route with its name, HTTP methods, and whether a handler is actually present. The list is the same compile-time table the host registers from, so it cannot drift. |
 | `capabilities` | The feature flags `feedback`, `explain`, `evidence`, `episodeTrigger`, `adaptiveBudget`, and `updateChecker`. |
-| `update` | The bounded update-checker state: version tags, the behavior enum, the local check date, and the last result. Derived install specs and unknown fields are dropped. |
+| `update` | The bounded update-checker state: version tags, the Git discovery source, the exact pinned target address, the install capability, the behavior enum, the local check date, and the last result. An `installSpec` that is not the exact pinned Git shape, and every unknown field, are dropped. |
 
 ### No public CLI path for external verification
 

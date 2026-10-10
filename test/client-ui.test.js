@@ -1689,6 +1689,7 @@ const UPDATE_STATUS = {
   latestVersion: '0.4.0',
   latestTag: 'v0.4.0',
   installSpec: 'github:PipaGs/dsh-you-should-know#v0.4.0',
+  source: 'git-tags',
   updateAvailable: true,
   dismissed: false,
   dismissedVersion: '',
@@ -1813,6 +1814,17 @@ test('the update card shows the exact pinned spec and the restart note, and inst
   assert.ok(findByAria(view.output, 'Copy install spec'))
   assert.equal(typeof env.module.installBundle, 'undefined', 'the browser half exposes no install call')
   assert.equal(backend.posts.length, 0, 'rendering the notice mutates nothing')
+  view.unmount()
+})
+
+test('the update card names the Git tag source and the exact target address', async () => {
+  const backend = updateBackend()
+  const env = await loadBundle({ backend: backend.backend })
+  const view = mountSettingsCard(env)
+  await flushAsync()
+  assert.match(textOf(view.output), /Git tags/)
+  assert.match(textOf(view.output), /target: github:PipaGs\/dsh-you-should-know#v0\.4\.0/)
+  assert.equal(textOf(view.output).includes('Update check failed'), false)
   view.unmount()
 })
 
