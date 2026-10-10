@@ -8,7 +8,9 @@ import {
   buildCapabilities,
   buildSelfCheckPayload,
   createSelfCheckHandler,
+  readInstalledVersion,
   routeCapabilityView,
+  updateSummary,
 } from '../lib/self-check.js'
 
 const EXPECTED_ROUTES = [
@@ -149,6 +151,62 @@ test('the self-check payload bounds every version and enum value', () => {
   assert.equal(payload.reviewerMode, null)
   assert.equal(payload.runtimeStatus, 'unknown')
   assert.ok(JSON.stringify(payload).length < 2000, 'the payload stays small')
+})
+
+test('updateSummary bounds strings and numbers and drops unknown fields', () => {
+  const summary = updateSummary({
+    currentVersion: '  0.4.1  ',
+    latestTag: 'v0.4.1',
+    lastAutoCheckDate: 'x'.repeat(80),
+    lastCheckedAt: Number.MAX_SAFE_INTEGER + 10,
+    latestVersion: 'bad\u0000value',
+    updateAvailable: true,
+    dismissed: false,
+    secret: 'sk-live',
+  })
+  assert.deepEqual(summary, { currentVersion: '0.4.1', latestTag: 'v0.4.1', updateAvailable: true, dismissed: false })
+})
+
+test('the two running-version names are one value by design', () => {
+  const payload = build()
+  assert.equal(payload.pluginVersion, payload.runtimeVersion)
+})
+
+test('the handler reports a manifest-read failure to the error sink instead of swallowing it', async () => {
+  const seen = []
+  const handler = createSelfCheckHandler({
+    engine: { diagnostics: () => baseDiagnostics },
+    updateChecker: { status: () => baseUpdate },
+    pluginVersion: '0.4.1',
+    handlers: ALL_HANDLERS,
+    readInstalledVersion: async () => { throw new Error('manifest unavailable') },
+    onError: (error) => seen.push(error.message),
+  })
+  const response = await handler.selfCheck(new Request('http://127.0.0.1' + SELF_CHECK_PATH, { method: 'GET' }))
+  assert.equal(response.status, 500)
+  assert.deepEqual(seen, ['manifest unavailable'])
+})
+
+test('the handler reports a diagnostics failure to the error sink', async () => {
+  const seen = []
+  const handler = createSelfCheckHandler({
+    engine: { diagnostics: () => { throw new Error('engine gone') } },
+    updateChecker: { status: () => baseUpdate },
+    pluginVersion: '0.4.1',
+    handlers: ALL_HANDLERS,
+    readInstalledVersion: async () => '0.4.1',
+    onError: (error) => seen.push(error.message),
+  })
+  const response = await handler.selfCheck(new Request('http://127.0.0.1' + SELF_CHECK_PATH, { method: 'GET' }))
+  assert.equal(response.status, 500)
+  assert.deepEqual(seen, ['engine gone'])
+})
+
+test('the default installed-version reader reports nothing on the readable manifest', async () => {
+  const seen = []
+  const result = await readInstalledVersion((error) => seen.push(error))
+  assert.equal(result, await manifestVersion())
+  assert.deepEqual(seen, [])
 })
 
 test('the self-check route is GET/HEAD, bodyless on HEAD, and rejects writes', async () => {

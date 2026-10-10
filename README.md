@@ -356,7 +356,7 @@ The self-check route answers only from in-process state and returns bounded JSON
 |---|---|
 | `authTransport` | Always `host-authenticated-connection`: the route is served by the same authenticated connection carrier as every other plugin route. |
 | `healthy` | `true` only when the reviewer is configured, every route has a handler, and `runtimeStatus` is `idle` or `reviewing`. The Settings card shows **Not healthy** with the reported reason otherwise. |
-| `configured` | Whether an explicit blank provider/model disabled the reviewer. It is `false` on a row that registers no routes. |
+| `configured` | Whether the loaded config keeps the reviewer enabled. A blank `provider`/`model` sets `disabled`, so the row registers no routes and this is `false`. |
 | `pluginVersion` / `runtimeVersion` | The running module's version constant, or `null` when it is unusable. |
 | `installedVersion` | The version in the plugin's own installed `package.json`, or `null` when the manifest cannot be read. A value that differs from the running version is the honest restart signal. |
 | `runtimeStatus` | The aggregate scheduler state across live sessions: `idle`, `reviewing`, `degraded`, `quota_exhausted`, `halted`, or `disposed`, most severe first, or `unknown`. |
