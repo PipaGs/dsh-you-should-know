@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 
-const SHIPPED = ['lib/core.js', 'lib/review-profile.js', 'lib/review-strictness.js', 'lib/update.js', 'lib/index.js', 'lib/client.js']
+const SHIPPED = ['lib/core.js', 'lib/review-profile.js', 'lib/review-strictness.js', 'lib/language.js', 'lib/feedback.js', 'lib/adaptive.js', 'lib/evidence.js', 'lib/explain.js', 'lib/update.js', 'lib/index.js', 'lib/client.js']
 const PUBLIC = ['package.json', 'cordis.patch.yml', 'README.md', 'LICENSE']
 
 async function read(path) {
@@ -58,6 +58,9 @@ test('the plugin uses only the sanctioned seams', async () => {
   assert.ok(client.includes("'api/dsh-you-should-know/dismiss'"), 'the dismiss post is document-relative for the Desktop app origin')
   assert.ok(client.includes("'api/dsh-you-should-know/history'"), 'the history read is document-relative for the Desktop app origin')
   assert.equal(client.includes("'/dsh-you-should-know/"), false, 'no origin-root absolute route remains in the browser half')
+  assert.ok(index.includes('EXPLAIN_PATH'), 'Explain is served over one dedicated bounded route')
+  assert.ok(core.includes('EPISODE_EVIDENCE_BEGIN'), 'the evidence capsule has explicit untrusted markers')
+  assert.ok(core.includes('parseExplanation'), 'the explanation reply uses the strict bounded parser')
   assert.ok(client.includes('conversation.input.dock'), 'the card lives in the composer-adjacent slot')
   assert.ok(client.includes("ctx.slots.inject("), 'the card registers through the slot system')
   assert.ok(!client.includes('localStorage'), 'resolution state stays in the page, not shared storage')
@@ -142,7 +145,7 @@ test('the bundled row leaves the reviewer route to adaptive discovery', async ()
 test('the manifest declares the bundle, the client half, and no build step', async () => {
   const manifest = JSON.parse(await read('package.json'))
   assert.equal(manifest.name, 'dsh-you-should-know')
-  assert.equal(manifest.version, '0.3.8')
+  assert.equal(manifest.version, '0.4.0')
   assert.equal(manifest.license, 'MIT')
   assert.equal(manifest.dsh.manifestVersion, 1)
   assert.equal(manifest.dsh.bundle.patch, './cordis.patch.yml')
