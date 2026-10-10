@@ -11,8 +11,9 @@ import { createUpdateChecker, normalizeUpdateState } from '../lib/update.js'
 
 const UPDATE_URL = 'http://127.0.0.1/api/dsh-you-should-know/update'
 
-function releaseBody(tag) {
-  return JSON.stringify({ tag_name: tag, draft: false, prerelease: false })
+/** One realistic git ls-remote --tags --refs stdout body. */
+function tagListing(...tags) {
+  return tags.map((tag, index) => String(index + 1).padStart(40, '0') + '\trefs/tags/' + tag).join('\n') + '\n'
 }
 
 function updateHarness(options = {}) {
@@ -23,16 +24,16 @@ function updateHarness(options = {}) {
     Object.assign(state, patch)
   }
   const calls = []
-  const webFetch = async (request, signal) => {
+  const shellExec = async (request, signal) => {
     calls.push({ request, signal })
-    if (options.fail === true) throw new Error('network down')
-    return { statusCode: 200, body: { kind: 'text', content: releaseBody(options.latestTag ?? 'v0.4.0') }, truncated: false }
+    if (options.fail === true) throw new Error('git unavailable')
+    return { exitCode: 0, signal: null, timedOut: false, aborted: false, timeoutMs: 1000, stdout: { text: tagListing(options.latestTag ?? 'v0.4.0'), truncated: false }, stderr: { text: '', truncated: false } }
   }
   const checker = createUpdateChecker({
     currentVersion: options.currentVersion ?? '0.3.8',
     getState: () => state,
     persist,
-    webFetch,
+    shellExec,
     now: () => Date.parse('2026-06-15T10:00:00Z'),
     setTimer: () => 1,
     clearTimer: () => {},
@@ -69,6 +70,7 @@ test('GET update returns the bounded update status and writability', async () =>
     latestVersion: '0.4.0',
     latestTag: 'v0.4.0',
     installSpec: 'github:PipaGs/dsh-you-should-know#v0.4.0',
+    source: 'git-tags',
     updateAvailable: true,
     dismissed: false,
     dismissedVersion: '',
@@ -164,6 +166,7 @@ test('the update response carries only bounded update fields, never prompt or no
     'lastResult',
     'latestTag',
     'latestVersion',
+    'source',
     'updateAvailable',
     'updateBehavior',
   ])
@@ -251,7 +254,7 @@ test('without a preserve hook the reviewer patch is unchanged', async () => {
 test('the exported plugin version mirrors package.json', async () => {
   const manifest = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'))
   assert.equal(PLUGIN_VERSION, manifest.version)
-  assert.equal(manifest.version, '0.4.1')
+  assert.equal(manifest.version, '0.4.2')
 })
 
 test('the Config schema declares the update fields with conservative defaults', () => {
