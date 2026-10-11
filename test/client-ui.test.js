@@ -1544,6 +1544,87 @@ test('a stale history response for session A never populates session B', async (
   view.unmount()
 })
 
+// --- Empty state -----------------------------------------------------------------
+
+test('a session with no notes and no history keeps a compact No notes yet card', async () => {
+  const env = await loadBundle({ backend: notesBackend([]), allowIntervals: true })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1' })
+  await flushAsync()
+
+  assert.ok(view.output, 'the dock renders even with no note and no history')
+  assert.match(textOf(view.output), /No notes yet/, 'the compact empty state is visible')
+  const empty = findByAria(view.output, 'You should know')
+  assert.ok(empty, 'the empty state is labelled for assistive tech')
+  assert.equal(empty.props.role, 'status', 'the empty state is a status, not a finding')
+  assert.equal(empty.props['data-state'], 'empty', 'the empty state is distinguishable from a finding')
+  assert.equal(findAll(view.output, 'section').some((node) => node.props && node.props.role === 'note'), false, 'the empty state is never a finding card')
+  for (const label of ['Add to chat', 'Dismiss', 'Knew it', 'Thanks', 'Explain']) {
+    assert.equal(buttonByText(view.output, label), null, 'the empty state offers no ' + label + ' action')
+  }
+  view.unmount()
+})
+
+test('the empty card survives an unmount and a fresh mount after a host restart', async () => {
+  const first = await loadBundle({ backend: notesBackend([]), allowIntervals: true })
+  const before = first.runtime.mount(first.dockComponent().component, { sessionId: 's-1' })
+  await flushAsync()
+  assert.match(textOf(before.output), /No notes yet/, 'the empty state is present before a restart')
+  before.unmount()
+
+  // A host restart reloads the page: the bundle is fresh and holds no in-memory
+  // note or history for the session, so the state must resolve to the same card.
+  const restarted = await loadBundle({ backend: notesBackend([]), allowIntervals: true })
+  const after = restarted.runtime.mount(restarted.dockComponent().component, { sessionId: 's-1' })
+  await flushAsync()
+  assert.ok(after.output, 'the dock is present after a restart')
+  assert.match(textOf(after.output), /No notes yet/, 'the empty state survives a restart')
+  after.unmount()
+})
+
+test('the empty card gives way to a note as soon as the poll reports one', async () => {
+  let notes = []
+  const backend = async (url) => {
+    if (url.startsWith('api/dsh-you-should-know/notes')) return { status: 200, body: { ok: true, notes, historyCount: notes.length } }
+    return { status: 200, body: { ok: true } }
+  }
+  const env = await loadBundle({ backend, allowIntervals: true })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1' })
+  await flushAsync()
+  assert.match(textOf(view.output), /No notes yet/)
+
+  notes = [{ id: 'n-1', note: 'A real finding.', importance: 'high', createdAt: 1 }]
+  env.runIntervals()
+  await flushAsync()
+  assert.doesNotMatch(textOf(view.output), /No notes yet/, 'the empty state is gone once a note exists')
+  assert.match(textOf(view.output), /A real finding\./)
+  view.unmount()
+})
+
+test('switching from a note session to an empty session shows the empty card, and back', async () => {
+  const backend = async (url) => {
+    if (url.startsWith('api/dsh-you-should-know/notes')) {
+      const sessionId = new URL(url, 'http://localhost').searchParams.get('sessionId')
+      const notes = sessionId === 'A' ? [{ id: 'A:1', note: 'Alpha finding.', importance: 'high', createdAt: 1 }] : []
+      return { status: 200, body: { ok: true, notes, historyCount: 0 } }
+    }
+    return { status: 200, body: { ok: true } }
+  }
+  const env = await loadBundle({ backend, allowIntervals: true })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 'A' })
+  await flushAsync()
+  assert.match(textOf(view.output), /Alpha finding\./)
+
+  view.render({ sessionId: 'B' })
+  assert.doesNotMatch(textOf(view.output), /Alpha finding\./, 'the stale note is dropped in the same frame')
+  await flushAsync()
+  assert.match(textOf(view.output), /No notes yet/, 'an empty session renders the empty state')
+
+  view.render({ sessionId: 'A' })
+  await flushAsync()
+  assert.match(textOf(view.output), /Alpha finding\./, 'the note returns for its own session')
+  view.unmount()
+})
+
 // --- Reviewer strictness modes in the UI ---------------------------------------
 
 test('the settings card renders the exact five reviewer modes with a mode helper line', async () => {
