@@ -1,0 +1,74 @@
+{
+  "task_id": "ysk-empty-state-dock-20261011",
+  "captured_at_utc": "2026-10-11T15:20:58Z",
+  "captured_by": "DeepSeek Harness, supervised goal goal-session-a2bf702d-c228-4dfe-b0d1-a0faab483821",
+  "product_commit": "f1c3dedb4710e37c5b9262d4dc84a13a15169dee",
+  "base_commit": "af401479a6335982074ae9b9285efb26114237d5",
+  "base_tag": "v0.4.2",
+  "host": {
+    "app": "DeepSeek Harness.app",
+    "host_version": "0.2.0-rc.2",
+    "cli": "/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh",
+    "bundled_node": "24.18.1",
+    "invocation": "DSH_HOME=/tmp/ysk-visual-home dsh --profile ysk --no-open --port 19588",
+    "profile": "ysk (initialized from the shipped web template: --from-default-profile web)",
+    "url": "http://127.0.0.1:19588/",
+    "isolated_home": "/tmp/ysk-visual-home",
+    "managed_profile_touched": false
+  },
+  "plugin": {
+    "source": "/Users/pipags/work/dsh-you-should-know/.worktrees/ysk-empty-state-dock",
+    "resolved_via": "profiles/ysk/node_modules/dsh-you-should-know -> task worktree symlink",
+    "lib_client_sha256": "4a2bcd2030f33b68794525c0f384ac9ed2b0222a540a784a4b8a54c97c9c3335"
+  },
+  "browser": {
+    "engine": "chromium_headless_shell-1243",
+    "driver": "playwright from the local npm _npx cache",
+    "viewport": "1280x900, deviceScaleFactor 2",
+    "script": "evidence/capture.cjs"
+  },
+  "data_control": {
+    "empty": "real isolated session; the host notes route answered {ok:true, notes:[]} with no history",
+    "pending": "GET api/dsh-you-should-know/notes fulfilled at the HTTP boundary with one active critical note",
+    "history": "GET api/dsh-you-should-know/notes + /history fulfilled at the HTTP boundary with one active and one dismissed entry",
+    "note": "the pending/history note bodies are deterministic fixtures injected at the browser network boundary; the empty state used the real host route"
+  },
+  "files": [
+    {
+      "path": "10-empty.png",
+      "sha256": "606ebab0046159c97bd593e4733cd081f1d5554a67b9c4f237640c0123d097d2",
+      "note": "crop: You should know / No notes yet"
+    },
+    {
+      "path": "10-empty-page.png",
+      "sha256": "f4991b1a9e6f1a29ac95bda40e556553af71e94c11fce6476f801355716e78c4",
+      "note": "full native shell"
+    },
+    {
+      "path": "11-pending.png",
+      "sha256": "d63c09426a182978bca4cac24a787c92e4dcff774679f7a111bd66960a1dff5c",
+      "note": "crop: active critical finding"
+    },
+    {
+      "path": "12-history.png",
+      "sha256": "b3fcd506d7364ead6c750f9fde0bda695dd424f68a765545e79e8d60ee6faec1",
+      "note": "crop: history panel, active + dismissed"
+    },
+    {
+      "path": "10-empty.html",
+      "sha256": "787fbc969a89e0c04c05ed34362481dd6c77feaed0bfd9021e156eaa69d1398a"
+    },
+    {
+      "path": "11-pending.html",
+      "sha256": "0882076520bbfca7b9ec214a548778ee9a1635c80b1ce616e9e4c430b1873935"
+    },
+    {
+      "path": "12-history.html",
+      "sha256": "d4caeeb4b94963ae8e84053a12ce90908d2f211742977228500f3c3d133e9f04"
+    },
+    {
+      "path": "capture.cjs",
+      "sha256": "b71a9ae02b1e0413d994a41bc54bd96bc06522d5a68e9bca4cd39419477b077e"
+    }
+  ]
+}
