@@ -4,7 +4,7 @@
 **Product head (коммит с кодом, тестами, README и evidence):** `f1c3dedb4710e37c5b9262d4dc84a13a15169dee`
 **База:** `origin/main` `af401479a6335982074ae9b9285efb26114237d5` (tag `v0.4.2`).
 **Ветка:** `feat/ysk-empty-state-dock` (worktree `.worktrees/ysk-empty-state-dock`).
-**PR:** один, из этой ветки в `main`; точный PR head — коммит, добавляющий этот отчёт, зафиксирован в описании PR и в handoff.
+**PR:** один, из этой ветки в `main`; точный PR head на момент handoff зафиксирован в описании PR (product head — `f1c3ded`) и в handoff-сообщении.
 **Инструмент:** DeepSeek Harness, supervised goal `goal-session-a2bf702d-c228-4dfe-b0d1-a0faab483821`, mode strict.
 
 ---
@@ -197,6 +197,7 @@ $ git diff --numstat af40147..f1c3ded
 - Версия пакета не поднималась (остаётся `0.4.2`), т.к. release/bump в scope не входил и требует отдельной авторизации.
 - Нативное after-доказательство из managed Desktop-профиля: **NOT ATTEMPTED / NOT PROVEN** (инсталляция в managed-профиль запрещена).
 - Merge в `main` не выполнялся — PR оставлен на ревью.
+- **Гигиена процесса:** мой Playwright-прогон через сторонний MCP оставил 3 untracked файла в чужом репозитории `~/work/ozon/docs/harness-reports/parallel-search-cart-flows-20260921-live-app-acceptance/evidence/playwright/` (2 page YAML + console log, все созданы ~18:12–18:18 2026-10-11). Удаление заблокировано файловым sandbox (`workspace-write`) и escalation отклонён пользователем, поэтому файлы **оставлены**. К продукту/ветке/PR этого репозитория они отношения не имеют.
 
 ## 12. Rulings
 
