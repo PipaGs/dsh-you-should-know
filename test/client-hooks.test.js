@@ -260,7 +260,8 @@ test('a session switch never renders the previous session note, not even for one
   assert.doesNotMatch(textOf(view.output), /note for A/)
 
   await flushAsync()
-  assert.equal(view.output, null)
+  assert.match(textOf(view.output), /No notes yet/, 'an empty session shows the empty card, not a stale note')
+  assert.doesNotMatch(textOf(view.output), /note for A/, 'session A note never renders under session B')
   view.unmount()
 })
 
@@ -359,7 +360,8 @@ test('dismissal memory stays bounded and forgets the oldest sessions', async () 
   // The most recently visited session keeps its dismissal memory.
   const newest = env.runtime.mount(env.Dock, { sessionId: `s${budget}` })
   await flushAsync()
-  assert.equal(newest.output, null, 'a recent dismissal must survive')
+  assert.equal(findButton(newest.output), null, 'a recent dismissal must survive')
+  assert.doesNotMatch(textOf(newest.output), /note for s200/, 'the dismissed note never returns')
   newest.unmount()
 })
 
