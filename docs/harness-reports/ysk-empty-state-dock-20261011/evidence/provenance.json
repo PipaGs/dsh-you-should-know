@@ -1,0 +1,102 @@
+{
+  "task_id": "ysk-empty-state-dock-20261011",
+  "revision": 2,
+  "supersedes": "the rev-1 provenance committed at PR #8 head d529f1226d88268ef7c94409b47d772ed6df5c8e, which wrongly stated that the empty capture used the real host route while its capture.cjs intercepted it",
+  "captured_at_utc": "2026-10-11T15:29:30Z",
+  "captured_by": "DeepSeek Harness, supervised goal goal-session-a2bf702d-c228-4dfe-b0d1-a0faab483821",
+  "product_commit": "f1c3dedb4710e37c5b9262d4dc84a13a15169dee",
+  "base_commit": "af401479a6335982074ae9b9285efb26114237d5",
+  "base_tag": "v0.4.2",
+  "host": {
+    "app": "DeepSeek Harness.app",
+    "host_version": "0.2.0-rc.2",
+    "cli": "<DeepSeek Harness.app>/Contents/Resources/runtime/cli/bin/dsh",
+    "bundled_node": "24.18.1",
+    "invocation": "DSH_HOME=<isolated-home> dsh --profile ysk --no-open --port 19589",
+    "profile": "ysk (initialized from the shipped web template: --from-default-profile web)",
+    "isolated_home": "<platform temp>/ysk-visual-home",
+    "managed_profile_touched": false
+  },
+  "plugin": {
+    "source": "task worktree at branch feat/ysk-empty-state-dock (path not recorded on purpose)",
+    "resolved_via": "<isolated-home>/profiles/ysk/node_modules/dsh-you-should-know -> task worktree symlink",
+    "lib_client_sha256": "4a2bcd2030f33b68794525c0f384ac9ed2b0222a540a784a4b8a54c97c9c3335"
+  },
+  "browser": {
+    "engine": "chromium_headless_shell-1243",
+    "driver": "playwright, loaded through PLAYWRIGHT_MODULE (no path baked into capture.cjs)",
+    "viewport": "1280x900, deviceScaleFactor 2",
+    "script": "evidence/capture.cjs",
+    "required_env": [
+      "PLAYWRIGHT_MODULE=<path to the playwright package entry> (or a resolvable 'playwright' install)",
+      "PLAYWRIGHT_BROWSERS_PATH=<browsers root> when it is not the default <home>/Library/Caches/ms-playwright"
+    ],
+    "note": "the installed chrome-headless-shell revision must match the playwright build; capture.cjs picks the newest chromium_headless_shell-* under the browsers root"
+  },
+  "data_control": {
+    "empty": "NO interception. The card rendered from the real authenticated host route GET api/dsh-you-should-know/notes; the observed response is recorded in empty-host-response.json (status 200, ok true, notes [], historyCount 0).",
+    "pending": "GET api/dsh-you-should-know/notes fulfilled at the browser HTTP boundary AFTER the empty capture, with one active critical note.",
+    "history": "GET api/dsh-you-should-know/notes + GET api/dsh-you-should-know/history fulfilled at the browser HTTP boundary AFTER the empty capture, with one active and one dismissed entry.",
+    "note": "interception is installed only after 10-empty is written, so the empty proof is the real host route; pending/history are explicitly fixtures."
+  },
+  "authentication": "no cookie, token, or header is stored in the evidence; the page token lives only in the local capture command line and is not written to any file",
+  "files": [
+    {
+      "path": "10-empty.png",
+      "sha256": "606ebab0046159c97bd593e4733cd081f1d5554a67b9c4f237640c0123d097d2",
+      "source": "real host route",
+      "note": "crop: You should know / No notes yet"
+    },
+    {
+      "path": "10-empty-page.png",
+      "sha256": "a97d4d5a3dbec9e73da697e322f4b29d5207260df2ad0d97484a89d71925596f",
+      "source": "real host route",
+      "note": "full native shell"
+    },
+    {
+      "path": "10-empty.html",
+      "sha256": "787fbc969a89e0c04c05ed34362481dd6c77feaed0bfd9021e156eaa69d1398a",
+      "source": "real host route"
+    },
+    {
+      "path": "empty-host-response.json",
+      "sha256": "bb6508c5c0a6a14736906d540da64520a1baf5ef0aaa1cf3e41d08d67fad0bc1",
+      "source": "real host route response shape"
+    },
+    {
+      "path": "11-pending.png",
+      "sha256": "d63c09426a182978bca4cac24a787c92e4dcff774679f7a111bd66960a1dff5c",
+      "source": "HTTP fixture"
+    },
+    {
+      "path": "11-pending.html",
+      "sha256": "0882076520bbfca7b9ec214a548778ee9a1635c80b1ce616e9e4c430b1873935",
+      "source": "HTTP fixture"
+    },
+    {
+      "path": "12-history.png",
+      "sha256": "8c0da6e24f72edcb63fbd23e2f255db644c91ca47ce83170b441f8a3b2dbd9e9",
+      "source": "HTTP fixture"
+    },
+    {
+      "path": "12-history.html",
+      "sha256": "de52852fb0109fe9a7b8a0c5eddf7c80be2ea9c1821615cae4f3a1f02136404f",
+      "source": "HTTP fixture"
+    },
+    {
+      "path": "capture.cjs",
+      "sha256": "645d3c91caaa04672f5554a6df895501c3baf89a88390a8304ea0842b60404b2",
+      "note": "portable; no machine-specific path; intercepts only after the empty capture"
+    },
+    {
+      "path": "test-run-baseline.txt",
+      "sha256": "90b9aa952338289d283563b457444ec95ed3b759d403df9a7b6191b6aeb2c77c",
+      "note": "full npm test output at af40147: 481/481"
+    },
+    {
+      "path": "test-run-final.txt",
+      "sha256": "9cd757373910388ed911f1f94a9e82ac0bbbecc61a496c2631920cecd02b9514",
+      "note": "full npm test output at the fixed tree: 485/485"
+    }
+  ]
+}
