@@ -95,7 +95,7 @@ test('the client half declares its services and registers the composer-adjacent 
   assert.equal(injectFace(42).sessionId, '')
 })
 
-test('the card renders nothing at all when there is no note', async () => {
+test('the card renders a compact empty state for a session with no note', async () => {
   const registrations = await loadBundle()
   const mod = registrations[0].factory(() => fakeReact())
   let dock = null
@@ -109,5 +109,16 @@ test('the card renders nothing at all when there is no note', async () => {
       },
     },
   })
-  assert.equal(dock({ sessionId: 's1' }), null)
+  // The dock only exists inside a session; the host's empty binding is not a card.
+  assert.equal(dock({ sessionId: '' }), null)
+
+  const tree = dock({ sessionId: 's1' })
+  assert.ok(tree, 'a session with no note still renders the card')
+  assert.equal(tree.type, 'div')
+  const section = tree.children[0]
+  assert.equal(section.type, 'section')
+  assert.equal(section.props.role, 'status', 'the empty state is a status, not a finding')
+  assert.equal(section.props['aria-label'], 'You should know')
+  assert.equal(section.props['data-state'], 'empty')
+  assert.deepEqual(section.children.map((child) => child.children[0]), ['You should know', 'No notes yet'])
 })
