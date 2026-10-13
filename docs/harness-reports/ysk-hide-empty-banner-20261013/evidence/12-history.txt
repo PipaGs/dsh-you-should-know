@@ -1,0 +1,32 @@
+New Session
+⌥
+⌘
+N
+Plugins
+Workspaces
+Default workspace
+New Session
+Settings
+Into the Unknown
+Preview
+Default workspace
+Standard mode
+Hide history
+State: Active
+critical
+2026-10-13 13:40 UTC
+The retry loop never clears its timer, so a disposed session keeps polling after the host restarted.
+Open file
+lib/runtime.js:42
+Add to chat
+Dismiss
+State: Dismissed
+high
+2026-10-13 13:39 UTC
+A dismissed finding kept its resolved state and its source line.
+Open file
+lib/core.js:7
+Describe what you want to build, / commands, @ files or sessions
+Workspace Write
+DeepSeek-V41-Flash
+High
