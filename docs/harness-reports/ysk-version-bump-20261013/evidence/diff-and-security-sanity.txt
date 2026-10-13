@@ -1,0 +1,15 @@
+# DIFF_SANITY: git diff --numstat 5a8dda3..0b1e2d69846dbee0b96e33d44d60cad393fd42b0
+6	6	README.md
+1	1	lib/index.js
+1	1	package.json
+1	1	test/invariant.test.js
+3	3	test/plugin.test.js
+1	1	test/update-route.test.js
+
+# PR #9 preservation: git diff --name-only 5a8dda3..0b1e2d69846dbee0b96e33d44d60cad393fd42b0 -- lib/ test/client.js test/client-ui.test.js test/client.test.js test/client-hooks.test.js
+lib/index.js
+# (expected: only lib/index.js)
+
+# SECURITY_SANITY: secrets/URL/key scan over the product diff
+# command: git diff 5a8dda3..0b1e2d69846dbee0b96e33d44d60cad393fd42b0 | grep -inE 'api[_-]?key|secret|password|token|cookie|authorization|https?://' || echo none
+none

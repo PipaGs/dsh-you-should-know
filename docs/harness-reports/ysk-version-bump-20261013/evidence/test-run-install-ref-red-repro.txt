@@ -1,0 +1,35 @@
+# Controlled reproduction of the intermediate-state failure observed in the first full npm test:
+# package.json is 0.4.3 while README install ref is temporarily reverted to #v0.4.2.
+# Command: node --test --test-name-pattern='the README documents only tag-pinned GitHub install addresses' test/install-discovery.test.js
+#
+✖ the README documents only tag-pinned GitHub install addresses (3.17275ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 123.247625
+
+✖ failing tests:
+
+test at test/install-discovery.test.js:82:1
+✖ the README documents only tag-pinned GitHub install addresses (3.17275ms)
+  AssertionError [ERR_ASSERTION]: github:PipaGs/dsh-you-should-know#v0.4.2 is not the pinned address for 0.4.3
+  + actual - expected
+  
+  + 'github:PipaGs/dsh-you-should-know#v0.4.2'
+  - 'github:PipaGs/dsh-you-should-know#v0.4.3'
+  
+      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump/test/install-discovery.test.js:87:12)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'github:PipaGs/dsh-you-should-know#v0.4.2',
+    expected: 'github:PipaGs/dsh-you-should-know#v0.4.3',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+REPRO_EXIT=1
