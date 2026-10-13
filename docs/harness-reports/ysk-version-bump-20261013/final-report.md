@@ -43,9 +43,13 @@ e96c5bb -> 0.3.6   ...  b344d8d -> 0.3.1
 
 Каждый bump-коммит менял: `package.json`, `lib/index.js`, README (Status + install-адрес + self-check sample) и версионные литералы в `test/invariant.test.js`, `test/plugin.test.js`, `test/update-route.test.js` (проверено `git show d67e01b --stat`). Теги `v0.4.0..v0.4.2` указывают на merge-коммиты PR #5–#7.
 
-**Install-адрес — авторитетное зеркало, а не «release ref вне scope».** Это доказано тестом `test/install-discovery.test.js:82` («the README documents only tag-pinned GitHub install addresses»): он требует, чтобы каждый `dsh plugin add` адрес в README равнялся `pinnedSpec(manifest.version)`. Полный прогон на промежуточном дереве дал:```text
+**Install-адрес — авторитетное зеркало, а не «release ref вне scope».** Это доказано тестом `test/install-discovery.test.js:82` («the README documents only tag-pinned GitHub install addresses»): он требует, чтобы каждый `dsh plugin add` адрес в README равнялся `pinnedSpec(manifest.version)`. Полный прогон на промежуточном дереве дал:
+
+```text
 AssertionError: github:PipaGs/dsh-you-should-know#v0.4.2 is not the pinned address for 0.4.3
-```Поэтому адрес поднят до `#v0.4.3` вместе с `package.json`. См. ruling §10.
+```
+
+Поэтому адрес поднят до `#v0.4.3` вместе с `package.json`. См. ruling §10.
 
 Проверка базы: worktree создан от `origin/main` `5a8dda3`, что совпадает с `refs/heads/main` на remote. Тег `v0.4.3` на remote отсутствует (публикация — вне scope).
 
