@@ -1,0 +1,8 @@
+# version/package validation on product head 0b1e2d69846dbee0b96e33d44d60cad393fd42b0
+$ node --input-type=module -e '<reads package.json and imports PLUGIN_VERSION>'
+package.json version = 0.4.3
+PLUGIN_VERSION       = 0.4.3
+mirror equal          = true
+both 0.4.3            = true
+$ npm pkg get version
+"0.4.3"

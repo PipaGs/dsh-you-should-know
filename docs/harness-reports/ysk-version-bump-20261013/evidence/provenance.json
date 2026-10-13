@@ -1,0 +1,19 @@
+{
+  "task_id": "ysk-version-bump-20261013",
+  "goal_id": "goal-session-d01bdb69-2213-4cee-843a-c37ddb07aa12",
+  "mode": "strict",
+  "tool": "DeepSeek Harness",
+  "base": "5a8dda344079d2854972922fa142d185a24a1436",
+  "base_description": "origin/main merge PR #9 (fix/ysk-hide-empty-banner)",
+  "product_head": "0b1e2d69846dbee0b96e33d44d60cad393fd42b0",
+  "branch": "chore/ysk-version-bump-0.4.3",
+  "worktree": ".worktrees/ysk-version-bump",
+  "node": "v26.9.0",
+  "npm": "11.19.1",
+  "version_before": "0.4.2",
+  "version_after": "0.4.3",
+  "install_ref_after": "github:PipaGs/dsh-you-should-know#v0.4.3",
+  "release_tag_created": false,
+  "npm_publish": false,
+  "note": "The sha of the commit that adds this evidence directory is recorded in the PR description; a file cannot contain its own commit hash."
+}
