@@ -1,0 +1,27 @@
+New Session
+⌥
+⌘
+N
+Plugins
+Workspaces
+Default workspace
+New Session
+Settings
+Into the Unknown
+Preview
+Default workspace
+Standard mode
+History
+You should know · critical
+The retry loop never clears its timer, so a disposed session keeps polling after the host restarted.
+Knew it
+Thanks
+Explain
+Open file
+lib/runtime.js:42
+Add to chat
+Dismiss
+Describe what you want to build, / commands, @ files or sessions
+Workspace Write
+DeepSeek-V41-Flash
+High

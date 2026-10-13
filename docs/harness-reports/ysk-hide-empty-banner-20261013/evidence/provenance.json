@@ -1,0 +1,143 @@
+{
+  "task_id": "ysk-hide-empty-banner-20261013",
+  "revision": 1,
+  "captured_at_utc": "2026-10-13T13:42:09.456Z",
+  "captured_by": "DeepSeek Harness, supervised goal goal-session-c8e54391-0f28-42b0-aed2-2008c4babbb8",
+  "product_commit": "dfceb158168c7388f1a8e35faeb64a8d8d679ee3",
+  "base_commit": "5d60d662a666e2f54ebed76b8ac0f081d6f7e3be",
+  "host": {
+    "app": "DeepSeek Harness.app",
+    "host_version": "0.2.0-rc.2",
+    "invocation": "DSH_HOME=/tmp/ysk-hide-banner-home dsh ysk --from-default-profile web --no-open --port 19590",
+    "isolated_home": "/tmp/ysk-hide-banner-home",
+    "managed_profile_touched": false
+  },
+  "plugin": {
+    "source": "task worktree at branch fix/ysk-hide-empty-banner",
+    "lib_client_sha256": "4151fae8011f5842d18c47c0f8eb5141562e8ecd343c1f436740286f17b8e6b5"
+  },
+  "browser": {
+    "engine": "chrome-headless-shell (chromium 1243)",
+    "driver": "playwright, loaded through PLAYWRIGHT_MODULE",
+    "viewport": "1280x900, deviceScaleFactor 2",
+    "script": "capture.cjs"
+  },
+  "data_control": {
+    "empty": "NO interception. Rendered from the real authenticated host route GET api/dsh-you-should-know/notes; the observed response is recorded in empty-host-response.json.",
+    "populated": "notes fulfilled at the browser HTTP boundary AFTER the empty capture, with one critical note.",
+    "history": "notes + history fulfilled at the browser HTTP boundary AFTER the empty capture, with one active and one dismissed entry.",
+    "empty_again": "both routes fulfilled empty AFTER the populated capture, proving the empty -> populated -> empty transitions on the same page."
+  },
+  "files": [
+    {
+      "path": "10-empty-page.png",
+      "sha256": "ab3b7dbb2718bbbe8d7cb40f319fa15816bf3ccb34c387dbcec632a6fc2a0b20",
+      "bytes": 115144
+    },
+    {
+      "path": "10-empty.json",
+      "sha256": "9c11ce5252bad4b85bf12389050137cb2a609a1e525cca02a72a5de076fbf85f",
+      "bytes": 738
+    },
+    {
+      "path": "10-empty.png",
+      "sha256": "499b49e1162523f0735bf7678535a1ae72d681ec3db47211dbd47903f5f5da40",
+      "bytes": 57020
+    },
+    {
+      "path": "10-empty.txt",
+      "sha256": "467b57081625c34b3c30dec900f15843d2deb9d3694022dc231cd36ce75e34b2",
+      "bytes": 241
+    },
+    {
+      "path": "11-populated-page.png",
+      "sha256": "8c6c926f866531a02880104d166d7928ee3d3699532168e8a63420f2aa606a4f",
+      "bytes": 151843
+    },
+    {
+      "path": "11-populated.json",
+      "sha256": "07f238df875206b583dbbe1cf0113d3f52aca65aee53b01596f76c5090424a84",
+      "bytes": 4890
+    },
+    {
+      "path": "11-populated.png",
+      "sha256": "c681be0708afcb3e3bf38a707cb9c6125ee6b27ae350f856866455919a9b8226",
+      "bytes": 94178
+    },
+    {
+      "path": "11-populated.txt",
+      "sha256": "06d215f385f60b328cbab1e4a37db57d1608f1b3531396fd24dad06c6697756e",
+      "bytes": 449
+    },
+    {
+      "path": "12-history-page.png",
+      "sha256": "f98ffe31f0a1d8a9caf1e870f04ea83c83727c189f045af33d8fcc726377abcf",
+      "bytes": 176281
+    },
+    {
+      "path": "12-history.json",
+      "sha256": "d6fe9237f3294370e89771a8f0e6ab112095875153213716af7c831df92ea351",
+      "bytes": 5717
+    },
+    {
+      "path": "12-history.png",
+      "sha256": "e4e7f62e50e12972fadceb2aca583e45d3ac42fe2e34fbde3bb90b3894fd19c3",
+      "bytes": 118154
+    },
+    {
+      "path": "12-history.txt",
+      "sha256": "c74e090d0c49e873bcadb82e97ce42cda58392778d0c6927aaeca3e7a11271ee",
+      "bytes": 579
+    },
+    {
+      "path": "13-empty-again-page.png",
+      "sha256": "ab3b7dbb2718bbbe8d7cb40f319fa15816bf3ccb34c387dbcec632a6fc2a0b20",
+      "bytes": 115144
+    },
+    {
+      "path": "13-empty-again.json",
+      "sha256": "9c11ce5252bad4b85bf12389050137cb2a609a1e525cca02a72a5de076fbf85f",
+      "bytes": 738
+    },
+    {
+      "path": "13-empty-again.png",
+      "sha256": "499b49e1162523f0735bf7678535a1ae72d681ec3db47211dbd47903f5f5da40",
+      "bytes": 57020
+    },
+    {
+      "path": "13-empty-again.txt",
+      "sha256": "467b57081625c34b3c30dec900f15843d2deb9d3694022dc231cd36ce75e34b2",
+      "bytes": 241
+    },
+    {
+      "path": "capture.cjs",
+      "sha256": "153bb031173a35336917338f3b8ce7127e76e1a9c3400b850003bdf8366d1120",
+      "bytes": 15194
+    },
+    {
+      "path": "check.txt",
+      "sha256": "e7d92b340e4e2d160da356e0e79ff8074fa026a406f4d6001fd6aecd16ee7488",
+      "bytes": 455
+    },
+    {
+      "path": "empty-host-response.json",
+      "sha256": "26ad6c0d871882d7341b24c122645d203be179846c86ddf48e253e2950caf7c0",
+      "bytes": 192
+    },
+    {
+      "path": "test-run-baseline.txt",
+      "sha256": "a8da91892c5628cd032be52de044d333e8d587b016fcde1cd17cbb1d8cb8e7f3",
+      "bytes": 44150
+    },
+    {
+      "path": "test-run-final.txt",
+      "sha256": "a84eec787bda395d50596c451ab5511a96258a337ce100ee81edca33c9fedb1c",
+      "bytes": 44358
+    },
+    {
+      "path": "test-run-red.txt",
+      "sha256": "7d4ca5dbb0354ca246fc43248eb4177241651d1960ea44007013036f37f52869",
+      "bytes": 37509
+    }
+  ]
+}

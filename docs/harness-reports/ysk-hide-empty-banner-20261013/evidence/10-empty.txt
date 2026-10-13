@@ -1,0 +1,17 @@
+New Session
+⌥
+⌘
+N
+Plugins
+Workspaces
+Default workspace
+New Session
+Settings
+Into the Unknown
+Preview
+Default workspace
+Standard mode
+Describe what you want to build, / commands, @ files or sessions
+Workspace Write
+DeepSeek-V41-Flash
+High
