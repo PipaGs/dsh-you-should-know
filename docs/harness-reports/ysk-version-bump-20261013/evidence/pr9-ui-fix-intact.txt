@@ -1,0 +1,16 @@
+# AC2 proof: PR #9 hidden-empty-banner tests run on product head 0b1e2d69846dbee0b96e33d44d60cad393fd42b0
+# Command: node --test --test-name-pattern='<PR#9 empty-state tests>' test/client-ui.test.js test/client.test.js test/client-hooks.test.js
+#
+✔ test/client-hooks.test.js (125.074875ms)
+✔ a session with no notes and no history renders no dock at all (7.950583ms)
+✔ an empty session stays empty across an unmount and a fresh mount after a host restart (8.337583ms)
+✔ switching from a note session to an empty session hides the dock, and back (11.764042ms)
+✔ the card renders nothing for a session with no note and no history (3.428ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 156.762

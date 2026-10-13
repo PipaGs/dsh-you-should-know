@@ -1,0 +1,21 @@
+# occurrences of 0.4.2 in tracked files (historical docs excluded), product head 0b1e2d69846dbee0b96e33d44d60cad393fd42b0
+# command: git grep -n '0\.4\.2' -- . ':!docs/harness-reports'
+test/client-ui.test.js:2223:  const harness = selfCheckBackend({ ...SELF_CHECK, installedVersion: '0.4.2' })
+test/self-check.test.js:258:  const handler = createSelfCheckHandler({ engine: { diagnostics: () => baseDiagnostics }, updateChecker: { status: () => baseUpdate }, pluginVersion: '0.4.1', handlers: ALL_HANDLERS, readInstalledVersion: async () => '0.4.2' })
+test/self-check.test.js:261:  assert.equal(body.installedVersion, '0.4.2')
+
+# occurrences of 0.4.3 in tracked files (historical docs excluded)
+# command: git grep -n '0\.4\.3' -- . ':!docs/harness-reports'
+README.md:11:Version `0.4.3`, MIT. Host and browser halves are committed as plain JavaScript, so a `github:` install needs no build step. Scope is intentionally small: a composer-adjacent note card with a bounded notification history, a Plugins settings card with a reviewer strictness mode and optional additional reviewer instructions, and a session-header mode and model override, one reviewer call per qualifying turn, and a per-session runtime that retries one transient failure, bounds the queue and the whole call, and pauses on quota without losing the turn.
+README.md:83:dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.4.3
+README.md:344:  "pluginVersion": "0.4.3",
+README.md:345:  "runtimeVersion": "0.4.3",
+README.md:346:  "installedVersion": "0.4.3",
+README.md:351:  "update": { "currentVersion": "0.4.3", "latestVersion": "", "latestTag": "", "installSpec": "", "source": "git-tags", "updateAvailable": false, "dismissed": false, "autoCheckUpdates": true, "updateBehavior": "ask-before-update", "automaticSupported": false, "lastAutoCheckDate": "", "lastCheckedAt": null, "lastResult": null }
+lib/index.js:36:export const PLUGIN_VERSION = '0.4.3'
+package.json:3:  "version": "0.4.3",
+test/invariant.test.js:189:  assert.equal(manifest.version, '0.4.3')
+test/plugin.test.js:399:  assert.equal(body.pluginVersion, '0.4.3')
+test/plugin.test.js:400:  assert.equal(body.runtimeVersion, '0.4.3')
+test/plugin.test.js:401:  assert.equal(body.installedVersion, '0.4.3')
+test/update-route.test.js:257:  assert.equal(manifest.version, '0.4.3')

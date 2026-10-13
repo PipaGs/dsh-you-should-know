@@ -1,0 +1,12 @@
+✔ the manifest declares the bundle, the client half, and no build step (1.634083ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+✔ the authenticated self-check route reports only the bounded running plugin state (18.576625ms)
+✔ the exported plugin version mirrors package.json (1.677667ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 156.861667
