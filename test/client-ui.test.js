@@ -1544,44 +1544,40 @@ test('a stale history response for session A never populates session B', async (
   view.unmount()
 })
 
-// --- Empty state -----------------------------------------------------------------
+// --- Hidden empty state -----------------------------------------------------------
 
-test('a session with no notes and no history keeps a compact No notes yet card', async () => {
+test('a session with no notes and no history renders no dock at all', async () => {
   const env = await loadBundle({ backend: notesBackend([]), allowIntervals: true })
   const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1' })
   await flushAsync()
 
-  assert.ok(view.output, 'the dock renders even with no note and no history')
-  assert.match(textOf(view.output), /No notes yet/, 'the compact empty state is visible')
-  const empty = findByAria(view.output, 'You should know')
-  assert.ok(empty, 'the empty state is labelled for assistive tech')
-  assert.equal(empty.props.role, 'status', 'the empty state is a status, not a finding')
-  assert.equal(empty.props['data-state'], 'empty', 'the empty state is distinguishable from a finding')
-  assert.equal(findAll(view.output, 'section').some((node) => node.props && node.props.role === 'note'), false, 'the empty state is never a finding card')
+  assert.equal(view.output, null, 'the empty dock renders nothing, not an empty banner')
+  assert.equal(textOf(view.output), '', 'no empty-state text is left above the composer')
+  assert.equal(findByAria(view.output, 'You should know'), null, 'no empty-state label remains')
+  assert.equal(findAll(view.output, 'section').length, 0, 'no empty card element occupies layout')
   for (const label of ['Add to chat', 'Dismiss', 'Knew it', 'Thanks', 'Explain']) {
-    assert.equal(buttonByText(view.output, label), null, 'the empty state offers no ' + label + ' action')
+    assert.equal(buttonByText(view.output, label), null, 'the empty session offers no ' + label + ' action')
   }
   view.unmount()
 })
 
-test('the empty card survives an unmount and a fresh mount after a host restart', async () => {
+test('an empty session stays empty across an unmount and a fresh mount after a host restart', async () => {
   const first = await loadBundle({ backend: notesBackend([]), allowIntervals: true })
   const before = first.runtime.mount(first.dockComponent().component, { sessionId: 's-1' })
   await flushAsync()
-  assert.match(textOf(before.output), /No notes yet/, 'the empty state is present before a restart')
+  assert.equal(before.output, null, 'no empty banner before a restart')
   before.unmount()
 
   // A host restart reloads the page: the bundle is fresh and holds no in-memory
-  // note or history for the session, so the state must resolve to the same card.
+  // note or history for the session, so the dock must stay hidden.
   const restarted = await loadBundle({ backend: notesBackend([]), allowIntervals: true })
   const after = restarted.runtime.mount(restarted.dockComponent().component, { sessionId: 's-1' })
   await flushAsync()
-  assert.ok(after.output, 'the dock is present after a restart')
-  assert.match(textOf(after.output), /No notes yet/, 'the empty state survives a restart')
+  assert.equal(after.output, null, 'no empty banner after a restart')
   after.unmount()
 })
 
-test('the empty card gives way to a note as soon as the poll reports one', async () => {
+test('a real note appears as soon as the poll reports one, with its heading and actions', async () => {
   let notes = []
   const backend = async (url) => {
     if (url.startsWith('api/dsh-you-should-know/notes')) return { status: 200, body: { ok: true, notes, historyCount: notes.length } }
@@ -1590,17 +1586,23 @@ test('the empty card gives way to a note as soon as the poll reports one', async
   const env = await loadBundle({ backend, allowIntervals: true })
   const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1' })
   await flushAsync()
-  assert.match(textOf(view.output), /No notes yet/)
+  assert.equal(view.output, null, 'the dock is hidden while there is nothing to report')
 
   notes = [{ id: 'n-1', note: 'A real finding.', importance: 'high', createdAt: 1 }]
   env.runIntervals()
   await flushAsync()
-  assert.doesNotMatch(textOf(view.output), /No notes yet/, 'the empty state is gone once a note exists')
-  assert.match(textOf(view.output), /A real finding\./)
+  assert.match(textOf(view.output), /A real finding\./, 'the real note renders once it exists')
+  assert.match(textOf(view.output), /You should know/, 'the usual heading returns with the note')
+  assert.doesNotMatch(textOf(view.output), /No notes yet/, 'no empty-state text comes back with the note')
+  const card = findByAria(view.output, 'You should know')
+  assert.ok(card, 'the populated dock carries the note card')
+  assert.equal(card.props.role, 'note', 'the populated dock is a finding card')
+  assert.ok(buttonByText(view.output, 'Add to chat'), 'the note keeps its Add to chat action')
+  assert.ok(buttonByText(view.output, 'Dismiss'), 'the note keeps its Dismiss action')
   view.unmount()
 })
 
-test('switching from a note session to an empty session shows the empty card, and back', async () => {
+test('switching from a note session to an empty session hides the dock, and back', async () => {
   const backend = async (url) => {
     if (url.startsWith('api/dsh-you-should-know/notes')) {
       const sessionId = new URL(url, 'http://localhost').searchParams.get('sessionId')
@@ -1617,7 +1619,7 @@ test('switching from a note session to an empty session shows the empty card, an
   view.render({ sessionId: 'B' })
   assert.doesNotMatch(textOf(view.output), /Alpha finding\./, 'the stale note is dropped in the same frame')
   await flushAsync()
-  assert.match(textOf(view.output), /No notes yet/, 'an empty session renders the empty state')
+  assert.equal(view.output, null, 'an empty session renders no dock, not an empty banner')
 
   view.render({ sessionId: 'A' })
   await flushAsync()
