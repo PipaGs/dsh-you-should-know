@@ -8,7 +8,7 @@ The product intent is analogous to Claude Code's *You Should Know*, with one del
 
 ## Status
 
-Version `0.4.2`, MIT. Host and browser halves are committed as plain JavaScript, so a `github:` install needs no build step. Scope is intentionally small: a composer-adjacent note card with a bounded notification history, a Plugins settings card with a reviewer strictness mode and optional additional reviewer instructions, and a session-header mode and model override, one reviewer call per qualifying turn, and a per-session runtime that retries one transient failure, bounds the queue and the whole call, and pauses on quota without losing the turn.
+Version `0.4.3`, MIT. Host and browser halves are committed as plain JavaScript, so a `github:` install needs no build step. Scope is intentionally small: a composer-adjacent note card with a bounded notification history, a Plugins settings card with a reviewer strictness mode and optional additional reviewer instructions, and a session-header mode and model override, one reviewer call per qualifying turn, and a per-session runtime that retries one transient failure, bounds the queue and the whole call, and pauses on quota without losing the turn.
 
 ## What it does
 
@@ -80,7 +80,7 @@ A source-level test (`test/invariant.test.js`) scans the shipped files for every
 Because the built host and browser halves are committed, installation needs no source build. Install an **immutable release ref**, not the default branch:
 
 ```sh
-dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.4.2
+dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.4.3
 ```
 
 A bare `github:PipaGs/dsh-you-should-know` address is resolved by pnpm and saved as that same value every time. The Desktop plugin manager learns which package an install produced by diffing the profile's dependencies before and after pnpm runs, and falls back to matching the typed address against a package name. A bare default-branch address changes nothing on the second run, and that fallback does not understand a Git address, so the manager reports that the installed package could not be told from the dependency change. A ref-pinned address is saved verbatim, so each install and upgrade is attributed to `dsh-you-should-know`. In the Desktop **Add plugin** dialog, enter the same pinned address. To move to a later release, install its tag; to install the exact version already present, remove the plugin first.
@@ -341,14 +341,14 @@ The self-check route answers only from in-process state and returns bounded JSON
   "authTransport": "host-authenticated-connection",
   "healthy": true,
   "configured": true,
-  "pluginVersion": "0.4.2",
-  "runtimeVersion": "0.4.2",
-  "installedVersion": "0.4.2",
+  "pluginVersion": "0.4.3",
+  "runtimeVersion": "0.4.3",
+  "installedVersion": "0.4.3",
   "runtimeStatus": "idle",
   "reviewerMode": "balanced",
   "routes": [{ "name": "self-check", "methods": ["GET", "HEAD"], "registered": true }],
   "capabilities": { "feedback": true, "explain": true, "evidence": true, "episodeTrigger": true, "adaptiveBudget": true, "updateChecker": true },
-  "update": { "currentVersion": "0.4.2", "latestVersion": "", "latestTag": "", "installSpec": "", "source": "git-tags", "updateAvailable": false, "dismissed": false, "autoCheckUpdates": true, "updateBehavior": "ask-before-update", "automaticSupported": false, "lastAutoCheckDate": "", "lastCheckedAt": null, "lastResult": null }
+  "update": { "currentVersion": "0.4.3", "latestVersion": "", "latestTag": "", "installSpec": "", "source": "git-tags", "updateAvailable": false, "dismissed": false, "autoCheckUpdates": true, "updateBehavior": "ask-before-update", "automaticSupported": false, "lastAutoCheckDate": "", "lastCheckedAt": null, "lastResult": null }
 }
 ```
 
