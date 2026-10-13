@@ -1,0 +1,29 @@
+{
+  "dockSlot": {
+    "x": 0,
+    "y": 0,
+    "width": 0,
+    "height": 0
+  },
+  "dockContent": null,
+  "dockSlotChildren": 0,
+  "dockSlotHtml": "",
+  "composerStack": {
+    "x": 405,
+    "y": 351,
+    "width": 744,
+    "height": 238
+  },
+  "youShouldKnowNodes": 0,
+  "noteCards": 0,
+  "emptyStateNodes": 0,
+  "hasNoNotesYet": false,
+  "actions": {
+    "addToChat": false,
+    "dismiss": false,
+    "knewIt": false,
+    "thanks": false,
+    "explain": false
+  },
+  "bodyText": "New Session\n⌥\n⌘\nN\nPlugins\nWorkspaces\nDefault workspace\nNew Session\nSettings\nInto the Unknown\nPreview\nDefault workspace\nStandard mode\nDescribe what you want to build, / commands, @ files or sessions\nWorkspace Write\nDeepSeek-V41-Flash\nHigh"
+}
