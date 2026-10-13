@@ -1,0 +1,10 @@
+{
+  "observedResponses": 1,
+  "status": 200,
+  "ok": true,
+  "notesIsArray": true,
+  "noteCount": 0,
+  "historyCount": 0,
+  "parseError": null,
+  "source": "real host route, no interception"
+}
