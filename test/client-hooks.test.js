@@ -260,7 +260,7 @@ test('a session switch never renders the previous session note, not even for one
   assert.doesNotMatch(textOf(view.output), /note for A/)
 
   await flushAsync()
-  assert.match(textOf(view.output), /No notes yet/, 'an empty session shows the empty card, not a stale note')
+  assert.equal(view.output, null, 'an empty session renders no dock, not a stale note')
   assert.doesNotMatch(textOf(view.output), /note for A/, 'session A note never renders under session B')
   view.unmount()
 })
