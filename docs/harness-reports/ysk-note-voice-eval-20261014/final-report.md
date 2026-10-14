@@ -409,3 +409,15 @@ lib/** не тронут; ledger U-2.1.288-note-voice остаётся adapted /
 
 - Тот же PR #13, та же ветка; corrective commit и head фиксируются после push.
 - **Статус:** READY_FOR_CHATGPT_REVIEW.
+
+### Handoff rev4 (точные SHA) — 2026-10-14T11:56:04Z
+
+- Corrective commit: f707297b7a4d50dac966afcee0c7c823767803d0
+  (fix: проверять фактический outcome timeout-ветки перед продолжением),
+  запушен в origin/test/ysk-note-voice-eval-20261014.
+- Верификация на f707297: npm run check EXIT=0; npm test — tests 520 /
+  pass 520 / fail 0; targeted 43/43; evaluator test 24/24; RED rev4
+  (evidence/test-run-red-rev4.txt) — 1 fail до фикса; default evaluator —
+  live:false, notRun 4/4.
+- Тот же PR #13; merge/release не выполнялись.
+- **Статус:** READY_FOR_CHATGPT_REVIEW.
