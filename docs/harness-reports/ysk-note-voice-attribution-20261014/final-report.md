@@ -244,3 +244,90 @@ parity notes, ссылкой на `lib/core.js`, `test/core.test.js`, `README.md
 - Верификация product-состояния на 2e8ca59: `npm run check` — OK; `npm test` — tests 495 /
   pass 495 / fail 0; RED-прогон — 2 fail / 71 pass; `test/invariant.test.js` — 11/11.
   Правка отчёта product evidence не инвалидирует.
+
+---
+
+## 17. CHANGES_REQUIRED rev2 corrections — 2026-10-14T10:07:31Z
+
+Разделы 1–16 выше — историческая запись на reviewed head
+`9a2803d0835c1819f99ac9a1934f56e03a096652`; они не переписаны. Ниже — один закрытый
+review-раунд: сгруппированные исправления по двум findings ChatGPT.
+
+### F1. Полная копия upstream-документа заменена минимальным excerpt
+
+- Было: `evidence/upstream-changelog-20261014.md` — полная копия официальной страницы
+  changelog (1,082,335 байт / 1,081,280 символов; GitHub blob
+  `a4eeb5ec885ae0e003d22fe2bb2d1c0e2b475d47`), что противоречит политике
+  `docs/upstream/README.md` («quote only short official sentences, copy no upstream code»)
+  и создаёт лишнюю перераспространение/раздувание репозитория без обнаруживаемой лицензии.
+- Стало: файл перезаписан минимальным excerpt — ровно одна официальная фраза версии
+  2.1.288, canonical URL, observed timestamp, номер строки наблюдаемого документа и
+  sha256 полного документа как provenance наблюдения; полный текст не коммитится.
+  Размер: 944 байта (было 1,082,335).
+- Метаданные (sha256 `dfc62da2…`) сохранены в ledger source и evidence JSON; это
+  наблюдение, а не переупаковка текста.
+
+### F2. Ledger 2.1.288: adapted вместо equivalent, scoped acceptance
+
+- Было: `localStatus: "equivalent"`, acceptance `null`, формулировка «parity present».
+- Стало: `localStatus: "adapted"`, `disposition: "applicable"`, `acceptance` со
+  `scope: "prompt-composition"` (summary + testableAs). Parity notes прямо разделяют:
+  **verified** — composed system prompt содержит правило, base policy идёт первой, owner не
+  выдумывается из excerpt; **NOT verified** — живой вывод модели (non-deterministic, live
+  model test отсутствует). Поэтому статус adapted, а не equivalent.
+- README проекта и `docs/upstream/README.md` приведены к той же формулировке
+  (instruction-level adaptation; live model output not verified); добавлена ссылка на
+  committed excerpt.
+- Ledger-гейт не ослаблен: тест по-прежнему требует acceptance для gap/deferred, reason для
+  rejected, существование каждого evidence-пути и official+immutable/pinned источник;
+  добавлен явный пропуск для adapted-строки и проверка формы scoped acceptance.
+
+### Демонстрация base policy precedence над Custom
+
+Добавлен регрессионный тест
+`test/review-profile.test.js :: the base note-voice rule outranks a Custom reviewer prompt and cannot be replaced`:
+даже при Custom-режиме base policy идёт первой, voice-правило присутствует (явная проверка
+`voiceRuleAt >= 0`, а не вакуумный indexOf), идёт до `--- BEGIN CUSTOM REVIEWER PROMPT ---`,
+no-invented-blame guard тоже до Custom, а hostile Custom-текст сохраняется verbatim как
+untrusted data. RED теста зафиксирован: см. новый RED-прогон ниже.
+
+### Верификация (raw, обновлено)
+
+- RED (`test/core.test.js` + `test/review-profile.test.js`): 3 fail / 82 pass
+  (evidence/test-run-red.txt).
+- GREEN targeted: 93/93; `npm run check` — EXIT=0; `npm test` — **tests 496 / pass 496 / fail 0**
+  (evidence/check.txt, evidence/test-run-final.txt).
+- `test/invariant.test.js` — 11/11; forbidden delivery seams — no match
+  (evidence/security-diff-sanity.txt).
+- Рост тестов 495 -> 496: +1 новый precedence-тест в test/review-profile.test.js.
+
+### DIFF_SANITY / SECURITY_SANITY (rev2)
+
+- Изменённые пути: `README.md`, `docs/upstream/README.md`, `docs/upstream/ledger.json`,
+  `test/review-profile.test.js`, `test/upstream-ledger.test.js` и evidence-файлы задачи;
+  `lib/core.js` — без изменений относительно reviewed head (hash
+  `44c816e22900a3def3eb670bc657aedbc7a67baa3f596c9d7c3faa46a0ea0bc9`).
+- Net: −11,225 строк (в основном удалённая полная копия changelog).
+- Секреты/абсолютные пути/приватные данные не добавлялись; human-only инвариант зелёный.
+
+### Provenance (pre-commit, rev2)
+
+| Артефакт | SHA-256 |
+| --- | --- |
+| lib/core.js | 44c816e22900a3def3eb670bc657aedbc7a67baa3f596c9d7c3faa46a0ea0bc9 |
+| test/core.test.js | 62613b59b95225148ddf792021d51eb10ef5632bc239a7cd4513d8e0b7de878b |
+| test/review-profile.test.js | 87c97adf314f5a35d48ee9dda52f25f81c17b67144f66d44f0efb0dc6b1d7aee |
+| test/upstream-ledger.test.js | bf8a5fd1e95aaa86e94acfda98acb333e3cba3336b570525b534b6c57418f76b |
+| docs/upstream/ledger.json | 55e91d9352df8ee8442355c20b85c9abafd71a83cbae869d12b8a124f875688d |
+| docs/upstream/README.md | bf3b266129ed8a4a8d9db21f9d39d44a7cf370af1849002cf093e737e11271e3 |
+| README.md | 692b202d57939374f83a451c1b6de0f80c4d729326b4c50640a1c7405e9e034b |
+| evidence/upstream-changelog-20261014.md | 6366d8cbb7cffe9cb0ee9aba306fd1c04dd7b1807d4b64fb626972b5fed27ce0 |
+| evidence/claude-code-upstream-20261014.json | c5fac2b1502d8a221ec4a7e229012c645f84be0d9310791173af84031e809d7a |
+
+### Handoff rev2
+
+- Тот же PR #12, та же ветка `feat/ysk-note-voice-attribution-20261014`, тот же worktree и
+  отчёт; новый PR не создавался, merge/release не выполнялись.
+- Первый родительский коммит reviewed head — `9a2803d`; corrective commit и итоговый head
+  фиксируются в заголовке PR #12 после push.
+- **Статус:** READY_FOR_CHATGPT_REVIEW.

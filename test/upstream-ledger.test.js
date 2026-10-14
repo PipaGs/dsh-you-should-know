@@ -93,14 +93,17 @@ test('every tracked upstream signal has its own item with evidence and a disposi
   }
 })
 
-test('a gap is never dispositioned as applicable-with-nothing-to-do', () => {
+test('a gap or an adaptation is never dispositioned as applicable-with-nothing-to-do', () => {
   const ledger = readLedger()
   for (const item of ledger.upstream.items) {
     const gap = item.localStatus === 'missing' || item.localStatus === 'partial'
+    // An adapted item may carry a scoped acceptance: the adaptation is real and
+    // is verified, but the upstream behavior itself is not claimed as proven.
+    const needsAcceptance = item.disposition === 'deferred' || gap
     if (item.disposition === 'applicable' && gap) {
       assert.ok(item.acceptance, item.id + ' is an applicable gap and must carry an acceptance')
     }
-    if (item.disposition === 'deferred' || (item.disposition === 'applicable' && gap)) {
+    if (needsAcceptance) {
       assert.ok(item.acceptance && item.acceptance.summary && item.acceptance.testableAs,
         item.id + ' must name a separately scoped, testable acceptance')
     }
@@ -109,8 +112,12 @@ test('a gap is never dispositioned as applicable-with-nothing-to-do', () => {
         item.id + ' is rejected and must say why')
       assert.equal(item.acceptance, null, item.id + ' rejected items carry no acceptance')
     }
-    if (item.disposition === 'applicable' && !gap) {
+    if (item.disposition === 'applicable' && !gap && item.localStatus !== 'adapted') {
       assert.equal(item.acceptance, null, item.id + ' already has parity and needs no acceptance')
+    }
+    if (item.acceptance) {
+      assert.ok(item.acceptance.summary && item.acceptance.testableAs,
+        item.id + ' carries a scoped acceptance with a summary and a testable claim')
     }
   }
 })

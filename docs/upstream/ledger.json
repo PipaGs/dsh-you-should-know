@@ -96,7 +96,7 @@
         "upstreamDate": "2026-10-14",
         "upstreamQuote": "Improved \"You should know\" notes to say \"we\", \"the main agent\" or \"you\" depending on who was responsible for a decision",
         "claim": "A note picks its voice from who was responsible for the decision: we, the main agent, or you.",
-        "localStatus": "equivalent",
+        "localStatus": "adapted",
         "localEvidence": [
           "lib/core.js",
           "test/core.test.js",
@@ -104,8 +104,12 @@
           "docs/upstream/ledger.json"
         ],
         "disposition": "applicable",
-        "parityNotes": "The base reviewer policy now carries one explicit responsibility-attribution rule: \"we\" when the human and the agent decided together, \"the main agent\" when the action or choice is the agent's, \"you\" when the decision or the consequence is the human's or the note addresses the human directly, and a neutral statement of fact when the excerpt does not show who was responsible. The rule never invents blame. test/core.test.js covers the rule and the neutral fallback; the deferred acceptance below was satisfied by the task ysk-note-voice-attribution-20261014.",
-        "acceptance": null
+        "parityNotes": "Instruction-level adaptation, not proven behavioral equivalence. The upstream changelog asks for notes that name who was responsible; this plugin carries one explicit responsibility-attribution rule in the trusted base reviewer policy (\"we\" when the human and the agent decided together, \"the main agent\" when the action or choice is the agent's, \"you\" when the decision or the consequence is the human's or when the note addresses the human directly) plus a neutral statement of fact when the excerpt does not show who was responsible, and it never invents blame. What is verified: the composed system prompt contains that rule, keeps the base policy first, and does not gain a fabricated owner from the excerpt; see test/core.test.js and test/review-profile.test.js. What is NOT verified: the reviewer model's live output. The model is nondeterministic and no live-model test exercises it, so an actual note naming the responsible party is unproven. Status is adapted rather than equivalent for that reason.",
+        "acceptance": {
+          "summary": "The reviewer instruction selects the note voice by responsibility, as verified by prompt composition.",
+          "testableAs": "A prompt-composition test asserts that the composed reviewer system prompt carries the responsibility-attribution rule and its three voices, and that a Custom reviewer prompt cannot replace the base rule. Completed by the task ysk-note-voice-attribution-20261014; this acceptance covers instruction composition only, not live model behavior.",
+          "scope": "prompt-composition"
+        }
       },
       {
         "id": "U-2.1.290-language-setting",

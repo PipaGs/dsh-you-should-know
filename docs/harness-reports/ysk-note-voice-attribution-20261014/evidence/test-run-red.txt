@@ -1,5 +1,6 @@
 not ok 39 - the note voice follows who was responsible for the decision, without invented blame
 not ok 40 - the note-voice rule is excerpt-independent and never fabricates an owner
-# tests 73
-# pass 71
-# fail 2
+not ok 82 - the base note-voice rule outranks a Custom reviewer prompt and cannot be replaced
+# tests 85
+# pass 82
+# fail 3

@@ -7,6 +7,7 @@ change can be triaged reproducibly instead of guessed at.
 - Machine-readable ledger: [ledger.json](./ledger.json)
 - Triage and adoption process: [workflow.md](./workflow.md)
 - Raw upstream snapshot and hashes: [evidence/claude-code-upstream-20261014.json](./evidence/claude-code-upstream-20261014.json)
+- Committed upstream excerpt for 2.1.288: [../harness-reports/ysk-note-voice-attribution-20261014/evidence/upstream-changelog-20261014.md](../harness-reports/ysk-note-voice-attribution-20261014/evidence/upstream-changelog-20261014.md) (one official sentence; the full retrieved document is observed by hash only and is not committed)
 
 ## Local baseline
 
@@ -40,12 +41,15 @@ sentences below and copies no upstream code.
 | --- | --- | --- | --- |
 | 2.1.287 | A built-in side agent flags important things you or Claude might miss | adapted | applicable (parity present) |
 | 2.1.287 | Gated to first-party sessions with telemetry on | not-applicable | rejected |
-| 2.1.288 | Notes name who was responsible: we, the main agent, or you | equivalent | applicable (parity present) |
+| 2.1.288 | Notes name who was responsible: we, the main agent, or you | adapted | applicable (instruction-level adaptation; live model output not verified) |
 | 2.1.290 | Notes follow the language setting instead of always English | equivalent | applicable (parity present) |
 
 The exact quotes and the named local evidence for every row live in
-[ledger.json](./ledger.json). The deferred row names its own testable
-acceptance there; this baseline change implements no upstream behavior.
+[ledger.json](./ledger.json). The 2.1.288 row is an instruction-level adaptation:
+the trusted base reviewer policy carries the responsibility-attribution rule, but
+the reviewer model's live output is nondeterministic and is not asserted to match
+upstream behavior. Its scoped acceptance (prompt composition) is recorded and
+completed there.
 
 ## Open unknowns
 
