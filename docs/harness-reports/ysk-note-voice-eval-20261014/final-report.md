@@ -337,3 +337,15 @@ lib/** не тронут; ledger U-2.1.288-note-voice остаётся adapted /
 - Первый родительский коммит reviewed head — 8b6860e; corrective commit и
   итоговый head фиксируются в PR после push.
 - **Статус:** READY_FOR_CHATGPT_REVIEW.
+
+### Handoff rev3 (точные SHA) — 2026-10-14T11:52:31Z
+
+- Corrective commit: cecf77ef72149aa52885197753662fc49db4f5be
+  (fix: подтверждать закрытие iterator до старта следующего кейса),
+  запушен в origin/test/ysk-note-voice-eval-20261014.
+- Верификация на cecf77e: npm run check EXIT=0; npm test — tests 517 /
+  pass 517 / fail 0; targeted 40/40; evaluator test 21/21; RED rev3
+  (evidence/test-run-red-rev3.txt) — 2 fail до фикса; default evaluator —
+  live:false, notRun 4/4.
+- Тот же PR #13; merge/release не выполнялись.
+- **Статус:** READY_FOR_CHATGPT_REVIEW.
