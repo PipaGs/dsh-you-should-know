@@ -15,8 +15,8 @@ change can be triaged reproducibly instead of guessed at.
 | Repository | PipaGs/dsh-you-should-know |
 | Product version | 0.4.3 |
 | Reference tag | v0.4.3 |
-| Baseline head | b6a202d00e80e6069c07b03e65034b4280756f1d |
-| Shipped artifact | the v0.4.3 host and browser halves; this change adds documentation and one test only |
+| Baseline head | ec07de154aa36688db6e8fe85cbf7c1233fac9ab |
+| Shipped artifact | the v0.4.3 host and browser halves; the 2.1.288 voice rule adds trusted instruction text and one test only |
 
 ## Upstream baseline
 
@@ -27,7 +27,8 @@ quoted lines stay verifiable.
 | Source | Pinned to |
 | --- | --- |
 | [releases/tag/v2.1.287](https://github.com/anthropics/claude-code/releases/tag/v2.1.287) | tag v2.1.287 (immutable, published 2026-10-01) |
-| [CHANGELOG.md at db93774](https://github.com/anthropics/claude-code/blob/db93774d73e8fdbaf315a6f4c175ae99ad3d515a/CHANGELOG.md) | commit db93774d73e8fdbaf315a6f4c175ae99ad3d515a |
+| [CHANGELOG.md at db93774](https://github.com/anthropics/claude-code/blob/db93774d73e8fdbaf315a6f4c175ae99ad3d515a/CHANGELOG.md) | commit db93774d73e8fdbaf315a6f4c175ae99ad3d515a (previous cycle baseline) |
+| [changelog.md](https://code.claude.com/docs/en/changelog.md) | served official page, sha256 dfc62da25a39339848ffedb7cf2beadf51f41458d7b681d79d25b22274550d5e, re-read 2026-10-14 for the 2.1.288 voice item |
 
 The upstream repository reports no detectable license file (the GitHub license
 API returned 404 on 2026-10-14), so the baseline quotes only the short official
@@ -39,7 +40,7 @@ sentences below and copies no upstream code.
 | --- | --- | --- | --- |
 | 2.1.287 | A built-in side agent flags important things you or Claude might miss | adapted | applicable (parity present) |
 | 2.1.287 | Gated to first-party sessions with telemetry on | not-applicable | rejected |
-| 2.1.288 | Notes name who was responsible: we, the main agent, or you | missing | deferred |
+| 2.1.288 | Notes name who was responsible: we, the main agent, or you | equivalent | applicable (parity present) |
 | 2.1.290 | Notes follow the language setting instead of always English | equivalent | applicable (parity present) |
 
 The exact quotes and the named local evidence for every row live in

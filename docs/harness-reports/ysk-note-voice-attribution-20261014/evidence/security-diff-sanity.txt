@@ -1,0 +1,16 @@
+== invariant test (human-only guard) ==
+# tests 11
+# pass 11
+# fail 0
+== forbidden delivery seams in shipped lib (expect no matches) ==
+no forbidden seam match
+== new instruction line: no prompt/transcript/secret reach ==
+635:  'Let the note voice follow who was responsible for a decision, using only what the excerpt itself supports: "we" when the human and the agent decided together, "the main agent" when an action or choice is the agent\'s, and "you" when the decision or the consequence is the human\'s or when the note addresses the human directly. Never attribute a decision, an action, or the blame for one to a party the excerpt does not show; when responsibility is unclear, keep the note neutral and state only what happened.',
+== diff touches only the expected paths ==
+README.md
+docs/upstream/README.md
+docs/upstream/evidence/claude-code-upstream-20261014.json
+docs/upstream/ledger.json
+lib/core.js
+test/core.test.js
+test/upstream-ledger.test.js

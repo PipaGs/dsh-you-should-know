@@ -1,0 +1,15 @@
+ README.md                                          |  4 +-
+ docs/upstream/README.md                            |  9 ++--
+ .../evidence/claude-code-upstream-20261014.json    | 53 +++++++++++++++++--
+ docs/upstream/ledger.json                          | 60 ++++++++++++++++------
+ lib/core.js                                        |  1 +
+ test/core.test.js                                  | 23 +++++++++
+ test/upstream-ledger.test.js                       | 27 ++++++----
+ 7 files changed, 142 insertions(+), 35 deletions(-)
+M	README.md
+M	docs/upstream/README.md
+M	docs/upstream/evidence/claude-code-upstream-20261014.json
+M	docs/upstream/ledger.json
+M	lib/core.js
+M	test/core.test.js
+M	test/upstream-ledger.test.js
