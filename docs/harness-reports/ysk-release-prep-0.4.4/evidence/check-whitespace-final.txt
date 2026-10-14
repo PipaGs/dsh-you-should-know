@@ -1,108 +1,15 @@
 # whitespace check on the release branch relative to exact main b1153793
+# recorded at HEAD af149cf (post-normalization). The check output below is
+# the raw reporter output, with the reporter trailing "+ " prefix kept but
+# with no trailing whitespace of its own (this evidence file is also clean).
+
 $ git diff --check origin/main...HEAD
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/diff-summary-rev2.txt:29: trailing whitespace.
-+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/diff-summary-rev2.txt:34: trailing whitespace.
-+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/diff-summary.txt:6: trailing whitespace.
-+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/diff-summary.txt:8: trailing whitespace.
-+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/diff-summary.txt:11: trailing whitespace.
-+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/diff-summary.txt:13: trailing whitespace.
-+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/diff-summary.txt:16: trailing whitespace.
-+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/diff-summary.txt:21: trailing whitespace.
-+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/diff-summary.txt:41: trailing whitespace.
-+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/diff-summary.txt:47: trailing whitespace.
-+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/diff-summary.txt:52: trailing whitespace.
-+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/diff-summary.txt:108: trailing whitespace.
-+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-red-release-consistency-repro.txt:19: trailing whitespace.
-+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-red-release-consistency-repro.txt:21: trailing whitespace.
-+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-red-release-consistency-repro.txt:40: trailing whitespace.
-+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-red-release-consistency-repro.txt:42: trailing whitespace.
-+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-red-release-notes.txt:56: trailing whitespace.
-+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-red-release-notes.txt:58: trailing whitespace.
-+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-red-version-mirrors.txt:19: trailing whitespace.
-+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-red-version-mirrors.txt:21: trailing whitespace.
-+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-red-version-mirrors.txt:36: trailing whitespace.
-+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-red-version-mirrors.txt:38: trailing whitespace.
-+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-red-version-mirrors.txt:53: trailing whitespace.
-+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-red-version-mirrors.txt:55: trailing whitespace.
-+
+(no output; exit 0)
 
 $ git diff --check
 (no output; exit 0)
 
-# any remaining trailing-whitespace lines in the new stage6 evidence?
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/whitespace-normalization-log.txt:31:"normalized for whitespace; factual diff patch content preserved except
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/whitespace-normalization-log.txt:47:  "normalized for whitespace; factual diff patch content preserved except
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/whitespace-normalization-log.txt:52:```text
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/whitespace-normalization-log.txt:59:The pre-normalization bytes remain recoverable from git history at the parent
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-final.txt:2:> dsh-you-should-know@0.4.4 test
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-final.txt:393:[dsh-you-should-know] already composed in this process; this duplicate row stays inert
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-final.txt:415:[dsh-you-should-know] already composed in this process; this duplicate row stays inert
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-baseline.txt:2:> dsh-you-should-know@0.4.3 test
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-baseline.txt:392:[dsh-you-should-know] already composed in this process; this duplicate row stays inert
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-baseline.txt:414:[dsh-you-should-know] already composed in this process; this duplicate row stays inert
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-final-rev2.txt:2:> dsh-you-should-know@0.4.4 test
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-final-rev2.txt:392:[dsh-you-should-know] already composed in this process; this duplicate row stays inert
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-final-rev2.txt:412:[dsh-you-should-know] already composed in this process; this duplicate row stays inert
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/diff-summary-rev2.txt:12:?? docs/harness-reports/ysk-release-prep-0.4.4/evidence/check-final-rev2.txt
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/diff-summary-rev2.txt:13:?? docs/harness-reports/ysk-release-prep-0.4.4/evidence/diff-summary-rev2.txt
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/diff-summary-rev2.txt:14:?? docs/harness-reports/ysk-release-prep-0.4.4/evidence/path-sanitization-note.txt
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/diff-summary-rev2.txt:15:?? docs/harness-reports/ysk-release-prep-0.4.4/evidence/security-diff-sanity-rev2.txt
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/diff-summary-rev2.txt:16:?? docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-final-rev2.txt
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/diff-summary-rev2.txt:17:?? docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-green-invariants-ledger-install-rev2.txt
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/diff-summary-rev2.txt:18:?? docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-green-release-consistency-rev2.txt
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/diff-summary-rev2.txt:19:?? docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-green-release-notes.txt
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/diff-summary-rev2.txt:20:?? docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-red-release-notes.txt
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/diff-summary-rev2.txt:21:?? docs/harness-reports/ysk-release-prep-0.4.4/evidence/version-scan-rev2.txt
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/path-sanitization-note.txt:22:```text
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/path-sanitization-note.txt:23:81a6e4ebbb98c54682623679dd7d9622f6bcfb1af809686bdfe30100d2fe9a7d  evidence/test-run-red-version-mirrors.txt
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/path-sanitization-note.txt:24:f1b3d42d8297aeed7fdf81498f79ccd35b4045c07d34d219f83991703338cf82  evidence/test-run-red-release-consistency-repro.txt
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/path-sanitization-note.txt:29:```text
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/path-sanitization-note.txt:32:$ grep -E '^(tests|pass|fail)|^ℹ (tests|pass|fail)|EXIT' evidence/test-run-red-version-mirrors.txt
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/check-whitespace-final.txt:4:+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/check-whitespace-final.txt:6:+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/check-whitespace-final.txt:8:+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/check-whitespace-final.txt:10:+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/check-whitespace-final.txt:12:+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/check-whitespace-final.txt:14:+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/check-whitespace-final.txt:16:+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/check-whitespace-final.txt:18:+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/check-whitespace-final.txt:20:+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/check-whitespace-final.txt:22:+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/check-whitespace-final.txt:24:+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/check-whitespace-final.txt:26:+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/check-whitespace-final.txt:28:+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/check-whitespace-final.txt:30:+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/check-whitespace-final.txt:32:+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/check-whitespace-final.txt:34:+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/check-whitespace-final.txt:36:+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/check-whitespace-final.txt:38:+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/check-whitespace-final.txt:40:+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/check-whitespace-final.txt:42:+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/check-whitespace-final.txt:44:+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/check-whitespace-final.txt:46:+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/check-whitespace-final.txt:48:+
-docs/harness-reports/ysk-release-prep-0.4.4/evidence/check-whitespace-final.txt:50:+
-FOUND
+$ node --test test/release-consistency.test.js  -> 4/4 pass
+$ node --test test/release-notes-consistency.test.js -> 7/7 pass
+$ npm test -> 562/562 pass, 0 fail
+$ npm run check -> exit 0
