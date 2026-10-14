@@ -1,0 +1,8 @@
+# sha256 (pre-commit working tree, 2026-10-14)
+091bb4df6485c9c1dd6f1203fc538094144fd06520dccb273c32a0dcee52b974  scripts/note-voice-eval.mjs
+e85cb90ddaa5391169f47474ea6882f29df47938e11810587ea0a23d2e005d74  test/note-voice-eval.test.js
+ac8d717b4de260760d5c578871290b79ea145ee61218419e09847d2b6405c5b5  package.json
+3372d1201262fc8085e28ebc9e037408d8c596ab926199b238dac4308a2eac5b  docs/upstream/ledger.json
+d0d671cd7725dcf9abaadf1c0af386d8637027f551f3ddff8afcb3aed631273c  docs/upstream/README.md
+5b091e0da5a3cb0094c8ca4bfa5b979160811a8e4754bc8e81d00a252da9b3ef  docs/harness-reports/ysk-note-voice-eval-20261014/final-report.md
+44c816e22900a3def3eb670bc657aedbc7a67baa3f596c9d7c3faa46a0ea0bc9  lib/core.js

@@ -1,0 +1,16 @@
+## product code diff (lib/** must be empty)
+lib diff lines: 0
+
+## evaluator network primitives (must be no match)
+no match
+
+## evaluator env reads (only the attestation flag)
+410:  const gate = resolveLiveGate({ argv, env: process.env })
+
+## secret/absolute-path scan over changed source and docs
+no match
+
+## invariant test (human-only)
+ℹ tests 11
+ℹ pass 11
+ℹ fail 0

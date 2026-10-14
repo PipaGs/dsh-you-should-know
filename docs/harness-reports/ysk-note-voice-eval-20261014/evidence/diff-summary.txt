@@ -1,0 +1,27 @@
+## git status --porcelain
+ M docs/upstream/README.md
+ M docs/upstream/ledger.json
+ M package.json
+?? docs/harness-reports/ysk-note-voice-eval-20261014/
+?? scripts/note-voice-eval.mjs
+?? test/note-voice-eval.test.js
+
+## git diff --stat (tracked)
+ docs/upstream/README.md   | 11 +++++++++--
+ docs/upstream/ledger.json | 25 ++++++++++++++++++++-----
+ package.json              |  7 ++++---
+ 3 files changed, 33 insertions(+), 10 deletions(-)
+
+## new/untracked files
+docs/harness-reports/ysk-note-voice-eval-20261014/evidence/artifacts-hashes.txt
+docs/harness-reports/ysk-note-voice-eval-20261014/evidence/check.txt
+docs/harness-reports/ysk-note-voice-eval-20261014/evidence/diff-summary.txt
+docs/harness-reports/ysk-note-voice-eval-20261014/evidence/note-voice-eval-not-run.json
+docs/harness-reports/ysk-note-voice-eval-20261014/evidence/note-voice-eval-not-run.stderr.txt
+docs/harness-reports/ysk-note-voice-eval-20261014/evidence/security-diff-sanity.txt
+docs/harness-reports/ysk-note-voice-eval-20261014/evidence/test-run-final.txt
+docs/harness-reports/ysk-note-voice-eval-20261014/evidence/test-run-red.txt
+docs/harness-reports/ysk-note-voice-eval-20261014/evidence/test-run-targeted.txt
+docs/harness-reports/ysk-note-voice-eval-20261014/final-report.md
+scripts/note-voice-eval.mjs
+test/note-voice-eval.test.js
