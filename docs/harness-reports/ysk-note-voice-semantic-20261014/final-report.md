@@ -301,3 +301,93 @@ run-no-pass`, results 0 PASS / 2 FAIL / 2 SILENT, usage 1652/152. `test/upstream
    evidence и denominators.
 4. Корректен ли release-readiness checklist §10, в частности вывод, что тег v0.4.3
    (b6a202d) не покрывает PR #12/#13/#14 и потому для релиза нужен новый semver/tag.
+
+---
+
+## 14. Review update — 2026-10-14 (rev 2, CHANGES_REQUIRED на head d7cfffa)
+
+Независимый review PR #15 подтвердил фикс «your instruction» и evidence 549/549,
+но вернул новый BLOCKER: `adjudicateCase` применял selection только в ветке
+`verdict.note === null`. Для `joint` (`selection:'excluded'`) любой emitted note
+получал PASS (например, «We agreed to cap retries at three»), хотя политика прямо
+говорит «Stay silent otherwise»; для `unclear` (`selection:'unknown'`)
+нейтральный note тоже мог получить PASS при недоказанном gate. Новых
+model/provider/balance-вызовов не было (0 paid calls).
+
+### RED (synthetic offline, без сети; evidence/test-run-red-rev2.txt)
+
+- excluded `joint` + note «We agreed to cap retries at three» → было PASS
+  (должно быть distinct non-PASS);
+- unknown `unclear` + нейтральный note → было PASS (должно быть distinct non-PASS);
+- end-to-end summary: pass 4 вместо ожидаемых 2.
+RED против head d7cfffa: tests 55 / fail 5 (semantic 2, evaluator 2, live 1).
+
+### Fix — двухосевой selection vs attribution
+
+`scripts/note-voice-eval.mjs`:
+
+- после разбора note/action (owners и mentions считаются как раньше) применяется
+  selection-гейт: `excluded` + непустой note → **`UNWARRANTED_NOTE`**;
+  `unknown` + непустой note → **`SELECTION_UNKNOWN`**. Оба — distinct non-PASS с
+  явной gate-причиной; `noteOwners`/`noteMentions`/`actionOwners`/`actionMentions`
+  сохраняются для человека;
+- `selected` + непустой note → прежний attribution-скоринг PASS/FAIL без
+  изменений (включая neutral note при `expected:'none'`);
+- `note === null` → прежние `SILENT` / `EXPECTED_SILENCE` / `SILENT_UNKNOWN`;
+- `summarize` учитывает `unwarrantedNote`/`selectionUnknown`; `LIMITATIONS`
+  дополнены двухосевым правилом для emitted note.
+
+### Комментарий trust boundary (фактическое уточнение, без ослабления opt-in)
+
+Устаревшее «trusted caller cost-neutral» уточнено: passing `gate {live:true}` —
+это **spend authorization** доверенного вызывающего (именно так работает
+оплаченный DeepSeek runner); standalone-гейт с обязательным
+zero-incremental-cost attestation остаётся legacy-дефолтом, по-прежнему не
+открывает сеть, opt-in и лимиты не ослаблены. Поведение `resolveLiveGate` и
+standalone CLI не менялось.
+
+### Версионированные тестовые правки (внутри v2)
+
+- новый `test/note-voice-semantic.test.js` AC-S7 (двухосевой гейт, selected benign
+  note, сохранение owner-анализа) и AC-S8 (counters);
+- `test/note-voice-eval.test.js`: joint → `UNWARRANTED_NOTE`, unclear →
+  `SELECTION_UNKNOWN`; gate-blocked note сохраняет `noteOwners` и объясняет
+  причину; bounded live run → 2 PASS + `UNWARRANTED_NOTE` + `SELECTION_UNKNOWN`;
+- `test/note-voice-eval-live.test.js`: end-to-end summary `pass 2`,
+  `unwarrantedNote 1`, `selectionUnknown 1`.
+
+### Историческое и ретроспективное
+
+- Исторический v1 run не изменялся: `note-voice-eval-1`, promptVersion
+  `5c1fae1b…`, 0 PASS / 2 FAIL / 2 SILENT, usage 1652/152.
+- Ретроспектива сохранённых исторических note (joint/unclear были silent) не
+  меняется; двухосевой гейт проиллюстрирован отдельно синтетическими emitted
+  note —
+  [retrospective-recalibration-rev2.json](./evidence/retrospective-recalibration-rev2.json).
+  Это НЕ model run и НЕ историческая запись; полный сырой reply не сохранялся.
+
+### Verification rev2 (0 paid calls)
+
+    npm run check -> EXIT=0                         (evidence/check-rev2.txt)
+    npm test -> tests 551 / pass 551 / fail 0       (evidence/test-run-final-rev2.txt)
+    node --test test/invariant.test.js -> 11/11     (evidence/invariant-rev2.txt)
+    node --test test/upstream-ledger.test.js -> 8/8 (evidence/upstream-ledger-rev2.txt)
+    RED против d7cfffa -> tests 55 / fail 5         (evidence/test-run-red-rev2.txt)
+
+`lib/**` не менялся; исторический знаменатель 0/2/2 и ledger
+adapted/run-no-pass сохранены; merge/release/tag/install не выполнялись.
+
+### AC rev2 (delta)
+
+Исходные AC-1..AC-11 остаются PASS; добавляются verify-цели этой ревизии:
+
+| AC | Требование | Статус | Доказательство |
+| --- | --- | --- | --- |
+| AC-Dev1 | excluded + emitted note → `UNWARRANTED_NOTE`, не PASS | PASS | AC-S7; test-run-red-rev2.txt |
+| AC-Dev2 | unknown + emitted note → `SELECTION_UNKNOWN`, не PASS | PASS | AC-S7 |
+| AC-Dev3 | selected-скоринг и null-пути не изменились | PASS | AC-S7; существующие evaluator-тесты |
+| AC-Dev4 | summary counters и LIMITATIONS точны | PASS | AC-S8; summarize |
+| AC-Dev5 | исторический v1 run и знаменатель 0/2/2 неизменны | PASS | retrospective-recalibration-rev2.json |
+| AC-Dev6 | `lib/**`, release/tag/install, user automation не тронуты | PASS | diff-summary-rev2.txt, security-diff-sanity-rev2.txt |
+
+AC denominator rev2: 11 + 6 = 17, **PASS 17, PARTIAL 0, FAIL 0, NOT_RUN 0**.

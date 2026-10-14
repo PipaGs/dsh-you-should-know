@@ -1,0 +1,9 @@
+# diff summary rev2 — working tree, pre-commit (base 3563dd8, reviewed d7cfffa)
+ scripts/note-voice-eval.mjs       | 49 ++++++++++++++++++++++++++++----------
+ test/note-voice-eval-live.test.js |  4 +++-
+ test/note-voice-eval.test.js      | 27 ++++++++++++++-------
+ test/note-voice-semantic.test.js  | 50 +++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 108 insertions(+), 22 deletions(-)
+
+# lib/** changes (working tree; must be empty)
+(end lib)

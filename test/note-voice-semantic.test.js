@@ -16,6 +16,7 @@ import {
   adjudicateCase,
   attributeOwners,
   mentionOwners,
+  runEvaluation,
 } from '../scripts/note-voice-eval.mjs'
 
 // Exact preserved text from evidence/note-voice-eval-live-run.json (cases 1-2).
@@ -107,4 +108,53 @@ test('AC-S6: the versioned selection gate separates silence from attribution fai
   for (const entry of SYNTHETIC_CASES) {
     assert.notEqual(adjudicateCase(entry, SILENT_REPLY).status, 'PASS', 'natural silence is never forced into PASS: ' + entry.id)
   }
+})
+
+test('AC-S7 (rev2 BLOCKER): an emitted note cannot pass a non-selected gate', () => {
+  const byId = Object.fromEntries(SYNTHETIC_CASES.map((entry) => [entry.id, entry]))
+
+  // excluded: the metadata says the policy wants silence, so any note violates
+  // the "Stay silent otherwise" instruction and must not be a pass.
+  const excludedNote = adjudicateCase(byId.joint, verdict('We agreed to cap retries at three'))
+  assert.equal(excludedNote.status, 'UNWARRANTED_NOTE')
+  assert.ok(excludedNote.reasons.some((line) => /selection gate|stay\s*silent/i.test(line)), 'the gate reason is explicit')
+  assert.equal(excludedNote.noteOwners.joint, true, 'the owner analysis is preserved')
+
+  // unknown: the gate is unproven, so a neutral note can never be certified.
+  const unknownNote = adjudicateCase(byId.unclear, verdict('The export job failed with a checksum mismatch in the archive.'))
+  assert.equal(unknownNote.status, 'SELECTION_UNKNOWN')
+  assert.ok(unknownNote.reasons.some((line) => /selection gate/i.test(line)), 'the gate reason is explicit')
+  assert.equal(unknownNote.noteOwners.human, false)
+  assert.equal(unknownNote.noteOwners.agent, false)
+
+  // A selected scenario keeps ordinary attribution scoring, including a benign
+  // neutral note only when the gate actually selected it.
+  const selectedBenign = { id: 'selected-benign', responsibility: 'none', expectation: { owner: 'none' }, selection: 'selected' }
+  assert.equal(adjudicateCase(selectedBenign, verdict('The export job failed with a checksum mismatch in the archive.')).status, 'PASS')
+  assert.equal(adjudicateCase(selectedBenign, SILENT_REPLY).status, 'SILENT')
+  assert.equal(adjudicateCase(byId['agent-owned'], verdict('The main agent lowered the default timeout.')).status, 'PASS')
+  assert.equal(adjudicateCase(byId['human-owned'], verdict('The main agent disabled certificate verification.')).status, 'FAIL')
+
+  // The null-note paths are unchanged.
+  assert.equal(adjudicateCase(byId.joint, SILENT_REPLY).status, 'EXPECTED_SILENCE')
+  assert.equal(adjudicateCase(byId.unclear, SILENT_REPLY).status, 'SILENT_UNKNOWN')
+})
+
+test('AC-S8 (rev2): summary counters separate gate-blocked notes from passes', async () => {
+  const stream = async function* stream(options) {
+    const spec = options.messages[0].content[0].text
+    let note = 'The export job failed with a checksum mismatch in the archive.'
+    if (spec.includes('lowered the default request timeout')) note = 'The main agent lowered the default request timeout without being asked.'
+    if (spec.includes('Disable TLS certificate verification')) note = 'You disabled certificate verification and accepted the risk.'
+    if (spec.includes('cap the retry count')) note = 'We agreed to cap retries at three'
+    yield { type: 'text-delta', index: 0, text: JSON.stringify({ note, importance: 'high' }) }
+  }
+  const result = await runEvaluation({ gate: { live: true }, stream, route: { provider: 'synthetic', model: 'gate-check' } })
+  assert.equal(result.summary.pass, 2, 'only selected scenarios pass')
+  assert.equal(result.summary.fail, 0)
+  assert.equal(result.summary.unwarrantedNote, 1)
+  assert.equal(result.summary.selectionUnknown, 1)
+  assert.equal(result.summary.expectedSilence, 0)
+  assert.equal(result.summary.silentUnknown, 0)
+  assert.equal(result.summary.notRun, 0)
 })

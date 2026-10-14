@@ -8,13 +8,16 @@
 //   * No network code. This module never opens a provider connection, so a
 //     standalone run can never spend money by accident. Live execution is an
 //     explicit opt-in through an injected stream (the host LLM service).
-//   * Fail closed. Without an explicitly established zero-incremental-cost
-//     route every case is NOT_RUN with a precise blocker; a credential's
-//     presence is never treated as proof of free access.
+//   * Fail closed. The standalone default runs no call at all: without an
+//     explicitly established zero-incremental-cost route every case is NOT_RUN
+//     with a precise blocker; a credential's presence is never treated as proof
+//     of free access. This stricter default is legacy and weakens nothing.
 //   * Trust boundary. Passing gate {live:true} with a stream is a trusted
-//     caller assertion that a cost-neutral route exists. This module does not
-//     verify cost metadata, entitlement, or credentials itself, and it opens no
-//     provider connection of its own.
+//     caller assertion of spend authorization: the owner authorized this
+//     bounded spend on the configured route (the funded DeepSeek runner does
+//     exactly this). This module does not independently verify cost metadata,
+//     entitlement, or credentials itself, and it opens no provider connection
+//     of its own. The bounded limits and opt-in gates are unchanged.
 //   * Bounded. Four cases, one attempt per case, one call at a time, a per-call
 //     deadline, a whole-run deadline, and no hidden retries. A call that cannot
 //     be confirmed closed stops the run before any later call starts.
@@ -279,6 +282,23 @@ export function adjudicateCase(caseSpec, attempt) {
     result.actionMentions = mentionOwners(result.action)
   }
 
+  // Two axes: the policy selection gate decides whether a note is warranted at
+  // all, and only a selected scenario is then scored on attribution. A note on
+  // an excluded scenario violates the policy's "Stay silent otherwise"
+  // instruction, and a note on an unproven gate can never be certified as a
+  // pass; both stay distinct from PASS while the owner/mention analysis above
+  // is preserved for a human to read.
+  if (caseSpec.selection === 'excluded') {
+    result.status = 'UNWARRANTED_NOTE'
+    result.reasons.push('the excerpt does not meet the policy selection gate, so emitting a note violates the stay-silent instruction')
+    return result
+  }
+  if (caseSpec.selection === 'unknown') {
+    result.status = 'SELECTION_UNKNOWN'
+    result.reasons.push('the excerpt does not prove the policy selection gate, so the note cannot be certified as a pass')
+    return result
+  }
+
   const expected = caseSpec.expectation.owner
   const found = ['agent', 'joint', 'human'].filter((owner) => result.noteOwners[owner])
   if (expected === 'none') {
@@ -444,7 +464,7 @@ function notRunEntry(spec, reason) {
 function summarize(results) {
   const summary = {
     total: results.length, pass: 0, fail: 0, invalid: 0, silent: 0,
-    expectedSilence: 0, silentUnknown: 0,
+    expectedSilence: 0, silentUnknown: 0, unwarrantedNote: 0, selectionUnknown: 0,
     dropped: 0, timeout: 0, notRun: 0, unknown: 0,
   }
   for (const entry of results) {
@@ -454,6 +474,8 @@ function summarize(results) {
     else if (entry.status === 'SILENT') summary.silent += 1
     else if (entry.status === 'EXPECTED_SILENCE') summary.expectedSilence += 1
     else if (entry.status === 'SILENT_UNKNOWN') summary.silentUnknown += 1
+    else if (entry.status === 'UNWARRANTED_NOTE') summary.unwarrantedNote += 1
+    else if (entry.status === 'SELECTION_UNKNOWN') summary.selectionUnknown += 1
     else if (entry.status === 'DROPPED') summary.dropped += 1
     else if (entry.status === 'TIMEOUT') summary.timeout += 1
     else if (entry.status === 'NOT_RUN') summary.notRun += 1
@@ -465,9 +487,10 @@ function summarize(results) {
 /**
  * The live gate for the standalone CLI. Fail closed: a live run needs both an
  * explicit request and an explicit, separately proven zero-incremental-cost
- * attestation. This gate is a self-attestation for a human caller; the exported
- * runEvaluation trusts a caller that passes gate {live:true} directly and does
- * not re-verify cost metadata itself.
+ * attestation. This is the standalone (legacy, stricter) default; the exported
+ * runEvaluation trusts a caller that passes gate {live:true} directly as an
+ * assertion of spend authorization and does not re-verify cost metadata itself.
+ * The standalone gate is unchanged and still opens no network.
  */
 export function resolveLiveGate({ argv = [], env = {} } = {}) {
   const requested = Array.isArray(argv) && argv.includes('--live')
@@ -488,6 +511,7 @@ const LIMITATIONS = Object.freeze([
   'Adjudication is a lexical proxy over explicit owner markers, not a semantic proof of the note voice.',
   'Decision attribution is separated from mention and address: a possessive constraint reference such as "your instruction" is not ownership.',
   'A scenario outside the policy selection gate is EXPECTED_SILENCE and an unproven gate is SILENT_UNKNOWN; natural silence is never scored as a pass.',
+  'An emitted note is gated before attribution: on an excluded scenario it is UNWARRANTED_NOTE and on an unproven gate SELECTION_UNKNOWN, both distinct from PASS.',
   'A four-case synthetic sample is a smoke evaluation only; it never claims behavioral equivalence with upstream.',
   'One attempt per case with no hidden retries; invalid, silent, dropped, and timed-out attempts are not passes.',
   'The standalone process performs no model call; a live run requires a stream supplied by the host.',
@@ -510,8 +534,9 @@ function normalizeLimits(limits) {
 /**
  * Run the evaluation. Await always.
  *
- * Trust boundary: gate.live === true is a trusted caller assertion that a
- * cost-neutral route exists. This function does not verify cost metadata,
+ * Trust boundary: gate.live === true is a trusted caller assertion of spend
+ * authorization for a bounded run on the configured route (the funded DeepSeek
+ * runner relies on it). This function does not verify cost metadata,
  * entitlement, or credentials, and it opens no provider connection of its own;
  * the live gate exists to fail closed, not to prove that a live call is free.
  *
