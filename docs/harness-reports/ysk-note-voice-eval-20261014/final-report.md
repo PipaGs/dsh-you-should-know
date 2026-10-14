@@ -194,3 +194,23 @@ SHA product/report-коммитов вписываются в PR после push
   интеграции через инъецированный stream.
 - Ledger не переведён в equivalent. Причина: нет живого evidence. Цена
   ошибки: статус остаётся консервативным.
+
+---
+
+## 15. Review handoff — 2026-10-14T11:06:11Z
+
+Разделы 1–14 выше — историческая запись pre-commit рабочего дерева; они не
+переписаны. Ниже — закрытый handoff-раунд.
+
+- Task commit: 147ed784ace2b0f3d55019da8aed322ffc7e7a0b
+  (test: добавить opt-in fail-closed оценку note voice (2.1.288)),
+  запушен в origin/test/ysk-note-voice-eval-20261014.
+- PR: https://github.com/PipaGs/dsh-you-should-know/pull/13
+  (--base main, --head test/ysk-note-voice-eval-20261014).
+- Base: 7b4ba87ba36e61fcf778541338402981b8791524 (origin/main после PR #12).
+- Верификация на 147ed78: npm run check EXIT=0; npm test — tests 511 /
+  pass 511 / fail 0; targeted 34/34; default evaluator — live:false,
+  notRun 4/4. Правка отчёта product evidence не инвалидирует.
+- Запись отчёта о handoff коммитится после task commit как report-only
+  коммит; его SHA — фактический PR head на момент ревью.
+- **Статус:** READY_FOR_CHATGPT_REVIEW. DSH не мержит и не релизит.
