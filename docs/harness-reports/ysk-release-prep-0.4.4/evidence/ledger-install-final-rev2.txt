@@ -1,0 +1,22 @@
+✔ the package name is the dependency key a GitHub install records (2.170542ms)
+✔ a first GitHub install is discovered from the dependency change (0.450042ms)
+✔ a bare default-branch spec cannot be re-attributed after the first install (0.086708ms)
+✔ a tag-pinned spec is discovered over an existing bare install (0.654666ms)
+✔ the README documents only tag-pinned GitHub install addresses (1.337333ms)
+✔ the upstream ledger cites pinned official Claude Code sources (1.247ms)
+✔ the ledger records the local baseline on a real named revision (9.515125ms)
+✔ every tracked upstream signal has its own item with evidence and a disposition (0.415125ms)
+✔ a gap or an adaptation is never dispositioned as applicable-with-nothing-to-do (0.179541ms)
+✔ an uncontested upstream unknown is recorded, not resolved by guessing (0.139583ms)
+✔ a source outage is recorded as unknown, never as no change (0.149958ms)
+✔ the ledger carries no private or unrelated project data (0.236083ms)
+✔ the human-readable workflow and baseline documents exist and agree with the ledger (0.198792ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 143.65725
+EXIT=0

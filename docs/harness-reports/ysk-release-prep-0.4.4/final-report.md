@@ -330,3 +330,68 @@ ledger «retained, not edited by stage 5»; merged stage-5 report всё ещё 
 
 `v0.4.4`, tag/release/install/merge и платные/provider-вызовы по-прежнему **не
 выполнялись**.
+
+---
+
+## Review update — round 2 (2026-10-14, CHANGES_REQUIRED по PR #16)
+
+Ревью на head `e1f81d15d9f39f67970cb6738ef498139609fea6` подтвердило factual
+release notes (round 1) как PASS и вернуло один release BLOCKER: `git diff --check`
+не чист из-за whitespace-only строк в новых evidence-файлах.
+
+### F6 (blocker) — whitespace в новых evidence
+
+Воспроизведено на точном дереве:
+
+```text
+$ git diff --check origin/main...HEAD
+docs/harness-reports/ysk-release-prep-0.4.4/evidence/diff-summary-rev2.txt:29: trailing whitespace.
+docs/harness-reports/ysk-release-prep-0.4.4/evidence/diff-summary-rev2.txt:34: trailing whitespace.
+docs/harness-reports/ysk-release-prep-0.4.4/evidence/diff-summary.txt:6,8,11,13,16,21,41,47,52,108: trailing whitespace.
+docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-red-release-consistency-repro.txt:19,21,40,42: trailing whitespace.
+docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-red-release-notes.txt:56,58: trailing whitespace.
+docs/harness-reports/ysk-release-prep-0.4.4/evidence/test-run-red-version-mirrors.txt:19,21,36,38,53,55: trailing whitespace.
+EXIT=2
+```
+
+Совпадает с независимым подсчётом ревьюера (2 + 10 + 4 + 2 + 6 = 24 строки в 5
+файлах). Все 24 строки — пустые строки, содержащие только пробелы
+(`" "` или `"  "`); строк с trailing whitespace после реального контента нет.
+Это подтверждено построчной проверкой (`non-whitespace-only = 0`).
+
+**Исправление (minimal, evidence-only):** trailing SP/TAB обрезан только в этих
+24 новых строках. Числовые исходы не менялись и перечитаны после правки:
+`3/0/3 EXIT=1`, `4/2/2`, `7/2/5`; количества строк файлов не изменились.
+Транспарентная запись — `evidence/whitespace-normalization-log.txt`
+(пофайловые pre/post sha256, номера строк, что не менялось). Два patch-capture
+файла помечены «normalized for whitespace; factual diff patch content preserved
+except whitespace»; фактические diff-хунки побайтово сохранены (изменялись
+только пробелы пустых строк-разделителей). Для трёх RED-логов заголовок также
+фиксирует санитизацию абсолютного префикса. Raw-логи **не** заявляются
+byte-identical: pre-trim байты восстановимы из git-истории, хэши фиксируют обе
+стороны. Исторические отчёты и прежние evidence не тронуты.
+
+**Дополнительных whitespace-предупреждений нет:** после правки
+`git diff --check origin/main...HEAD` → exit 0, `git diff --check` → exit 0.
+
+### Уточнение формулировки проверки
+
+Release notes и отчёт больше не подразумевают, что verification уже выполнен «на
+merge commit»: числа помечены как измеренные на release-prep-ветке относительно
+`main` @ `b1153793`, а exact merge-коммит ещё не существует.
+
+### Verification round 2
+
+| Проверка | Результат | Evidence |
+|---|---|---|
+| `git diff --check origin/main...HEAD` | exit 0 (clean) | `check-whitespace-final.txt` |
+| whitespace-нормализация | 24 строки / 5 файлов, исходы не изменены | `whitespace-normalization-log.txt` |
+| `npm test` | 562/562, 0 fail | `test-run-final-rev2.txt` |
+| `npm run check` | exit 0 | `check-final-rev2.txt` |
+| `test/release-notes-consistency.test.js` | 7/7 | `test-run-green-release-notes.txt` |
+| `test/release-consistency.test.js` | 4/4 | `test-run-green-release-consistency-rev2.txt` |
+| invariants / ledger / install-discovery | 24/24 (invariant 11/11) | `test-run-green-invariants-ledger-install-rev2.txt` |
+| secret/abs-path scan | без секретов и абсолютных путей | `security-diff-sanity-rev2.txt` |
+
+Тег/release/install/merge, provider/balance/платные вызовы не выполнялись;
+`lib/**` — по-прежнему только константа версии.

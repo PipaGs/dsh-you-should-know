@@ -1,3 +1,4 @@
+# local absolute path prefix sanitized to file://<repo>/; whitespace-normalized (trailing spaces on blank lines trimmed)
 ✖ the publication body starts at the Highlights section (0.715167ms)
 ✖ the body states the historical and retrospective statuses exactly (0.099ms)
 ✖ the body does not repeat the two contradicted claims (0.284792ms)
@@ -53,9 +54,9 @@ test at test/release-notes-consistency.test.js:44:1
 test at test/release-notes-consistency.test.js:57:1
 ✖ the body does not repeat the two contradicted claims (0.284792ms)
   AssertionError [ERR_ASSERTION]: no "proxy false positives" claim
-  
+
   true !== false
-  
+
       at TestContext.<anonymous> (file://<repo>/test/release-notes-consistency.test.js:58:10)
       at Test.runInAsyncScope (node:async_hooks:226:14)
       at Test.run (node:internal/test_runner/test:1402:25)

@@ -83,12 +83,14 @@ the new JavaScript generation loads.
 ## Verification on the merged commit
 
 Planned verification (fill in the exact numbers on the merged commit before
-publishing, as the previous releases did):
+publishing, as the previous releases did). The values below are measured on the
+release-prep branch relative to `main` @ `b1153793`, not yet on a merge commit:
 
 - `npm test` -> 562/562 pass on the release-prep tree (release-consistency 4/4 and
   release-notes-consistency 7/7 included).
 - `npm run check` -> exit 0.
-- `git diff --check` -> clean.
+- `git diff --check origin/main...HEAD` -> clean (exit 0); a whitespace
+  normalization log for the evidence files is committed in the report directory.
 - Human-only invariant (`test/invariant.test.js`) -> 11/11 pass.
 - Release consistency gate (`test/release-consistency.test.js`) -> 4/4 pass.
 

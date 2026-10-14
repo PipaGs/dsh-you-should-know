@@ -1,3 +1,4 @@
+# local absolute path prefix sanitized to file://<repo>/; whitespace-normalized (trailing spaces on blank lines trimmed)
 ✖ the manifest declares the bundle, the client half, and no build step (2.172334ms)
 [dsh-you-should-know] update check failed: no public shell service is mounted
 ✖ the authenticated self-check route reports only the bounded running plugin state (17.7205ms)
@@ -16,9 +17,9 @@
 test at test/invariant.test.js:186:1
 ✖ the manifest declares the bundle, the client half, and no build step (2.172334ms)
   AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
-  
+
   '0.4.3' !== '0.4.4'
-  
+
       at TestContext.<anonymous> (file://<repo>/test/invariant.test.js:189:10)
       at async Test.run (node:internal/test_runner/test:1409:7)
       at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
@@ -33,9 +34,9 @@ test at test/invariant.test.js:186:1
 test at test/plugin.test.js:384:1
 ✖ the authenticated self-check route reports only the bounded running plugin state (17.7205ms)
   AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
-  
+
   '0.4.3' !== '0.4.4'
-  
+
       at TestContext.<anonymous> (file://<repo>/test/plugin.test.js:399:10)
       at async Test.run (node:internal/test_runner/test:1409:7)
       at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
@@ -50,9 +51,9 @@ test at test/plugin.test.js:384:1
 test at test/update-route.test.js:254:1
 ✖ the exported plugin version mirrors package.json (2.088791ms)
   AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
-  
+
   '0.4.3' !== '0.4.4'
-  
+
       at TestContext.<anonymous> (file://<repo>/test/update-route.test.js:257:10)
       at async Test.run (node:internal/test_runner/test:1409:7)
       at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {

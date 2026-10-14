@@ -1,3 +1,5 @@
+# normalized for whitespace; factual diff patch content preserved except whitespace
+# (blank separator lines were trimmed of trailing spaces; see whitespace-normalization-log.txt)
 # product/test numstat vs origin/main
 6	6	README.md
 1	1	lib/index.js
@@ -26,12 +28,12 @@ index 66010e1..9343797 100644
 --- a/lib/index.js
 +++ b/lib/index.js
 @@ -33,7 +33,7 @@ export const name = 'dsh-you-should-know'
- 
+
  // The running plugin version. It mirrors package.json, and the update checker
  // compares it against the newest stable Git tag of the public repository.
 -export const PLUGIN_VERSION = '0.4.3'
 +export const PLUGIN_VERSION = '0.4.4'
- 
+
  /**
   * Declarative row schema for the host settings service. Every field is volatile,
 

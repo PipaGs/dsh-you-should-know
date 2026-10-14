@@ -1,3 +1,4 @@
+# local absolute path prefix sanitized to file://<repo>/; whitespace-normalized (trailing spaces on blank lines trimmed)
 ✔ the release version is a patch increment over the previous release (0.444833ms)
 ✖ package.json, PLUGIN_VERSION, and the README install address agree (0.728875ms)
 ✔ every README self-check sample version is the released version (0.353625ms)
@@ -16,9 +17,9 @@
 test at test/release-consistency.test.js:43:1
 ✖ package.json, PLUGIN_VERSION, and the README install address agree (0.728875ms)
   AssertionError [ERR_ASSERTION]: package.json carries the release version
-  
+
   '0.4.3' !== '0.4.4'
-  
+
       at TestContext.<anonymous> (file://<repo>/test/release-consistency.test.js:45:10)
       at Test.runInAsyncScope (node:async_hooks:226:14)
       at Test.run (node:internal/test_runner/test:1402:25)
@@ -37,9 +38,9 @@ test at test/release-consistency.test.js:43:1
 test at test/release-consistency.test.js:66:1
 ✖ no released artifact still documents the previous version (0.223667ms)
   AssertionError [ERR_ASSERTION]: package.json still names 0.4.3
-  
+
   true !== false
-  
+
       at TestContext.<anonymous> (file://<repo>/test/release-consistency.test.js:69:12)
       at Test.runInAsyncScope (node:async_hooks:226:14)
       at Test.run (node:internal/test_runner/test:1402:25)

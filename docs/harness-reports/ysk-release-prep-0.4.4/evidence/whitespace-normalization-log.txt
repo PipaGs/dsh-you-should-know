@@ -1,0 +1,64 @@
+# Whitespace normalization log (stage 6, review round 2)
+
+Scope: NEW stage-6 evidence files only. No historical report and no prior
+evidence file was touched. No test outcome, count, assertion, actual/expected
+value, file path or diff hunk content was changed by this normalization.
+
+## Why
+
+`git diff --check origin/main...HEAD` reported trailing-whitespace warnings on
+lines added by this PR. The published release notes promise
+"git diff --check -> clean", so the release branch must actually be clean.
+All 24 flagged lines were blank lines that contained only spaces (no line had
+trailing whitespace after real content). Whitespace-only blank lines were
+emptied; nothing else changed.
+
+## What changed
+
+| File | Lines trimmed | Line numbers (pre-trim) | sha256 before | sha256 after |
+|---|---|---|---|---|
+| `diff-summary.txt` | 10 | 6, 8, 11, 13, 16, 21, 41, 47, 52, 108 | c049f0726b2ef2af04134b13711547b2d35eb9ecd77142e45930af4709e4f84b | 901aacfcdca7a6f978982605d6ea1965c7c4af03b5bdf4a261553cbd08fec538 |
+| `diff-summary-rev2.txt` | 2 | 29, 34 | 1d2e02287a51b222f8aab706d7512724809c12c249f737d2c790efe129dae2dc | d9a2e58c22e4e25466ab3f20ee2532511977beab0cbdf7cd210154e03dba0069 |
+| `test-run-red-release-consistency-repro.txt` | 4 | 19, 21, 40, 42 | f1b3d42d8297aeed7fdf81498f79ccd35b4045c07d34d219f83991703338cf82 | 2673c36937f6723292279bc4cb36d3b4d5eb32635043bee81d0600d85cbbdd08 |
+| `test-run-red-release-notes.txt` | 2 | 56, 58 | 3b9db7791aa266a30b4a07c42f966f3be851274565c9f92adf261dd199105b9e | 63aa4cf687353c11178ce68e3e4adddfacb250af1377dba5a1ff4e12fdc90837 |
+| `test-run-red-version-mirrors.txt` | 6 | 19, 21, 36, 38, 53, 55 | 81a6e4ebbb98c54682623679dd7d9622f6bcfb1af809686bdfe30100d2fe9a7d | 6506754b2698a1c427792d654fe5bafd9b19ea342ed403752609c7ec10550dc3 |
+
+Total: 24 lines in 5 files. Every line had content `" "` or `"  "` (spaces
+only) before; each is an empty line after.
+
+The "after" hashes include a one-line provenance marker added at the top of the
+five files (the two `diff-summary` files carry
+"normalized for whitespace; factual diff patch content preserved except
+whitespace"; the three RED logs carry "local absolute path prefix sanitized to
+file://<repo>/; whitespace-normalized"). The markers add one line and change no
+other byte.
+
+## What did NOT change
+
+- Test outcomes and counts: `3 tests / 0 pass / 3 fail / EXIT=1` (RED version
+  mirrors), `4 / 2 / 2` (RED release-consistency repro), `7 / 2 / 5` (RED
+  release-notes guard). These were re-read after the trim and are unchanged.
+- File line counts are unchanged.
+- Diff hunk content in the patch captures was not edited: because no line had
+  trailing whitespace after real content, every applied patch line is
+  byte-identical. The two `diff-summary` files present patches, and their
+  factual content is preserved exactly; only the trailing spaces of the blank
+  separator lines were removed. They are therefore marked
+  "normalized for whitespace; factual diff patch content preserved except
+  whitespace".
+
+## Verification
+
+```text
+$ git diff --check origin/main...HEAD
+(no output; exit 0)
+```
+
+## Provenance
+
+The pre-normalization bytes remain recoverable from git history at the parent
+commit of the normalization commit (branch `chore/ysk-release-prep-0.4.4`,
+the commit titled "test: нормализовать whitespace в evidence release-prep 0.4.4
+(review round 2)"). The raw logs are therefore not claimed to be byte-identical
+to the committed files; the committed files are the normalized copies and the
+hashes above pin both sides.

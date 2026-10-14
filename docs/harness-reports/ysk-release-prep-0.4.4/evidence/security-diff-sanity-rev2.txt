@@ -1,7 +1,12 @@
-# secret/abs-path scan on the PRODUCT/TRACKED diff only (origin/main..working tree)
-# credential shapes checked: private-key blocks, Authorization/x-api-key WITH a value,
-# DEEPSEEK_API_KEY=<value>, absolute home prefixes.
+# secret/abs-path scan on the tracked product/test diff vs origin/main
 NO SECRET/ABS-PATH MATCHES in product/test diff
 
-# documentation-only mentions of the header name (no value) inside the report/evidence:
-0
+# abs home prefix anywhere in the new stage6 artifacts?
+NO ABS PATHS
+
+# docs/upstream must be untouched
+docs/upstream UNCHANGED
+
+# lib/** diff must be only PLUGIN_VERSION
+ lib/index.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)

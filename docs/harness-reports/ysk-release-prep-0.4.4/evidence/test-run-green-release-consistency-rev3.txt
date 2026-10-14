@@ -1,0 +1,13 @@
+✔ the release version is a patch increment over the previous release (0.411958ms)
+✔ package.json, PLUGIN_VERSION, and the README install address agree (0.703375ms)
+✔ every README self-check sample version is the released version (0.203834ms)
+✔ no released artifact still documents the previous version (0.208875ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 139.004291
+EXIT=0
