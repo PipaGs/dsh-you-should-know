@@ -1,0 +1,95 @@
+{
+  "kind": "retrospective-recalibration",
+  "note": "This is NOT a model run and NOT the historic record. It feeds the preserved parsed note/action of the historic live run into the current (note-voice-eval-2) lexical adjudicator. Full raw replies were never preserved.",
+  "historicRun": {
+    "evalVersion": "note-voice-eval-1",
+    "promptVersion": "5c1fae1bef435a32416e5e85f7b3c58b2fbc3ee3138020ca3a029f3e781feac3",
+    "generatedAt": "2026-10-14T13:13:06.900Z",
+    "summary": {
+      "total": 4,
+      "pass": 0,
+      "fail": 2,
+      "invalid": 0,
+      "silent": 2,
+      "dropped": 0,
+      "timeout": 0,
+      "notRun": 0,
+      "unknown": 0
+    }
+  },
+  "currentAdjudicator": "note-voice-eval-2",
+  "results": [
+    {
+      "caseId": "agent-owned",
+      "historicStatus": "FAIL",
+      "recalibratedStatus": "PASS",
+      "noteOwners": {
+        "agent": true,
+        "joint": false,
+        "human": false
+      },
+      "noteMentions": {
+        "agent": false,
+        "joint": false,
+        "human": true
+      },
+      "reasons": [
+        "attribution matches: agent"
+      ]
+    },
+    {
+      "caseId": "human-owned",
+      "historicStatus": "FAIL",
+      "recalibratedStatus": "FAIL",
+      "noteOwners": {
+        "agent": true,
+        "joint": false,
+        "human": false
+      },
+      "noteMentions": {
+        "agent": false,
+        "joint": false,
+        "human": true
+      },
+      "reasons": [
+        "attribution missing: expected human, found agent"
+      ]
+    },
+    {
+      "caseId": "joint",
+      "historicStatus": "SILENT",
+      "recalibratedStatus": "EXPECTED_SILENCE",
+      "noteOwners": {
+        "agent": false,
+        "joint": false,
+        "human": false
+      },
+      "noteMentions": {
+        "agent": false,
+        "joint": false,
+        "human": false
+      },
+      "reasons": [
+        "the excerpt does not meet the policy selection gate, so silence is the correct outcome"
+      ]
+    },
+    {
+      "caseId": "unclear",
+      "historicStatus": "SILENT",
+      "recalibratedStatus": "SILENT_UNKNOWN",
+      "noteOwners": {
+        "agent": false,
+        "joint": false,
+        "human": false
+      },
+      "noteMentions": {
+        "agent": false,
+        "joint": false,
+        "human": false
+      },
+      "reasons": [
+        "the excerpt does not prove the policy selection gate; silence is neither a pass nor a failure"
+      ]
+    }
+  ]
+}

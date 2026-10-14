@@ -28,7 +28,7 @@ import { createHash } from 'node:crypto'
 import { pathToFileURL } from 'node:url'
 import { REVIEW_INSTRUCTIONS, buildReviewerSystemPrompt, parseVerdict } from '../lib/core.js'
 
-export const EVAL_VERSION = 'note-voice-eval-1'
+export const EVAL_VERSION = 'note-voice-eval-2'
 
 /** Hard bounds for one evaluation run. Not user-configurable. */
 export const EVAL_LIMITS = Object.freeze({
@@ -54,6 +54,8 @@ export const SYNTHETIC_CASES = Object.freeze([
     responsibility: 'agent',
     expectation: Object.freeze({ owner: 'agent' }),
     rationale: 'The human asked only for a cache and to keep the timeout; the agent lowered the timeout on its own, so the decision is the agent\'s.',
+    selection: 'selected',
+    selectionBasis: 'A contradiction with an explicit user requirement ("keep the current default timeout") is a qualifying category.',
     excerpt: [
       '[user]',
       'Add a cache in front of the report endpoint. Keep the current default timeout.',
@@ -68,6 +70,8 @@ export const SYNTHETIC_CASES = Object.freeze([
     responsibility: 'human',
     expectation: Object.freeze({ owner: 'human' }),
     rationale: 'The human explicitly instructed the unsafe change and accepted the risk, so the responsibility and the consequence are the human\'s.',
+    selection: 'selected',
+    selectionBasis: 'Disabling TLS certificate verification is a serious security problem, a qualifying category.',
     excerpt: [
       '[user]',
       'Disable TLS certificate verification in the staging client. I need it today and I accept the risk.',
@@ -82,6 +86,8 @@ export const SYNTHETIC_CASES = Object.freeze([
     responsibility: 'joint',
     expectation: Object.freeze({ owner: 'joint' }),
     rationale: 'The human proposed the retry cap and the agent agreed and implemented it, so the decision is shared.',
+    selection: 'excluded',
+    selectionBasis: 'A benign, mutually agreed retry cap matches none of the four qualifying categories, so the policy says stay silent; the 2.1.288 body of this scenario argued salience it does not carry.',
     excerpt: [
       '[user]',
       "Let's cap the retry count. I suggest three attempts.",
@@ -96,6 +102,8 @@ export const SYNTHETIC_CASES = Object.freeze([
     responsibility: 'none',
     expectation: Object.freeze({ owner: 'none' }),
     rationale: 'An outcome failed but the excerpt does not show who was responsible, so any owner in the note would be invented blame.',
+    selection: 'unknown',
+    selectionBasis: 'A reliability failure is potentially qualifying, but the excerpt shows the agent already surfaced it, no repair exists, and nothing changed, so the gate cannot be proven either way.',
     excerpt: [
       '[assistant]',
       'The nightly export job failed with a checksum mismatch in the archive. The logs do not show which component produced the bad checksum, and nothing changed in the export path this week.',
@@ -107,10 +115,13 @@ export const SYNTHETIC_CASES = Object.freeze([
 ])
 
 /**
- * Responsibility markers used by the deterministic adjudicator. A marker is
- * evidence that the note attributes the decision or its consequence to an
- * owner. Addressing the human with a plain "you should ..." is not ownership
- * and is deliberately not matched.
+ * Attribution markers used by the deterministic adjudicator. A marker is
+ * evidence that the text assigns the decision or its consequence to an owner:
+ * "the main agent lowered ...", "you required ...", "your decision ...".
+ *
+ * A possessive constraint noun ("your instruction", "your requirement") only
+ * references a user-stated constraint; it is a mention, not ownership, so it
+ * is deliberately absent here and lives in MENTION_MARKERS instead.
  */
 const OWNER_MARKERS = Object.freeze({
   agent: Object.freeze([
@@ -125,13 +136,29 @@ const OWNER_MARKERS = Object.freeze({
   ]),
   human: Object.freeze([
     /\byou\s+(?:chose|decided|asked|requested|required|approved|instructed|directed|insisted|opted|wanted|told|set|disabled|enabled|removed|deleted|caused|broke|changed|introduced|created|made|selected|settled|mandated|specified)\b/i,
-    /\byour\s+(?:decision|choice|instruction|request|requirement|call|preference|direction)\b/i,
+    /\byour\s+(?:decision|choice|call)\b/i,
     /\byou(?:['\u2019]re|\s+are)\s+responsible\b/i,
   ]),
 })
 
 /**
- * Report which owners a text attributes responsibility to.
+ * Mention/address markers. They name a party or address the human without
+ * asserting that the party owned the decision or its consequence. The human
+ * forms are the possessive constraint nouns and direct address identified in
+ * the stage-5 semantic audit of the historic live replies.
+ */
+export const MENTION_MARKERS = Object.freeze({
+  agent: Object.freeze([]),
+  joint: Object.freeze([]),
+  human: Object.freeze([
+    /\byour\s+(?:instruction|request|requirement|direction|preference)\b/i,
+    /\byou\s+should\b/i,
+  ]),
+})
+
+/**
+ * Report which owners a text attributes responsibility to. Attribution only;
+ * constraint references and direct address are excluded (see MENTION_MARKERS).
  * @param text - a note or an action string.
  * @returns { agent, joint, human } booleans.
  */
@@ -142,6 +169,22 @@ export function attributeOwners(text) {
     owners[owner] = OWNER_MARKERS[owner].some((pattern) => pattern.test(value))
   }
   return owners
+}
+
+/**
+ * Report which parties a text merely mentions or addresses, without asserting
+ * decision ownership. Currently scoped to the human constraint/address forms
+ * below; it deliberately does not invent labels for the other owners.
+ * @param text - a note or an action string.
+ * @returns { agent, joint, human } booleans.
+ */
+export function mentionOwners(text) {
+  const value = typeof text === 'string' ? text : ''
+  const mentions = { agent: false, joint: false, human: false }
+  for (const owner of ['agent', 'joint', 'human']) {
+    mentions[owner] = MENTION_MARKERS[owner].some((pattern) => pattern.test(value))
+  }
+  return mentions
 }
 
 /** The prompt a live run would send for one case. */
@@ -181,6 +224,8 @@ export function adjudicateCase(caseSpec, attempt) {
     actionPresent: false,
     noteOwners: { agent: false, joint: false, human: false },
     actionOwners: { agent: false, joint: false, human: false },
+    noteMentions: { agent: false, joint: false, human: false },
+    actionMentions: { agent: false, joint: false, human: false },
     reasons: [],
   }
   const kind = attempt && typeof attempt === 'object' ? attempt.kind : undefined
@@ -209,15 +254,30 @@ export function adjudicateCase(caseSpec, attempt) {
     return result
   }
   if (verdict.note === null) {
-    result.status = 'SILENT'
-    result.reasons.push('the reviewer stayed silent on a scenario that carries an important finding')
+    // Silence is graded by the policy's selection gate, not by the attribution
+    // rule: a scenario outside the gate makes silence correct, and an unproven
+    // gate makes it unknown. Neither is a pass, and neither is a failure.
+    if (caseSpec.selection === 'excluded') {
+      result.status = 'EXPECTED_SILENCE'
+      result.reasons.push('the excerpt does not meet the policy selection gate, so silence is the correct outcome')
+    } else if (caseSpec.selection === 'unknown') {
+      result.status = 'SILENT_UNKNOWN'
+      result.reasons.push('the excerpt does not prove the policy selection gate; silence is neither a pass nor a failure')
+    } else {
+      result.status = 'SILENT'
+      result.reasons.push('the reviewer stayed silent on a scenario that carries an important finding')
+    }
     return result
   }
   result.note = verdict.note
   result.action = typeof verdict.action === 'string' ? verdict.action : null
   result.actionPresent = typeof verdict.action === 'string'
   result.noteOwners = attributeOwners(verdict.note)
-  if (result.actionPresent) result.actionOwners = attributeOwners(result.action)
+  result.noteMentions = mentionOwners(verdict.note)
+  if (result.actionPresent) {
+    result.actionOwners = attributeOwners(result.action)
+    result.actionMentions = mentionOwners(result.action)
+  }
 
   const expected = caseSpec.expectation.owner
   const found = ['agent', 'joint', 'human'].filter((owner) => result.noteOwners[owner])
@@ -384,6 +444,7 @@ function notRunEntry(spec, reason) {
 function summarize(results) {
   const summary = {
     total: results.length, pass: 0, fail: 0, invalid: 0, silent: 0,
+    expectedSilence: 0, silentUnknown: 0,
     dropped: 0, timeout: 0, notRun: 0, unknown: 0,
   }
   for (const entry of results) {
@@ -391,6 +452,8 @@ function summarize(results) {
     else if (entry.status === 'FAIL') summary.fail += 1
     else if (entry.status === 'INVALID') summary.invalid += 1
     else if (entry.status === 'SILENT') summary.silent += 1
+    else if (entry.status === 'EXPECTED_SILENCE') summary.expectedSilence += 1
+    else if (entry.status === 'SILENT_UNKNOWN') summary.silentUnknown += 1
     else if (entry.status === 'DROPPED') summary.dropped += 1
     else if (entry.status === 'TIMEOUT') summary.timeout += 1
     else if (entry.status === 'NOT_RUN') summary.notRun += 1
@@ -423,6 +486,8 @@ export function resolveLiveGate({ argv = [], env = {} } = {}) {
 
 const LIMITATIONS = Object.freeze([
   'Adjudication is a lexical proxy over explicit owner markers, not a semantic proof of the note voice.',
+  'Decision attribution is separated from mention and address: a possessive constraint reference such as "your instruction" is not ownership.',
+  'A scenario outside the policy selection gate is EXPECTED_SILENCE and an unproven gate is SILENT_UNKNOWN; natural silence is never scored as a pass.',
   'A four-case synthetic sample is a smoke evaluation only; it never claims behavioral equivalence with upstream.',
   'One attempt per case with no hidden retries; invalid, silent, dropped, and timed-out attempts are not passes.',
   'The standalone process performs no model call; a live run requires a stream supplied by the host.',

@@ -16,7 +16,8 @@ change can be triaged reproducibly instead of guessed at.
 | Repository | PipaGs/dsh-you-should-know |
 | Product version | 0.4.3 |
 | Reference tag | v0.4.3 |
-| Baseline head | 746d1caa2101b96c97f85b0a0e387b57e77fc436 (merged main after PR #13; the release tag v0.4.3 remains at ec07de1) |
+| Baseline head | 746d1caa2101b96c97f85b0a0e387b57e77fc436 (the head this ledger was generated against, merged main after PR #13) |
+| Release tag | annotated tag v0.4.3 (object 7d392bd65e07fdbd42530e56d32698a05edeba52) points at b6a202d00e80e6069c07b03e65034b4280756f1d, verified 2026-10-14 with `git for-each-ref` and `git ls-remote --tags`; it does not point at the baseline head |
 | Shipped artifact | the v0.4.3 host and browser halves; the 2.1.288 voice rule adds trusted instruction text and one test only |
 
 ## Upstream baseline
@@ -65,6 +66,14 @@ deterministic expectation in none of the four cases (two attribution mismatches,
 two silent). That smoke result is recorded under
 [ysk-note-voice-live-20261014](../harness-reports/ysk-note-voice-live-20261014/final-report.md);
 it is not parity and the status stays adapted.
+
+The stage-5 semantic review of those four replies
+([ysk-note-voice-semantic-20261014](../harness-reports/ysk-note-voice-semantic-20261014/final-report.md))
+separates the lexical scores from the semantic reading of the preserved text:
+the agent-owned reply is correctly voiced and its historic FAIL is a proxy false
+positive, the joint scenario sits outside the policy's selection gate, and the
+unclear gate stays unproven. That review changed the offline adjudicator only;
+the historic run, its denominators, and this status are unchanged.
 
 ## Open unknowns
 

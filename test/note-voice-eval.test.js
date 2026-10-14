@@ -41,7 +41,7 @@ function verdict(note, extra = {}) {
 }
 
 test('AC1: the evaluator ships exactly four labelled synthetic cases with deterministic criteria', () => {
-  assert.equal(EVAL_VERSION, 'note-voice-eval-1')
+  assert.equal(EVAL_VERSION, 'note-voice-eval-2')
   assert.equal(SYNTHETIC_CASES.length, 4)
   assert.deepEqual(
     SYNTHETIC_CASES.map((entry) => entry.id),
