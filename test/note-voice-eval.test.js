@@ -188,6 +188,111 @@ test('AC3: an enabled bounded live run uses one attempt per case, concurrency on
   assert.ok(result.limitations.some((line) => /sample|proxy|lexical/i.test(line)), 'sample limitations stay explicit')
 })
 
+test('AC3: a non-cancellable stream stops the run and launches no later case', async () => {
+  const track = { calls: 0, returnCalled: false }
+  const stream = () => {
+    track.calls += 1
+    let first = true
+    return {
+      [Symbol.asyncIterator]() {
+        return {
+          next() {
+            if (first) {
+              first = false
+              return Promise.resolve({ done: false, value: { type: 'text-delta', index: 0, text: 'partial' } })
+            }
+            // The injected call ignores the abort and never settles.
+            return new Promise(() => {})
+          },
+          return() {
+            track.returnCalled = true
+            // Cannot be cancelled: cleanup never settles either.
+            return new Promise(() => {})
+          },
+        }
+      },
+    }
+  }
+  const result = await runEvaluation({
+    gate: { live: true },
+    stream,
+    route: { provider: 'synthetic', model: 'stuck' },
+    limits: { callTimeoutMs: 20, closeGraceMs: 20 },
+  })
+  assert.equal(track.calls, 1, 'no later case starts while the first call may still be active')
+  assert.equal(track.returnCalled, true, 'the evaluator requests iterator.return before giving up')
+  assert.equal(result.results[0].status, 'TIMEOUT')
+  assert.equal(result.results[0].closed, false)
+  assert.equal(result.stopped, true)
+  assert.equal(result.stoppedAfterCaseId, 'agent-owned')
+  assert.equal(result.results.slice(1).every((entry) => entry.status === 'NOT_RUN'), true)
+  assert.match(result.results[1].reason, /previous|not started/i)
+  assert.equal(result.summary.timeout, 1)
+  assert.equal(result.summary.notRun, 3)
+  assert.equal(result.summary.pass + result.summary.fail, 0)
+})
+
+test('AC3: a closeable stream is cleaned up, and an overlong reply closes its iterator without stopping the run', async () => {
+  const track = { calls: 0, returnCalls: [] }
+  const stream = (options) => {
+    track.calls += 1
+    const index = track.calls
+    const spec = options.messages[0].content[0].text
+    let yielded = false
+    return {
+      [Symbol.asyncIterator]() {
+        return {
+          next() {
+            if (yielded) return Promise.resolve({ done: true, value: undefined })
+            yielded = true
+            if (spec.includes('lowered the default request timeout')) {
+              return Promise.resolve({ done: false, value: { type: 'text-delta', index: 0, text: 'x'.repeat(5000) } })
+            }
+            return Promise.resolve({
+              done: false,
+              value: { type: 'text-delta', index: 0, text: JSON.stringify({ note: 'The export job failed with a checksum mismatch in the archive.', importance: 'high' }) },
+            })
+          },
+          return() {
+            track.returnCalls.push(index)
+            return Promise.resolve({ done: true, value: undefined })
+          },
+        }
+      },
+    }
+  }
+  const result = await runEvaluation({
+    gate: { live: true },
+    stream,
+    route: { provider: 'synthetic', model: 'closeable' },
+    limits: { callTimeoutMs: 500, closeGraceMs: 100 },
+  })
+  assert.equal(track.calls, 4, 'a confirmed close still allows the remaining bounded cases')
+  assert.equal(track.returnCalls.length, 1, 'the overlong reply requests exactly one iterator close')
+  assert.equal(result.results[0].truncated, true)
+  assert.equal(result.results[0].closed, true)
+  assert.equal(result.stopped, false)
+  assert.equal(result.summary.notRun, 0)
+  assert.equal(result.results.length, 4)
+})
+
+test('AC3: live authorization is a trusted-caller assertion, not independent cost verification', async () => {
+  const offline = await runEvaluation({ gate: { live: false, blocker: 'cost not established' } })
+  assert.equal(offline.authorizationBasis, 'none')
+  const online = await runEvaluation({
+    gate: { live: true },
+    stream: async function* stream() {
+      yield { type: 'text-delta', index: 0, text: JSON.stringify({ note: 'The export job failed with a checksum mismatch.', importance: 'high' }) }
+    },
+    route: { provider: 'p', model: 'm' },
+    limits: { callTimeoutMs: 200, closeGraceMs: 50 },
+  })
+  assert.equal(online.authorizationBasis, 'trusted-caller')
+  const source = readFileSync(scriptPath, 'utf8')
+  assert.match(source, /trusted caller/i)
+  assert.match(source, /does not (?:independently )?verify/i)
+})
+
 test('AC3: the live gate is fail-closed on missing or uncertain cost metadata', () => {
   const off = resolveLiveGate({ argv: [], env: {} })
   assert.equal(off.enabled, false)

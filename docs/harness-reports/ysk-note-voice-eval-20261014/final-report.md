@@ -214,3 +214,60 @@ SHA product/report-коммитов вписываются в PR после push
 - Запись отчёта о handoff коммитится после task commit как report-only
   коммит; его SHA — фактический PR head на момент ревью.
 - **Статус:** READY_FOR_CHATGPT_REVIEW. DSH не мержит и не релизит.
+
+---
+
+## 16. CHANGES_REQUIRED rev2 — 2026-10-14T11:25:16Z
+
+Разделы 1–15 выше — историческая запись на reviewed head
+7f365d83d4d9bb945b4cd04862589aebf1dcb311; они не переписаны. Ниже — один
+закрытый review-раунд по BLOCKER из PR #13.
+
+### F1. Timeout и overlength не закрывали iterator; следующие кейсы могли пересечься
+
+- Было: collectOnce делал Promise.race([collect, timeout]) и возвращал TIMEOUT,
+  но не abort'ил и не закрывал iterator; runEvaluation стартовал следующий
+  кейс, пока предыдущий model call мог ещё быть активен. При достижении
+  maxReplyChars цикл делал break без iterator.return. Это нарушало
+  concurrency=1, общий bound и гарантию отсутствия лишнего расхода.
+- Стало: collectOnce принимает options.signal (AbortSignal — тот же контракт,
+  который lib/runtime.js и lib/core.js уже используют для llm.stream), при
+  дедлайне делает controller.abort() и bounded-запрос iterator.return().
+  Ожидание ограничено (EVAL_LIMITS.closeGraceMs=500, unref-таймер), брошенный
+  consumer сам ловит свой rejection. Возвращается closed: boolean.
+  Overlength-ответ тоже закрывает iterator bounded.
+- Fail-closed stop: если closed !== true, runEvaluation фиксирует текущий кейс
+  и НЕ запускает ни один следующий — остальные получают NOT_RUN с точным
+  reason. TIMEOUT-попытка и no-call remaining различимы. Скрытых retry нет,
+  максимум 4 вызова.
+- Trust boundary: gate {live:true} — доверенная авторизация вызывающего хоста,
+  а не независимая проверка cost-метаданных; это явно записано в комментариях
+  модуля и отражено в результате (authorizationBasis). Платный маршрут не
+  добавлялся.
+
+### Регрессионные тесты (RED → GREEN)
+
+- RED до фикса: новый тест «non-cancellable stream stops the run» зависал
+  (test timed out), «overlong reply closes its iterator» падал на
+  returnCalls.length, «trusted-caller» падал на authorizationBasis.
+- GREEN: node --test test/note-voice-eval.test.js → 18/18; stubborn-поток
+  останавливает run примерно за 64 ms (limits callTimeoutMs=20,
+  closeGraceMs=20), вызовов stream ровно 1.
+
+### Верификация (raw, rev2)
+
+    npm run check -> EXIT=0 (evidence/check.txt)
+    npm test -> tests 514 / pass 514 / fail 0 (evidence/test-run-final.txt)
+    targeted -> 37/37 (evidence/test-run-targeted.txt)
+    default evaluator -> live:false, notRun 4/4, stopped:false,
+      authorizationBasis none (evidence/note-voice-eval-not-run.json)
+
+lib/** не тронут; ledger U-2.1.288-note-voice остаётся adapted / not-run.
+
+### Handoff rev2
+
+- Тот же PR #13, та же ветка test/ysk-note-voice-eval-20261014, тот же
+  worktree; новый PR не создавался, merge/release не выполнялись.
+- Первый родительский коммит reviewed head — 7f365d8; corrective commit и
+  итоговый head фиксируются в заголовке PR после push.
+- **Статус:** READY_FOR_CHATGPT_REVIEW.

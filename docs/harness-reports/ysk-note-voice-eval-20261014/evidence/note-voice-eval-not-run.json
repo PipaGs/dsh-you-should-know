@@ -1,16 +1,20 @@
 {
   "evalVersion": "note-voice-eval-1",
   "promptVersion": "5c1fae1bef435a32416e5e85f7b3c58b2fbc3ee3138020ca3a029f3e781feac3",
-  "generatedAt": "2026-10-14T11:05:32.340Z",
+  "generatedAt": "2026-10-14T11:24:55.521Z",
   "equivalenceClaimed": false,
   "limitations": [
     "Adjudication is a lexical proxy over explicit owner markers, not a semantic proof of the note voice.",
     "A four-case synthetic sample is a smoke evaluation only; it never claims behavioral equivalence with upstream.",
     "One attempt per case with no hidden retries; invalid, silent, dropped, and timed-out attempts are not passes.",
-    "The standalone process performs no model call; a live run requires a stream supplied by the host."
+    "The standalone process performs no model call; a live run requires a stream supplied by the host.",
+    "A call that neither settles nor closes within the cleanup grace stops the run; the remaining cases are NOT_RUN, not modelled away."
   ],
+  "authorizationBasis": "none",
   "live": false,
   "route": null,
+  "stopped": false,
+  "stoppedAfterCaseId": null,
   "results": [
     {
       "caseId": "agent-owned",

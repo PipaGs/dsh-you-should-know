@@ -5,7 +5,18 @@ lib diff lines: 0
 no match
 
 ## evaluator env reads (only the attestation flag)
-410:  const gate = resolveLiveGate({ argv, env: process.env })
+541:  const gate = resolveLiveGate({ argv, env: process.env })
+
+## evaluator cancellation contract (AbortController + iterator.return)
+263:async function closeWithin(iterator, graceMs) {
+264:  if (!iterator || typeof iterator.return !== 'function') return true
+267:    result = iterator.return()
+280: * returned async iterator is closed with iterator.return().
+286:  const controller = new AbortController()
+291:        controller.abort()
+293:        // A hostile AbortController is not fatal here.
+338:    const released = await closeWithin(iterator, closeGraceMs)
+346:  const closed = settled === true ? true : await closeWithin(iterator, closeGraceMs)
 
 ## secret/absolute-path scan over changed source and docs
 no match

@@ -11,8 +11,13 @@
 //   * Fail closed. Without an explicitly established zero-incremental-cost
 //     route every case is NOT_RUN with a precise blocker; a credential's
 //     presence is never treated as proof of free access.
-//   * Bounded. Four cases, one attempt per case, concurrency one, a per-call
-//     deadline, and no hidden retries.
+//   * Trust boundary. Passing gate {live:true} with a stream is a trusted
+//     caller assertion that a cost-neutral route exists. This module does not
+//     verify cost metadata, entitlement, or credentials itself, and it opens no
+//     provider connection of its own.
+//   * Bounded. Four cases, one attempt per case, one call at a time, a per-call
+//     deadline, a whole-run deadline, and no hidden retries. A call that cannot
+//     be confirmed closed stops the run before any later call starts.
 //   * Adjudication is separate from generation. The raw reply is captured and
 //     then adjudicated by pure rules, so a lexical proxy never masquerades as a
 //     semantic proof and a short sample never claims upstream equivalence.
@@ -31,6 +36,7 @@ export const EVAL_LIMITS = Object.freeze({
   maxAttemptsPerCase: 1,
   concurrency: 1,
   callTimeoutMs: 20000,
+  closeGraceMs: 500,
   totalDeadlineMs: 90000,
   maxReplyChars: 4000,
 })
@@ -241,45 +247,117 @@ export function adjudicateCase(caseSpec, attempt) {
   return result
 }
 
-/** One bounded stream read; never throws, never retries. */
-async function collectOnce(streamFn, options, deadlineMs) {
+/** A bounded wait whose timer never holds the process open. */
+function delay(ms) {
+  return new Promise((resolve) => {
+    const handle = setTimeout(resolve, ms)
+    if (handle && typeof handle.unref === 'function') handle.unref()
+  })
+}
+
+/**
+ * Request one iterator close without awaiting it unbounded. Never rejects.
+ * Returns true when the close settled by the grace (or there is nothing to
+ * close), false when a model call may still be active.
+ */
+async function closeWithin(iterator, graceMs) {
+  if (!iterator || typeof iterator.return !== 'function') return true
+  let result
+  try {
+    result = iterator.return()
+  } catch (error) {
+    return true
+  }
+  if (!result || typeof result.then !== 'function') return true
+  const settled = result.then(() => true, () => true)
+  return await Promise.race([settled, delay(graceMs).then(() => false)])
+}
+
+/**
+ * One bounded stream read; never throws, never retries, and never leaves an
+ * unhandled rejection. Cancellation uses the host contract the plugin already
+ * relies on: options.signal carries an AbortSignal into llm.stream, and the
+ * returned async iterator is closed with iterator.return().
+ *
+ * The returned closed flag is the safety signal for the caller: false means a
+ * model call may still be active, so the caller must not start another call.
+ */
+async function collectOnce(streamFn, options, deadlineMs, closeGraceMs) {
+  const controller = new AbortController()
   let timer
   const timeout = new Promise((resolve) => {
-    timer = setTimeout(() => resolve({ kind: 'timeout' }), deadlineMs)
+    timer = setTimeout(() => {
+      try {
+        controller.abort()
+      } catch (error) {
+        // A hostile AbortController is not fatal here.
+      }
+      resolve(true)
+    }, deadlineMs)
     if (timer && typeof timer.unref === 'function') timer.unref()
   })
-  const collect = (async () => {
+
+  let iterator
+  const consume = (async () => {
     try {
-      const iterable = streamFn(options)
+      const iterable = streamFn({ ...options, signal: controller.signal })
       if (!iterable || typeof iterable[Symbol.asyncIterator] !== 'function') {
-        return { kind: 'error', error: { code: 'NO_STREAM' } }
+        return { kind: 'error', error: { code: 'NO_STREAM' }, closed: true }
       }
-      const iterator = iterable[Symbol.asyncIterator]()
+      iterator = iterable[Symbol.asyncIterator]()
       let text = ''
       for (;;) {
         const step = await iterator.next()
-        if (!step || step.done) break
+        if (!step || step.done) return { kind: 'reply', raw: text, closed: true }
         const chunk = step.value
         if (chunk && typeof chunk === 'object' && chunk.type === 'text-delta' && typeof chunk.text === 'string') {
           text += chunk.text
           if (text.length >= EVAL_LIMITS.maxReplyChars) {
-            text = text.slice(0, EVAL_LIMITS.maxReplyChars)
-            break
+            return { kind: 'reply', raw: text.slice(0, EVAL_LIMITS.maxReplyChars), truncated: true, early: true }
           }
         }
         if (chunk && typeof chunk === 'object' && chunk.type === 'finish'
           && chunk.reason && chunk.reason.kind === 'error') {
-          return { kind: 'error', error: describeError(chunk.reason.failure || chunk.reason) }
+          return { kind: 'error', error: describeError(chunk.reason.failure || chunk.reason), early: true, terminalFinish: true }
         }
       }
-      return { kind: 'reply', raw: text }
     } catch (error) {
-      return { kind: 'error', error: describeError(error) }
+      return { kind: 'error', error: describeError(error), closed: true }
     }
   })()
-  const outcome = await Promise.race([collect, timeout])
-  if (timer !== undefined) clearTimeout(timer)
-  return outcome
+  // An abandoned consumer must never surface as an unhandled rejection.
+  consume.catch(() => {})
+
+  const timedOut = await Promise.race([consume.then(() => false), timeout])
+  if (timedOut !== true) {
+    if (timer !== undefined) clearTimeout(timer)
+    const outcome = await consume
+    if (outcome.early !== true) return { ...outcome, closed: true }
+    // An early stop (overlong reply or a terminal error chunk) still releases
+    // the iterator; a terminal finish already ended the call.
+    const released = await closeWithin(iterator, closeGraceMs)
+    return { ...outcome, closed: outcome.terminalFinish === true || released }
+  }
+
+  // The deadline won and the abort was already requested. Give the aborted
+  // loop a bounded chance to settle, then request one bounded iterator close.
+  // If neither is confirmed, the caller must stop the run.
+  const settled = await Promise.race([consume.then(() => true), delay(closeGraceMs).then(() => false)])
+  const closed = settled === true ? true : await closeWithin(iterator, closeGraceMs)
+  return { kind: 'timeout', closed }
+}
+
+/** A case that was never sent to the model. */
+function notRunEntry(spec, reason) {
+  return {
+    caseId: spec.id,
+    responsibility: spec.responsibility,
+    status: 'NOT_RUN',
+    reason,
+    note: null,
+    action: null,
+    actionPresent: false,
+  }
 }
 
 function summarize(results) {
@@ -301,8 +379,11 @@ function summarize(results) {
 }
 
 /**
- * The live gate. Fail closed: a live run needs both an explicit request and an
- * explicit, separately proven zero-incremental-cost attestation.
+ * The live gate for the standalone CLI. Fail closed: a live run needs both an
+ * explicit request and an explicit, separately proven zero-incremental-cost
+ * attestation. This gate is a self-attestation for a human caller; the exported
+ * runEvaluation trusts a caller that passes gate {live:true} directly and does
+ * not re-verify cost metadata itself.
  */
 export function resolveLiveGate({ argv = [], env = {} } = {}) {
   const requested = Array.isArray(argv) && argv.includes('--live')
@@ -324,18 +405,39 @@ const LIMITATIONS = Object.freeze([
   'A four-case synthetic sample is a smoke evaluation only; it never claims behavioral equivalence with upstream.',
   'One attempt per case with no hidden retries; invalid, silent, dropped, and timed-out attempts are not passes.',
   'The standalone process performs no model call; a live run requires a stream supplied by the host.',
+  'A call that neither settles nor closes within the cleanup grace stops the run; the remaining cases are NOT_RUN, not modelled away.',
 ])
+
+/** Bound the run from the fixed defaults; limits is a test-only override. */
+function normalizeLimits(limits) {
+  const source = limits && typeof limits === 'object' ? limits : {}
+  const pick = (value, fallback) => (Number.isFinite(value) && value > 0 ? value : fallback)
+  return {
+    callTimeoutMs: pick(source.callTimeoutMs, EVAL_LIMITS.callTimeoutMs),
+    closeGraceMs: pick(source.closeGraceMs, EVAL_LIMITS.closeGraceMs),
+    totalDeadlineMs: pick(source.totalDeadlineMs, EVAL_LIMITS.totalDeadlineMs),
+    stoppedReason: 'not started: an earlier model call was not confirmed closed within the cleanup grace, so the run stopped to keep one call at a time and preserve the spend bound',
+    unconfirmedReason: 'cleanup unconfirmed: the model call did not settle and its iterator did not close within the cleanup grace',
+  }
+}
 
 /**
  * Run the evaluation. Await always.
+ *
+ * Trust boundary: gate.live === true is a trusted caller assertion that a
+ * cost-neutral route exists. This function does not verify cost metadata,
+ * entitlement, or credentials, and it opens no provider connection of its own;
+ * the live gate exists to fail closed, not to prove that a live call is free.
  *
  * @param gate - { live: boolean, blocker?: string }. Anything but live:true fails closed.
  * @param stream - an injected model stream (required for a live run); no default.
  * @param route - { provider, model } recorded when it is exposed.
  * @param now - optional clock for a deterministic timestamp in tests.
+ * @param limits - optional bounded-limit overrides for tests.
  */
-export async function runEvaluation({ gate, stream, route, now } = {}) {
+export async function runEvaluation({ gate, stream, route, now, limits } = {}) {
   const effectiveGate = gate && typeof gate === 'object' ? gate : { live: false, blocker: 'live evaluation not requested' }
+  const bounds = normalizeLimits(limits)
   const generatedAt = typeof now === 'function' ? now() : new Date().toISOString()
   const promptVersion = createHash('sha256').update(REVIEW_INSTRUCTIONS, 'utf8').digest('hex')
   const base = {
@@ -344,38 +446,51 @@ export async function runEvaluation({ gate, stream, route, now } = {}) {
     generatedAt,
     equivalenceClaimed: false,
     limitations: LIMITATIONS,
+    authorizationBasis: effectiveGate.live === true ? 'trusted-caller' : 'none',
   }
   if (effectiveGate.live !== true) {
     const blocker = typeof effectiveGate.blocker === 'string' && effectiveGate.blocker !== ''
       ? effectiveGate.blocker
       : 'live evaluation not established'
-    const results = SYNTHETIC_CASES.map((spec) => ({
-      caseId: spec.id,
-      responsibility: spec.responsibility,
-      status: 'NOT_RUN',
-      reason: blocker,
-      note: null,
-      action: null,
-      actionPresent: false,
-    }))
-    return { ...base, live: false, route: null, results, summary: summarize(results) }
+    const results = SYNTHETIC_CASES.map((spec) => notRunEntry(spec, blocker))
+    return {
+      ...base,
+      live: false,
+      route: null,
+      stopped: false,
+      stoppedAfterCaseId: null,
+      results,
+      summary: summarize(results),
+    }
   }
   const provider = route && typeof route.provider === 'string' ? route.provider.trim() : ''
   const model = route && typeof route.model === 'string' ? route.model.trim() : ''
   const routeView = provider !== '' && model !== '' ? { provider, model } : null
   const results = []
   let calls = 0
-  // The whole run is bounded, not only each call: once the total deadline is
-  // spent, the remaining cases are reported as TIMEOUT instead of being sent.
-  const deadlineAt = Date.now() + EVAL_LIMITS.totalDeadlineMs
+  let stopped = false
+  let stoppedAfterCaseId = null
+  // The whole run is bounded, not only each call. A case is never sent once the
+  // run has stopped, so a call that cannot be confirmed closed cannot overlap
+  // with a later one.
+  const deadlineAt = Date.now() + bounds.totalDeadlineMs
   for (const spec of SYNTHETIC_CASES) {
-    if (calls >= EVAL_LIMITS.maxCases * EVAL_LIMITS.maxAttemptsPerCase) break
-    calls += 1
-    const remaining = deadlineAt - Date.now()
-    if (remaining <= 0) {
-      results.push(adjudicateCase(spec, { kind: 'timeout' }))
+    if (stopped) {
+      results.push(notRunEntry(spec, bounds.stoppedReason))
       continue
     }
+    if (calls >= EVAL_LIMITS.maxCases * EVAL_LIMITS.maxAttemptsPerCase) {
+      results.push(notRunEntry(spec, 'not started: the fixed per-run call budget was already spent'))
+      continue
+    }
+    const remaining = deadlineAt - Date.now()
+    if (remaining <= 0) {
+      stopped = true
+      stoppedAfterCaseId = spec.id
+      results.push(notRunEntry(spec, 'not started: the whole-run deadline was reached before this case'))
+      continue
+    }
+    calls += 1
     const prompt = buildCasePrompt(spec)
     const attempt = await collectOnce(stream, {
       provider,
@@ -384,10 +499,26 @@ export async function runEvaluation({ gate, stream, route, now } = {}) {
       messages: [{ role: 'user', content: [{ type: 'text', text: prompt.message }] }],
       temperature: 0,
       maxTokens: 768,
-    }, Math.max(1, Math.min(EVAL_LIMITS.callTimeoutMs, remaining)))
-    results.push(adjudicateCase(spec, attempt))
+    }, Math.max(1, Math.min(bounds.callTimeoutMs, remaining)), bounds.closeGraceMs)
+    const entry = adjudicateCase(spec, attempt)
+    entry.closed = attempt.closed === true
+    if (attempt.truncated === true) entry.truncated = true
+    if (entry.closed !== true) {
+      entry.reasons = entry.reasons.concat([bounds.unconfirmedReason])
+      stopped = true
+      stoppedAfterCaseId = spec.id
+    }
+    results.push(entry)
   }
-  return { ...base, live: true, route: routeView, results, summary: summarize(results) }
+  return {
+    ...base,
+    live: true,
+    route: routeView,
+    stopped,
+    stoppedAfterCaseId,
+    results,
+    summary: summarize(results),
+  }
 }
 
 function printPrompts() {
