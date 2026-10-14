@@ -16,7 +16,7 @@ change can be triaged reproducibly instead of guessed at.
 | Repository | PipaGs/dsh-you-should-know |
 | Product version | 0.4.3 |
 | Reference tag | v0.4.3 |
-| Baseline head | ec07de154aa36688db6e8fe85cbf7c1233fac9ab |
+| Baseline head | 7b4ba87ba36e61fcf778541338402981b8791524 (merged main after PR #12; the release tag v0.4.3 remains at ec07de1) |
 | Shipped artifact | the v0.4.3 host and browser halves; the 2.1.288 voice rule adds trusted instruction text and one test only |
 
 ## Upstream baseline
@@ -41,7 +41,7 @@ sentences below and copies no upstream code.
 | --- | --- | --- | --- |
 | 2.1.287 | A built-in side agent flags important things you or Claude might miss | adapted | applicable (parity present) |
 | 2.1.287 | Gated to first-party sessions with telemetry on | not-applicable | rejected |
-| 2.1.288 | Notes name who was responsible: we, the main agent, or you | adapted | applicable (instruction-level adaptation; live model output not verified) |
+| 2.1.288 | Notes name who was responsible: we, the main agent, or you | adapted | applicable (instruction-level adaptation; live model output not verified; fail-closed evaluator shipped, live cases NOT_RUN) |
 | 2.1.290 | Notes follow the language setting instead of always English | equivalent | applicable (parity present) |
 
 The exact quotes and the named local evidence for every row live in
@@ -50,6 +50,13 @@ the trusted base reviewer policy carries the responsibility-attribution rule, bu
 the reviewer model's live output is nondeterministic and is not asserted to match
 upstream behavior. Its scoped acceptance (prompt composition) is recorded and
 completed there.
+
+The 2.1.288 row also carries a follow-up evaluation: an opt-in, fail-closed
+evaluator with four synthetic responsibility scenarios and deterministic
+adjudication ([note-voice-eval.mjs](../../scripts/note-voice-eval.mjs),
+[note-voice-eval.test.js](../../test/note-voice-eval.test.js)). It made no live
+model call because no zero-incremental-cost route could be established from the
+available metadata, so every live case is NOT_RUN and the status stays adapted.
 
 ## Open unknowns
 

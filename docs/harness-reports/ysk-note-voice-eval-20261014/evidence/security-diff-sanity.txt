@@ -1,0 +1,25 @@
+## product code diff (lib/** must be empty)
+lib diff lines: 0
+
+## evaluator network primitives (must be no match)
+no match
+
+## evaluator env reads (only the attestation flag)
+562:  const gate = resolveLiveGate({ argv, env: process.env })
+
+## timeout branch inspects the actual consume outcome
+269:async function closeWithin(iterator, graceMs) {
+346:    if (outcome.early !== true) return { ...outcome, closed: outcome.closed === true }
+349:    const released = await closeWithin(iterator, closeGraceMs)
+359:  let outcome
+361:    consume.then((value) => { outcome = value; return true }),
+364:  if (settled === true && outcome !== undefined && outcome.early !== true && outcome.closed === true) {
+367:  const released = await closeWithin(iterator, closeGraceMs)
+
+## secret/absolute-path scan over changed source and docs
+no match
+
+## invariant test (human-only)
+ℹ tests 11
+ℹ pass 11
+ℹ fail 0
