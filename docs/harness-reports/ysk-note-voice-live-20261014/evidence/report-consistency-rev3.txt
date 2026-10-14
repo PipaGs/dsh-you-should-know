@@ -1,0 +1,19 @@
+--- exact edited report checks (rev3) ---
+AC aggregate (final-report.md:241-242):
+AC denominator: 11 AC, attempted 11: **PASS 10, PARTIAL 1 (AC8), FAIL 0,
+NOT_RUN 0**. Живые PASS модели: 0 из 4 — не фабрикуются.
+
+AC8 row: 236:| AC8 | Один контролируемый live-прогон 4 сценариев; raw replies/usage/route/model; без fake PASS | PARTIAL | §5-§6;
+
+stale aggregate 'pass 11': the AC aggregate no longer contains it.
+Remaining occurrence(s) of 'pass 11' in the whole report (all inside the §14
+narrative that quotes the corrected value, i.e. documentation not a status):
+373:- Aggregate-строка в §7 исправлена с ошибочного «pass 11» на фактическое
+
+balance-before note phase: before
+"note": "Read-only availability check performed before the live run. Numeric wallet amounts are intentionally not committed: this repository is public and the owner authorized test spending only. Exact observed amounts are kept in local transient private evidence."
+balance-after note phase: after
+"note": "Read-only availability check performed after the live run. Numeric wallet amounts are intentionally not committed: this repository is public and the owner authorized test spending only. Exact observed amounts are kept in local transient private evidence."
+
+numeric / raw wallet fields in balance-before.json (expected 0): 0
+numeric / raw wallet fields in balance-after.json (expected 0): 0

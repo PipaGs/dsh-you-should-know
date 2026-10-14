@@ -1,0 +1,26 @@
+ .../evidence/balance-after.json                    |   9 +
+ .../evidence/balance-before.json                   |   9 +
+ .../evidence/check-rev2.txt                        |   4 +
+ .../evidence/check-rev3.txt                        |   4 +
+ .../evidence/check.txt                             |   4 +
+ .../evidence/diff-summary.txt                      |  26 +
+ .../note-voice-eval-live-gate-default.json         |  74 +++
+ .../evidence/note-voice-eval-live-run.json         | 157 ++++++
+ .../evidence/note-voice-eval-live-run.stdout.txt   | 157 ++++++
+ .../evidence/note-voice-eval-not-run.json          |  67 +++
+ .../evidence/report-consistency-rev3.txt           |  19 +
+ .../evidence/security-diff-sanity.txt              |  37 ++
+ .../evidence/test-run-final-rev2.txt               | 563 ++++++++++++++++++++
+ .../evidence/test-run-final-rev3.txt               | 568 +++++++++++++++++++++
+ .../evidence/test-run-final.txt                    | 556 ++++++++++++++++++++
+ .../evidence/test-run-red-rev2.txt                 |  64 +++
+ .../evidence/test-run-red-rev3.txt                 |  67 +++
+ .../evidence/test-run-red.txt                      |  35 ++
+ .../ysk-note-voice-live-20261014/final-report.md   | 423 +++++++++++++++
+ docs/upstream/README.md                            |  18 +-
+ docs/upstream/ledger.json                          |  66 ++-
+ package.json                                       |   7 +-
+ scripts/note-voice-eval-deepseek.mjs               | 430 ++++++++++++++++
+ scripts/note-voice-eval-live.mjs                   | 150 ++++++
+ test/note-voice-eval-live.test.js                  | 521 +++++++++++++++++++
+ 25 files changed, 4015 insertions(+), 20 deletions(-)

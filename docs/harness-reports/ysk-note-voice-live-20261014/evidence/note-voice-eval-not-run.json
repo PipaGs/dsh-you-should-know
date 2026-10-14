@@ -1,0 +1,67 @@
+{
+  "evalVersion": "note-voice-eval-1",
+  "promptVersion": "5c1fae1bef435a32416e5e85f7b3c58b2fbc3ee3138020ca3a029f3e781feac3",
+  "generatedAt": "2026-10-14T13:12:51.473Z",
+  "equivalenceClaimed": false,
+  "limitations": [
+    "Adjudication is a lexical proxy over explicit owner markers, not a semantic proof of the note voice.",
+    "A four-case synthetic sample is a smoke evaluation only; it never claims behavioral equivalence with upstream.",
+    "One attempt per case with no hidden retries; invalid, silent, dropped, and timed-out attempts are not passes.",
+    "The standalone process performs no model call; a live run requires a stream supplied by the host.",
+    "A call whose stream cannot confirm completion or cooperative iterator closure stops the run; the remaining cases are NOT_RUN, not modelled away."
+  ],
+  "authorizationBasis": "none",
+  "live": false,
+  "route": null,
+  "stopped": false,
+  "stoppedAfterCaseId": null,
+  "results": [
+    {
+      "caseId": "agent-owned",
+      "responsibility": "agent",
+      "status": "NOT_RUN",
+      "reason": "live evaluation was not requested; pass --live only after a cost-neutral route is established",
+      "note": null,
+      "action": null,
+      "actionPresent": false
+    },
+    {
+      "caseId": "human-owned",
+      "responsibility": "human",
+      "status": "NOT_RUN",
+      "reason": "live evaluation was not requested; pass --live only after a cost-neutral route is established",
+      "note": null,
+      "action": null,
+      "actionPresent": false
+    },
+    {
+      "caseId": "joint",
+      "responsibility": "joint",
+      "status": "NOT_RUN",
+      "reason": "live evaluation was not requested; pass --live only after a cost-neutral route is established",
+      "note": null,
+      "action": null,
+      "actionPresent": false
+    },
+    {
+      "caseId": "unclear",
+      "responsibility": "none",
+      "status": "NOT_RUN",
+      "reason": "live evaluation was not requested; pass --live only after a cost-neutral route is established",
+      "note": null,
+      "action": null,
+      "actionPresent": false
+    }
+  ],
+  "summary": {
+    "total": 4,
+    "pass": 0,
+    "fail": 0,
+    "invalid": 0,
+    "silent": 0,
+    "dropped": 0,
+    "timeout": 0,
+    "notRun": 4,
+    "unknown": 0
+  }
+}

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "taskId": "ysk-note-voice-eval-20261014",
-  "generatedAt": "2026-10-14T11:03:28Z",
+  "taskId": "ysk-note-voice-live-20261014",
+  "generatedAt": "2026-10-14T13:14:49Z",
   "upstream": {
     "project": "anthropics/claude-code",
     "feature": "You should know (built-in mod, cc-plugin-you-should-know@builtin)",
@@ -104,25 +104,67 @@
           "docs/upstream/ledger.json",
           "scripts/note-voice-eval.mjs",
           "test/note-voice-eval.test.js",
-          "docs/harness-reports/ysk-note-voice-eval-20261014/final-report.md"
+          "docs/harness-reports/ysk-note-voice-eval-20261014/final-report.md",
+          "scripts/note-voice-eval-deepseek.mjs",
+          "scripts/note-voice-eval-live.mjs",
+          "test/note-voice-eval-live.test.js",
+          "docs/harness-reports/ysk-note-voice-live-20261014/final-report.md",
+          "docs/harness-reports/ysk-note-voice-live-20261014/evidence/note-voice-eval-live-run.json",
+          "docs/harness-reports/ysk-note-voice-live-20261014/evidence/balance-before.json",
+          "docs/harness-reports/ysk-note-voice-live-20261014/evidence/balance-after.json"
         ],
         "disposition": "applicable",
-        "parityNotes": "Instruction-level adaptation, not proven behavioral equivalence. The upstream changelog asks for notes that name who was responsible; this plugin carries one explicit responsibility-attribution rule in the trusted base reviewer policy (\"we\" when the human and the agent decided together, \"the main agent\" when the action or choice is the agent's, \"you\" when the decision or the consequence is the human's or when the note addresses the human directly) plus a neutral statement of fact when the excerpt does not show who was responsible, and it never invents blame. What is verified: the composed system prompt contains that rule, keeps the base policy first, and does not gain a fabricated owner from the excerpt; see test/core.test.js and test/review-profile.test.js. What is NOT verified: the reviewer model's live output. The model is nondeterministic and no live-model test exercises it, so an actual note naming the responsible party is unproven. Status is adapted rather than equivalent for that reason. A follow-up stage added an opt-in, fail-closed evaluator with four synthetic cases and a deterministic adjudication rule (scripts/note-voice-eval.mjs, test/note-voice-eval.test.js). It made no live model call because no zero-incremental-cost route could be established from available metadata, so the live-model output remains unproven and the status stays adapted.",
+        "parityNotes": "Instruction-level adaptation, not proven behavioral equivalence. The upstream changelog asks for notes that name who was responsible; this plugin carries one explicit responsibility-attribution rule in the trusted base reviewer policy (\"we\" when the human and the agent decided together, \"the main agent\" when the action or choice is the agent's, \"you\" when the decision or the consequence is the human's or when the note addresses the human directly) plus a neutral statement of fact when the excerpt does not show who was responsible, and it never invents blame. What is verified: the composed system prompt contains that rule, keeps the base policy first, and does not gain a fabricated owner from the excerpt; see test/core.test.js and test/review-profile.test.js. What is NOT verified: the reviewer model's live output. The model is nondeterministic and no live-model test exercises it, so an actual note naming the responsible party is unproven. Status is adapted rather than equivalent for that reason. A follow-up stage added an opt-in, fail-closed evaluator with four synthetic cases and a deterministic adjudication rule (scripts/note-voice-eval.mjs, test/note-voice-eval.test.js). It made no live model call because no zero-incremental-cost route could be established from available metadata, so the live-model output remains unproven and the status stays adapted. A follow-up stage then ran the evaluator once against the real configured route after an explicit owner authorization and four bounded calls (task ysk-note-voice-live-20261014). The observed replies matched the deterministic expectation in zero of four cases (two attribution mismatches, two silent); because the adjudicator is a coarse lexical proxy and the sample is tiny, that is neither parity nor a clean verdict on the model, and the status stays adapted.",
         "acceptance": {
           "summary": "The reviewer instruction selects the note voice by responsibility, as verified by prompt composition.",
           "testableAs": "A prompt-composition test asserts that the composed reviewer system prompt carries the responsibility-attribution rule and its three voices, and that a Custom reviewer prompt cannot replace the base rule. Completed by the task ysk-note-voice-attribution-20261014; this acceptance covers instruction composition only, not live model behavior.",
           "scope": "prompt-composition"
         },
         "liveVerification": {
-          "taskId": "ysk-note-voice-eval-20261014",
-          "status": "not-run",
-          "reason": "No reviewer route could be proven zero-incremental-cost from available metadata: the mounted providers are metered and a credential alone is not proof of free access, so the evaluator stayed fail-closed and made no model call.",
+          "taskId": "ysk-note-voice-live-20261014",
+          "status": "run-no-pass",
+          "authorization": "The owner explicitly authorized a bounded spend against the already-funded official DeepSeek balance, so a proven zero-incremental-cost route was no longer a prerequisite for this run.",
+          "route": {
+            "provider": "deepseek-official",
+            "model": "deepseek-flash"
+          },
+          "calls": {
+            "attempted": 4,
+            "limit": 4,
+            "retries": 0,
+            "closedConfirmed": 4,
+            "stopped": false
+          },
+          "results": {
+            "pass": 0,
+            "fail": 2,
+            "silent": 2,
+            "invalid": 0,
+            "dropped": 0,
+            "timeout": 0,
+            "notRun": 0
+          },
+          "observedUsage": {
+            "inputTokens": 1652,
+            "outputTokens": 152
+          },
+          "balanceCheck": {
+            "before": "available",
+            "after": "available",
+            "status": 200,
+            "note": "Read-only before/after availability checks were performed. Numeric wallet amounts are intentionally not committed: this repository is public and the owner authorized test spending only; exact amounts stay in local transient private evidence."
+          },
+          "reason": "The real reviewer replies did not match the synthetic expectation in any of the four cases: two notes attributed a decision to a party the adjudicator did not expect, and two cases stayed silent. The deterministic adjudicator is a coarse lexical proxy, so these outcomes are neither proof of upstream parity nor a clean verdict on the model; they are the observed sample.",
           "sampleScope": "Four synthetic cases: agent-owned, human-owned, joint, and unclear responsibility.",
-          "adjudication": "Lexical proxy over explicit owner markers; invalid, silent, dropped, and timed-out attempts stay distinct from a pass.",
+          "adjudication": "Lexical proxy over explicit owner markers; invalid, silent, dropped, and timed-out attempts stay distinct from a pass. A note that mixes the expected owner with another marker is a mismatch, and a null note is SILENT rather than a pass.",
           "evidence": [
-            "scripts/note-voice-eval.mjs",
-            "test/note-voice-eval.test.js",
-            "docs/harness-reports/ysk-note-voice-eval-20261014/evidence/note-voice-eval-not-run.json"
+            "scripts/note-voice-eval-deepseek.mjs",
+            "scripts/note-voice-eval-live.mjs",
+            "test/note-voice-eval-live.test.js",
+            "docs/harness-reports/ysk-note-voice-live-20261014/final-report.md",
+            "docs/harness-reports/ysk-note-voice-live-20261014/evidence/note-voice-eval-live-run.json",
+            "docs/harness-reports/ysk-note-voice-live-20261014/evidence/balance-before.json",
+            "docs/harness-reports/ysk-note-voice-live-20261014/evidence/balance-after.json"
           ]
         }
       },
@@ -150,7 +192,7 @@
     "repository": "PipaGs/dsh-you-should-know",
     "version": "0.4.3",
     "tag": "v0.4.3",
-    "head": "7b4ba87ba36e61fcf778541338402981b8791524",
+    "head": "746d1caa2101b96c97f85b0a0e387b57e77fc436",
     "branch": "main"
   },
   "outagePolicy": {

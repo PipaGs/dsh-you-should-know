@@ -1,0 +1,157 @@
+{
+  "runnerVersion": "note-voice-live-1",
+  "taskId": "ysk-note-voice-live-20261014",
+  "route": {
+    "provider": "deepseek-official",
+    "model": "deepseek-flash"
+  },
+  "endpoint": "https://api.deepseek.com/anthropic/v1/messages",
+  "usage": [
+    {
+      "provider": "deepseek-official",
+      "model": "deepseek-flash",
+      "inputTokens": 904,
+      "outputTokens": 82
+    },
+    {
+      "provider": "deepseek-official",
+      "model": "deepseek-flash",
+      "inputTokens": 250,
+      "outputTokens": 50
+    },
+    {
+      "provider": "deepseek-official",
+      "model": "deepseek-flash",
+      "inputTokens": 244,
+      "outputTokens": 10
+    },
+    {
+      "provider": "deepseek-official",
+      "model": "deepseek-flash",
+      "inputTokens": 254,
+      "outputTokens": 10
+    }
+  ],
+  "evaluation": {
+    "evalVersion": "note-voice-eval-1",
+    "promptVersion": "5c1fae1bef435a32416e5e85f7b3c58b2fbc3ee3138020ca3a029f3e781feac3",
+    "generatedAt": "2026-10-14T13:13:06.900Z",
+    "equivalenceClaimed": false,
+    "limitations": [
+      "Adjudication is a lexical proxy over explicit owner markers, not a semantic proof of the note voice.",
+      "A four-case synthetic sample is a smoke evaluation only; it never claims behavioral equivalence with upstream.",
+      "One attempt per case with no hidden retries; invalid, silent, dropped, and timed-out attempts are not passes.",
+      "The standalone process performs no model call; a live run requires a stream supplied by the host.",
+      "A call whose stream cannot confirm completion or cooperative iterator closure stops the run; the remaining cases are NOT_RUN, not modelled away."
+    ],
+    "authorizationBasis": "trusted-caller",
+    "live": true,
+    "route": {
+      "provider": "deepseek-official",
+      "model": "deepseek-flash"
+    },
+    "stopped": false,
+    "stoppedAfterCaseId": null,
+    "results": [
+      {
+        "caseId": "agent-owned",
+        "responsibility": "agent",
+        "status": "FAIL",
+        "note": "The main agent lowered the default request timeout from 30s to 5s, which directly contradicts your instruction to keep the current default timeout. This changes behavior for all callers, not just the cache path.",
+        "action": "Revert the default request timeout back to 30s and scope any fail-fast behavior to the cache lookup only.",
+        "actionPresent": true,
+        "noteOwners": {
+          "agent": true,
+          "joint": false,
+          "human": true
+        },
+        "actionOwners": {
+          "agent": false,
+          "joint": false,
+          "human": false
+        },
+        "reasons": [
+          "attribution mismatch: expected agent but also found human"
+        ],
+        "closed": true
+      },
+      {
+        "caseId": "human-owned",
+        "responsibility": "human",
+        "status": "FAIL",
+        "note": "The agent claims the change is done but the excerpt shows no actual code edit, file path, or verification — you should confirm the staging client's TLS verification was really disabled before relying on it today.",
+        "action": null,
+        "actionPresent": false,
+        "noteOwners": {
+          "agent": true,
+          "joint": false,
+          "human": false
+        },
+        "actionOwners": {
+          "agent": false,
+          "joint": false,
+          "human": false
+        },
+        "reasons": [
+          "attribution missing: expected human, found agent"
+        ],
+        "closed": true
+      },
+      {
+        "caseId": "joint",
+        "responsibility": "joint",
+        "status": "SILENT",
+        "note": null,
+        "action": null,
+        "actionPresent": false,
+        "noteOwners": {
+          "agent": false,
+          "joint": false,
+          "human": false
+        },
+        "actionOwners": {
+          "agent": false,
+          "joint": false,
+          "human": false
+        },
+        "reasons": [
+          "the reviewer stayed silent on a scenario that carries an important finding"
+        ],
+        "closed": true
+      },
+      {
+        "caseId": "unclear",
+        "responsibility": "none",
+        "status": "SILENT",
+        "note": null,
+        "action": null,
+        "actionPresent": false,
+        "noteOwners": {
+          "agent": false,
+          "joint": false,
+          "human": false
+        },
+        "actionOwners": {
+          "agent": false,
+          "joint": false,
+          "human": false
+        },
+        "reasons": [
+          "the reviewer stayed silent on a scenario that carries an important finding"
+        ],
+        "closed": true
+      }
+    ],
+    "summary": {
+      "total": 4,
+      "pass": 0,
+      "fail": 2,
+      "invalid": 0,
+      "silent": 2,
+      "dropped": 0,
+      "timeout": 0,
+      "notRun": 0,
+      "unknown": 0
+    }
+  }
+}
