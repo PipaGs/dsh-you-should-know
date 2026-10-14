@@ -4,7 +4,7 @@ A quiet, **human-only** second-opinion watcher for [DeepSeek Harness](https://gi
 
 A separately configured reviewer model — DeepSeek out of the box, any registered route by config — looks at each completed root-agent turn and speaks up only when the human most likely missed something important. A compact **You should know** card sits above the composer whenever there is something to report: it shows the current finding, is dismissible, and offers **Add to chat** without ever sending. When there is no active note and no history, the slot stays completely empty — no banner, no label, and no reserved space. Nothing is ever written into the conversation, and nothing reaches the primary agent. A finding card also carries three human-only feedback actions: **Knew it** suppresses that finding's fingerprint for the session, **Thanks** closes the finding and returns the adaptive cadence to normal, and **Explain** opens one bounded, cached explanation of why the finding matters. A successful **Add to chat** also counts as useful and resets backoff. Each session keeps a bounded, in-memory **History** of what happened.
 
-The product intent is analogous to Claude Code's *You Should Know*, with one deliberately harder constraint: here the note is for the human only.
+The product intent is analogous to Claude Code's *You Should Know*, with one deliberately harder constraint: here the note is for the human only. The versioned upstream baseline and the read-only adoption workflow for that analogy live in [docs/upstream/](./docs/upstream/README.md).
 
 ## Status
 

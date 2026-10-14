@@ -1,0 +1,54 @@
+{
+  "snapshotId": "claude-code-upstream-20261014",
+  "taskId": "ysk-upstream-adoption-20261014",
+  "fetchedAt": "2026-10-14T09:43:02Z",
+  "method": "Read-only curl GET against official GitHub endpoints; no authentication, no private or session data sent.",
+  "sources": [
+    {
+      "id": "claude-code-release-v2.1.287",
+      "url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.287",
+      "apiUrl": "https://api.github.com/repos/anthropics/claude-code/releases/tags/v2.1.287",
+      "immutable": true,
+      "tag": "v2.1.287",
+      "publishedAt": "2026-10-01T18:00:22Z",
+      "draft": false,
+      "prerelease": false,
+      "sha256": "0fb6f5753ba768c5aec55e0c96fa0beae39342716535355a9baadcfbc4297b14",
+      "relevantLines": [
+        "Added You should know, a built-in mod where a side agent watches your back and flags things you or Claude might miss. Turn it on with /plugin enable cc-plugin-you-should-know@builtin (for first-party sessions with telemetry on)"
+      ]
+    },
+    {
+      "id": "claude-code-changelog-main",
+      "url": "https://github.com/anthropics/claude-code/blob/db93774d73e8fdbaf315a6f4c175ae99ad3d515a/CHANGELOG.md",
+      "rawUrl": "https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md",
+      "commitSha": "db93774d73e8fdbaf315a6f4c175ae99ad3d515a",
+      "commitDate": "2026-10-14T02:49:24Z",
+      "sha256": "7abf62a98e6739e0b51071c5e289b0a6baef4f3a2d08046a6df2b338b3d0d086",
+      "matchedLines": [
+        {
+          "version": "2.1.290",
+          "text": "Fixed You should know writing its notes in English regardless of the language setting"
+        },
+        {
+          "version": "2.1.288",
+          "text": "Improved You should know notes to say we, the main agent or you depending on who was responsible for a decision"
+        },
+        {
+          "version": "2.1.287",
+          "text": "Added You should know, a built-in mod where a side agent watches your back and flags things you or Claude might miss. Turn it on with /plugin enable cc-plugin-you-should-know@builtin (for first-party sessions with telemetry on)"
+        }
+      ]
+    }
+  ],
+  "licenseCheck": {
+    "apiUrl": "https://api.github.com/repos/anthropics/claude-code/license",
+    "httpStatus": 404,
+    "observedAt": "2026-10-14T09:43:02Z",
+    "interpretation": "GitHub reports no detectable license file for the upstream repository as of 2026-10-14. The baseline quotes only short official release and changelog sentences for factual tracking and copies no upstream code."
+  },
+  "algorithmDisclosure": {
+    "disclosed": false,
+    "note": "The official release note and changelog describe the feature and two follow-up changes but not how the side agent selects, gates, deduplicates, or formats notes. No reverse engineering is attempted."
+  }
+}

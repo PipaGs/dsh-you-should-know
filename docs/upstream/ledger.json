@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "taskId": "ysk-upstream-adoption-20261014",
+  "generatedAt": "2026-10-14T09:43:02Z",
+  "upstream": {
+    "project": "anthropics/claude-code",
+    "feature": "You should know (built-in mod, cc-plugin-you-should-know@builtin)",
+    "algorithmDisclosed": false,
+    "sources": [
+      {
+        "id": "claude-code-release-v2.1.287",
+        "kind": "github-release",
+        "url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.287",
+        "immutable": true,
+        "publishedAt": "2026-10-01T18:00:22Z",
+        "fetchedAt": "2026-10-14T09:43:02Z",
+        "sha256": "0fb6f5753ba768c5aec55e0c96fa0beae39342716535355a9baadcfbc4297b14"
+      },
+      {
+        "id": "claude-code-changelog-main",
+        "kind": "github-changelog",
+        "url": "https://github.com/anthropics/claude-code/blob/db93774d73e8fdbaf315a6f4c175ae99ad3d515a/CHANGELOG.md",
+        "immutable": false,
+        "commitSha": "db93774d73e8fdbaf315a6f4c175ae99ad3d515a",
+        "commitDate": "2026-10-14T02:49:24Z",
+        "fetchedAt": "2026-10-14T09:43:02Z",
+        "sha256": "7abf62a98e6739e0b51071c5e289b0a6baef4f3a2d08046a6df2b338b3d0d086"
+      }
+    ],
+    "items": [
+      {
+        "id": "U-2.1.287-builtin-side-agent",
+        "upstreamVersion": "2.1.287",
+        "upstreamSourceId": "claude-code-release-v2.1.287",
+        "upstreamDate": "2026-10-01",
+        "upstreamQuote": "Added You should know, a built-in mod where a side agent watches your back and flags things you or Claude might miss. Turn it on with /plugin enable cc-plugin-you-should-know@builtin (for first-party sessions with telemetry on)",
+        "claim": "A built-in side agent reviews completed work and flags important things the human or the agent most likely missed.",
+        "localStatus": "adapted",
+        "localEvidence": [
+          "lib/index.js",
+          "lib/core.js",
+          "test/invariant.test.js",
+          "README.md"
+        ],
+        "disposition": "applicable",
+        "parityNotes": "Implemented as an out-of-tree DeepSeek Harness plugin with a separately configured reviewer model. The user-visible capability matches; the platform, the enable path, and the human-only isolation differ by design and were verified on the shipped v0.4.3 code.",
+        "acceptance": null
+      },
+      {
+        "id": "U-2.1.287-telemetry-gate",
+        "upstreamVersion": "2.1.287",
+        "upstreamSourceId": "claude-code-release-v2.1.287",
+        "upstreamDate": "2026-10-01",
+        "upstreamQuote": "for first-party sessions with telemetry on",
+        "claim": "The built-in mod is gated to first-party sessions that have telemetry enabled.",
+        "localStatus": "not-applicable",
+        "localEvidence": [
+          "README.md",
+          "test/invariant.test.js",
+          "lib/index.js"
+        ],
+        "disposition": "rejected",
+        "parityNotes": "This plugin has no telemetry and no first-party session concept.",
+        "rejectionReason": "Platform-specific upstream gating. Adopting it would require adding telemetry and a first-party session notion, which would weaken the documented privacy posture and is not part of this plugin's model.",
+        "acceptance": null
+      },
+      {
+        "id": "U-2.1.288-note-voice",
+        "upstreamVersion": "2.1.288",
+        "upstreamSourceId": "claude-code-changelog-main",
+        "upstreamDate": "2026-10-14",
+        "upstreamQuote": "Improved You should know notes to say we, the main agent or you depending on who was responsible for a decision",
+        "claim": "A note picks its voice from who was responsible for the decision: we, the main agent, or you.",
+        "localStatus": "missing",
+        "localEvidence": [
+          "lib/core.js",
+          "lib/review-strictness.js",
+          "lib/review-profile.js",
+          "README.md"
+        ],
+        "disposition": "deferred",
+        "parityNotes": "The local base policy fixes the note as addressed to the human and gives the agent a separate action string. No responsibility-based voice rule exists anywhere in lib/; verified by search on 2026-10-14. This is a real, small gap that deserves its own task and its own before/after evidence.",
+        "acceptance": {
+          "summary": "The reviewer instruction selects the note voice from responsibility, following the verified upstream rule.",
+          "testableAs": "A prompt-composition test feeds a fixed excerpt in which the agent made the decision and asserts the composed reviewer system prompt carries the responsibility-attribution rule; a second case where the human made the decision asserts the human-facing voice.",
+          "ownTask": true
+        }
+      },
+      {
+        "id": "U-2.1.290-language-setting",
+        "upstreamVersion": "2.1.290",
+        "upstreamSourceId": "claude-code-changelog-main",
+        "upstreamDate": "2026-10-14",
+        "upstreamQuote": "Fixed You should know writing its notes in English regardless of the language setting",
+        "claim": "Notes follow the configured language setting instead of always being written in English.",
+        "localStatus": "equivalent",
+        "localEvidence": [
+          "lib/language.js",
+          "lib/core.js",
+          "test/language.test.js",
+          "README.md"
+        ],
+        "disposition": "applicable",
+        "parityNotes": "lib/language.js resolves the output language with priority: explicit host user-language setting, then the latest genuine human message, then English. Covered by test/language.test.js and present before this baseline.",
+        "acceptance": null
+      }
+    ]
+  },
+  "local": {
+    "repository": "PipaGs/dsh-you-should-know",
+    "version": "0.4.3",
+    "tag": "v0.4.3",
+    "head": "b6a202d00e80e6069c07b03e65034b4280756f1d",
+    "branch": "main"
+  },
+  "outagePolicy": {
+    "rule": "If any primary source is unreachable, moved, truncated, or otherwise unverifiable, the affected item is recorded as unknown for that cycle; it is never recorded as no change. The previous verified baseline stays in place, and the outage plus the attempted URLs are recorded in the next review update.",
+    "appliesTo": "every verification step, including the source list itself",
+    "lastOutage": null
+  },
+  "openUnknowns": [
+    {
+      "id": "upstream-selection-algorithm",
+      "question": "How the upstream side agent selects, gates, deduplicates, and formats its notes.",
+      "whyUnknown": "The official release note and changelog do not describe the algorithm, and this repository does not reverse engineer undisclosed internals.",
+      "policy": "unknown-not-no-change",
+      "reassessWhen": "An official Anthropic source discloses the behavior."
+    },
+    {
+      "id": "upstream-data-handling",
+      "question": "How the upstream mod handles session data under its telemetry gate.",
+      "whyUnknown": "The official text does not describe data handling. Assuming it matches this plugin's privacy model would be speculation.",
+      "policy": "unknown-not-no-change",
+      "reassessWhen": "An official Anthropic privacy or data-flow statement covers the mod."
+    }
+  ]
+}
