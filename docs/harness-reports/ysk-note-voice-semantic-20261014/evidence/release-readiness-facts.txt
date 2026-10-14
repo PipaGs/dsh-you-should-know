@@ -1,0 +1,12 @@
+# release-readiness facts (read-only, no publish)
+package.json version: 0.4.3
+lib/index.js PLUGIN_VERSION: PLUGIN_VERSION = '0.4.3'
+README pinned install refs:
+85:dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.4.3
+235:**Installing a found release.** The plugin never installs, upgrades, or mutates an installation. The exact address is `github:PipaGs/dsh-you-should-know#vX.Y.Z`. Install it through the Plugins settings (the **Add plugin** dialog or the profile dependency), then **restart DSH Desktop** so the new JavaScript generation loads. Dismissing a version hides its notice for that version only; a newer release surfaces again.
+tag v0.4.3 object: 7d392bd65e07fdbd42530e56d32698a05edeba52
+tag v0.4.3 target: b6a202d00e80e6069c07b03e65034b4280756f1d
+tag v0.4.3 target subject: b6a202d Merge pull request #10 from PipaGs/chore/ysk-version-bump-0.4.3
+remote tag v0.4.3: 7d392bd65e07fdbd42530e56d32698a05edeba52	refs/tags/v0.4.3 b6a202d00e80e6069c07b03e65034b4280756f1d	refs/tags/v0.4.3^{} 
+install smoke command (NOT run in stage 5): npm run smoke:install
+tag/install/release executed in stage 5: NO

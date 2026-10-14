@@ -1,0 +1,32 @@
+✔ AC1: the evaluator ships exactly four labelled synthetic cases with deterministic criteria (0.830875ms)
+✔ AC1: every excerpt is non-sensitive synthetic data, not session or private content (0.228375ms)
+✔ AC1: each case prompt targets the merged base policy and carries the excerpt verbatim (0.58325ms)
+✔ attributeOwners finds the responsibility marker and nothing else (0.547792ms)
+✔ AC1/AC2: adjudication passes the labelled owner and fails a contradictory one (0.41675ms)
+✔ AC2: a failed attribution reports the matched evidence and reasons (0.099292ms)
+✔ AC2: invalid, silent, dropped, and timed-out attempts are distinct from PASS (0.117167ms)
+✔ AC5: the note-to-human voice and the optional repair action are adjudicated separately (0.093375ms)
+✔ AC1: an unrun case reports NOT_RUN with a precise blocker, never a fabricated verdict (1.68425ms)
+✔ AC3: the default run makes no model call at all (0.1785ms)
+✔ AC3: an enabled bounded live run uses one attempt per case, concurrency one, and captures the route (0.5435ms)
+✔ AC3: a non-cancellable stream stops the run and launches no later case (63.08525ms)
+✔ AC3: a closeable stream is cleaned up, and an overlong reply closes its iterator without stopping the run (0.709417ms)
+✔ AC3: an early-truncated stream with a non-confirming close stops the run (0.598667ms)
+✔ AC3: a timed-out stream with a non-confirming close stops the run (209.94625ms)
+✔ AC3: a native async generator confirms closure through return() done:true (1.21875ms)
+✔ AC3: an abort rejection with a non-confirming close stops the run (136.73175ms)
+✔ AC3: a cooperative abort with a confirming close continues the run (108.128458ms)
+✔ AC3: a completion that arrives after the deadline is still accounted as TIMEOUT (125.721167ms)
+✔ AC3: live authorization is a trusted-caller assertion, not independent cost verification (4.470583ms)
+✔ AC3: the live gate is fail-closed on missing or uncertain cost metadata (0.47575ms)
+✔ AC3/SECURITY: the evaluator module opens no network connection of its own (0.8025ms)
+✔ AC4/AC5: results carry no steering channel and never claim upstream equivalence (0.414041ms)
+✔ EVAL_LIMITS bound the run and forbid automatic retries (0.107ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 794.571709

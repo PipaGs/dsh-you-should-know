@@ -41,7 +41,7 @@ function verdict(note, extra = {}) {
 }
 
 test('AC1: the evaluator ships exactly four labelled synthetic cases with deterministic criteria', () => {
-  assert.equal(EVAL_VERSION, 'note-voice-eval-1')
+  assert.equal(EVAL_VERSION, 'note-voice-eval-2')
   assert.equal(SYNTHETIC_CASES.length, 4)
   assert.deepEqual(
     SYNTHETIC_CASES.map((entry) => entry.id),
@@ -93,17 +93,19 @@ test('AC1/AC2: adjudication passes the labelled owner and fails a contradictory 
   assert.equal(adjudicateCase(agent, verdict('We lowered the default timeout.')).status, 'FAIL')
   assert.equal(adjudicateCase(human, verdict('You required disabling certificate verification in staging.')).status, 'PASS')
   assert.equal(adjudicateCase(human, verdict('The main agent disabled certificate verification.')).status, 'FAIL')
-  assert.equal(adjudicateCase(joint, verdict('We settled on three retry attempts.')).status, 'PASS')
-  assert.equal(adjudicateCase(joint, verdict('You settled on three retry attempts.')).status, 'FAIL')
-  assert.equal(adjudicateCase(unclear, verdict('The export job failed with a checksum mismatch in the archive.')).status, 'PASS')
-  assert.equal(adjudicateCase(unclear, verdict('The main agent broke the archive checksum.')).status, 'FAIL')
+  // joint sits outside the policy selection gate and unclear beyond a proven
+  // gate, so any emitted note is not a pass; selected cases keep scoring.
+  assert.equal(adjudicateCase(joint, verdict('We settled on three retry attempts.')).status, 'UNWARRANTED_NOTE')
+  assert.equal(adjudicateCase(joint, verdict('You settled on three retry attempts.')).status, 'UNWARRANTED_NOTE')
+  assert.equal(adjudicateCase(unclear, verdict('The export job failed with a checksum mismatch in the archive.')).status, 'SELECTION_UNKNOWN')
+  assert.equal(adjudicateCase(unclear, verdict('The main agent broke the archive checksum.')).status, 'SELECTION_UNKNOWN')
 })
 
-test('AC2: a failed attribution reports the matched evidence and reasons', () => {
+test('AC2: a note blocked by the selection gate keeps its owner analysis and says why', () => {
   const result = adjudicateCase(caseById('unclear'), verdict('You caused the export to fail.'))
-  assert.equal(result.status, 'FAIL')
-  assert.equal(result.noteOwners.human, true)
-  assert.ok(result.reasons.some((line) => /attribut/i.test(line)), 'failure explains the attribution problem')
+  assert.equal(result.status, 'SELECTION_UNKNOWN')
+  assert.equal(result.noteOwners.human, true, 'the owner analysis is preserved even when the gate blocks a pass')
+  assert.ok(result.reasons.some((line) => /selection gate/i.test(line)), 'failure explains the gate problem')
 })
 
 test('AC2: invalid, silent, dropped, and timed-out attempts are distinct from PASS', () => {
@@ -184,7 +186,14 @@ test('AC3: an enabled bounded live run uses one attempt per case, concurrency on
   assert.match(result.promptVersion, /^[0-9a-f]{64}$/, 'the evaluated prompt text is pinned by hash')
   assert.equal(result.results.length, 4)
   assert.equal(result.summary.notRun, 0)
-  assert.equal(result.results.every((entry) => ['PASS', 'FAIL'].includes(entry.status)), true)
+  assert.deepEqual(
+    result.results.map((entry) => entry.status),
+    ['PASS', 'PASS', 'UNWARRANTED_NOTE', 'SELECTION_UNKNOWN'],
+    'selected cases pass; an excluded or unproven gate is never a pass',
+  )
+  assert.equal(result.summary.pass, 2)
+  assert.equal(result.summary.unwarrantedNote, 1)
+  assert.equal(result.summary.selectionUnknown, 1)
   assert.ok(result.limitations.some((line) => /sample|proxy|lexical/i.test(line)), 'sample limitations stay explicit')
 })
 
