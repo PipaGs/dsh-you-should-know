@@ -1,0 +1,68 @@
+# RED rev3 (against reviewed head 8b6860e module, new close-confirmation tests)
+# Command: node --test --test-timeout=8000 test/note-voice-eval.test.js
+
+✔ AC1: the evaluator ships exactly four labelled synthetic cases with deterministic criteria (0.846625ms)
+✔ AC1: every excerpt is non-sensitive synthetic data, not session or private content (0.221834ms)
+✔ AC1: each case prompt targets the merged base policy and carries the excerpt verbatim (0.582458ms)
+✔ attributeOwners finds the responsibility marker and nothing else (0.639167ms)
+✔ AC1/AC2: adjudication passes the labelled owner and fails a contradictory one (0.294917ms)
+✔ AC2: a failed attribution reports the matched evidence and reasons (0.094333ms)
+✔ AC2: invalid, silent, dropped, and timed-out attempts are distinct from PASS (0.116834ms)
+✔ AC5: the note-to-human voice and the optional repair action are adjudicated separately (0.094625ms)
+✔ AC1: an unrun case reports NOT_RUN with a precise blocker, never a fabricated verdict (1.276542ms)
+✔ AC3: the default run makes no model call at all (0.150916ms)
+✔ AC3: an enabled bounded live run uses one attempt per case, concurrency one, and captures the route (0.468041ms)
+✔ AC3: a non-cancellable stream stops the run and launches no later case (63.757416ms)
+✔ AC3: a closeable stream is cleaned up, and an overlong reply closes its iterator without stopping the run (0.658541ms)
+✖ AC3: an early-truncated stream with a non-confirming close stops the run (0.98325ms)
+✖ AC3: a timed-out stream with a non-confirming close stops the run (167.733375ms)
+✔ AC3: a native async generator confirms closure through return() done:true (2.333042ms)
+✔ AC3: live authorization is a trusted-caller assertion, not independent cost verification (2.016666ms)
+✔ AC3: the live gate is fail-closed on missing or uncertain cost metadata (0.363833ms)
+✔ AC3/SECURITY: the evaluator module opens no network connection of its own (0.659916ms)
+✔ AC4/AC5: results carry no steering channel and never claim upstream equivalence (0.380333ms)
+✔ EVAL_LIMITS bound the run and forbid automatic retries (0.098334ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 19
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 376.978792
+
+✖ failing tests:
+
+test at test/note-voice-eval.test.js:309:1
+✖ AC3: an early-truncated stream with a non-confirming close stops the run (0.98325ms)
+  AssertionError [ERR_ASSERTION]: absent: exactly one stream starts
+  
+  4 !== 1
+  
+      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-note-voice-eval/test/note-voice-eval.test.js:318:12)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 4,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/note-voice-eval.test.js:327:1
+✖ AC3: a timed-out stream with a non-confirming close stops the run (167.733375ms)
+  AssertionError [ERR_ASSERTION]: absent: exactly one stream starts
+  
+  4 !== 1
+  
+      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-note-voice-eval/test/note-voice-eval.test.js:336:12)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 4,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

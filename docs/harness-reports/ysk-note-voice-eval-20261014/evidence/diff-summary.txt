@@ -5,22 +5,20 @@
  M docs/harness-reports/ysk-note-voice-eval-20261014/evidence/security-diff-sanity.txt
  M docs/harness-reports/ysk-note-voice-eval-20261014/evidence/test-run-final.txt
  M docs/harness-reports/ysk-note-voice-eval-20261014/evidence/test-run-targeted.txt
- M docs/harness-reports/ysk-note-voice-eval-20261014/final-report.md
  M scripts/note-voice-eval.mjs
  M test/note-voice-eval.test.js
-?? docs/harness-reports/ysk-note-voice-eval-20261014/evidence/test-run-red-rev2.txt
+?? docs/harness-reports/ysk-note-voice-eval-20261014/evidence/test-run-red-rev3.txt
 
 ## git diff --stat (tracked)
  .../evidence/artifacts-hashes.txt                  |    8 +-
- .../evidence/diff-summary.txt                      |   34 +-
- .../evidence/note-voice-eval-not-run.json          |    8 +-
- .../evidence/security-diff-sanity.txt              |   13 +-
- .../evidence/test-run-final.txt                    | 1036 ++++++++++----------
- .../evidence/test-run-targeted.txt                 |   75 +-
- .../ysk-note-voice-eval-20261014/final-report.md   |   57 ++
- scripts/note-voice-eval.mjs                        |  211 +++-
- test/note-voice-eval.test.js                       |  105 ++
- 9 files changed, 926 insertions(+), 621 deletions(-)
+ .../evidence/diff-summary.txt                      |   16 +-
+ .../evidence/note-voice-eval-not-run.json          |    4 +-
+ .../evidence/security-diff-sanity.txt              |   29 +-
+ .../evidence/test-run-final.txt                    | 1039 ++++++++++----------
+ .../evidence/test-run-targeted.txt                 |   83 +-
+ scripts/note-voice-eval.mjs                        |   39 +-
+ test/note-voice-eval.test.js                       |   88 ++
+ 8 files changed, 701 insertions(+), 605 deletions(-)
 
 ## new/untracked files
-docs/harness-reports/ysk-note-voice-eval-20261014/evidence/test-run-red-rev2.txt
+docs/harness-reports/ysk-note-voice-eval-20261014/evidence/test-run-red-rev3.txt

@@ -283,3 +283,57 @@ lib/** не тронут; ledger U-2.1.288-note-voice остаётся adapted /
   live:false, notRun 4/4.
 - Тот же PR #13; merge/release не выполнялись.
 - **Статус:** READY_FOR_CHATGPT_REVIEW.
+
+---
+
+## 17. CHANGES_REQUIRED rev3 — 2026-10-14T11:52:04Z
+
+Разделы 1–16 выше — историческая запись на reviewed head
+8b6860e52b2663a76cb9b41c5921af0c18c34a12; они не переписаны. Ниже — один
+закрытый review-раунд по BLOCKER из PR #13.
+
+### F1. closeWithin подтверждал закрытие без доказательства
+
+- Было: closeWithin возвращал true при отсутствии iterator.return(),
+  синхронном throw, rejection, отсутствии thenable и при не-подтверждающем
+  результате done:false (settled.then(() => true, () => true)); terminalFinish
+  тоже принудительно давал closed=true. Это позволяло runEvaluation стартовать
+  следующий model call после timeout/overlength, нарушая concurrency=1 и
+  spend bound.
+- Стало: closure подтверждается только когда iterator.return() разрешается
+  IteratorResult с done === true (или синхронный return() даёт done === true)
+  в пределах grace. Отсутствующий return, throw, rejection, не-подтверждающий
+  результат и неразрешившийся result → false. Принудительный terminalFinish
+  убран: finish-error тоже проходит через closeWithin. Если iterator не
+  создавался (streamFn выбросил или вернул не iterable) — активного вызова
+  нет, closed=true.
+- runEvaluation по-прежнему не стартует следующий кейс, если closed !== true;
+  остальные получают NOT_RUN с точным reason. Abort signal по-прежнему
+  запрашивается на timeout.
+
+### RED → GREEN
+
+- RED против reviewed head 8b6860e: оба новых теста падают
+  (absent: exactly one stream starts), evidence/test-run-red-rev3.txt.
+- GREEN: node --test test/note-voice-eval.test.js → 21/21; варианты
+  absent / throws / rejects / doneFalse / noResult проверены и для
+  early-truncation, и для timeout; native async generator подтверждает
+  закрытие через return() с done:true; вызов ровно один.
+
+### Верификация (raw, rev3)
+
+    npm run check -> EXIT=0 (evidence/check.txt)
+    npm test -> tests 517 / pass 517 / fail 0 (evidence/test-run-final.txt)
+    targeted -> 40/40 (evidence/test-run-targeted.txt)
+    default evaluator -> live:false, notRun 4/4, stopped:false,
+      authorizationBasis none (evidence/note-voice-eval-not-run.json)
+
+lib/** не тронут; ledger U-2.1.288-note-voice остаётся adapted / not-run.
+
+### Handoff rev3
+
+- Тот же PR #13, та же ветка test/ysk-note-voice-eval-20261014, тот же
+  worktree; новый PR не создавался, merge/release не выполнялись.
+- Первый родительский коммит reviewed head — 8b6860e; corrective commit и
+  итоговый head фиксируются в PR после push.
+- **Статус:** READY_FOR_CHATGPT_REVIEW.

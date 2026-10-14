@@ -257,19 +257,26 @@ function delay(ms) {
 
 /**
  * Request one iterator close without awaiting it unbounded. Never rejects.
- * Returns true when the close settled by the grace (or there is nothing to
- * close), false when a model call may still be active.
+ *
+ * Closure is confirmed only when the iterator's own return() reports
+ * done === true within the grace, or when a synchronous return() result
+ * reports done === true. An absent return, a synchronous throw, a rejected
+ * return, a non-confirming result, and a result that never settles are all
+ * false: closure is then unconfirmed and the caller must not start another
+ * call. This follows the async iterator protocol, where return() fulfils with
+ * an IteratorResult whose done is true once the iterator is closed.
  */
 async function closeWithin(iterator, graceMs) {
-  if (!iterator || typeof iterator.return !== 'function') return true
+  if (!iterator || typeof iterator.return !== 'function') return false
   let result
   try {
     result = iterator.return()
   } catch (error) {
-    return true
+    return false
   }
-  if (!result || typeof result.then !== 'function') return true
-  const settled = result.then(() => true, () => true)
+  const confirms = (value) => value !== null && typeof value === 'object' && value.done === true
+  if (!result || typeof result.then !== 'function') return confirms(result)
+  const settled = result.then(confirms, () => false)
   return await Promise.race([settled, delay(graceMs).then(() => false)])
 }
 
@@ -279,8 +286,10 @@ async function closeWithin(iterator, graceMs) {
  * relies on: options.signal carries an AbortSignal into llm.stream, and the
  * returned async iterator is closed with iterator.return().
  *
- * The returned closed flag is the safety signal for the caller: false means a
- * model call may still be active, so the caller must not start another call.
+ * The returned closed flag is the safety signal for the caller: true only when
+ * the stream completed or its iterator confirmed closure with done === true;
+ * false means a model call may still be active, so the caller must not start
+ * another call.
  */
 async function collectOnce(streamFn, options, deadlineMs, closeGraceMs) {
   const controller = new AbortController()
@@ -318,11 +327,13 @@ async function collectOnce(streamFn, options, deadlineMs, closeGraceMs) {
         }
         if (chunk && typeof chunk === 'object' && chunk.type === 'finish'
           && chunk.reason && chunk.reason.kind === 'error') {
-          return { kind: 'error', error: describeError(chunk.reason.failure || chunk.reason), early: true, terminalFinish: true }
+          return { kind: 'error', error: describeError(chunk.reason.failure || chunk.reason), early: true }
         }
       }
     } catch (error) {
-      return { kind: 'error', error: describeError(error), closed: true }
+      // No iterator means no call was started; a started iterator must still
+      // confirm closure before the caller may continue.
+      return { kind: 'error', error: describeError(error), early: iterator !== undefined, closed: iterator === undefined }
     }
   })()
   // An abandoned consumer must never surface as an unhandled rejection.
@@ -333,10 +344,10 @@ async function collectOnce(streamFn, options, deadlineMs, closeGraceMs) {
     if (timer !== undefined) clearTimeout(timer)
     const outcome = await consume
     if (outcome.early !== true) return { ...outcome, closed: true }
-    // An early stop (overlong reply or a terminal error chunk) still releases
-    // the iterator; a terminal finish already ended the call.
+    // An early stop (overlong reply or a terminal error chunk) releases the
+    // iterator only if the close itself confirms done === true.
     const released = await closeWithin(iterator, closeGraceMs)
-    return { ...outcome, closed: outcome.terminalFinish === true || released }
+    return { ...outcome, closed: released }
   }
 
   // The deadline won and the abort was already requested. Give the aborted
@@ -405,7 +416,7 @@ const LIMITATIONS = Object.freeze([
   'A four-case synthetic sample is a smoke evaluation only; it never claims behavioral equivalence with upstream.',
   'One attempt per case with no hidden retries; invalid, silent, dropped, and timed-out attempts are not passes.',
   'The standalone process performs no model call; a live run requires a stream supplied by the host.',
-  'A call that neither settles nor closes within the cleanup grace stops the run; the remaining cases are NOT_RUN, not modelled away.',
+  'A call whose stream cannot confirm completion or cooperative iterator closure stops the run; the remaining cases are NOT_RUN, not modelled away.',
 ])
 
 /** Bound the run from the fixed defaults; limits is a test-only override. */

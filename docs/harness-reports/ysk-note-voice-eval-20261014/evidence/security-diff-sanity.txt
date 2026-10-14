@@ -5,18 +5,25 @@ lib diff lines: 0
 no match
 
 ## evaluator env reads (only the attestation flag)
-541:  const gate = resolveLiveGate({ argv, env: process.env })
+552:  const gate = resolveLiveGate({ argv, env: process.env })
 
-## evaluator cancellation contract (AbortController + iterator.return)
-263:async function closeWithin(iterator, graceMs) {
-264:  if (!iterator || typeof iterator.return !== 'function') return true
-267:    result = iterator.return()
-280: * returned async iterator is closed with iterator.return().
-286:  const controller = new AbortController()
-291:        controller.abort()
-293:        // A hostile AbortController is not fatal here.
-338:    const released = await closeWithin(iterator, closeGraceMs)
-346:  const closed = settled === true ? true : await closeWithin(iterator, closeGraceMs)
+## conservative closure contract
+262: * done === true within the grace, or when a synchronous return() result
+263: * reports done === true. An absent return, a synchronous throw, a rejected
+269:async function closeWithin(iterator, graceMs) {
+270:  if (!iterator || typeof iterator.return !== 'function') return false
+273:    result = iterator.return()
+275:    return false
+277:  const confirms = (value) => value !== null && typeof value === 'object' && value.done === true
+287: * returned async iterator is closed with iterator.return().
+290: * the stream completed or its iterator confirmed closure with done === true;
+295:  const controller = new AbortController()
+300:        controller.abort()
+302:        // A hostile AbortController is not fatal here.
+348:    // iterator only if the close itself confirms done === true.
+349:    const released = await closeWithin(iterator, closeGraceMs)
+357:  const closed = settled === true ? true : await closeWithin(iterator, closeGraceMs)
+563:  if (typeof entry !== 'string' || entry === '') return false
 
 ## secret/absolute-path scan over changed source and docs
 no match

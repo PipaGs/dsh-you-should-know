@@ -276,6 +276,94 @@ test('AC3: a closeable stream is cleaned up, and an overlong reply closes its it
   assert.equal(result.results.length, 4)
 })
 
+// Close behaviors that cannot confirm iterator closure. A conservative
+// evaluator must treat every one of them as unconfirmed and stop the run.
+const NON_CONFIRMING_CLOSES = {
+  absent: undefined,
+  throws: () => { throw new Error('synchronous close failure') },
+  rejects: () => Promise.reject(new Error('asynchronous close failure')),
+  doneFalse: () => Promise.resolve({ done: false }),
+  noResult: () => undefined,
+}
+
+function iteratorWithClose(mode, closeFactory, track) {
+  return () => {
+    track.calls += 1
+    let yielded = false
+    const iterator = {
+      next() {
+        if (!yielded) {
+          yielded = true
+          if (mode === 'timeout') return Promise.resolve({ done: false, value: { type: 'text-delta', index: 0, text: 'partial' } })
+          return Promise.resolve({ done: false, value: { type: 'text-delta', index: 0, text: 'x'.repeat(5000) } })
+        }
+        if (mode === 'timeout') return new Promise(() => {})
+        return Promise.resolve({ done: true, value: undefined })
+      },
+    }
+    if (closeFactory !== undefined) iterator.return = closeFactory
+    return { [Symbol.asyncIterator]() { return iterator } }
+  }
+}
+
+test('AC3: an early-truncated stream with a non-confirming close stops the run', async () => {
+  for (const [name, closeFactory] of Object.entries(NON_CONFIRMING_CLOSES)) {
+    const track = { calls: 0 }
+    const result = await runEvaluation({
+      gate: { live: true },
+      stream: iteratorWithClose('truncate', closeFactory, track),
+      route: { provider: 'synthetic', model: 'early-' + name },
+      limits: { callTimeoutMs: 300, closeGraceMs: 30 },
+    })
+    assert.equal(track.calls, 1, name + ': exactly one stream starts')
+    assert.equal(result.results[0].truncated, true, name + ': the overlong reply is recorded')
+    assert.equal(result.results[0].closed, false, name + ': closure is not confirmed')
+    assert.equal(result.stopped, true, name + ': the run stops')
+    assert.equal(result.results.slice(1).every((entry) => entry.status === 'NOT_RUN'), true, name + ': remaining are NOT_RUN')
+    assert.equal(result.summary.notRun, 3, name + ': three cases were never sent')
+  }
+})
+
+test('AC3: a timed-out stream with a non-confirming close stops the run', async () => {
+  for (const [name, closeFactory] of Object.entries(NON_CONFIRMING_CLOSES)) {
+    const track = { calls: 0 }
+    const result = await runEvaluation({
+      gate: { live: true },
+      stream: iteratorWithClose('timeout', closeFactory, track),
+      route: { provider: 'synthetic', model: 'timeout-' + name },
+      limits: { callTimeoutMs: 20, closeGraceMs: 20 },
+    })
+    assert.equal(track.calls, 1, name + ': exactly one stream starts')
+    assert.equal(result.results[0].status, 'TIMEOUT', name + ': the attempt is a timeout')
+    assert.equal(result.results[0].closed, false, name + ': closure is not confirmed')
+    assert.equal(result.stopped, true, name + ': the run stops')
+    assert.equal(result.summary.timeout, 1, name + ': one timeout')
+    assert.equal(result.summary.notRun, 3, name + ': three cases were never sent')
+  }
+})
+
+test('AC3: a native async generator confirms closure through return() done:true', async () => {
+  const track = { calls: 0 }
+  const stream = async function* stream() {
+    track.calls += 1
+    if (track.calls === 1) {
+      yield { type: 'text-delta', index: 0, text: 'x'.repeat(5000) }
+      return
+    }
+    yield { type: 'text-delta', index: 0, text: JSON.stringify({ note: 'The export job failed with a checksum mismatch in the archive.', importance: 'high' }) }
+  }
+  const result = await runEvaluation({
+    gate: { live: true },
+    stream,
+    route: { provider: 'synthetic', model: 'native' },
+    limits: { callTimeoutMs: 500, closeGraceMs: 100 },
+  })
+  assert.equal(track.calls, 4, 'the confirmed close of the overlong case allows the rest')
+  assert.equal(result.results[0].truncated, true)
+  assert.equal(result.results[0].closed, true)
+  assert.equal(result.stopped, false)
+})
+
 test('AC3: live authorization is a trusted-caller assertion, not independent cost verification', async () => {
   const offline = await runEvaluation({ gate: { live: false, blocker: 'cost not established' } })
   assert.equal(offline.authorizationBasis, 'none')
