@@ -1,0 +1,12 @@
+# secret/abs-path scan on the tracked product/test diff vs origin/main
+NO SECRET/ABS-PATH MATCHES in product/test diff
+
+# abs home prefix anywhere in the new stage6 artifacts?
+NO ABS PATHS
+
+# docs/upstream must be untouched
+docs/upstream UNCHANGED
+
+# lib/** diff must be only PLUGIN_VERSION
+ lib/index.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)

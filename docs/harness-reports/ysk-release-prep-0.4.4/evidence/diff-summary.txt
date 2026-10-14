@@ -1,0 +1,119 @@
+# normalized for whitespace; factual diff patch content preserved except whitespace
+# (blank separator lines were trimmed of trailing spaces; see whitespace-normalization-log.txt)
+diff --git a/README.md b/README.md
+index 37ccc24..b169cef 100644
+--- a/README.md
++++ b/README.md
+@@ -8,7 +8,7 @@ The product intent is analogous to Claude Code's *You Should Know*, with one del
+
+ ## Status
+
+-Version `0.4.3`, MIT. Host and browser halves are committed as plain JavaScript, so a `github:` install needs no build step. Scope is intentionally small: a composer-adjacent note card with a bounded notification history, a Plugins settings card with a reviewer strictness mode and optional additional reviewer instructions, and a session-header mode and model override, one reviewer call per qualifying turn, and a per-session runtime that retries one transient failure, bounds the queue and the whole call, and pauses on quota without losing the turn.
++Version `0.4.4`, MIT. Host and browser halves are committed as plain JavaScript, so a `github:` install needs no build step. Scope is intentionally small: a composer-adjacent note card with a bounded notification history, a Plugins settings card with a reviewer strictness mode and optional additional reviewer instructions, and a session-header mode and model override, one reviewer call per qualifying turn, and a per-session runtime that retries one transient failure, bounds the queue and the whole call, and pauses on quota without losing the turn.
+
+ ## What it does
+
+@@ -82,7 +82,7 @@ A source-level test (`test/invariant.test.js`) scans the shipped files for every
+ Because the built host and browser halves are committed, installation needs no source build. Install an **immutable release ref**, not the default branch:
+
+ ```sh
+-dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.4.3
++dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.4.4
+ ```
+
+ A bare `github:PipaGs/dsh-you-should-know` address is resolved by pnpm and saved as that same value every time. The Desktop plugin manager learns which package an install produced by diffing the profile's dependencies before and after pnpm runs, and falls back to matching the typed address against a package name. A bare default-branch address changes nothing on the second run, and that fallback does not understand a Git address, so the manager reports that the installed package could not be told from the dependency change. A ref-pinned address is saved verbatim, so each install and upgrade is attributed to `dsh-you-should-know`. In the Desktop **Add plugin** dialog, enter the same pinned address. To move to a later release, install its tag; to install the exact version already present, remove the plugin first.
+@@ -343,14 +343,14 @@ The self-check route answers only from in-process state and returns bounded JSON
+   "authTransport": "host-authenticated-connection",
+   "healthy": true,
+   "configured": true,
+-  "pluginVersion": "0.4.3",
+-  "runtimeVersion": "0.4.3",
+-  "installedVersion": "0.4.3",
++  "pluginVersion": "0.4.4",
++  "runtimeVersion": "0.4.4",
++  "installedVersion": "0.4.4",
+   "runtimeStatus": "idle",
+   "reviewerMode": "balanced",
+   "routes": [{ "name": "self-check", "methods": ["GET", "HEAD"], "registered": true }],
+   "capabilities": { "feedback": true, "explain": true, "evidence": true, "episodeTrigger": true, "adaptiveBudget": true, "updateChecker": true },
+-  "update": { "currentVersion": "0.4.3", "latestVersion": "", "latestTag": "", "installSpec": "", "source": "git-tags", "updateAvailable": false, "dismissed": false, "autoCheckUpdates": true, "updateBehavior": "ask-before-update", "automaticSupported": false, "lastAutoCheckDate": "", "lastCheckedAt": null, "lastResult": null }
++  "update": { "currentVersion": "0.4.4", "latestVersion": "", "latestTag": "", "installSpec": "", "source": "git-tags", "updateAvailable": false, "dismissed": false, "autoCheckUpdates": true, "updateBehavior": "ask-before-update", "automaticSupported": false, "lastAutoCheckDate": "", "lastCheckedAt": null, "lastResult": null }
+ }
+ ```
+
+diff --git a/lib/index.js b/lib/index.js
+index 66010e1..9343797 100644
+--- a/lib/index.js
++++ b/lib/index.js
+@@ -33,7 +33,7 @@ export const name = 'dsh-you-should-know'
+
+ // The running plugin version. It mirrors package.json, and the update checker
+ // compares it against the newest stable Git tag of the public repository.
+-export const PLUGIN_VERSION = '0.4.3'
++export const PLUGIN_VERSION = '0.4.4'
+
+ /**
+  * Declarative row schema for the host settings service. Every field is volatile,
+diff --git a/package.json b/package.json
+index 3695bfa..13ffba7 100644
+--- a/package.json
++++ b/package.json
+@@ -1,6 +1,6 @@
+ {
+   "name": "dsh-you-should-know",
+-  "version": "0.4.3",
++  "version": "0.4.4",
+   "description": "Quiet, human-only second-opinion reviewer for DeepSeek Harness: a separately configured reviewer model (DeepSeek by default, any registered provider and model by config) watches completed root-agent turns and, only when something important was missed, shows a dismissible card above the composer. It never injects or steers the primary agent.",
+   "type": "module",
+   "license": "MIT",
+diff --git a/test/invariant.test.js b/test/invariant.test.js
+index 9af489e..316dd43 100644
+--- a/test/invariant.test.js
++++ b/test/invariant.test.js
+@@ -186,7 +186,7 @@ test('the bundled row leaves the reviewer route to adaptive discovery', async ()
+ test('the manifest declares the bundle, the client half, and no build step', async () => {
+   const manifest = JSON.parse(await read('package.json'))
+   assert.equal(manifest.name, 'dsh-you-should-know')
+-  assert.equal(manifest.version, '0.4.3')
++  assert.equal(manifest.version, '0.4.4')
+   assert.equal(manifest.license, 'MIT')
+   assert.equal(manifest.dsh.manifestVersion, 1)
+   assert.equal(manifest.dsh.bundle.patch, './cordis.patch.yml')
+diff --git a/test/plugin.test.js b/test/plugin.test.js
+index 78ab6bb..e5120d0 100644
+--- a/test/plugin.test.js
++++ b/test/plugin.test.js
+@@ -396,9 +396,9 @@ test('the authenticated self-check route reports only the bounded running plugin
+   const body = await response.json()
+   assert.equal(body.ok, true)
+   assert.equal(body.authTransport, 'host-authenticated-connection')
+-  assert.equal(body.pluginVersion, '0.4.3')
+-  assert.equal(body.runtimeVersion, '0.4.3')
+-  assert.equal(body.installedVersion, '0.4.3')
++  assert.equal(body.pluginVersion, '0.4.4')
++  assert.equal(body.runtimeVersion, '0.4.4')
++  assert.equal(body.installedVersion, '0.4.4')
+   assert.equal(body.runtimeStatus, 'idle')
+   assert.equal(body.reviewerMode, 'balanced')
+   assert.equal(body.healthy, true)
+diff --git a/test/update-route.test.js b/test/update-route.test.js
+index 7978e18..71ea186 100644
+--- a/test/update-route.test.js
++++ b/test/update-route.test.js
+@@ -254,7 +254,7 @@ test('without a preserve hook the reviewer patch is unchanged', async () => {
+ test('the exported plugin version mirrors package.json', async () => {
+   const manifest = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'))
+   assert.equal(PLUGIN_VERSION, manifest.version)
+-  assert.equal(manifest.version, '0.4.3')
++  assert.equal(manifest.version, '0.4.4')
+ })
+
+ test('the Config schema declares the update fields with conservative defaults', () => {
+ M README.md
+ M lib/index.js
+ M package.json
+ M test/invariant.test.js
+ M test/plugin.test.js
+ M test/update-route.test.js
+?? docs/harness-reports/ysk-release-prep-0.4.4/
+?? test/release-consistency.test.js

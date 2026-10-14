@@ -1,0 +1,109 @@
+# local absolute path prefix sanitized to file://<repo>/; whitespace-normalized (trailing spaces on blank lines trimmed)
+✖ the publication body starts at the Highlights section (0.715167ms)
+✖ the body states the historical and retrospective statuses exactly (0.099ms)
+✖ the body does not repeat the two contradicted claims (0.284792ms)
+✖ the body states no generated model pass and the missing historical raw reply (0.165541ms)
+✖ the body describes the ledger as retained rather than edited by stage 5 (0.125791ms)
+✔ the merged stage-5 report still carries the four retrospective statuses (0.117667ms)
+✔ the historical live record is 0 PASS / 2 FAIL / 2 SILENT and was not touched (0.176792ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 2
+ℹ fail 5
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 135.60575
+
+✖ failing tests:
+
+test at test/release-notes-consistency.test.js:37:1
+✖ the publication body starts at the Highlights section (0.715167ms)
+  AssertionError [ERR_ASSERTION]: the body starts at the ## Highlights heading
+      at TestContext.<anonymous> (file://<repo>/test/release-notes-consistency.test.js:38:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test/release-notes-consistency.test.js:44:1
+✖ the body states the historical and retrospective statuses exactly (0.099ms)
+  AssertionError [ERR_ASSERTION]: the body states: 0 PASS / 2 FAIL / 2 SILENT
+      at TestContext.<anonymous> (file://<repo>/test/release-notes-consistency.test.js:53:12)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test/release-notes-consistency.test.js:57:1
+✖ the body does not repeat the two contradicted claims (0.284792ms)
+  AssertionError [ERR_ASSERTION]: no "proxy false positives" claim
+
+  true !== false
+
+      at TestContext.<anonymous> (file://<repo>/test/release-notes-consistency.test.js:58:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/release-notes-consistency.test.js:64:1
+✖ the body states no generated model pass and the missing historical raw reply (0.165541ms)
+  AssertionError [ERR_ASSERTION]: the body says no generated model pass is claimed
+      at TestContext.<anonymous> (file://<repo>/test/release-notes-consistency.test.js:65:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: "# Proposed release notes — v0.4.4\n\nStatus: **candidate text, not published.** DSH prepared this body; it did not\ncreate the tag, push the tag, create the GitHub Release, or install anything.\nThe owner/ChatGPT publishes it only after this PR is merged and the merged\ncommit is verified.\n\nThe published release convention of this repository is the GitHub Release body\n(compare the existing `v0.4.3` release: Highlights, Install, Verification on the\nmerged commit). The text below follows that shape.\n\n---\n\n## Highlights\n\nThis release publishes source version `0.4.4`, the patch increment that follows\nthe merged note-voice work in PRs #12–#15.\n\n- **Note voice by responsibility (PR #12).** The trusted base reviewer policy\n  now carries one responsibility-attribution rule for the human-facing note: it\n  says `we` when the human and the agent decided together, `the main agent` when\n  the action or choice is the agent's, and `you` when the decision or the\n  consequence is the human's or when the note addresses the human directly.\n  When the excerpt does not show who was responsible, the note states only what\n  happened and stays neutral; the rule never invents blame. It is instruction\n  text only and adds no field to the JSON reply contract.\n- **Bounded note-voice evaluation harness (PRs #13–#15).** The repository now\n  ships an offline, deterministic evaluator\n  (`scripts/note-voice-eval.mjs`, `npm run eval:note-voice`) plus an opt-in\n  live runner (`scripts/note-voice-eval-live.mjs`, `npm run eval:note-voice:live`)\n  that is double-gated behind `--live --confirm-spend` and a\n  `DEEPSEEK_API_KEY` present only in the runner environment. The key is read\n  from the environment, never logged, and never written to an emitted report.\n  Neither script runs during `npm test`, and neither opens a network connection\n  unless a human explicitly invokes the live runner.\n- **Semantic recalibration of the ledger item (PR #15).** The upstream ledger\n  item for the 2.1.288 note-voice rule is recorded as `adapted` with an explicit\n  scoped acceptance; the earlier `equivalent` label was corrected forward as\n  part of that semantic review. No historical evaluation record was rewritten,\n  and no retroactive re-scoring was applied.\n\nThe published historical DeepSeek live run remains, as recorded, **0 PASS /\n2 FAIL / 2 SILENT** on the lexical adjudicator. The semantic review found the\ntwo FAIL verdicts to be proxy false positives (the notes themselves were\nevidence-based) and the two SILENT cases to be legitimate silence for the fixed\nsynthetic excerpts; that is a review of the adjudicator, not a claim about\nmodel behavior. No upstream behavioral parity is asserted: the voice rule is an\ninstruction-level adaptation and live model output is not proven equivalent to\nClaude Code's `You should know`.\n\nVersion mirrors are synchronized to `0.4.4` (`package.json` `version`,\n`PLUGIN_VERSION` in `lib/index.js`, the README status line, the README\ntag-pinned install address, and the README self-check sample). Beyond the note\nvoice rule and the evaluation harness, this release carries no runtime behavior\nchanges. The human-only invariant is unchanged: no steering, injection, wake-up,\ntranscript write, or any other path to the primary agent.\n\n## Install\n\n```sh\ndsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.4.4\n```\n\nThe address is a tag-pinned GitHub install; the released host and browser halves\nare committed, so no build step runs. Restart DSH Desktop after installation so\nthe new JavaScript generation loads.\n\n## Verification on the merged commit\n\nPlanned verification (fill in the exact numbers on the merged commit before\npublishing, as the previous releases did):\n\n- `npm test` -> 555/555 pass on the release-prep tree.\n- `npm run check` -> exit 0.\n- `git diff --check` -> clean.\n- Human-only invariant (`test/invariant.test.js`) -> 11/11 pass.\n- Release consistency gate (`test/release-consistency.test.js`) -> 4/4 pass.\n\n## Limitations\n\n- Live reviewer output is nondeterministic and is not asserted; only the\n  composed reviewer instruction is verified.\n- The evaluation harness is a lexical, deterministic proxy with known\n  false-positive shapes; it is documented as such in\n  `test/note-voice-semantic.test.js` and the task reports.\n- This release publishes no telemetry and makes no provider call on behalf of\n  the user beyond the single configured reviewer request.\n",
+    expected: /no generated\s+model pass is claimed/i,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at test/release-notes-consistency.test.js:71:1
+✖ the body describes the ledger as retained rather than edited by stage 5 (0.125791ms)
+  AssertionError [ERR_ASSERTION]: the body says stage 5 did not modify the ledger
+      at TestContext.<anonymous> (file://<repo>/test/release-notes-consistency.test.js:72:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: "# Proposed release notes — v0.4.4\n\nStatus: **candidate text, not published.** DSH prepared this body; it did not\ncreate the tag, push the tag, create the GitHub Release, or install anything.\nThe owner/ChatGPT publishes it only after this PR is merged and the merged\ncommit is verified.\n\nThe published release convention of this repository is the GitHub Release body\n(compare the existing `v0.4.3` release: Highlights, Install, Verification on the\nmerged commit). The text below follows that shape.\n\n---\n\n## Highlights\n\nThis release publishes source version `0.4.4`, the patch increment that follows\nthe merged note-voice work in PRs #12–#15.\n\n- **Note voice by responsibility (PR #12).** The trusted base reviewer policy\n  now carries one responsibility-attribution rule for the human-facing note: it\n  says `we` when the human and the agent decided together, `the main agent` when\n  the action or choice is the agent's, and `you` when the decision or the\n  consequence is the human's or when the note addresses the human directly.\n  When the excerpt does not show who was responsible, the note states only what\n  happened and stays neutral; the rule never invents blame. It is instruction\n  text only and adds no field to the JSON reply contract.\n- **Bounded note-voice evaluation harness (PRs #13–#15).** The repository now\n  ships an offline, deterministic evaluator\n  (`scripts/note-voice-eval.mjs`, `npm run eval:note-voice`) plus an opt-in\n  live runner (`scripts/note-voice-eval-live.mjs`, `npm run eval:note-voice:live`)\n  that is double-gated behind `--live --confirm-spend` and a\n  `DEEPSEEK_API_KEY` present only in the runner environment. The key is read\n  from the environment, never logged, and never written to an emitted report.\n  Neither script runs during `npm test`, and neither opens a network connection\n  unless a human explicitly invokes the live runner.\n- **Semantic recalibration of the ledger item (PR #15).** The upstream ledger\n  item for the 2.1.288 note-voice rule is recorded as `adapted` with an explicit\n  scoped acceptance; the earlier `equivalent` label was corrected forward as\n  part of that semantic review. No historical evaluation record was rewritten,\n  and no retroactive re-scoring was applied.\n\nThe published historical DeepSeek live run remains, as recorded, **0 PASS /\n2 FAIL / 2 SILENT** on the lexical adjudicator. The semantic review found the\ntwo FAIL verdicts to be proxy false positives (the notes themselves were\nevidence-based) and the two SILENT cases to be legitimate silence for the fixed\nsynthetic excerpts; that is a review of the adjudicator, not a claim about\nmodel behavior. No upstream behavioral parity is asserted: the voice rule is an\ninstruction-level adaptation and live model output is not proven equivalent to\nClaude Code's `You should know`.\n\nVersion mirrors are synchronized to `0.4.4` (`package.json` `version`,\n`PLUGIN_VERSION` in `lib/index.js`, the README status line, the README\ntag-pinned install address, and the README self-check sample). Beyond the note\nvoice rule and the evaluation harness, this release carries no runtime behavior\nchanges. The human-only invariant is unchanged: no steering, injection, wake-up,\ntranscript write, or any other path to the primary agent.\n\n## Install\n\n```sh\ndsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.4.4\n```\n\nThe address is a tag-pinned GitHub install; the released host and browser halves\nare committed, so no build step runs. Restart DSH Desktop after installation so\nthe new JavaScript generation loads.\n\n## Verification on the merged commit\n\nPlanned verification (fill in the exact numbers on the merged commit before\npublishing, as the previous releases did):\n\n- `npm test` -> 555/555 pass on the release-prep tree.\n- `npm run check` -> exit 0.\n- `git diff --check` -> clean.\n- Human-only invariant (`test/invariant.test.js`) -> 11/11 pass.\n- Release consistency gate (`test/release-consistency.test.js`) -> 4/4 pass.\n\n## Limitations\n\n- Live reviewer output is nondeterministic and is not asserted; only the\n  composed reviewer instruction is verified.\n- The evaluation harness is a lexical, deterministic proxy with known\n  false-positive shapes; it is documented as such in\n  `test/note-voice-semantic.test.js` and the task reports.\n- This release publishes no telemetry and makes no provider call on behalf of\n  the user beyond the single configured reviewer request.\n",
+    expected: /did \*\*not\*\* modify\s+\`docs\/upstream\/ledger\.json\`/i,
+    operator: 'match',
+    diff: 'simple'
+  }

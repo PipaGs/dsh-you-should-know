@@ -1,0 +1,37 @@
+# Evidence sanitization note (stage 6, review round 1)
+
+Two NEW stage-6 evidence files contained absolute local path prefixes and are
+sanitized in this round. Historical prior reports under
+`docs/harness-reports/ysk-*` are NOT touched.
+
+## What changed
+
+| File | Change | Assertions/outcomes |
+|---|---|---|
+| `test-run-red-version-mirrors.txt` | an absolute `file://<local-abs-worktree>/` prefix -> `file://<repo>/` (3 occurrences) | unchanged (3 tests, 0 pass, 3 fail, EXIT=1) |
+| `test-run-red-release-consistency-repro.txt` | the same absolute prefix -> `file://<repo>/` (2 occurrences) | unchanged (4 tests, 2 pass, 2 fail) |
+| `test-run-red-release-consistency-repro.txt` | trailing `EXIT=0` -> `EXIT=1` | corrects a stale shell exit capture; the run actually exited 1 with 2/4 failures |
+
+Nothing else in the sanitized files was edited: test names, assertion messages,
+actual/expected values, counts and durations are byte-identical apart from the
+path prefix. The `EXIT` line change records the same failing outcome, not a new
+one.
+
+## Sanitized file hashes (sha256)
+
+```text
+81a6e4ebbb98c54682623679dd7d9622f6bcfb1af809686bdfe30100d2fe9a7d  evidence/test-run-red-version-mirrors.txt
+f1b3d42d8297aeed7fdf81498f79ccd35b4045c07d34d219f83991703338cf82  evidence/test-run-red-release-consistency-repro.txt
+```
+
+## Check
+
+```text
+$ grep -rn "$(printf '/Users/')pipags" docs/harness-reports/ysk-release-prep-0.4.4/
+(no output)
+$ grep -E '^(tests|pass|fail)|^ℹ (tests|pass|fail)|EXIT' evidence/test-run-red-version-mirrors.txt
+ℹ tests 3
+ℹ pass 0
+ℹ fail 3
+EXIT=1
+```
