@@ -1,0 +1,9 @@
+# version scan (released artifacts)
+npm pkg get version: "0.4.4"
+36:export const PLUGIN_VERSION = '0.4.4'
+11:Version `0.4.4`, MIT. Host and browser halves are committed as plain JavaScript, so a `github:` install needs no build step. Scope is intentionally small: a composer-adjacent note card with a bounded notification history, a Plugins settings card with a reviewer strictness mode and optional additional reviewer instructions, and a session-header mode and model override, one reviewer call per qualifying turn, and a per-session runtime that retries one transient failure, bounds the queue and the whole call, and pauses on quota without losing the turn.
+85:dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.4.4
+346:  "pluginVersion": "0.4.4",
+353:  "update": { "currentVersion": "0.4.4", "latestVersion": "", "latestTag": "", "installSpec": "", "source": "git-tags", "updateAvailable": false, "dismissed": false, "autoCheckUpdates": true, "updateBehavior": "ask-before-update", "automaticSupported": false, "lastAutoCheckDate": "", "lastCheckedAt": null, "lastResult": null }
+--- stale 0.4.3 in released artifacts ---
+NONE

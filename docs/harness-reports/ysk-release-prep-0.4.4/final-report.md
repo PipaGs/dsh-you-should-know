@@ -14,7 +14,7 @@
 **Кандидат:** `v0.4.4` — patch-инкремент; тег **не создан**.
 **PR:** один, из этой ветки в main; точный head фиксируется в описании PR.
 **Инструмент:** DeepSeek Harness, supervised goal
-`goal-session-eee9b689-f761-468c-a033-71861ee32e18`, revision 1, mode strict.
+`goal-session-eee9b689-f761-468c-a033-71861ee32e18`, revision 2, mode strict.
 
 ---
 
@@ -215,8 +215,10 @@ immutable ref для уже установивших). Корректная ал
   нет, и создало бы ложное утверждение о несуществующем теге. Цена ошибки: если
   ревьюер захочет «живой» ledger, это отдельная правка после публикации тега.
 - **Исторические отчёты не переписывались.** `equivalent` → `adapted` — forward-only
-  correction, уже сделанная в рамках PR #15 в данных ledger; этот PR её не трогает и
-  задним числом ничего не переоценивает.
+  correction, сделанная **раньше** stage 5 (PRs #11–#14); stage 5 (PR #15) явно
+  `docs/upstream/ledger.json` **не изменял**, а сохранил `localStatus: adapted` /
+  `liveVerification.status: run-no-pass` как есть (см. stage-5 report §12). Этот PR
+  ledger тоже не трогает: `git diff origin/main -- docs/upstream/ledger.json` пуст.
 - **`npm run smoke:install` не запускался.** Скрипт не мутирует `~/.dsh` (временные
   каталоги в `$TMPDIR`), но требует сети и **опубликованного** тега; `v0.4.4` ещё нет.
   Offline-эквивалент (`test/install-discovery.test.js`) и release-гейт закрывают
@@ -240,3 +242,91 @@ immutable ref для уже установивших). Корректная ал
 - **NOT REQUIRED.** Изменение не вводит библиотек/API/версий зависимостей;
   Context7 и веб-поиск не требовались. Единственная внешняя операция — read-only
   `git ls-remote` к собственному репозиторию (см. §7).
+
+---
+
+## Review update — round 1 (2026-10-14, CHANGES_REQUIRED по PR #16)
+
+Ревью ChatGPT на точном head `61e020f3015511613a719758b0a87b555cbc915d` вернуло
+CHANGES_REQUIRED. Весь фидбек текущего head прочитан и сгруппирован; правки внесены
+одним batch. Разделы §1–§10 выше сохранены как исходный handoff; ниже — только новые
+факты и исправления этого раунда.
+
+### F1 (blocker) — ложная семантика stage 5 в release notes
+
+Прежний текст `release-notes-v0.4.4.md` утверждал, что «semantic review found the
+two FAIL verdicts to be proxy false positives» и что «the two SILENT cases [were]
+legitimate silence». Оба утверждения противоречат merged stage-5 report (PR #15):
+
+- lexical false positive ровно один — agent-owned FAIL (сработал маркер
+  `your instruction` на пользовательском constraint), v2 переводит его в PASS;
+- human-owned FAIL остаётся **повторяющейся substantive attribution gap**: v2-статус
+  FAIL, human-ownership в note по-прежнему отсутствует;
+- joint SILENT → `EXPECTED_SILENCE` (excerpt вне selection gate);
+- unclear SILENT → `SILENT_UNKNOWN` (gate не доказан), а не «подтверждённая тишина».
+
+Исправлено фактически и минимально: §`## Evaluation status` в release notes теперь
+даёт точные статусы (исторический v1 0 PASS / 2 FAIL / 2 SILENT; v2-ретроспектива
+1 PASS, 1 FAIL, 1 EXPECTED_SILENCE, 1 SILENT_UNKNOWN на сохранённом тексте, не новый
+model run), отдельно называет единственный lexical false positive, оставляет
+human-owned FAIL как gap, и прямо пишет, что **generated model pass не заявляется**,
+а **полный сырой reply исторического прогона не сохранён**.
+
+### F2 — ложная атрибуция ledger к PR #15
+
+Прежняя формулировка «Semantic recalibration of the ledger item (PR #15) …
+equivalent corrected forward» неверна: stage 5 (PR #15) `docs/upstream/ledger.json`
+**не изменял**. Зафиксировано: stage 5 откалибровал **evaluator** и **сохранил**
+существующую ledger-запись (`localStatus: adapted`, `liveVerification.status:
+run-no-pass`), а `equivalent → adapted` было исправлено раньше (PRs #11–#14).
+Тот же факт поправлен в §8 (Rulings) выше; `git diff origin/main -- docs/upstream/ledger.json`
+пуст (ledger этим PR не трогается).
+
+### F3 — гигиена локальных путей в новых публичных evidence
+
+В новых stage-6 evidence-файлах были абсолютные пути вида
+`file://<local-abs-worktree>/…` (2 в `test-run-red-release-consistency-repro.txt`,
+3 в `test-run-red-version-mirrors.txt`). Префикс заменён на `file://<repo>/`; числовые
+исходы и assertions не изменялись. Дополнительно исправлен ошибочный `EXIT=0` в
+repro-логе на фактический `EXIT=1` (2/4 fail) — это тоже не меняет исход. Запись о
+санитизации — `evidence/path-sanitization-note.txt` (новый файл, append-only).
+Исторические отчёты и прежние evidence **не изменялись**.
+После санитизации поиск абсолютного домашнего префикса по
+`docs/harness-reports/ysk-release-prep-0.4.4/` даёт пусто (команда без самого
+префикса — в `evidence/path-sanitization-note.txt`).
+
+### F4 — publication body начинается с Highlights
+
+Раньше файл начинался с `# Proposed release notes — v0.4.4` и статус-преамбулы.
+Теперь `release-notes-v0.4.4.md` начинается строкой 1 с `## Highlights` и является
+точным телом GitHub Release; кандидат-метаданные и карта источников вынесены в
+`release-notes-v0.4.4-candidate.md`.
+
+### F5 — новый read-only regression
+
+`test/release-notes-consistency.test.js` (offline, без сети): тело начинается с
+`## Highlights`; точные v1/v2 статусы; отсутствие обоих ложных утверждений
+(«proxy false positives», «legitimate silence», «equivalent → adapted»);
+явные «no generated model pass» и «historical full raw reply … not preserved»;
+ledger «retained, not edited by stage 5»; merged stage-5 report всё ещё содержит
+четыре ретро-статуса; исторический live-record 0/2/2 и `equivalenceClaimed: false`.
+Контролируемый RED: на pre-fix теле release notes гейт дал 5/7 fail
+(`evidence/test-run-red-release-notes.txt`), после правки 7/7 pass.
+
+### Verification round 1
+
+| Проверка | Результат | Evidence |
+|---|---|---|
+| `test/release-notes-consistency.test.js` | 7/7 pass | `test-run-green-release-notes.txt` |
+| controlled RED на pre-fix notes | 5/7 fail | `test-run-red-release-notes.txt` |
+| `test/release-consistency.test.js` | 4/4 pass | `test-run-green-release-consistency-rev2.txt` |
+| `test/release-notes-consistency.test.js` | 7/7 pass | `test-run-green-release-notes.txt` |
+| `npm test` | 562/562, 0 fail (на final tree round 1) | `test-run-final-rev2.txt` |
+| `npm run check` | EXIT=0 | `check-final-rev2.txt` |
+| invariants / ledger / install-discovery | 24/24 | `test-run-green-invariants-ledger-install-rev2.txt` |
+| version mirrors | 0.4.4 во всех зеркалах | `version-scan-rev2.txt` |
+| secret/diff sanity | без секретов и абсолютных путей | `security-diff-sanity-rev2.txt` |
+| `lib/**` | изменена только константа версии | `diff-summary-rev2.txt` |
+
+`v0.4.4`, tag/release/install/merge и платные/provider-вызовы по-прежнему **не
+выполнялись**.

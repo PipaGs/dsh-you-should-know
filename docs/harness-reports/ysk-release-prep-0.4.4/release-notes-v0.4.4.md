@@ -1,16 +1,3 @@
-# Proposed release notes — v0.4.4
-
-Status: **candidate text, not published.** DSH prepared this body; it did not
-create the tag, push the tag, create the GitHub Release, or install anything.
-The owner/ChatGPT publishes it only after this PR is merged and the merged
-commit is verified.
-
-The published release convention of this repository is the GitHub Release body
-(compare the existing `v0.4.3` release: Highlights, Install, Verification on the
-merged commit). The text below follows that shape.
-
----
-
 ## Highlights
 
 This release publishes source version `0.4.4`, the patch increment that follows
@@ -33,20 +20,48 @@ the merged note-voice work in PRs #12–#15.
   from the environment, never logged, and never written to an emitted report.
   Neither script runs during `npm test`, and neither opens a network connection
   unless a human explicitly invokes the live runner.
-- **Semantic recalibration of the ledger item (PR #15).** The upstream ledger
-  item for the 2.1.288 note-voice rule is recorded as `adapted` with an explicit
-  scoped acceptance; the earlier `equivalent` label was corrected forward as
-  part of that semantic review. No historical evaluation record was rewritten,
-  and no retroactive re-scoring was applied.
+- **Offline evaluator calibration and retained ledger status (PR #15).** The
+  semantic-review task calibrated the offline, deterministic adjudicator
+  against the preserved historical replies (root cause fixed, regression tests
+  added). It did **not** modify `docs/upstream/ledger.json`: the ledger item for
+  the Claude Code 2.1.288 note-voice rule keeps the already-recorded
+  `localStatus: adapted` and `liveVerification.status: run-no-pass` that the
+  earlier note-voice PRs put on `main`; the earlier `equivalent` label had
+  already been corrected to `adapted`. Stage 5 calibrated the evaluator and
+  retained the existing ledger record; it changed neither the status nor the
+  historical denominator.
 
-The published historical DeepSeek live run remains, as recorded, **0 PASS /
-2 FAIL / 2 SILENT** on the lexical adjudicator. The semantic review found the
-two FAIL verdicts to be proxy false positives (the notes themselves were
-evidence-based) and the two SILENT cases to be legitimate silence for the fixed
-synthetic excerpts; that is a review of the adjudicator, not a claim about
-model behavior. No upstream behavioral parity is asserted: the voice rule is an
-instruction-level adaptation and live model output is not proven equivalent to
-Claude Code's `You should know`.
+## Evaluation status
+
+The historical evaluation is reported exactly as recorded, and no generated
+model pass is claimed:
+
+- **Historical full raw reply is absent.** The historical live run preserved the
+  parsed note/action of its cases, not the full raw reply bytes; the offline
+  review works from that preserved text.
+- **Historical lexical result (v1) stays 0 PASS / 2 FAIL / 2 SILENT.** That
+  denominator is not rewritten and no re-scoring of the historical record is
+  applied.
+- **Retrospective recalibration (v2, preserved text only)** classifies the same
+  four preserved cases as **1 PASS, 1 FAIL, 1 EXPECTED_SILENCE, 1
+  SILENT_UNKNOWN**:
+  - the agent-owned case moves from FAIL to PASS because the fixed adjudicator
+    no longer reads the user's constraint ("your instruction") as human
+    ownership — this was the one lexical false positive;
+  - the human-owned case stays FAIL: human ownership is still not named, so it
+    remains a substantive attribution gap under the voice rule (whether the
+    reviewer had to voice the human owner in that framing is an interpretation,
+    not a fact proven by the text);
+  - the joint case becomes EXPECTED_SILENCE: the excerpt excludes itself from
+    the selection gate, and the policy's "stay silent otherwise" applies;
+  - the unclear case becomes SILENT_UNKNOWN: the gate is not proven either way,
+    so its silence is undetermined, not confirmed.
+- **This is a recalibration, not a model run.** No new model inference was made;
+  the classification is a re-run over the preserved parsed text. No upstream
+  behavioral parity is asserted: the voice rule is an instruction-level
+  adaptation and live model output is not proven equivalent to Claude Code's
+  `You should know`. The prior product policy — no generated model pass claim —
+  is unchanged.
 
 Version mirrors are synchronized to `0.4.4` (`package.json` `version`,
 `PLUGIN_VERSION` in `lib/index.js`, the README status line, the README
@@ -70,7 +85,8 @@ the new JavaScript generation loads.
 Planned verification (fill in the exact numbers on the merged commit before
 publishing, as the previous releases did):
 
-- `npm test` -> 555/555 pass on the release-prep tree.
+- `npm test` -> 562/562 pass on the release-prep tree (release-consistency 4/4 and
+  release-notes-consistency 7/7 included).
 - `npm run check` -> exit 0.
 - `git diff --check` -> clean.
 - Human-only invariant (`test/invariant.test.js`) -> 11/11 pass.
@@ -81,7 +97,8 @@ publishing, as the previous releases did):
 - Live reviewer output is nondeterministic and is not asserted; only the
   composed reviewer instruction is verified.
 - The evaluation harness is a lexical, deterministic proxy with known
-  false-positive shapes; it is documented as such in
+  false-positive shapes (for example a possessive constraint noun such as "your
+  instruction"); it is documented as such in
   `test/note-voice-semantic.test.js` and the task reports.
 - This release publishes no telemetry and makes no provider call on behalf of
   the user beyond the single configured reviewer request.

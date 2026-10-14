@@ -19,7 +19,7 @@ test at test/release-consistency.test.js:43:1
   
   '0.4.3' !== '0.4.4'
   
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-release-prep-0.4.4/test/release-consistency.test.js:45:10)
+      at TestContext.<anonymous> (file://<repo>/test/release-consistency.test.js:45:10)
       at Test.runInAsyncScope (node:async_hooks:226:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -40,7 +40,7 @@ test at test/release-consistency.test.js:66:1
   
   true !== false
   
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-release-prep-0.4.4/test/release-consistency.test.js:69:12)
+      at TestContext.<anonymous> (file://<repo>/test/release-consistency.test.js:69:12)
       at Test.runInAsyncScope (node:async_hooks:226:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -54,4 +54,4 @@ test at test/release-consistency.test.js:66:1
     operator: 'strictEqual',
     diff: 'simple'
   }
-EXIT=0
+EXIT=1

@@ -19,7 +19,7 @@ test at test/invariant.test.js:186:1
   
   '0.4.3' !== '0.4.4'
   
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-release-prep-0.4.4/test/invariant.test.js:189:10)
+      at TestContext.<anonymous> (file://<repo>/test/invariant.test.js:189:10)
       at async Test.run (node:internal/test_runner/test:1409:7)
       at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
     generatedMessage: true,
@@ -36,7 +36,7 @@ test at test/plugin.test.js:384:1
   
   '0.4.3' !== '0.4.4'
   
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-release-prep-0.4.4/test/plugin.test.js:399:10)
+      at TestContext.<anonymous> (file://<repo>/test/plugin.test.js:399:10)
       at async Test.run (node:internal/test_runner/test:1409:7)
       at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
     generatedMessage: true,
@@ -53,7 +53,7 @@ test at test/update-route.test.js:254:1
   
   '0.4.3' !== '0.4.4'
   
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-release-prep-0.4.4/test/update-route.test.js:257:10)
+      at TestContext.<anonymous> (file://<repo>/test/update-route.test.js:257:10)
       at async Test.run (node:internal/test_runner/test:1409:7)
       at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
     generatedMessage: true,

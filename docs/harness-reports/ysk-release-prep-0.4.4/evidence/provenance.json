@@ -1,6 +1,6 @@
 {
   "taskId": "ysk-release-prep-0.4.4",
-  "generatedAt": "2026-10-14T15:20:00Z",
+  "generatedAt": "2026-10-14T16:40:00Z",
   "repository": "PipaGs/dsh-you-should-know",
   "baseBranch": "main",
   "baseCommit": "b11537934f54dad82a28404b735e6c4e7bc387c0",
@@ -26,7 +26,7 @@
   "tool": {
     "harness": "DeepSeek Harness",
     "goalId": "goal-session-eee9b689-f761-468c-a033-71861ee32e18",
-    "goalRevision": 1,
+    "goalRevision": 2,
     "mode": "strict"
   },
   "changedFiles": [
@@ -55,5 +55,9 @@
     "dsh plugin add / profile mutation",
     "npm run smoke:install"
   ],
-  "evidenceCommitNote": "The evidence commit contains this file, so it cannot record its own exact SHA. It is the single child of productCommit that adds docs/harness-reports/ysk-release-prep-0.4.4; read it with: git log --oneline -1 <branch>."
+  "evidenceCommitNote": "The evidence commit contains this file, so it cannot record its own exact SHA. It is the single child of productCommit that adds docs/harness-reports/ysk-release-prep-0.4.4; read it with: git log --oneline -1 <branch>.",
+  "reviewRound": "1 (CHANGES_REQUIRED on head 61e020f; fixes applied in the same PR #16)",
+  "releaseNotesBody": "docs/harness-reports/ysk-release-prep-0.4.4/release-notes-v0.4.4.md (starts at ## Highlights; exact GitHub Release body)",
+  "releaseNotesCandidateMetadata": "docs/harness-reports/ysk-release-prep-0.4.4/release-notes-v0.4.4-candidate.md",
+  "evidenceSanitization": "New stage-6 RED logs had absolute /Users prefixes replaced with file://<repo>/; no assertion or count changed. See evidence/path-sanitization-note.txt."
 }

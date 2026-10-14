@@ -1,0 +1,7 @@
+# secret/abs-path scan on the PRODUCT/TRACKED diff only (origin/main..working tree)
+# credential shapes checked: private-key blocks, Authorization/x-api-key WITH a value,
+# DEEPSEEK_API_KEY=<value>, absolute home prefixes.
+NO SECRET/ABS-PATH MATCHES in product/test diff
+
+# documentation-only mentions of the header name (no value) inside the report/evidence:
+0

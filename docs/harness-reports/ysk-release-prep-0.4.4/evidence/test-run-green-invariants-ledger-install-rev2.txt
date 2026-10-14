@@ -1,0 +1,33 @@
+✔ the package name is the dependency key a GitHub install records (2.329542ms)
+✔ a first GitHub install is discovered from the dependency change (0.561958ms)
+✔ a bare default-branch spec cannot be re-attributed after the first install (0.094542ms)
+✔ a tag-pinned spec is discovered over an existing bare install (0.672583ms)
+✔ the README documents only tag-pinned GitHub install addresses (1.181458ms)
+✔ shipped sources contain no path that could deliver advice to the primary agent (8.412416ms)
+✔ the plugin uses only the sanctioned seams (1.16425ms)
+✔ the auth boundary stays host-owned: no no-auth route registration exists (0.85325ms)
+✔ no shipped source reads, stores, or forwards a cookie, token, or auth header (3.025625ms)
+✔ no shipped source can install, upgrade, or self-modify the plugin (4.00175ms)
+✔ the browser half reaches files and the composer only through their public seams (0.777458ms)
+✔ Add to chat can only compose the draft and never hands the action to the agent (0.666209ms)
+✔ the English-only scan rejects Cyrillic, Greek, and CJK text (0.103834ms)
+✔ public-facing text stays English-only and free of unrelated project references (2.98325ms)
+✔ the bundled row leaves the reviewer route to adaptive discovery (0.365958ms)
+✔ the manifest declares the bundle, the client half, and no build step (0.272875ms)
+✔ the upstream ledger cites pinned official Claude Code sources (1.31625ms)
+✔ the ledger records the local baseline on a real named revision (11.030083ms)
+✔ every tracked upstream signal has its own item with evidence and a disposition (0.408583ms)
+✔ a gap or an adaptation is never dispositioned as applicable-with-nothing-to-do (0.170542ms)
+✔ an uncontested upstream unknown is recorded, not resolved by guessing (0.141666ms)
+✔ a source outage is recorded as unknown, never as no change (0.145875ms)
+✔ the ledger carries no private or unrelated project data (0.229167ms)
+✔ the human-readable workflow and baseline documents exist and agree with the ledger (0.593583ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 157.046208
+EXIT=0
