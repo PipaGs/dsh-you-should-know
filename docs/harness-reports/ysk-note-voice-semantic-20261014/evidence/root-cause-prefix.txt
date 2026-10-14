@@ -1,0 +1,4 @@
+EVAL_VERSION = note-voice-eval-1
+attributeOwners(note) = {"agent":true,"joint":false,"human":true}
+adjudicateCase(agent-owned, note).status = FAIL
+reasons = ["attribution mismatch: expected agent but also found human"]

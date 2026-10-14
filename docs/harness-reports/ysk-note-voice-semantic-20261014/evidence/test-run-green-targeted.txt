@@ -1,0 +1,14 @@
+✔ AC-S1 (root cause): the preserved agent-owned note is agent attribution, not human (1.491333ms)
+✔ AC-S2: mention/address is separated from decision attribution (0.6975ms)
+✔ AC-S3: general constraint-reference false positives are mention, not ownership (0.125125ms)
+✔ AC-S4: real human ownership recognizers still attribute to the human (0.066333ms)
+✔ AC-S5: an action keeps its own attribution and never rewrites the note classification (0.094083ms)
+✔ AC-S6: the versioned selection gate separates silence from attribution failure (0.129875ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 134.115875

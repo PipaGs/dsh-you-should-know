@@ -1,0 +1,7 @@
+# security / diff sanity — working tree, pre-commit
+## lib/** changed (must be empty):
+(end)
+## network primitives in scripts/note-voice-eval.mjs:
+none
+## secret-like tokens / local paths in the diff:
+none

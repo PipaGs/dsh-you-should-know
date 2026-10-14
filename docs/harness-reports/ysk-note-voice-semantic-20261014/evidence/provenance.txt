@@ -1,0 +1,15 @@
+task id: ysk-note-voice-semantic-20261014
+branch: test/ysk-note-voice-semantic-20261014
+base commit (origin/main): 3563dd82d1658713162cc31bb0a2deb5998eafa5
+recorded at: 2026-10-14T14:38:12Z
+node: v26.9.0
+npm: 11.19.1
+tag v0.4.3 object: 7d392bd65e07fdbd42530e56d32698a05edeba52
+tag v0.4.3 commit: b6a202d00e80e6069c07b03e65034b4280756f1d
+origin/main (ls-remote): 3563dd82d1658713162cc31bb0a2deb5998eafa5
+--- changed files (working tree, pre-commit) ---
+ M docs/upstream/README.md
+ M scripts/note-voice-eval.mjs
+ M test/note-voice-eval.test.js
+?? docs/harness-reports/ysk-note-voice-semantic-20261014/
+?? test/note-voice-semantic.test.js

@@ -1,0 +1,12 @@
+# diff summary — working tree, pre-commit (base 3563dd8)
+ docs/upstream/README.md      | 11 +++++-
+ scripts/note-voice-eval.mjs  | 85 ++++++++++++++++++++++++++++++++++++++------
+ test/note-voice-eval.test.js |  2 +-
+ 3 files changed, 86 insertions(+), 12 deletions(-)
+
+# untracked (new) files
+?? docs/harness-reports/ysk-note-voice-semantic-20261014/
+?? test/note-voice-semantic.test.js
+
+# lib/** changes (working tree; must be empty)
+(end lib)

@@ -1,0 +1,19 @@
+task id: ysk-note-voice-semantic-20261014
+round: CHANGES_REQUIRED rev2 on PR #15
+branch: test/ysk-note-voice-semantic-20261014
+base commit (origin/main): 3563dd82d1658713162cc31bb0a2deb5998eafa5
+reviewed head: d7cfffa383602a3b4d4556cfdbe0d7d8c6b7f1fb
+recorded at: 2026-10-14T14:43:00Z
+node: v26.9.0
+--- changed files (working tree, pre-commit) ---
+ M scripts/note-voice-eval.mjs
+ M test/note-voice-eval-live.test.js
+ M test/note-voice-eval.test.js
+ M test/note-voice-semantic.test.js
+?? docs/harness-reports/ysk-note-voice-semantic-20261014/evidence/check-rev2.txt
+?? docs/harness-reports/ysk-note-voice-semantic-20261014/evidence/invariant-rev2.txt
+?? docs/harness-reports/ysk-note-voice-semantic-20261014/evidence/provenance-rev2.txt
+?? docs/harness-reports/ysk-note-voice-semantic-20261014/evidence/test-run-final-rev2.txt
+?? docs/harness-reports/ysk-note-voice-semantic-20261014/evidence/test-run-green-rev2-targeted.txt
+?? docs/harness-reports/ysk-note-voice-semantic-20261014/evidence/test-run-red-rev2.txt
+?? docs/harness-reports/ysk-note-voice-semantic-20261014/evidence/upstream-ledger-rev2.txt

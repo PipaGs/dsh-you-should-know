@@ -1,0 +1,130 @@
+{
+  "kind": "retrospective-recalibration-rev2",
+  "note": "The historic section re-adjudicates the preserved parsed note/action of the historic v1 live run. The syntheticEmittedGate section is a deterministic offline illustration of the rev2 two-axis gate and is NOT historic evidence and NOT a model run. Full raw replies were never preserved.",
+  "currentAdjudicator": "note-voice-eval-2",
+  "historicRun": {
+    "evalVersion": "note-voice-eval-1",
+    "promptVersion": "5c1fae1bef435a32416e5e85f7b3c58b2fbc3ee3138020ca3a029f3e781feac3",
+    "generatedAt": "2026-10-14T13:13:06.900Z",
+    "summary": {
+      "total": 4,
+      "pass": 0,
+      "fail": 2,
+      "invalid": 0,
+      "silent": 2,
+      "dropped": 0,
+      "timeout": 0,
+      "notRun": 0,
+      "unknown": 0
+    },
+    "invariant": "0 PASS / 2 FAIL / 2 SILENT is unchanged; only the proxy verdict-label can move."
+  },
+  "historicRecalibrated": [
+    {
+      "caseId": "agent-owned",
+      "historicStatus": "FAIL",
+      "recalibratedStatus": "PASS",
+      "noteOwners": {
+        "agent": true,
+        "joint": false,
+        "human": false
+      },
+      "noteMentions": {
+        "agent": false,
+        "joint": false,
+        "human": true
+      },
+      "reasons": [
+        "attribution matches: agent"
+      ]
+    },
+    {
+      "caseId": "human-owned",
+      "historicStatus": "FAIL",
+      "recalibratedStatus": "FAIL",
+      "noteOwners": {
+        "agent": true,
+        "joint": false,
+        "human": false
+      },
+      "noteMentions": {
+        "agent": false,
+        "joint": false,
+        "human": true
+      },
+      "reasons": [
+        "attribution missing: expected human, found agent"
+      ]
+    },
+    {
+      "caseId": "joint",
+      "historicStatus": "SILENT",
+      "recalibratedStatus": "EXPECTED_SILENCE",
+      "noteOwners": {
+        "agent": false,
+        "joint": false,
+        "human": false
+      },
+      "noteMentions": {
+        "agent": false,
+        "joint": false,
+        "human": false
+      },
+      "reasons": [
+        "the excerpt does not meet the policy selection gate, so silence is the correct outcome"
+      ]
+    },
+    {
+      "caseId": "unclear",
+      "historicStatus": "SILENT",
+      "recalibratedStatus": "SILENT_UNKNOWN",
+      "noteOwners": {
+        "agent": false,
+        "joint": false,
+        "human": false
+      },
+      "noteMentions": {
+        "agent": false,
+        "joint": false,
+        "human": false
+      },
+      "reasons": [
+        "the excerpt does not prove the policy selection gate; silence is neither a pass nor a failure"
+      ]
+    }
+  ],
+  "syntheticEmittedGate": {
+    "excluded_joint": {
+      "status": "UNWARRANTED_NOTE",
+      "noteOwners": {
+        "agent": false,
+        "joint": true,
+        "human": false
+      },
+      "noteMentions": {
+        "agent": false,
+        "joint": false,
+        "human": false
+      },
+      "reasons": [
+        "the excerpt does not meet the policy selection gate, so emitting a note violates the stay-silent instruction"
+      ]
+    },
+    "unknown_unclear": {
+      "status": "SELECTION_UNKNOWN",
+      "noteOwners": {
+        "agent": false,
+        "joint": false,
+        "human": false
+      },
+      "noteMentions": {
+        "agent": false,
+        "joint": false,
+        "human": false
+      },
+      "reasons": [
+        "the excerpt does not prove the policy selection gate, so the note cannot be certified as a pass"
+      ]
+    }
+  }
+}
