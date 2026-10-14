@@ -7,6 +7,7 @@ import {
   accumulatedDelta,
   aggregateRuntimeStatus,
   buildReviewPrompt,
+  buildReviewerSystemPrompt,
   collectContext,
   createEngine,
   createFetchHandlers,
@@ -474,6 +475,28 @@ test('the reviewer instruction separates the human note from the agent action', 
   assert.match(REVIEW_INSTRUCTIONS, /only when a valid source object/)
   assert.match(REVIEW_INSTRUCTIONS, /The loading state never clears because GET \/session returns 400\./)
   assert.match(REVIEW_INSTRUCTIONS, /Fix the \/session route registration so GET\/HEAD do not use a streaming request body/)
+})
+
+test('the note voice follows who was responsible for the decision, without invented blame', () => {
+  const system = buildReviewerSystemPrompt([{ role: 'user', text: 'Ship the release.' }])
+  assert.match(system, /who was responsible for (a|the) decision/, 'the rule ties the voice to the decision owner')
+  for (const label of ['"we"', '"the main agent"', '"you"']) {
+    assert.ok(system.includes(label), 'the rule names the ' + label + ' voice')
+  }
+  assert.match(system, /Never attribute a decision/i, 'attribution is refused when the excerpt cannot support it')
+})
+
+test('the note-voice rule is excerpt-independent and never fabricates an owner', () => {
+  const agentMessage = { role: 'assistant', text: 'I deleted the release branch to keep the tree clean.' }
+  const humanMessage = { role: 'user', text: 'I deleted the release branch to keep the tree clean.' }
+  const agentPrompt = buildReviewerSystemPrompt([agentMessage])
+  const humanPrompt = buildReviewerSystemPrompt([humanMessage])
+  const voiceRule = REVIEW_INSTRUCTIONS.split('\n').find((line) => line.startsWith('Let the note voice'))
+  assert.ok(voiceRule, 'the base policy carries one explicit note-voice rule')
+  assert.ok(agentPrompt.includes(voiceRule), 'the agent case composes the same rule')
+  assert.ok(humanPrompt.includes(voiceRule), 'the human case composes the same rule')
+  assert.match(voiceRule, /using only what the excerpt itself supports/)
+  assert.match(voiceRule, /when responsibility is unclear, keep the note neutral/)
 })
 
 test('an instruction embedded in the excerpt stays inside the untrusted marked block', () => {

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "taskId": "ysk-upstream-adoption-20261014",
-  "generatedAt": "2026-10-14T09:43:02Z",
+  "taskId": "ysk-note-voice-attribution-20261014",
+  "generatedAt": "2026-10-14T09:56:49Z",
   "upstream": {
     "project": "anthropics/claude-code",
     "feature": "You should know (built-in mod, cc-plugin-you-should-know@builtin)",
@@ -25,6 +25,31 @@
         "commitDate": "2026-10-14T02:49:24Z",
         "fetchedAt": "2026-10-14T09:43:02Z",
         "sha256": "7abf62a98e6739e0b51071c5e289b0a6baef4f3a2d08046a6df2b338b3d0d086"
+      },
+      {
+        "id": "claude-code-changelog-page-20261014",
+        "kind": "official-docs-changelog",
+        "url": "https://code.claude.com/docs/en/changelog.md",
+        "immutable": false,
+        "fetchedAt": "2026-10-14T09:54:42Z",
+        "sha256": "dfc62da25a39339848ffedb7cf2beadf51f41458d7b681d79d25b22274550d5e",
+        "matchedLines": [
+          {
+            "version": "2.1.290",
+            "line": 768,
+            "text": "Fixed You should know writing its notes in English regardless of the `language` setting"
+          },
+          {
+            "version": "2.1.288",
+            "line": 924,
+            "text": "Improved \"You should know\" notes to say \"we\", \"the main agent\" or \"you\" depending on who was responsible for a decision"
+          },
+          {
+            "version": "2.1.287",
+            "line": 1005,
+            "text": "Added You should know, a built-in mod where a side agent watches your back and flags things you or Claude might miss. Turn it on with `/plugin enable cc-plugin-you-should-know@builtin` (for first-party sessions with telemetry on)"
+          }
+        ]
       }
     ],
     "items": [
@@ -67,23 +92,23 @@
       {
         "id": "U-2.1.288-note-voice",
         "upstreamVersion": "2.1.288",
-        "upstreamSourceId": "claude-code-changelog-main",
+        "upstreamSourceId": "claude-code-changelog-page-20261014",
         "upstreamDate": "2026-10-14",
-        "upstreamQuote": "Improved You should know notes to say we, the main agent or you depending on who was responsible for a decision",
+        "upstreamQuote": "Improved \"You should know\" notes to say \"we\", \"the main agent\" or \"you\" depending on who was responsible for a decision",
         "claim": "A note picks its voice from who was responsible for the decision: we, the main agent, or you.",
-        "localStatus": "missing",
+        "localStatus": "adapted",
         "localEvidence": [
           "lib/core.js",
-          "lib/review-strictness.js",
-          "lib/review-profile.js",
-          "README.md"
+          "test/core.test.js",
+          "README.md",
+          "docs/upstream/ledger.json"
         ],
-        "disposition": "deferred",
-        "parityNotes": "The local base policy fixes the note as addressed to the human and gives the agent a separate action string. No responsibility-based voice rule exists anywhere in lib/; verified by search on 2026-10-14. This is a real, small gap that deserves its own task and its own before/after evidence.",
+        "disposition": "applicable",
+        "parityNotes": "Instruction-level adaptation, not proven behavioral equivalence. The upstream changelog asks for notes that name who was responsible; this plugin carries one explicit responsibility-attribution rule in the trusted base reviewer policy (\"we\" when the human and the agent decided together, \"the main agent\" when the action or choice is the agent's, \"you\" when the decision or the consequence is the human's or when the note addresses the human directly) plus a neutral statement of fact when the excerpt does not show who was responsible, and it never invents blame. What is verified: the composed system prompt contains that rule, keeps the base policy first, and does not gain a fabricated owner from the excerpt; see test/core.test.js and test/review-profile.test.js. What is NOT verified: the reviewer model's live output. The model is nondeterministic and no live-model test exercises it, so an actual note naming the responsible party is unproven. Status is adapted rather than equivalent for that reason.",
         "acceptance": {
-          "summary": "The reviewer instruction selects the note voice from responsibility, following the verified upstream rule.",
-          "testableAs": "A prompt-composition test feeds a fixed excerpt in which the agent made the decision and asserts the composed reviewer system prompt carries the responsibility-attribution rule; a second case where the human made the decision asserts the human-facing voice.",
-          "ownTask": true
+          "summary": "The reviewer instruction selects the note voice by responsibility, as verified by prompt composition.",
+          "testableAs": "A prompt-composition test asserts that the composed reviewer system prompt carries the responsibility-attribution rule and its three voices, and that a Custom reviewer prompt cannot replace the base rule. Completed by the task ysk-note-voice-attribution-20261014; this acceptance covers instruction composition only, not live model behavior.",
+          "scope": "prompt-composition"
         }
       },
       {
@@ -110,13 +135,18 @@
     "repository": "PipaGs/dsh-you-should-know",
     "version": "0.4.3",
     "tag": "v0.4.3",
-    "head": "b6a202d00e80e6069c07b03e65034b4280756f1d",
+    "head": "ec07de154aa36688db6e8fe85cbf7c1233fac9ab",
     "branch": "main"
   },
   "outagePolicy": {
     "rule": "If any primary source is unreachable, moved, truncated, or otherwise unverifiable, the affected item is recorded as unknown for that cycle; it is never recorded as no change. The previous verified baseline stays in place, and the outage plus the attempted URLs are recorded in the next review update.",
     "appliesTo": "every verification step, including the source list itself",
-    "lastOutage": null
+    "lastOutage": {
+      "observedAt": "2026-10-14T09:54:42Z",
+      "what": "The GitHub-hosted endpoints (raw.githubusercontent.com, api.github.com) and the docs host resolved to non-public addresses in this environment, so this cycle re-read the served official changelog page instead.",
+      "reachableFallback": "https://code.claude.com/docs/en/changelog.md",
+      "pinnedBaselineStays": "claude-code-changelog-main at commit db93774d73e8fdbaf315a6f4c175ae99ad3d515a"
+    }
   },
   "openUnknowns": [
     {

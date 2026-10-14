@@ -18,6 +18,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync, existsSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { dirname, join, resolve } from 'node:path'
 
@@ -28,7 +29,10 @@ const baselinePath = join(repoRoot, 'docs/upstream/README.md')
 
 const LOCAL_STATUSES = new Set(['equivalent', 'adapted', 'partial', 'missing', 'not-applicable', 'unknown'])
 const DISPOSITIONS = new Set(['applicable', 'deferred', 'rejected'])
-const SOURCE_HOST = 'https://github.com/anthropics/claude-code/'
+const OFFICIAL_SOURCE_HOSTS = [
+  'https://github.com/anthropics/claude-code/',
+  'https://code.claude.com/docs/',
+]
 
 function readLedger() {
   assert.ok(existsSync(ledgerPath), 'docs/upstream/ledger.json must exist')
@@ -38,27 +42,32 @@ function readLedger() {
 test('the upstream ledger cites pinned official Claude Code sources', () => {
   const ledger = readLedger()
   assert.equal(ledger.schemaVersion, 1, 'ledger schemaVersion is 1')
-  assert.equal(ledger.taskId, 'ysk-upstream-adoption-20261014', 'ledger carries the task id')
-  assert.equal(typeof ledger.generatedAt, 'string', 'ledger records when it was generated')
+  assert.equal(typeof ledger.taskId, 'string', 'ledger carries the task id')
+  assert.ok(ledger.taskId.trim().length > 0, 'the task id is nonempty')
+  assert.match(ledger.generatedAt, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/, 'ledger records an ISO timestamp for when it was generated')
   assert.equal(ledger.upstream.project, 'anthropics/claude-code', 'upstream project is official')
   assert.equal(ledger.upstream.algorithmDisclosed, false, 'the upstream algorithm stays undisclosed')
   assert.ok(Array.isArray(ledger.upstream.sources) && ledger.upstream.sources.length >= 2, 'at least two official sources')
   for (const source of ledger.upstream.sources) {
     assert.ok(source.id, 'every source has an id')
     assert.ok(source.kind, source.id + ' has a kind')
-    assert.ok(source.url.startsWith(SOURCE_HOST), source.id + ' points at the official Claude Code repository')
+    assert.ok(OFFICIAL_SOURCE_HOSTS.some((host) => source.url.startsWith(host)), source.id + ' points at an official Claude Code source')
     assert.ok(source.fetchedAt, source.id + ' records when it was fetched')
-    const pinned = source.immutable === true || /^[0-9a-f]{40}$/.test(source.commitSha || '')
-    assert.ok(pinned, source.id + ' is immutable or pinned to a full commit SHA')
+    const pinned = source.immutable === true || /^[0-9a-f]{40}$/.test(source.commitSha || '') || /^[0-9a-f]{64}$/.test(source.sha256 || '')
+    assert.ok(pinned, source.id + ' is immutable, pinned to a full commit SHA, or carries a content hash')
   }
 })
 
-test('the ledger records the local baseline on the shipped v0.4.3 revision', () => {
+test('the ledger records the local baseline on a real named revision', () => {
   const ledger = readLedger()
   assert.equal(ledger.local.repository, 'PipaGs/dsh-you-should-know')
-  assert.equal(ledger.local.version, '0.4.3')
-  assert.equal(ledger.local.tag, 'v0.4.3')
+  assert.match(ledger.local.version, /^\d+\.\d+\.\d+$/, 'the local version is a released semver')
+  assert.equal(ledger.local.tag, 'v' + ledger.local.version, 'the reference tag names the product version')
   assert.match(ledger.local.head, /^[0-9a-f]{40}$/, 'the local head is a full commit SHA')
+  assert.doesNotThrow(
+    () => execFileSync('git', ['cat-file', '-e', ledger.local.head + '^{commit}'], { cwd: repoRoot, stdio: 'ignore' }),
+    'the recorded baseline head is a real commit in this repository',
+  )
 })
 
 test('every tracked upstream signal has its own item with evidence and a disposition', () => {
@@ -84,14 +93,17 @@ test('every tracked upstream signal has its own item with evidence and a disposi
   }
 })
 
-test('a gap is never dispositioned as applicable-with-nothing-to-do', () => {
+test('a gap or an adaptation is never dispositioned as applicable-with-nothing-to-do', () => {
   const ledger = readLedger()
   for (const item of ledger.upstream.items) {
     const gap = item.localStatus === 'missing' || item.localStatus === 'partial'
+    // An adapted item may carry a scoped acceptance: the adaptation is real and
+    // is verified, but the upstream behavior itself is not claimed as proven.
+    const needsAcceptance = item.disposition === 'deferred' || gap
     if (item.disposition === 'applicable' && gap) {
       assert.ok(item.acceptance, item.id + ' is an applicable gap and must carry an acceptance')
     }
-    if (item.disposition === 'deferred' || (item.disposition === 'applicable' && gap)) {
+    if (needsAcceptance) {
       assert.ok(item.acceptance && item.acceptance.summary && item.acceptance.testableAs,
         item.id + ' must name a separately scoped, testable acceptance')
     }
@@ -100,8 +112,12 @@ test('a gap is never dispositioned as applicable-with-nothing-to-do', () => {
         item.id + ' is rejected and must say why')
       assert.equal(item.acceptance, null, item.id + ' rejected items carry no acceptance')
     }
-    if (item.disposition === 'applicable' && !gap) {
+    if (item.disposition === 'applicable' && !gap && item.localStatus !== 'adapted') {
       assert.equal(item.acceptance, null, item.id + ' already has parity and needs no acceptance')
+    }
+    if (item.acceptance) {
+      assert.ok(item.acceptance.summary && item.acceptance.testableAs,
+        item.id + ' carries a scoped acceptance with a summary and a testable claim')
     }
   }
 })
