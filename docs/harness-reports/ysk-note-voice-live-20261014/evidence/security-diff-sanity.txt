@@ -1,0 +1,37 @@
+--- lib/ changes (must be empty) ---
+lib/ unchanged (0 files)
+--- credential / auth strings in staged diff (expected: none) ---
+none
+--- numeric balance data or raw wallet fields in staged diff (expected: none) ---
+none
+--- offline evaluator network primitives (expected: none) ---
+none
+--- staged files vs base ---
+docs/harness-reports/ysk-note-voice-live-20261014/evidence/balance-after.json
+docs/harness-reports/ysk-note-voice-live-20261014/evidence/balance-before.json
+docs/harness-reports/ysk-note-voice-live-20261014/evidence/check-rev2.txt
+docs/harness-reports/ysk-note-voice-live-20261014/evidence/check-rev3.txt
+docs/harness-reports/ysk-note-voice-live-20261014/evidence/check.txt
+docs/harness-reports/ysk-note-voice-live-20261014/evidence/diff-summary.txt
+docs/harness-reports/ysk-note-voice-live-20261014/evidence/note-voice-eval-live-gate-default.json
+docs/harness-reports/ysk-note-voice-live-20261014/evidence/note-voice-eval-live-run.json
+docs/harness-reports/ysk-note-voice-live-20261014/evidence/note-voice-eval-live-run.stdout.txt
+docs/harness-reports/ysk-note-voice-live-20261014/evidence/note-voice-eval-not-run.json
+docs/harness-reports/ysk-note-voice-live-20261014/evidence/security-diff-sanity.txt
+docs/harness-reports/ysk-note-voice-live-20261014/evidence/test-run-final-rev2.txt
+docs/harness-reports/ysk-note-voice-live-20261014/evidence/test-run-final-rev3.txt
+docs/harness-reports/ysk-note-voice-live-20261014/evidence/test-run-final.txt
+docs/harness-reports/ysk-note-voice-live-20261014/evidence/test-run-red-rev2.txt
+docs/harness-reports/ysk-note-voice-live-20261014/evidence/test-run-red-rev3.txt
+docs/harness-reports/ysk-note-voice-live-20261014/evidence/test-run-red.txt
+docs/harness-reports/ysk-note-voice-live-20261014/final-report.md
+docs/upstream/README.md
+docs/upstream/ledger.json
+package.json
+scripts/note-voice-eval-deepseek.mjs
+scripts/note-voice-eval-live.mjs
+test/note-voice-eval-live.test.js
+--- notes ---
+The live adapter intentionally uses fetch, but only after an explicit double gate; it is never reached by npm check/test, which use injected fake streams.
+Numeric wallet amounts are kept only in local transient private evidence outside this repository; the public tree carries availability-only attestations.
+No credential value, request header value, or private session text is staged.

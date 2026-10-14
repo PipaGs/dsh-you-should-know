@@ -1,0 +1,9 @@
+{
+  "observedAt": "2026-10-14T13:12:58.564Z",
+  "endpoint": "https://api.deepseek.com/user/balance",
+  "method": "GET",
+  "checked": true,
+  "status": 200,
+  "available": true,
+  "note": "Read-only availability check performed before the live run. Numeric wallet amounts are intentionally not committed: this repository is public and the owner authorized test spending only. Exact observed amounts are kept in local transient private evidence."
+}
