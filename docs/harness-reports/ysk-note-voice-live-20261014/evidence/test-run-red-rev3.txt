@@ -1,0 +1,67 @@
+✔ the adapter request mirrors the configured deepseek-official/deepseek-flash route (0.982042ms)
+✔ an explicit /v1 base root is never duplicated (0.108083ms)
+✔ the adapter refuses to build without a key and the error never echoes one (0.145834ms)
+✔ text deltas reassemble across arbitrary byte chunk boundaries (15.2195ms)
+✔ usage is reported exactly once per call from message_start and message_delta (0.685916ms)
+✔ the request carries the route headers and exactly one attempt even on a server error (0.858667ms)
+✔ a provider auth failure is classified without a retry (0.184625ms)
+✔ iterator.return() aborts the request signal and confirms closure (0.271166ms)
+✔ an external abort signal stops the stream (0.208333ms)
+✔ the CLI gate fails closed without an explicit request, confirmation, and key (0.102042ms)
+✔ without --live the runner is not live and opens no connection (0.512042ms)
+✔ a live request without confirmation or key refuses without spending (1.319041ms)
+✔ a confirmed live run issues four sequential bounded requests and never leaks the key (3.43625ms)
+✔ raw reply capture is synthetic-only and capped at the exported bound (8.288041ms)
+✖ a non-OK response whose body cannot be read stays unconfirmed and stops the run (1.099708ms)
+✔ a non-OK response with a fully read body confirms closure and the run may continue (0.712042ms)
+✖ a success response without a readable body cannot confirm closure and stops the run (0.34775ms)
+✔ a body read failure is closed cooperatively when cancel succeeds (0.380542ms)
+✔ a body read failure stays unconfirmed when cancel also fails (0.142375ms)
+✔ the live run carries the merged promptVersion and the fixed bounded limits (1.210375ms)
+✔ iterator.return() reports unconfirmed closure when the body cannot be cancelled (0.166542ms)
+✔ iterator.return() never claims closure while the request is still pending (0.110625ms)
+✔ an unconfirmed close stops the run before any later billed call (0.215708ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 21
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 177.187625
+
+✖ failing tests:
+
+test at test/note-voice-eval-live.test.js:361:1
+✖ a non-OK response whose body cannot be read stays unconfirmed and stops the run (1.099708ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  4 !== 1
+  
+      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-note-voice-live/test/note-voice-eval-live.test.js:376:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 4,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/note-voice-eval-live.test.js:406:1
+✖ a success response without a readable body cannot confirm closure and stops the run (0.34775ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  4 !== 1
+  
+      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-note-voice-live/test/note-voice-eval-live.test.js:421:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 4,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
