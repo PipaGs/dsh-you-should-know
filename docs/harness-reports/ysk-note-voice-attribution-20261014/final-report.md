@@ -225,3 +225,22 @@ parity notes, ссылкой на `lib/core.js`, `test/core.test.js`, `README.md
 - Прежний GitHub baseline не перезаписан. Причина: immutable evidence hierarchy; новый
   served-источник добавлен отдельной записью с `carriedOver` и outage.
   Цена ошибки: ledger/evidence чуть длиннее.
+
+---
+
+## 16. Review handoff update — 2026-10-14T10:00:03Z
+
+Разделы 1–15 выше — исторические строки pre-commit рабочего дерева; они не переписаны.
+Ниже — закрытый handoff-раунд.
+
+- Product commit: `2e8ca59f186d1fa4855b3dc4365a2710572da2dc`
+  (`feat: атрибуция voice в note по ответственности (Claude Code 2.1.288)`), запушен в
+  `origin/feat/ysk-note-voice-attribution-20261014`.
+- PR: https://github.com/PipaGs/dsh-you-should-know/pull/12
+  (`--base main`, `--head feat/ysk-note-voice-attribution-20261014`).
+- Base: `ec07de154aa36688db6e8fe85cbf7c1233fac9ab` (origin/main, tag v0.4.3).
+- Запись отчёта о handoff коммитится после product commit как report-only коммит; его SHA —
+  фактический PR head на момент ревью и указан в заголовке PR.
+- Верификация product-состояния на 2e8ca59: `npm run check` — OK; `npm test` — tests 495 /
+  pass 495 / fail 0; RED-прогон — 2 fail / 71 pass; `test/invariant.test.js` — 11/11.
+  Правка отчёта product evidence не инвалидирует.
