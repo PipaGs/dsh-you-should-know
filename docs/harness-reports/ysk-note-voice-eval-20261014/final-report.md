@@ -349,3 +349,63 @@ lib/** не тронут; ledger U-2.1.288-note-voice остаётся adapted /
   live:false, notRun 4/4.
 - Тот же PR #13; merge/release не выполнялись.
 - **Статус:** READY_FOR_CHATGPT_REVIEW.
+
+---
+
+## 18. CHANGES_REQUIRED rev4 — 2026-10-14T11:55:43Z
+
+Разделы 1–17 выше — историческая запись на reviewed head
+b2f5fc5637ff67648566e2afc1c64126aad78173; они не переписаны. Ниже — один
+закрытый review-раунд по BLOCKER из PR #13.
+
+### F1. Timeout-ветка считала закрытием любое завершение consume
+
+- Было: после timeout settled = await Promise.race([consume.then(() =>
+  true), delay(grace)]), затем closed = settled === true ? true :
+  await closeWithin(...). Если signal.abort вызывал reject у
+  iterator.next(), consume ловил ошибку и завершался с
+  {kind:'error', early:true, closed:false}; consume settle'ился, closed
+  ложно становился true, и следующий model call стартовал, пока
+  предыдущий провайдер мог быть активен.
+- Стало: timeout-ветка ждёт settle consume в пределах grace, затем
+  смотрит фактический outcome. closed=true доверяется только при
+  натуральном done (early !== true и closed === true). Иначе вызывается
+  closeWithin и требуется done === true. При неподтверждении closed=false,
+  run останавливается, остальные кейсы NOT_RUN.
+- Также убран blanket force в non-timeout ветке: теперь
+  closed: outcome.closed === true, а не принудительный true.
+- Статус попытки при выигравшем дедлайне остаётся TIMEOUT, даже если
+  натуральное завершение приходит сразу после дедлайна.
+
+### RED → GREEN
+
+- RED против reviewed head b2f5fc5: тест abort-rejection с
+  absent/throws/rejects/doneFalse/noResult падает (absent: exactly one
+  stream starts), evidence/test-run-red-rev4.txt.
+- GREEN: 24/24; cooperative abort с подтверждающим close продолжает
+  (4 вызова, stopped:false); abort rejection с неподтверждающим close
+  останавливает (1 вызов); завершение после дедлайна учитывается как
+  TIMEOUT при confirmed closure.
+
+### Верификация (raw, rev4)
+
+    npm run check -> EXIT=0 (evidence/check.txt)
+    npm test -> tests 520 / pass 520 / fail 0 (evidence/test-run-final.txt)
+    targeted -> 43/43 (evidence/test-run-targeted.txt)
+    default evaluator -> live:false, notRun 4/4, stopped:false,
+      authorizationBasis none (evidence/note-voice-eval-not-run.json)
+
+lib/** не тронут; ledger U-2.1.288-note-voice остаётся adapted / not-run.
+
+### Аудит прочих путей закрытия
+
+- Natural done, NO_STREAM и catch без iterator закрывают без close —
+  активного вызова нет.
+- Truncation, finish-error и ловля ошибки при созданном iterator идут
+  только через closeWithin (done === true).
+- Иных путей, присваивающих closed=true без подтверждения, не осталось.
+
+### Handoff rev4
+
+- Тот же PR #13, та же ветка; corrective commit и head фиксируются после push.
+- **Статус:** READY_FOR_CHATGPT_REVIEW.

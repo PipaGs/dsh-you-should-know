@@ -364,6 +364,90 @@ test('AC3: a native async generator confirms closure through return() done:true'
   assert.equal(result.stopped, false)
 })
 
+// A stream whose pending next() rejects when the abort signal fires, as a
+// provider adapter that surfaces cancellation as a rejection would. The
+// rejection is delivered a few milliseconds after the abort so the timeout
+// branch is deterministically the one under test.
+function abortRejectingStream(closeFactory, track) {
+  return (options) => {
+    track.calls += 1
+    const iterator = {
+      next() {
+        return new Promise((resolve, reject) => {
+          const signal = options.signal
+          const fail = () => setTimeout(() => reject(Object.assign(new Error('aborted'), { code: 'ABORTED' })), 5)
+          if (signal && signal.aborted) fail()
+          else if (signal) signal.addEventListener('abort', fail, { once: true })
+        })
+      },
+    }
+    if (closeFactory !== undefined) iterator.return = closeFactory
+    return { [Symbol.asyncIterator]() { return iterator } }
+  }
+}
+
+test('AC3: an abort rejection with a non-confirming close stops the run', async () => {
+  for (const [name, closeFactory] of Object.entries(NON_CONFIRMING_CLOSES)) {
+    const track = { calls: 0 }
+    const result = await runEvaluation({
+      gate: { live: true },
+      stream: abortRejectingStream(closeFactory, track),
+      route: { provider: 'synthetic', model: 'abort-' + name },
+      limits: { callTimeoutMs: 20, closeGraceMs: 80 },
+    })
+    assert.equal(track.calls, 1, name + ': exactly one stream starts')
+    assert.equal(result.results[0].status, 'TIMEOUT', name + ': the attempt is a timeout')
+    assert.equal(result.results[0].closed, false, name + ': closure is not confirmed')
+    assert.equal(result.stopped, true, name + ': the run stops')
+    assert.equal(result.summary.timeout, 1, name + ': one timeout')
+    assert.equal(result.summary.notRun, 3, name + ': three cases were never sent')
+  }
+})
+
+test('AC3: a cooperative abort with a confirming close continues the run', async () => {
+  const track = { calls: 0 }
+  const result = await runEvaluation({
+    gate: { live: true },
+    stream: abortRejectingStream(() => Promise.resolve({ done: true }), track),
+    route: { provider: 'synthetic', model: 'abort-confirmed' },
+    limits: { callTimeoutMs: 20, closeGraceMs: 80 },
+  })
+  assert.equal(track.calls, 4, 'a confirmed cooperative abort close lets the remaining bounded cases run')
+  assert.equal(result.stopped, false)
+  assert.equal(result.summary.timeout, 4)
+  assert.equal(result.summary.notRun, 0)
+})
+
+test('AC3: a completion that arrives after the deadline is still accounted as TIMEOUT', async () => {
+  const track = { calls: 0 }
+  const stream = () => {
+    track.calls += 1
+    return {
+      [Symbol.asyncIterator]() {
+        return {
+          next() {
+            return new Promise((resolve) => {
+              const handle = setTimeout(() => resolve({ done: true, value: undefined }), 30)
+              if (handle && typeof handle.unref === 'function') handle.unref()
+            })
+          },
+          return() { return Promise.resolve({ done: true }) },
+        }
+      },
+    }
+  }
+  const result = await runEvaluation({
+    gate: { live: true },
+    stream,
+    route: { provider: 'synthetic', model: 'late-done' },
+    limits: { callTimeoutMs: 10, closeGraceMs: 100 },
+  })
+  assert.equal(result.results[0].status, 'TIMEOUT', 'the deadline wins and is accounted as TIMEOUT')
+  assert.equal(result.results[0].closed, true, 'the natural completion confirms closure')
+  assert.equal(track.calls, 4, 'confirmed closure allows the remaining bounded cases')
+  assert.equal(result.stopped, false)
+})
+
 test('AC3: live authorization is a trusted-caller assertion, not independent cost verification', async () => {
   const offline = await runEvaluation({ gate: { live: false, blocker: 'cost not established' } })
   assert.equal(offline.authorizationBasis, 'none')

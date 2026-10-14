@@ -1,7 +1,7 @@
 {
   "evalVersion": "note-voice-eval-1",
   "promptVersion": "5c1fae1bef435a32416e5e85f7b3c58b2fbc3ee3138020ca3a029f3e781feac3",
-  "generatedAt": "2026-10-14T11:51:32.903Z",
+  "generatedAt": "2026-10-14T11:55:18.714Z",
   "equivalenceClaimed": false,
   "limitations": [
     "Adjudication is a lexical proxy over explicit owner markers, not a semantic proof of the note voice.",

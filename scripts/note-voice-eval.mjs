@@ -343,7 +343,7 @@ async function collectOnce(streamFn, options, deadlineMs, closeGraceMs) {
   if (timedOut !== true) {
     if (timer !== undefined) clearTimeout(timer)
     const outcome = await consume
-    if (outcome.early !== true) return { ...outcome, closed: true }
+    if (outcome.early !== true) return { ...outcome, closed: outcome.closed === true }
     // An early stop (overlong reply or a terminal error chunk) releases the
     // iterator only if the close itself confirms done === true.
     const released = await closeWithin(iterator, closeGraceMs)
@@ -351,11 +351,21 @@ async function collectOnce(streamFn, options, deadlineMs, closeGraceMs) {
   }
 
   // The deadline won and the abort was already requested. Give the aborted
-  // loop a bounded chance to settle, then request one bounded iterator close.
-  // If neither is confirmed, the caller must stop the run.
-  const settled = await Promise.race([consume.then(() => true), delay(closeGraceMs).then(() => false)])
-  const closed = settled === true ? true : await closeWithin(iterator, closeGraceMs)
-  return { kind: 'timeout', closed }
+  // loop a bounded chance to settle, then inspect its actual outcome: merely
+  // settling is not closure. An abort that makes iterator.next() reject lands
+  // in the consumer's catch with early:true, so it must be confirmed with a
+  // cooperative close; only a natural done (not early, closed:true) is trusted
+  // without one. If neither is confirmed, the caller must stop the run.
+  let outcome
+  const settled = await Promise.race([
+    consume.then((value) => { outcome = value; return true }),
+    delay(closeGraceMs).then(() => false),
+  ])
+  if (settled === true && outcome !== undefined && outcome.early !== true && outcome.closed === true) {
+    return { kind: 'timeout', closed: true }
+  }
+  const released = await closeWithin(iterator, closeGraceMs)
+  return { kind: 'timeout', closed: released }
 }
 
 /** A case that was never sent to the model. */
