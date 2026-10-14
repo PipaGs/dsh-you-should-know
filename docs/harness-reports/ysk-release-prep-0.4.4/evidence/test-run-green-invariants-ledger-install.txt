@@ -1,0 +1,33 @@
+✔ the package name is the dependency key a GitHub install records (2.498916ms)
+✔ a first GitHub install is discovered from the dependency change (0.516167ms)
+✔ a bare default-branch spec cannot be re-attributed after the first install (0.096ms)
+✔ a tag-pinned spec is discovered over an existing bare install (0.752417ms)
+✔ the README documents only tag-pinned GitHub install addresses (1.464041ms)
+✔ shipped sources contain no path that could deliver advice to the primary agent (7.422417ms)
+✔ the plugin uses only the sanctioned seams (0.8885ms)
+✔ the auth boundary stays host-owned: no no-auth route registration exists (0.690416ms)
+✔ no shipped source reads, stores, or forwards a cookie, token, or auth header (2.490917ms)
+✔ no shipped source can install, upgrade, or self-modify the plugin (3.275625ms)
+✔ the browser half reaches files and the composer only through their public seams (0.806291ms)
+✔ Add to chat can only compose the draft and never hands the action to the agent (0.718834ms)
+✔ the English-only scan rejects Cyrillic, Greek, and CJK text (0.128ms)
+✔ public-facing text stays English-only and free of unrelated project references (2.839292ms)
+✔ the bundled row leaves the reviewer route to adaptive discovery (0.372708ms)
+✔ the manifest declares the bundle, the client half, and no build step (0.272542ms)
+✔ the upstream ledger cites pinned official Claude Code sources (1.480625ms)
+✔ the ledger records the local baseline on a real named revision (13.829208ms)
+✔ every tracked upstream signal has its own item with evidence and a disposition (0.45075ms)
+✔ a gap or an adaptation is never dispositioned as applicable-with-nothing-to-do (0.162791ms)
+✔ an uncontested upstream unknown is recorded, not resolved by guessing (0.14625ms)
+✔ a source outage is recorded as unknown, never as no change (0.147583ms)
+✔ the ledger carries no private or unrelated project data (0.234709ms)
+✔ the human-readable workflow and baseline documents exist and agree with the ledger (0.501417ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 150.5375
+EXIT=0

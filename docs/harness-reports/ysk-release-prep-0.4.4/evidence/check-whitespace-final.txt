@@ -1,0 +1,15 @@
+# whitespace check on the release branch relative to exact main b1153793
+# recorded at HEAD af149cf (post-normalization). The check output below is
+# the raw reporter output, with the reporter trailing "+ " prefix kept but
+# with no trailing whitespace of its own (this evidence file is also clean).
+
+$ git diff --check origin/main...HEAD
+(no output; exit 0)
+
+$ git diff --check
+(no output; exit 0)
+
+$ node --test test/release-consistency.test.js  -> 4/4 pass
+$ node --test test/release-notes-consistency.test.js -> 7/7 pass
+$ npm test -> 562/562 pass, 0 fail
+$ npm run check -> exit 0

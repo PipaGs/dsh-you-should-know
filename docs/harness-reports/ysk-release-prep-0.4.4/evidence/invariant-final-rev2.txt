@@ -1,0 +1,20 @@
+✔ shipped sources contain no path that could deliver advice to the primary agent (6.547584ms)
+✔ the plugin uses only the sanctioned seams (0.87225ms)
+✔ the auth boundary stays host-owned: no no-auth route registration exists (0.742792ms)
+✔ no shipped source reads, stores, or forwards a cookie, token, or auth header (4.335166ms)
+✔ no shipped source can install, upgrade, or self-modify the plugin (3.466042ms)
+✔ the browser half reaches files and the composer only through their public seams (0.860541ms)
+✔ Add to chat can only compose the draft and never hands the action to the agent (0.771458ms)
+✔ the English-only scan rejects Cyrillic, Greek, and CJK text (0.133291ms)
+✔ public-facing text stays English-only and free of unrelated project references (2.9005ms)
+✔ the bundled row leaves the reviewer route to adaptive discovery (0.397708ms)
+✔ the manifest declares the bundle, the client half, and no build step (0.28075ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 147.907125
+EXIT=0

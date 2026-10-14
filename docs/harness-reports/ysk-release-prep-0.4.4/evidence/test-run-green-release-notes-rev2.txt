@@ -1,0 +1,16 @@
+✔ the publication body starts at the Highlights section (0.559083ms)
+✔ the body states the historical and retrospective statuses exactly (0.076875ms)
+✔ the body does not repeat the two contradicted claims (0.196667ms)
+✔ the body states no generated model pass and the missing historical raw reply (0.194166ms)
+✔ the body describes the ledger as retained rather than edited by stage 5 (0.111959ms)
+✔ the merged stage-5 report still carries the four retrospective statuses (0.080708ms)
+✔ the historical live record is 0 PASS / 2 FAIL / 2 SILENT and was not touched (0.165917ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 122.446334
+EXIT=0

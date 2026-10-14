@@ -1,0 +1,76 @@
+{
+  "taskId": "ysk-release-prep-0.4.4",
+  "generatedAt": "2026-10-14T17:20:00Z",
+  "repository": "PipaGs/dsh-you-should-know",
+  "baseBranch": "main",
+  "baseCommit": "b11537934f54dad82a28404b735e6c4e7bc387c0",
+  "branch": "chore/ysk-release-prep-0.4.4",
+  "worktree": ".worktrees/ysk-release-prep-0.4.4",
+  "productCommit": "2acaed19e8944df165d8bc57820d9f4081659ad8",
+  "productCommitSubject": "chore: подготовить релиз 0.4.4 (синхронизация version mirrors + release-consistency гейт)",
+  "candidateVersion": "0.4.4",
+  "previousVersion": "0.4.3",
+  "previousTag": {
+    "name": "v0.4.3",
+    "object": "7d392bd65e07fdbd42530e56d32698a05edeba52",
+    "target": "b6a202d00e80e6069c07b03e65034b4280756f1d",
+    "targetSubject": "Merge pull request #10 from PipaGs/chore/ysk-version-bump-0.4.3",
+    "remoteObject": "7d392bd65e07fdbd42530e56d32698a05edeba52",
+    "releaseObject": "https://github.com/PipaGs/dsh-you-should-know/releases/tag/v0.4.3"
+  },
+  "remoteLatestTagBeforeRelease": "v0.4.3",
+  "runtime": {
+    "node": "v26.9.0",
+    "npm": "11.19.1"
+  },
+  "tool": {
+    "harness": "DeepSeek Harness",
+    "goalId": "goal-session-eee9b689-f761-468c-a033-71861ee32e18",
+    "goalRevision": 2,
+    "mode": "strict"
+  },
+  "changedFiles": [
+    "package.json",
+    "lib/index.js",
+    "README.md",
+    "test/invariant.test.js",
+    "test/plugin.test.js",
+    "test/update-route.test.js",
+    "test/release-consistency.test.js"
+  ],
+  "sha256": {
+    "package.json": "7bf5c02205b965bc4d10f47fc8a6f8ef74452c6a644d9f95ec6bae85cbe05967",
+    "lib/index.js": "09d90cd4457be7e36aca54a47db7ca5859144aa912657bcf3f95d6a783473c14",
+    "README.md": "c47d815ed397b0a482150663128cceba2670d79e69644bb0f9927510bf63c0b6",
+    "test/invariant.test.js": "aa700527b2bf0db41ad246565ca2d73acec4336bef4540ddb1d977c3fe1e1ab0",
+    "test/plugin.test.js": "6737598a585955a1f07382891931a6bfabcb9947aeb6be69c0ee9f34ac1c5c1a",
+    "test/update-route.test.js": "86e16bf7fac82a14f480787189af546f38752a46e8e85e0afd69f8f2d229a044",
+    "test/release-consistency.test.js": "3d1f3992d7e7bbd2cc6d3fac99a63c64c72730b925de99cac79cb9b632a8cd62"
+  },
+  "notExecuted": [
+    "git tag",
+    "git push --tags",
+    "gh release create",
+    "npm publish",
+    "dsh plugin add / profile mutation",
+    "npm run smoke:install"
+  ],
+  "evidenceCommitNote": "The evidence commit contains this file, so it cannot record its own exact SHA. It is the single child of productCommit that adds docs/harness-reports/ysk-release-prep-0.4.4; read it with: git log --oneline -1 <branch>.",
+  "reviewRound": "2 (CHANGES_REQUIRED on head e1f81d1: whitespace-only blank lines in new evidence; fixed in the same PR #16)",
+  "releaseNotesBody": "docs/harness-reports/ysk-release-prep-0.4.4/release-notes-v0.4.4.md (starts at ## Highlights; exact GitHub Release body)",
+  "releaseNotesCandidateMetadata": "docs/harness-reports/ysk-release-prep-0.4.4/release-notes-v0.4.4-candidate.md",
+  "evidenceSanitization": "New stage-6 RED logs had absolute /Users prefixes replaced with file://<repo>/; no assertion or count changed. See evidence/path-sanitization-note.txt.",
+  "whitespaceNormalization": {
+    "reason": "git diff --check origin/main...HEAD reported trailing whitespace on 24 added blank lines",
+    "files": {
+      "diff-summary.txt": 10,
+      "diff-summary-rev2.txt": 2,
+      "test-run-red-release-consistency-repro.txt": 4,
+      "test-run-red-release-notes.txt": 2,
+      "test-run-red-version-mirrors.txt": 6
+    },
+    "changes": "trailing SP/TAB trimmed on whitespace-only blank lines and provenance markers added; no test outcome, count, assertion or hunk content changed",
+    "log": "docs/harness-reports/ysk-release-prep-0.4.4/evidence/whitespace-normalization-log.txt",
+    "rawByteIdenticalClaim": false
+  }
+}
