@@ -1,0 +1,31 @@
+== diff stat ==
+ README.md                                          |     2 +-
+ .../evidence/diff-summary.txt                      |    16 +-
+ .../evidence/test-run-final.txt                    |  1000 +-
+ .../evidence/test-run-red.txt                      |     7 +-
+ .../evidence/upstream-changelog-20261014.md        | 10710 +------------------
+ docs/upstream/README.md                            |    10 +-
+ docs/upstream/ledger.json                          |    10 +-
+ test/review-profile.test.js                        |    14 +
+ test/upstream-ledger.test.js                       |    13 +-
+ 9 files changed, 557 insertions(+), 11225 deletions(-)
+== name-status ==
+M	README.md
+M	docs/harness-reports/ysk-note-voice-attribution-20261014/evidence/diff-summary.txt
+M	docs/harness-reports/ysk-note-voice-attribution-20261014/evidence/test-run-final.txt
+M	docs/harness-reports/ysk-note-voice-attribution-20261014/evidence/test-run-red.txt
+M	docs/harness-reports/ysk-note-voice-attribution-20261014/evidence/upstream-changelog-20261014.md
+M	docs/upstream/README.md
+M	docs/upstream/ledger.json
+M	test/review-profile.test.js
+M	test/upstream-ledger.test.js
+== status ==
+ M README.md
+ M docs/harness-reports/ysk-note-voice-attribution-20261014/evidence/diff-summary.txt
+ M docs/harness-reports/ysk-note-voice-attribution-20261014/evidence/test-run-final.txt
+ M docs/harness-reports/ysk-note-voice-attribution-20261014/evidence/test-run-red.txt
+ M docs/harness-reports/ysk-note-voice-attribution-20261014/evidence/upstream-changelog-20261014.md
+ M docs/upstream/README.md
+ M docs/upstream/ledger.json
+ M test/review-profile.test.js
+ M test/upstream-ledger.test.js

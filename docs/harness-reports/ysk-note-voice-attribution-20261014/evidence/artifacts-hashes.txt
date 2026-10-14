@@ -1,0 +1,25 @@
+pre-commit working tree artifact hashes (sha256)
+round: CHANGES_REQUIRED rev2
+recorded at: 2026-10-14T10:07:50Z
+base commit: ec07de154aa36688db6e8fe85cbf7c1233fac9ab
+
+55e91d9352df8ee8442355c20b85c9abafd71a83cbae869d12b8a124f875688d  docs/upstream/ledger.json
+c5fac2b1502d8a221ec4a7e229012c645f84be0d9310791173af84031e809d7a  docs/upstream/evidence/claude-code-upstream-20261014.json
+bf3b266129ed8a4a8d9db21f9d39d44a7cf370af1849002cf093e737e11271e3  docs/upstream/README.md
+bf8a5fd1e95aaa86e94acfda98acb333e3cba3336b570525b534b6c57418f76b  test/upstream-ledger.test.js
+62613b59b95225148ddf792021d51eb10ef5632bc239a7cd4513d8e0b7de878b  test/core.test.js
+87c97adf314f5a35d48ee9dda52f25f81c17b67144f66d44f0efb0dc6b1d7aee  test/review-profile.test.js
+44c816e22900a3def3eb670bc657aedbc7a67baa3f596c9d7c3faa46a0ea0bc9  lib/core.js
+692b202d57939374f83a451c1b6de0f80c4d729326b4c50640a1c7405e9e034b  README.md
+6366d8cbb7cffe9cb0ee9aba306fd1c04dd7b1807d4b64fb626972b5fed27ce0  docs/harness-reports/ysk-note-voice-attribution-20261014/evidence/upstream-changelog-20261014.md
+828971f1b500def985047bc216e24e042a2dbe5f84bc3f892a372f91abee904f  docs/harness-reports/ysk-note-voice-attribution-20261014/final-report.md
+
+== evidence file sizes (final) ==
+    1237  docs/harness-reports/ysk-note-voice-attribution-20261014/evidence/artifacts-hashes.txt
+     455  docs/harness-reports/ysk-note-voice-attribution-20261014/evidence/check.txt
+    1661  docs/harness-reports/ysk-note-voice-attribution-20261014/evidence/diff-summary.txt
+    1350  docs/harness-reports/ysk-note-voice-attribution-20261014/evidence/provenance.txt
+    1038  docs/harness-reports/ysk-note-voice-attribution-20261014/evidence/security-diff-sanity.txt
+   45161  docs/harness-reports/ysk-note-voice-attribution-20261014/evidence/test-run-final.txt
+     305  docs/harness-reports/ysk-note-voice-attribution-20261014/evidence/test-run-red.txt
+     942  docs/harness-reports/ysk-note-voice-attribution-20261014/evidence/upstream-changelog-20261014.md

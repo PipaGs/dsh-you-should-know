@@ -1,0 +1,23 @@
+== round: CHANGES_REQUIRED rev2 ==
+== invariant test (human-only guard) ==
+# tests 11
+# pass 11
+# fail 0
+== forbidden delivery seams in shipped lib (expect no matches) ==
+no forbidden seam match
+== committed upstream evidence is a minimal excerpt, not a full document ==
+bytes: 942
+lines: 19
+no upstream source code copied: only one quoted official sentence
+== diff touches only the expected paths ==
+README.md
+docs/harness-reports/ysk-note-voice-attribution-20261014/evidence/diff-summary.txt
+docs/harness-reports/ysk-note-voice-attribution-20261014/evidence/provenance.txt
+docs/harness-reports/ysk-note-voice-attribution-20261014/evidence/security-diff-sanity.txt
+docs/harness-reports/ysk-note-voice-attribution-20261014/evidence/test-run-final.txt
+docs/harness-reports/ysk-note-voice-attribution-20261014/evidence/test-run-red.txt
+docs/harness-reports/ysk-note-voice-attribution-20261014/evidence/upstream-changelog-20261014.md
+docs/upstream/README.md
+docs/upstream/ledger.json
+test/review-profile.test.js
+test/upstream-ledger.test.js

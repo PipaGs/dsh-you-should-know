@@ -1,0 +1,26 @@
+task id: ysk-note-voice-attribution-20261014
+round: CHANGES_REQUIRED rev2 corrections on PR #12
+branch: feat/ysk-note-voice-attribution-20261014
+base commit (origin/main): ec07de154aa36688db6e8fe85cbf7c1233fac9ab
+prior head (reviewed): 9a2803d0835c1819f99ac9a1934f56e03a096652
+recorded at: 2026-10-14T10:07:30Z
+node: v26.9.0
+npm: 11.19.1
+--- changed files (working tree, pre-commit) ---
+ M README.md
+ M docs/harness-reports/ysk-note-voice-attribution-20261014/evidence/diff-summary.txt
+ M docs/harness-reports/ysk-note-voice-attribution-20261014/evidence/provenance.txt
+ M docs/harness-reports/ysk-note-voice-attribution-20261014/evidence/test-run-final.txt
+ M docs/harness-reports/ysk-note-voice-attribution-20261014/evidence/test-run-red.txt
+ M docs/harness-reports/ysk-note-voice-attribution-20261014/evidence/upstream-changelog-20261014.md
+ M docs/upstream/README.md
+ M docs/upstream/ledger.json
+ M test/review-profile.test.js
+ M test/upstream-ledger.test.js
+--- upstream excerpt (committed, minimal) ---
+file: upstream-changelog-20261014.md
+committed bytes: 942
+source url: https://code.claude.com/docs/en/changelog.md
+observed at: 2026-10-14T09:54:42Z
+full retrieved document bytes: 1082335 (characters: 1081280)
+full retrieved document sha256 (observation only, NOT committed): dfc62da25a39339848ffedb7cf2beadf51f41458d7b681d79d25b22274550d5e

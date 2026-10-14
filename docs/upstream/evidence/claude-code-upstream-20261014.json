@@ -1,8 +1,13 @@
 {
   "snapshotId": "claude-code-upstream-20261014",
-  "taskId": "ysk-upstream-adoption-20261014",
-  "fetchedAt": "2026-10-14T09:43:02Z",
-  "method": "Read-only curl GET against official GitHub endpoints; no authentication, no private or session data sent.",
+  "taskId": "ysk-note-voice-attribution-20261014",
+  "fetchedAt": "2026-10-14T09:54:42Z",
+  "priorCycle": {
+    "taskId": "ysk-upstream-adoption-20261014",
+    "fetchedAt": "2026-10-14T09:43:02Z",
+    "remainsPinned": "The GitHub blob for claude-code-changelog-main stays pinned to commit db93774d73e8fdbaf315a6f4c175ae99ad3d515a (sha256 7abf62a98e6739e0b51071c5e289b0a6baef4f3a2d08046a6df2b338b3d0d086) as the previous verified baseline; it is not rewritten by this cycle."
+  },
+  "method": "Read-only curl GET against the official Claude Code changelog page; no authentication, no private or session data sent. The GitHub-hosted raw and API endpoints were unreachable from this environment in this cycle and were not retried with any wider access.",
   "sources": [
     {
       "id": "claude-code-release-v2.1.287",
@@ -16,7 +21,9 @@
       "sha256": "0fb6f5753ba768c5aec55e0c96fa0beae39342716535355a9baadcfbc4297b14",
       "relevantLines": [
         "Added You should know, a built-in mod where a side agent watches your back and flags things you or Claude might miss. Turn it on with /plugin enable cc-plugin-you-should-know@builtin (for first-party sessions with telemetry on)"
-      ]
+      ],
+      "carriedOver": true,
+      "lastVerifiedAt": "2026-10-14T09:43:02Z"
     },
     {
       "id": "claude-code-changelog-main",
@@ -38,9 +45,47 @@
           "version": "2.1.287",
           "text": "Added You should know, a built-in mod where a side agent watches your back and flags things you or Claude might miss. Turn it on with /plugin enable cc-plugin-you-should-know@builtin (for first-party sessions with telemetry on)"
         }
+      ],
+      "carriedOver": true,
+      "lastVerifiedAt": "2026-10-14T09:43:02Z"
+    },
+    {
+      "id": "claude-code-changelog-page-20261014",
+      "url": "https://code.claude.com/docs/en/changelog.md",
+      "kind": "official-docs-changelog",
+      "fetchedAt": "2026-10-14T09:54:42Z",
+      "httpStatus": 200,
+      "sha256": "dfc62da25a39339848ffedb7cf2beadf51f41458d7b681d79d25b22274550d5e",
+      "matchedLines": [
+        {
+          "version": "2.1.290",
+          "line": 768,
+          "text": "Fixed You should know writing its notes in English regardless of the `language` setting"
+        },
+        {
+          "version": "2.1.288",
+          "line": 924,
+          "text": "Improved \"You should know\" notes to say \"we\", \"the main agent\" or \"you\" depending on who was responsible for a decision"
+        },
+        {
+          "version": "2.1.287",
+          "line": 1005,
+          "text": "Added You should know, a built-in mod where a side agent watches your back and flags things you or Claude might miss. Turn it on with `/plugin enable cc-plugin-you-should-know@builtin` (for first-party sessions with telemetry on)"
+        }
       ]
     }
   ],
+  "outage": {
+    "observedAt": "2026-10-14T09:54:42Z",
+    "affectedHosts": [
+      "raw.githubusercontent.com",
+      "api.github.com"
+    ],
+    "symptom": "The environment resolved these hosts to non-public addresses, so the read-only fetch failed before any content was read.",
+    "resolution": "The served official changelog page (code.claude.com/docs/en/changelog.md) was reachable over curl and re-verified the same three lines at the same versions.",
+    "notRecordedAs": "no change",
+    "previousBaseline": "The pinned GitHub changelog at db93774 remains the verified baseline for the previous cycle and is preserved as carried-over evidence."
+  },
   "licenseCheck": {
     "apiUrl": "https://api.github.com/repos/anthropics/claude-code/license",
     "httpStatus": 404,
