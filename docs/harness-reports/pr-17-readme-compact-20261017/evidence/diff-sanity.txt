@@ -1,0 +1,68 @@
+COMMAND: git diff --name-status/--stat/--numstat/--check 48630ca..549bf7d32abbd39d664460cc522b75ead89d80a3
+BASE: 48630ca
+HEAD: 549bf7d32abbd39d664460cc522b75ead89d80a3
+NOTE: comparisons are between commits, independent of untracked logs
+
+$ git diff --name-status
+M	README.md
+A	docs/harness-reports/pr-17-readme-compact-20261017/evidence/check-packaged-links.mjs
+A	docs/harness-reports/pr-17-readme-compact-20261017/evidence/check-repo-links.mjs
+A	docs/harness-reports/pr-17-readme-compact-20261017/evidence/pack-after.json
+A	docs/harness-reports/pr-17-readme-compact-20261017/evidence/pack-after.stderr
+A	docs/harness-reports/pr-17-readme-compact-20261017/evidence/pack-after.txt
+A	docs/harness-reports/pr-17-readme-compact-20261017/evidence/pack-before.json
+A	docs/harness-reports/pr-17-readme-compact-20261017/evidence/pack-before.txt
+A	docs/harness-reports/pr-17-readme-compact-20261017/evidence/pack-link-check.txt
+A	docs/harness-reports/pr-17-readme-compact-20261017/evidence/pack-tarball-files.txt
+A	docs/harness-reports/pr-17-readme-compact-20261017/evidence/preexisting-upstream-link.txt
+A	docs/harness-reports/pr-17-readme-compact-20261017/evidence/provenance.txt
+A	docs/harness-reports/pr-17-readme-compact-20261017/evidence/repo-link-check.txt
+A	docs/harness-reports/pr-17-readme-compact-20261017/evidence/test-full.txt
+A	docs/harness-reports/pr-17-readme-compact-20261017/evidence/test-targeted.txt
+A	docs/reference.md
+M	package.json
+
+$ git diff --stat
+ README.md                                          | 406 ++++----------
+ .../evidence/check-packaged-links.mjs              |  47 ++
+ .../evidence/check-repo-links.mjs                  |  42 ++
+ .../evidence/pack-after.json                       | 106 ++++
+ .../evidence/pack-after.stderr                     |   0
+ .../evidence/pack-after.txt                        |  26 +
+ .../evidence/pack-before.json                      | 101 ++++
+ .../evidence/pack-before.txt                       |  27 +
+ .../evidence/pack-link-check.txt                   |  16 +
+ .../evidence/pack-tarball-files.txt                |  19 +
+ .../evidence/preexisting-upstream-link.txt         |   5 +
+ .../evidence/provenance.txt                        |  43 ++
+ .../evidence/repo-link-check.txt                   |  15 +
+ .../evidence/test-full.txt                         | 592 +++++++++++++++++++++
+ .../evidence/test-targeted.txt                     |  33 ++
+ docs/reference.md                                  | 302 +++++++++++
+ package.json                                       |   1 +
+ 17 files changed, 1471 insertions(+), 310 deletions(-)
+
+$ git diff --numstat
+96	310	README.md
+47	0	docs/harness-reports/pr-17-readme-compact-20261017/evidence/check-packaged-links.mjs
+42	0	docs/harness-reports/pr-17-readme-compact-20261017/evidence/check-repo-links.mjs
+106	0	docs/harness-reports/pr-17-readme-compact-20261017/evidence/pack-after.json
+0	0	docs/harness-reports/pr-17-readme-compact-20261017/evidence/pack-after.stderr
+26	0	docs/harness-reports/pr-17-readme-compact-20261017/evidence/pack-after.txt
+101	0	docs/harness-reports/pr-17-readme-compact-20261017/evidence/pack-before.json
+27	0	docs/harness-reports/pr-17-readme-compact-20261017/evidence/pack-before.txt
+16	0	docs/harness-reports/pr-17-readme-compact-20261017/evidence/pack-link-check.txt
+19	0	docs/harness-reports/pr-17-readme-compact-20261017/evidence/pack-tarball-files.txt
+5	0	docs/harness-reports/pr-17-readme-compact-20261017/evidence/preexisting-upstream-link.txt
+43	0	docs/harness-reports/pr-17-readme-compact-20261017/evidence/provenance.txt
+15	0	docs/harness-reports/pr-17-readme-compact-20261017/evidence/repo-link-check.txt
+592	0	docs/harness-reports/pr-17-readme-compact-20261017/evidence/test-full.txt
+33	0	docs/harness-reports/pr-17-readme-compact-20261017/evidence/test-targeted.txt
+302	0	docs/reference.md
+1	0	package.json
+
+$ git diff --check (empty means no whitespace errors)
+EXIT:0
+
+product paths changed (lib/, test/, cordis.patch.yml):
+none
