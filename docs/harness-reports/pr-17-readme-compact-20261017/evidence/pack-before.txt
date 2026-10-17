@@ -1,0 +1,27 @@
+COMMAND: npm_config_cache=/tmp/ysk-npm-cache npm_config_logs_dir=/tmp/ysk-npm-logs npm pack --dry-run --json
+TREE: HEAD 70b538e (pre-fix package.json)
+EXIT: 0
+NOTE: npm needed a writable cache/log dir because the default npm log directory is outside the sandbox.
+
+total files: 17
+README.md: true
+docs/reference.md: false
+docs/upstream/README.md: false
+
+LICENSE
+README.md
+cordis.patch.yml
+lib/adaptive.js
+lib/client.js
+lib/core.js
+lib/evidence.js
+lib/explain.js
+lib/feedback.js
+lib/index.js
+lib/language.js
+lib/review-profile.js
+lib/review-strictness.js
+lib/runtime.js
+lib/self-check.js
+lib/update.js
+package.json

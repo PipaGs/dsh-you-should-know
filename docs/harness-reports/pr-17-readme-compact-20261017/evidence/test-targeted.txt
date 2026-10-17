@@ -1,0 +1,33 @@
+COMMAND: node --test test/release-consistency.test.js test/install-discovery.test.js test/invariant.test.js
+TREE: pre-commit working tree (HEAD 70b538e + package.json files fix; report not yet added)
+UTC: 2026-10-17T18:25:56Z
+---
+✔ the package name is the dependency key a GitHub install records (2.681417ms)
+✔ a first GitHub install is discovered from the dependency change (0.614792ms)
+✔ a bare default-branch spec cannot be re-attributed after the first install (0.11525ms)
+✔ a tag-pinned spec is discovered over an existing bare install (0.835083ms)
+✔ the README documents only tag-pinned GitHub install addresses (1.269083ms)
+✔ shipped sources contain no path that could deliver advice to the primary agent (7.714708ms)
+✔ the plugin uses only the sanctioned seams (1.178084ms)
+✔ the auth boundary stays host-owned: no no-auth route registration exists (0.94775ms)
+✔ no shipped source reads, stores, or forwards a cookie, token, or auth header (3.035417ms)
+✔ no shipped source can install, upgrade, or self-modify the plugin (3.920792ms)
+✔ the browser half reaches files and the composer only through their public seams (1.046833ms)
+✔ Add to chat can only compose the draft and never hands the action to the agent (0.936167ms)
+✔ the English-only scan rejects Cyrillic, Greek, and CJK text (0.146125ms)
+✔ public-facing text stays English-only and free of unrelated project references (3.032375ms)
+✔ the bundled row leaves the reviewer route to adaptive discovery (0.431667ms)
+✔ the manifest declares the bundle, the client half, and no build step (0.33475ms)
+✔ the release version is a patch increment over the previous release (0.52875ms)
+✔ package.json, PLUGIN_VERSION, and the README install address agree (0.70125ms)
+✔ every README self-check sample version is the released version (0.223125ms)
+✔ no released artifact still documents the previous version (0.226666ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 178.642209
+EXIT:0

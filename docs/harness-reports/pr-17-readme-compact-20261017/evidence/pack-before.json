@@ -1,0 +1,101 @@
+[
+  {
+    "id": "dsh-you-should-know@0.4.4",
+    "name": "dsh-you-should-know",
+    "version": "0.4.4",
+    "size": 94126,
+    "unpackedSize": 349360,
+    "shasum": "488de303846f4a55bb80c2a99baa93cceb64e6aa",
+    "integrity": "sha512-P3HFu9xEBlFH3TT0AeTvKDJLGqJMHyhKG53yQUjYYMpOaovMUXnmcSRbbkbkhxkEVO/MsEwovAkRUzOhkO5LsA==",
+    "filename": "dsh-you-should-know-0.4.4.tgz",
+    "files": [
+      {
+        "path": "LICENSE",
+        "size": 1063,
+        "mode": 420
+      },
+      {
+        "path": "README.md",
+        "size": 21102,
+        "mode": 420
+      },
+      {
+        "path": "cordis.patch.yml",
+        "size": 1800,
+        "mode": 420
+      },
+      {
+        "path": "lib/adaptive.js",
+        "size": 3506,
+        "mode": 420
+      },
+      {
+        "path": "lib/client.js",
+        "size": 82410,
+        "mode": 420
+      },
+      {
+        "path": "lib/core.js",
+        "size": 108282,
+        "mode": 420
+      },
+      {
+        "path": "lib/evidence.js",
+        "size": 14048,
+        "mode": 420
+      },
+      {
+        "path": "lib/explain.js",
+        "size": 5007,
+        "mode": 420
+      },
+      {
+        "path": "lib/feedback.js",
+        "size": 4602,
+        "mode": 420
+      },
+      {
+        "path": "lib/index.js",
+        "size": 17232,
+        "mode": 420
+      },
+      {
+        "path": "lib/language.js",
+        "size": 5176,
+        "mode": 420
+      },
+      {
+        "path": "lib/review-profile.js",
+        "size": 14839,
+        "mode": 420
+      },
+      {
+        "path": "lib/review-strictness.js",
+        "size": 9900,
+        "mode": 420
+      },
+      {
+        "path": "lib/runtime.js",
+        "size": 21011,
+        "mode": 384
+      },
+      {
+        "path": "lib/self-check.js",
+        "size": 12957,
+        "mode": 420
+      },
+      {
+        "path": "lib/update.js",
+        "size": 23310,
+        "mode": 420
+      },
+      {
+        "path": "package.json",
+        "size": 3115,
+        "mode": 420
+      }
+    ],
+    "entryCount": 17,
+    "bundled": []
+  }
+]
