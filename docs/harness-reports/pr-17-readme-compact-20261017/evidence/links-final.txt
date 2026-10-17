@@ -1,0 +1,36 @@
+COMMAND: npm pack --pack-destination <tmp> && tar -xzf <tarball>
+TREE: commit 549bf7d32abbd39d664460cc522b75ead89d80a3; tracked tree clean, this run writes untracked evidence logs that are excluded from package and test inputs
+TARBALL: dsh-you-should-know-0.4.4.tgz
+--- packaged relative links ---
+BROKEN README.md -> ./docs/upstream/README.md (pre-existing, out of scope)
+OK     README.md -> ./docs/reference.md
+OK     README.md -> ./docs/reference.md#verdict-contract
+OK     README.md -> ./docs/reference.md#modes-and-prompts
+OK     README.md -> ./docs/reference.md#adaptive-cadence
+OK     README.md -> ./docs/reference.md#update-checker
+OK     README.md -> ./docs/reference.md#runtime-and-failures
+OK     README.md -> ./docs/reference.md#limitations
+OK     README.md -> ./docs/reference.md#status-and-self-check-routes
+OK     README.md -> ./docs/reference.md#test-coverage
+OK     README.md -> ./LICENSE
+OK     docs/reference.md -> ../README.md
+
+relative links missing: 1
+new docs/reference.md link broken: false
+PACKAGED_EXIT:0
+--- repository relative links and anchors ---
+OK README.md -> ./docs/upstream/README.md
+OK README.md -> ./docs/reference.md
+OK README.md -> ./docs/reference.md#verdict-contract
+OK README.md -> ./docs/reference.md#modes-and-prompts
+OK README.md -> ./docs/reference.md#adaptive-cadence
+OK README.md -> ./docs/reference.md#update-checker
+OK README.md -> ./docs/reference.md#runtime-and-failures
+OK README.md -> ./docs/reference.md#limitations
+OK README.md -> ./docs/reference.md#status-and-self-check-routes
+OK README.md -> ./docs/reference.md#test-coverage
+OK README.md -> ./LICENSE
+OK docs/reference.md -> ../README.md
+
+broken links/anchors: 0
+REPO_EXIT:0

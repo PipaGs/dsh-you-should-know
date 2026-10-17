@@ -1,0 +1,26 @@
+COMMAND: npm_config_cache=<tmp> npm_config_logs_dir=<tmp> npm pack --dry-run --json
+TREE: commit 549bf7d32abbd39d664460cc522b75ead89d80a3; tracked tree clean, this run writes untracked evidence logs that are excluded from package and test inputs
+EXIT: 0
+
+total files: 18
+README.md: true
+docs/reference.md: true
+
+LICENSE
+README.md
+cordis.patch.yml
+docs/reference.md
+lib/adaptive.js
+lib/client.js
+lib/core.js
+lib/evidence.js
+lib/explain.js
+lib/feedback.js
+lib/index.js
+lib/language.js
+lib/review-profile.js
+lib/review-strictness.js
+lib/runtime.js
+lib/self-check.js
+lib/update.js
+package.json

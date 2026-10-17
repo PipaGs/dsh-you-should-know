@@ -1,0 +1,33 @@
+COMMAND: node --test test/release-consistency.test.js test/install-discovery.test.js test/invariant.test.js
+TREE: commit 549bf7d32abbd39d664460cc522b75ead89d80a3; tracked tree clean, this run writes untracked evidence logs that are excluded from package and test inputs
+UTC: 2026-10-17T18:27:31Z
+---
+✔ the package name is the dependency key a GitHub install records (2.626125ms)
+✔ a first GitHub install is discovered from the dependency change (0.590708ms)
+✔ a bare default-branch spec cannot be re-attributed after the first install (0.11275ms)
+✔ a tag-pinned spec is discovered over an existing bare install (0.880917ms)
+✔ the README documents only tag-pinned GitHub install addresses (1.297125ms)
+✔ shipped sources contain no path that could deliver advice to the primary agent (7.824083ms)
+✔ the plugin uses only the sanctioned seams (1.031458ms)
+✔ the auth boundary stays host-owned: no no-auth route registration exists (1.004459ms)
+✔ no shipped source reads, stores, or forwards a cookie, token, or auth header (3.170042ms)
+✔ no shipped source can install, upgrade, or self-modify the plugin (3.901583ms)
+✔ the browser half reaches files and the composer only through their public seams (1.041292ms)
+✔ Add to chat can only compose the draft and never hands the action to the agent (0.996917ms)
+✔ the English-only scan rejects Cyrillic, Greek, and CJK text (0.1525ms)
+✔ public-facing text stays English-only and free of unrelated project references (3.051208ms)
+✔ the bundled row leaves the reviewer route to adaptive discovery (0.4275ms)
+✔ the manifest declares the bundle, the client half, and no build step (0.318333ms)
+✔ the release version is a patch increment over the previous release (0.541625ms)
+✔ package.json, PLUGIN_VERSION, and the README install address agree (0.670625ms)
+✔ every README self-check sample version is the released version (0.2395ms)
+✔ no released artifact still documents the previous version (0.205708ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 182.178584
+EXIT:0
