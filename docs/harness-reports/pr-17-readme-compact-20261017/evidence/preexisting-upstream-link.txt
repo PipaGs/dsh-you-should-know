@@ -1,0 +1,5 @@
+BASE: 48630cae8c42d5e4a5f39d71a5e3e2ee1b3f932e (origin/main before PR #17)
+package.json files on base:
+["lib","cordis.patch.yml","README.md","LICENSE"]
+README links to docs/upstream on base:
+7:docs/upstream/README.md

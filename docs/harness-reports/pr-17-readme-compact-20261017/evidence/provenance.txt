@@ -1,0 +1,43 @@
+DATE: 2026-10-17 (Europe/Moscow)
+UTC: 2026-10-17T18:26:38Z
+GOAL: goal-session-35b69f35-145e-4032-bc80-56afdd4ffe70 revision 1 mode strict
+REPO: PipaGs/dsh-you-should-know
+BRANCH: docs/readme-compact-reference
+TASK_ID: NOT SUPPLIED - identity is PR #17; no historical TASK_ID invented
+PR: #17 https://github.com/PipaGs/dsh-you-should-know/pull/17
+REVIEW: CHANGES_REQUIRED, issue comment 6238502543, 2026-10-17T18:23:20Z, reviewed head 70b538e705de0546da34e04f2dba5d1c6ae8776a
+BASE: 48630cae8c42d5e4a5f39d71a5e3e2ee1b3f932e (origin/main, PR base)
+PRELIMINARY_HEAD: 70b538e705de0546da34e04f2dba5d1c6ae8776a
+REMOTE_HEAD_BEFORE_ROUND: 70b538e705de0546da34e04f2dba5d1c6ae8776a
+COMPETING_WRITERS: none observed; branch checked out in one worktree; local head equalled remote head before edits
+
+$ git worktree list
+<home>/work/dsh-you-should-know                                       70b538e [docs/readme-compact-reference]
+<home>/work/dsh-you-should-know/.worktrees/ysk-actionable-chat        e96c5bb (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-empty-state-dock       4c6a527 (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-hide-empty-banner      e0f8a36 (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-note-voice-eval        517cb78 (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-note-voice-live        e3baf09 (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-note-voice-semantic    fe3a992 (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-postmerge-release-gate 48630ca (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-postmerge-verify       5a8dda3 (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-postmerge-verify-0.4.3 b6a202d (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-postmerge-verify-pr11  ec07de1 (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-postmerge-verify-pr12  7b4ba87 (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-postmerge-verify-pr13  746d1ca (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-postmerge-verify-pr14  3563dd8 (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-postmerge-verify-pr15  b115379 (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-release-prep-0.4.4     67f306f (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-upstream-adoption      32513e9 (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-version-bump           abcc5cb (detached HEAD)
+
+$ git branch -vv
+* docs/readme-compact-reference 70b538e [origin/docs/readme-compact-reference] docs: сократить README и вынести контракты в reference
+  main                          48630ca [origin/main] chore: подготовить релиз 0.4.4 (version mirrors + release-consistency гейт) (#16)
+
+$ git ls-remote origin refs/heads/main refs/heads/docs/readme-compact-reference
+70b538e705de0546da34e04f2dba5d1c6ae8776a	refs/heads/docs/readme-compact-reference
+48630cae8c42d5e4a5f39d71a5e3e2ee1b3f932e	refs/heads/main
+
+$ gh pr view 17 --json headRefOid,baseRefOid,files
+{"baseRefOid":"48630cae8c42d5e4a5f39d71a5e3e2ee1b3f932e","files":[{"path":"README.md","additions":96,"deletions":310,"changeType":"MODIFIED"},{"path":"docs/reference.md","additions":302,"deletions":0,"changeType":"ADDED"}],"headRefOid":"70b538e705de0546da34e04f2dba5d1c6ae8776a"}

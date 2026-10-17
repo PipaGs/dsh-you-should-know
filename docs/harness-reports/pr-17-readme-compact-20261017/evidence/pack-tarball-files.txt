@@ -1,0 +1,19 @@
+LICENSE
+README.md
+cordis.patch.yml
+docs/reference.md
+lib/adaptive.js
+lib/client.js
+lib/core.js
+lib/evidence.js
+lib/explain.js
+lib/feedback.js
+lib/index.js
+lib/language.js
+lib/review-profile.js
+lib/review-strictness.js
+lib/runtime.js
+lib/self-check.js
+lib/update.js
+package.json
+tarball entries:       18

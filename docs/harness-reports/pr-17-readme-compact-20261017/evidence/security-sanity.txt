@@ -1,0 +1,47 @@
+COMMAND: targeted scans on 48630ca..549bf7d32abbd39d664460cc522b75ead89d80a3
+NOTE: scans read committed content only
+
+files changed:
+README.md
+docs/harness-reports/pr-17-readme-compact-20261017/evidence/check-packaged-links.mjs
+docs/harness-reports/pr-17-readme-compact-20261017/evidence/check-repo-links.mjs
+docs/harness-reports/pr-17-readme-compact-20261017/evidence/pack-after.json
+docs/harness-reports/pr-17-readme-compact-20261017/evidence/pack-after.stderr
+docs/harness-reports/pr-17-readme-compact-20261017/evidence/pack-after.txt
+docs/harness-reports/pr-17-readme-compact-20261017/evidence/pack-before.json
+docs/harness-reports/pr-17-readme-compact-20261017/evidence/pack-before.txt
+docs/harness-reports/pr-17-readme-compact-20261017/evidence/pack-link-check.txt
+docs/harness-reports/pr-17-readme-compact-20261017/evidence/pack-tarball-files.txt
+docs/harness-reports/pr-17-readme-compact-20261017/evidence/preexisting-upstream-link.txt
+docs/harness-reports/pr-17-readme-compact-20261017/evidence/provenance.txt
+docs/harness-reports/pr-17-readme-compact-20261017/evidence/repo-link-check.txt
+docs/harness-reports/pr-17-readme-compact-20261017/evidence/test-full.txt
+docs/harness-reports/pr-17-readme-compact-20261017/evidence/test-targeted.txt
+docs/reference.md
+package.json
+
+secret-pattern matches in the diff:
+0
+
+private home paths (/Users) in changed files:
+0
+
+credential-like literals in changed files:
+0
+
+package.json diff vs base:
+diff --git a/package.json b/package.json
+index 13ffba7..313b286 100644
+--- a/package.json
++++ b/package.json
+@@ -32,6 +32,7 @@
+     "lib",
+     "cordis.patch.yml",
+     "README.md",
++    "docs/reference.md",
+     "LICENSE"
+   ],
+   "scripts": {
+
+lib/ or test/ changes (must be none):
+none

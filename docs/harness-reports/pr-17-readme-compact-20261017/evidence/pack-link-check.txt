@@ -1,0 +1,16 @@
+BROKEN README.md -> ./docs/upstream/README.md (pre-existing, out of scope)
+OK     README.md -> ./docs/reference.md
+OK     README.md -> ./docs/reference.md#verdict-contract
+OK     README.md -> ./docs/reference.md#modes-and-prompts
+OK     README.md -> ./docs/reference.md#adaptive-cadence
+OK     README.md -> ./docs/reference.md#update-checker
+OK     README.md -> ./docs/reference.md#runtime-and-failures
+OK     README.md -> ./docs/reference.md#limitations
+OK     README.md -> ./docs/reference.md#status-and-self-check-routes
+OK     README.md -> ./docs/reference.md#test-coverage
+OK     README.md -> ./LICENSE
+OK     docs/reference.md -> ../README.md
+
+relative links missing: 1
+new docs/reference.md link broken: false
+EXIT:0
