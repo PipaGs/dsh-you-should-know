@@ -1,0 +1,26 @@
+# GREEN: repository language gate after the rule artifacts exist
+timestamp_utc: 2026-10-19T10:31:15Z
+head=5929bb3547ba7c8f9f91e711a30880b9d201ea94
+dirty_tree:
+ M README.md
+?? AGENTS.md
+?? docs/harness-reports/english-only-rules-20261019/
+?? docs/harness-reports/ysk-version-bump-0.4.5-20261019/english-addendum-20261019.md
+?? test/repository-language.test.js
+
+✔ the authoritative repository rule exists and covers every required artifact (0.520708ms)
+✔ the README indexes the authoritative repository rules (0.518417ms)
+✔ the new repository-facing artifacts are English-only (0.308083ms)
+✔ the rule separates human chat from repository artifacts and preserves history (0.166917ms)
+✔ the PR #19 addendum records the deviation and links the preserved report (0.109ms)
+✔ the PR #19 historical report is preserved rather than silently translated (0.15625ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 119.152667
+
+EXIT_CODE=0

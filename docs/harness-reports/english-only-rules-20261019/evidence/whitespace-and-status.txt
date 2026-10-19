@@ -1,0 +1,41 @@
+# Final whitespace and status
+timestamp_utc: 2026-10-19T10:33:46Z
+head_before_commit=16cc7857e8a586665abb0fcb175ae2a2ac8d2d58
+
+## git diff --cached --check
+EXIT_CODE=0
+
+## git diff --check
+EXIT_CODE=0
+
+## changed paths relative to origin/main
+A	AGENTS.md
+M	README.md
+A	docs/harness-reports/english-only-rules-20261019/evidence/audit-existing-rules.txt
+A	docs/harness-reports/english-only-rules-20261019/evidence/check.txt
+A	docs/harness-reports/english-only-rules-20261019/evidence/diff-and-security-sanity.txt
+A	docs/harness-reports/english-only-rules-20261019/evidence/historical-pr19-deviation.txt
+A	docs/harness-reports/english-only-rules-20261019/evidence/language-scan.txt
+A	docs/harness-reports/english-only-rules-20261019/evidence/provenance.json
+A	docs/harness-reports/english-only-rules-20261019/evidence/test-run-final.txt
+A	docs/harness-reports/english-only-rules-20261019/evidence/test-run-green.txt
+A	docs/harness-reports/english-only-rules-20261019/evidence/test-run-red.txt
+A	docs/harness-reports/english-only-rules-20261019/evidence/whitespace-and-history.txt
+A	docs/harness-reports/english-only-rules-20261019/final-report.md
+A	docs/harness-reports/ysk-version-bump-0.4.5-20261019/english-addendum-20261019.md
+A	test/repository-language.test.js
+
+## status snapshot (this file and the manifest are staged immediately after this snapshot)
+A  docs/harness-reports/english-only-rules-20261019/evidence/audit-existing-rules.txt
+A  docs/harness-reports/english-only-rules-20261019/evidence/check.txt
+A  docs/harness-reports/english-only-rules-20261019/evidence/diff-and-security-sanity.txt
+A  docs/harness-reports/english-only-rules-20261019/evidence/historical-pr19-deviation.txt
+A  docs/harness-reports/english-only-rules-20261019/evidence/language-scan.txt
+A  docs/harness-reports/english-only-rules-20261019/evidence/provenance.json
+A  docs/harness-reports/english-only-rules-20261019/evidence/test-run-final.txt
+A  docs/harness-reports/english-only-rules-20261019/evidence/test-run-green.txt
+A  docs/harness-reports/english-only-rules-20261019/evidence/test-run-red.txt
+A  docs/harness-reports/english-only-rules-20261019/evidence/whitespace-and-history.txt
+A  docs/harness-reports/english-only-rules-20261019/final-report.md
+A  test/repository-language.test.js
+?? docs/harness-reports/english-only-rules-20261019/evidence/whitespace-and-status.txt

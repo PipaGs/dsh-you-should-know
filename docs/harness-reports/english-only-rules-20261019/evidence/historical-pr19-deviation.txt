@@ -1,0 +1,25 @@
+# Historical PR #19 language deviation
+timestamp_utc: 2026-10-19T10:32:02Z
+
+## PR metadata
+{"baseRefOid":"c4da5015ac5dea2ebcafee27a296bcd38aa00a78","headRefOid":"5e1725566a45be62e05cfc55f27932faca968099","mergeCommit":{"oid":"5929bb3547ba7c8f9f91e711a30880b9d201ea94"},"mergedAt":"2026-10-19T10:27:13Z","number":19,"state":"MERGED","url":"https://github.com/PipaGs/dsh-you-should-know/pull/19"}
+
+## Language flags (the source text is not printed)
+title_contains_cyrillic=true
+body_contains_cyrillic=true
+commit_messages_contain_cyrillic=true
+task_report_contains_cyrillic=true
+
+## Original report preservation
+origin_main_report_sha256=646e08a66b48432934e2f500c1e3f3c9ad8c58a148a8b279e84db297d74fbb7e
+working_tree_report_sha256=646e08a66b48432934e2f500c1e3f3c9ad8c58a148a8b279e84db297d74fbb7e
+original_report_diff_exit=0
+
+## English addendum
+addendum_exists_exit=0
+addendum_contains_cyrillic=false
+addendum_names_original=true
+
+## Conclusion
+PR #19 used Russian prose for its title, body, commit messages, and task-owned report.
+The original report bytes are unchanged; a separate dated English addendum records the deviation.

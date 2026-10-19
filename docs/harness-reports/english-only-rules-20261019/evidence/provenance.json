@@ -1,0 +1,19 @@
+{
+  "task_id": "english-only-rules-20261019",
+  "goal_id": "goal-session-2d67076e-1475-4d51-8827-3c68fa11d4ef",
+  "goal_revision": 2,
+  "mode": "strict",
+  "tool": "DeepSeek Harness",
+  "base": "5929bb3547ba7c8f9f91e711a30880b9d201ea94",
+  "base_description": "origin/main merge PR #19",
+  "branch": "docs/english-only-rules-20261019",
+  "worktree": ".worktrees/english-only-rules-20261019",
+  "pr": 20,
+  "rule_commit": "16cc7857e8a586665abb0fcb175ae2a2ac8d2d58",
+  "node": "v26.9.0",
+  "npm": "11.19.1",
+  "historical_pr19_report_sha256": "646e08a66b48432934e2f500c1e3f3c9ad8c58a148a8b279e84db297d74fbb7e",
+  "historical_pr19_report_modified": false,
+  "english_addendum": "docs/harness-reports/ysk-version-bump-0.4.5-20261019/english-addendum-20261019.md",
+  "note": "The sha of the commit that adds this evidence directory is recorded in the PR body; a file cannot contain its own commit hash."
+}
