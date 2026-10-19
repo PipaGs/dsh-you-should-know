@@ -1,0 +1,14 @@
+# git diff --check
+timestamp_utc: 2026-10-19T10:22:56Z
+EXIT_CODE=0
+
+# git status --short
+ M README.md
+ M docs/reference.md
+ M lib/index.js
+ M package.json
+ M test/invariant.test.js
+ M test/plugin.test.js
+ M test/release-consistency.test.js
+ M test/update-route.test.js
+?? docs/harness-reports/ysk-version-bump-0.4.5-20261019/
