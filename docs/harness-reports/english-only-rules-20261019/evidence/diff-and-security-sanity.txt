@@ -1,0 +1,62 @@
+# Final diff and security sanity
+timestamp_utc: 2026-10-19T10:33:39Z
+base=5929bb3547ba7c8f9f91e711a30880b9d201ea94
+
+## numstat
+55	0	docs/harness-reports/english-only-rules-20261019/evidence/audit-existing-rules.txt
+15	0	docs/harness-reports/english-only-rules-20261019/evidence/check.txt
+25	0	docs/harness-reports/english-only-rules-20261019/evidence/historical-pr19-deviation.txt
+21	0	docs/harness-reports/english-only-rules-20261019/evidence/language-scan.txt
+19	0	docs/harness-reports/english-only-rules-20261019/evidence/provenance.json
+605	0	docs/harness-reports/english-only-rules-20261019/evidence/test-run-final.txt
+26	0	docs/harness-reports/english-only-rules-20261019/evidence/test-run-green.txt
+131	0	docs/harness-reports/english-only-rules-20261019/evidence/test-run-red.txt
+11	0	docs/harness-reports/english-only-rules-20261019/evidence/whitespace-and-history.txt
+175	0	docs/harness-reports/english-only-rules-20261019/final-report.md
+87	0	test/repository-language.test.js
+
+## name-status
+A	docs/harness-reports/english-only-rules-20261019/evidence/audit-existing-rules.txt
+A	docs/harness-reports/english-only-rules-20261019/evidence/check.txt
+A	docs/harness-reports/english-only-rules-20261019/evidence/historical-pr19-deviation.txt
+A	docs/harness-reports/english-only-rules-20261019/evidence/language-scan.txt
+A	docs/harness-reports/english-only-rules-20261019/evidence/provenance.json
+A	docs/harness-reports/english-only-rules-20261019/evidence/test-run-final.txt
+A	docs/harness-reports/english-only-rules-20261019/evidence/test-run-green.txt
+A	docs/harness-reports/english-only-rules-20261019/evidence/test-run-red.txt
+A	docs/harness-reports/english-only-rules-20261019/evidence/whitespace-and-history.txt
+A	docs/harness-reports/english-only-rules-20261019/final-report.md
+A	test/repository-language.test.js
+
+## product paths changed
+NONE
+
+## historical PR #19 report changed
+NO
+
+## secret scan
+544:+✔ AC3: live authorization is a trusted-caller assertion, not independent cost verification (3.562667ms)
+1109:+no dependency, route, configuration field, outbound request, secret, token, or
+1110:+URL. The final numstat and the secret/URL scan are recorded in
+
+## URLs in the staged diff
+https://github.com/PipaGs/dsh-you-should-know/pull/19"}
+https://github.com/PipaGs/dsh-you-should-know/pull/20
+https://github.com/deepseek-ai/deepseek-harness
+https://github.com/npm/cli/releases/tag/v12.2.0
+
+## git diff --cached --check
+EXIT_CODE=0
+
+## Review of the matches
+
+The three secret-scan matches are false positives:
+
+- the line from test-run-final.txt is a test title that contains the word
+  "authorization" while testing a trusted-caller assertion;
+- the two lines from final-report.md are the sentence that records the absence
+  of a secret, token, key, or auth header.
+
+No credential value, token, API key, private key, or auth header is present.
+The listed URLs are the PR links and URLs that appear in captured test output,
+not secrets.

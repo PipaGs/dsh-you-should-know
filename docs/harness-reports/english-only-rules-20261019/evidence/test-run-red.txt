@@ -1,0 +1,131 @@
+# RED: repository language gate before the rule artifacts exist
+timestamp_utc: 2026-10-19T10:30:43Z
+head=5929bb3547ba7c8f9f91e711a30880b9d201ea94
+dirty_tree:
+?? docs/harness-reports/english-only-rules-20261019/
+?? test/repository-language.test.js
+
+✖ the authoritative repository rule exists and covers every required artifact (0.45875ms)
+✖ the README indexes the authoritative repository rules (1.0345ms)
+✖ the new repository-facing artifacts are English-only (0.118ms)
+✖ the rule separates human chat from repository artifacts and preserves history (0.078125ms)
+✖ the PR #19 addendum records the deviation and links the preserved report (0.101166ms)
+✖ the PR #19 historical report is preserved rather than silently translated (0.255417ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 0
+ℹ fail 6
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 130.102
+
+✖ failing tests:
+
+test at test/repository-language.test.js:31:1
+✖ the authoritative repository rule exists and covers every required artifact (0.45875ms)
+  Error: ENOENT: no such file or directory, open '/Users/pipags/work/dsh-you-should-know/.worktrees/english-only-rules-20261019/AGENTS.md'
+      at readFileSync (node:fs:620:20)
+      at read (file:///Users/pipags/work/dsh-you-should-know/.worktrees/english-only-rules-20261019/test/repository-language.test.js:28:10)
+      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/english-only-rules-20261019/test/repository-language.test.js:32:16)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/Users/pipags/work/dsh-you-should-know/.worktrees/english-only-rules-20261019/AGENTS.md'
+  }
+
+test at test/repository-language.test.js:48:1
+✖ the README indexes the authoritative repository rules (1.0345ms)
+  AssertionError [ERR_ASSERTION]: the README links to AGENTS.md
+      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/english-only-rules-20261019/test/repository-language.test.js:50:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '# dsh-you-should-know\n\nA quiet, **human-only** second-opinion watcher for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness).\n\nA separately configured reviewer model — DeepSeek out of the box, any registered route by config — reads each completed root-agent turn and speaks up only when the human most likely missed something important. A compact **You should know** card sits above the composer: dismissible, with **Add to chat**, **Knew it**, **Thanks**, and **Explain**. Nothing is sent into the conversation, nothing is steered, and nothing enters the primary agent\'s context. With no active note and no history, the slot stays completely empty — no banner, no label, no reserved space.\n\nThe intent mirrors Claude Code\'s *You Should Know* with one deliberately harder constraint: the note is for the human only. The versioned upstream baseline and read-only adoption workflow live in [docs/upstream/](./docs/upstream/README.md); deep contracts, route schemas, and runtime internals live in [docs/reference.md](./docs/reference.md).\n\n## Status\n\nVersion `0.4.5`, MIT. Host and browser halves ship as plain JavaScript, so a `github:` install needs no build. The scope is intentionally small: a composer-adjacent note card with a bounded in-memory history, a Plugins settings card (strictness mode, additional instructions, custom prompt, update controls), a session-header mode and model override, one reviewer call per qualifying turn, and a per-session runtime that retries one transient failure, bounds the queue, and pauses on quota without losing the turn.\n\n## What it does\n\nThe host reviews a turn only when **all** of these hold:\n\n1. A reviewer route resolves. Both route keys default to automatic DeepSeek discovery; setting either to an empty string disables the plugin entirely, and a profile that mounts no DeepSeek route stays silent.\n2. The event is `turn/end` with reason `completed`. Aborted, blocked, errored, max-tokens, and forked turns are ignored.\n3. The session is a **root** agent session — subagent sessions and delegated turns are ignored.\n4. The turn is a meaningful episode or clears the text-delta gate. A meaningful episode carries tool activity, a subagent event, or a workflow event; otherwise the turn needs visible assistant text and at least `minDeltaChars` accumulated characters, so a short ordinary Q&A stays ineligible.\n5. The turn is outside the effective cooldown: `cooldownTurns` multiplied by the bounded quiet streak.\n6. The session is inside its sliding one-hour budget (`maxReviewerCallsPerHour`). A skipped review makes no model call.\n7. The session has not used its internal 12-note budget.\n\nWhen the gates pass, the host sends one `ctx.llm.stream` request:\n\n- a system instruction composed in a fixed order — base policy, strictness profile for the mode, optional human instructions, adaptive profile. The base policy always outranks the rest;\n- one user message with a **bounded** excerpt of recent conversation: human user text and assistant reply text only, each message truncated under a total character cap. A meaningful episode appends one bounded evidence capsule with explicit markers (tool names, failure identity, turn reason, presentation paths, subagent provenance — never raw arguments, output, or message content);\n- **no tools**, `temperature: 0`, `maxTokens`, and `reasoningEffort: \'off\'` only when the model advertises an `off` effort.\n\nThe reply must be one JSON object:\n\n```json\n{"note": "one or two sentences addressed to the human", "importance": "high", "source": {"path": "src/store.js", "line": 42}, "action": "concrete repair instruction for the coding agent"}\n```\n\n`importance` is `high` or `critical`, and a nonempty note requires one of them. `source` is optional: it must be an exact path that appears verbatim in the excerpt, with a line only when the excerpt states one. `action` is optional and, when present, is the agent-facing repair instruction used by **Add to chat**. A malformed source or action drops the whole reply quietly. Silence has exactly one shape, `{"note": null, "importance": null}`; anything else that does not match the contract is dropped quietly. Accepted notes are normalized and deduplicated by text. Full validation rules: [verdict contract](./docs/reference.md#verdict-contract).\n\nThe **note voice** follows responsibility, using only what the excerpt supports: `we` for joint decisions, `the main agent` for the agent\'s actions, `you` when the decision or the consequence is the human\'s. When responsibility is unclear the note stays neutral and never invents blame.\n\nQualifying information is deliberately narrow: a contradiction with an explicit requirement, an overlooked material constraint, a serious correctness/security/safety/data-loss/reliability problem, or an implication that changes the next decision. Otherwise the reviewer stays silent — no summaries, praise, or style advice.\n\nNotes are written in the language of the latest genuine human message, falling back to English; a stored host language preference wins. When the excerpt reliably shows a programming language through a fenced tag or file extension, at most three bounded language-specific correctness checklists are added to the instruction.\n\n### Reviewer strictness modes\n\nEach review runs under exactly one mode. The mode changes both the areas of scrutiny and the notification threshold:\n\n| Mode | Areas of scrutiny | Notification threshold |\n|---|---|---|\n| `Relaxed` | Only obvious, material problems: real bugs, violated explicit requirements, security or data-loss risks, clearly wrong behavior. | Stores `critical` only; a `high` finding is dropped. |\n| `Balanced` (default) | Material overlooked problems: bugs, requirement violations, invalid states, API contract errors, races, security issues, error-handling and test gaps. | Stores `high` and `critical`. |\n| `Strict` | `Balanced` plus edge cases, stale state, race conditions, exception paths, network behavior, performance problems, missing tests. | Stores `high` and `critical`. |\n| `Paranoid` | Aggressively searches hidden failure modes and regressions: assumptions, concurrency, partial failures, retries, cleanup, lifecycle, boundaries, security, data loss, side effects, API incompatibility. | Stores `high` and `critical`; a `high` note needs a concrete `action`. |\n| `Custom` | Shaped by the saved Custom reviewer prompt, which replaces the strictness profile, with additional instructions as an overlay and the `Balanced` materiality floor. | Stores `high` and `critical`. |\n\nNo mode admits style, formatting, lint, naming, or preference findings, and no mode can relax the base policy: the JSON contract, the verbatim-path rule, the untrusted-excerpt rule, and the no-fabrication rule always win. **Additional reviewer instructions** (up to 2000 characters) are appended verbatim in every mode. **The Custom reviewer prompt** (up to 4000 characters) replaces only the strictness-profile portion and never the base policy. Both are preserved exactly, never translated or rewritten. Mode details: [modes and prompts](./docs/reference.md#modes-and-prompts).\n\n## The human-only invariant\n\nThe plugin is architecturally incapable of talking to the agent:\n\n- no `agent.steer`, `agent.inject`, or `followup`;\n- no inbox insertion, no wake-up, no append to the session log or transcript;\n- no modification of the primary model context, no approval or tool mechanisms.\n\nNotes live in plugin-owned, in-memory, per-session state. The only consumer is the browser, over authenticated Fetch routes under `/api/dsh-you-should-know/*`: notes, history, dismiss, status, session override, config, self-check, and explain. A source-level test (`test/invariant.test.js`) scans the shipped files for every delivery shape that could break this invariant.\n\n## Install from GitHub\n\nThe built host and browser halves are committed, so installation needs no source build. Install an immutable release ref:\n\n```sh\ndsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.4.5\n```\n\nA bare `github:PipaGs/dsh-you-should-know` address is saved as the same value on every run, so a second install cannot be told from the dependency change; a ref-pinned address is saved verbatim, so each install and upgrade is attributed to `dsh-you-should-know`. Enter the same pinned address in the Desktop **Add plugin** dialog. To move to a later release, install its tag; to reinstall the exact version already present, remove the plugin first.\n\nThe bundle contributes one row, `you-should-know`, with the reviewer route left automatic. At the first qualifying turn the plugin asks the live LLM registry for a DeepSeek route and picks a stable, inexpensive chat/flash model from that route\'s own catalog: the documented `deepseek`/`deepseek-chat` pair where it exists, otherwise `deepseek-official`/`deepseek-flash` on a current build. No DeepSeek route means no note, zero model calls, and no effect on the agent. Restart or let HMR reload the profile after changing the patch.\n\n### Configure\n\nBoth `provider` and `model` are optional and default to **automatic**. Discovery keeps the DeepSeek family (`deepseek`, `deepseek-official`, `deepseek-account`, then any other `deepseek*` route), prefers the exact `deepseek`/`deepseek-chat` pair where it resolves, and otherwise chooses the cheapest stable chat/flash model from the route\'s own catalog, avoiding reasoning and pro models. A missing catalog falls back to the conventional pair for a known DeepSeek route; no resolvable route means silence.\n\nSetting **both** keys is an exact override for any registered route — no allowlist, no fallback. Setting **one** pins that half and resolves the other automatically. Setting **either** to an empty string disables the reviewer entirely.\n\n```yaml\n- id: you-should-know\n  name: dsh-you-should-know\n  config:\n    provider: deepseek-official\n    model: deepseek-flash\n    minDeltaChars: 1200\n    cooldownTurns: 3\n    maxContextMessages: 12\n    maxTokens: '... 11078 more characters,
+    expected: /\]\(\.\/AGENTS\.md\)/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at test/repository-language.test.js:54:1
+✖ the new repository-facing artifacts are English-only (0.118ms)
+  Error: ENOENT: no such file or directory, open '/Users/pipags/work/dsh-you-should-know/.worktrees/english-only-rules-20261019/AGENTS.md'
+      at readFileSync (node:fs:620:20)
+      at read (file:///Users/pipags/work/dsh-you-should-know/.worktrees/english-only-rules-20261019/test/repository-language.test.js:28:10)
+      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/english-only-rules-20261019/test/repository-language.test.js:56:20)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/Users/pipags/work/dsh-you-should-know/.worktrees/english-only-rules-20261019/AGENTS.md'
+  }
+
+test at test/repository-language.test.js:61:1
+✖ the rule separates human chat from repository artifacts and preserves history (0.078125ms)
+  Error: ENOENT: no such file or directory, open '/Users/pipags/work/dsh-you-should-know/.worktrees/english-only-rules-20261019/AGENTS.md'
+      at readFileSync (node:fs:620:20)
+      at read (file:///Users/pipags/work/dsh-you-should-know/.worktrees/english-only-rules-20261019/test/repository-language.test.js:28:10)
+      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/english-only-rules-20261019/test/repository-language.test.js:62:16)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/Users/pipags/work/dsh-you-should-know/.worktrees/english-only-rules-20261019/AGENTS.md'
+  }
+
+test at test/repository-language.test.js:68:1
+✖ the PR #19 addendum records the deviation and links the preserved report (0.101166ms)
+  Error: ENOENT: no such file or directory, open '/Users/pipags/work/dsh-you-should-know/.worktrees/english-only-rules-20261019/docs/harness-reports/ysk-version-bump-0.4.5-20261019/english-addendum-20261019.md'
+      at readFileSync (node:fs:620:20)
+      at read (file:///Users/pipags/work/dsh-you-should-know/.worktrees/english-only-rules-20261019/test/repository-language.test.js:28:10)
+      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/english-only-rules-20261019/test/repository-language.test.js:69:20)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/Users/pipags/work/dsh-you-should-know/.worktrees/english-only-rules-20261019/docs/harness-reports/ysk-version-bump-0.4.5-20261019/english-addendum-20261019.md'
+  }
+
+test at test/repository-language.test.js:82:1
+✖ the PR #19 historical report is preserved rather than silently translated (0.255417ms)
+  Error: ENOENT: no such file or directory, open '/Users/pipags/work/dsh-you-should-know/.worktrees/english-only-rules-20261019/docs/harness-reports/ysk-version-bump-0.4.5-20261019/english-addendum-20261019.md'
+      at readFileSync (node:fs:620:20)
+      at read (file:///Users/pipags/work/dsh-you-should-know/.worktrees/english-only-rules-20261019/test/repository-language.test.js:28:10)
+      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/english-only-rules-20261019/test/repository-language.test.js:85:20)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/Users/pipags/work/dsh-you-should-know/.worktrees/english-only-rules-20261019/docs/harness-reports/ysk-version-bump-0.4.5-20261019/english-addendum-20261019.md'
+  }
+
+EXIT_CODE=1

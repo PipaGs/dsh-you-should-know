@@ -212,6 +212,10 @@ npm test
 
 The suite covers route discovery and recovery, the verdict contract and silence handling, every gate, dedupe, strictness thresholds, language detection, the human-only invariant, the note card and history, runtime queue, retry, and resume, live config, persistence, the update checker, and release consistency. Full coverage list: [test coverage](./docs/reference.md#test-coverage).
 
+## Repository rules
+
+Repository-facing prose follows the project's [repository rules](./AGENTS.md), including the English-only requirement for new pull request descriptions, commit messages, review comments, reports, and documentation. Human chat language is separate.
+
 ## Related work
 
 [omdsh-dev/dsh-advisor](https://github.com/omdsh-dev/dsh-advisor) pairs a second model that passively reviews each turn and **injects its notes into the primary agent**, so the agent sees the advice and can act on it inside the same turn.

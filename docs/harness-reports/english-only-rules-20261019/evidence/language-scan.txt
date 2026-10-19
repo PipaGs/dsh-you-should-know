@@ -1,0 +1,21 @@
+# English-only scan of all task artifacts
+timestamp_utc: 2026-10-19T10:33:34Z
+
+PASS AGENTS.md
+PASS README.md
+PASS docs/harness-reports/english-only-rules-20261019/evidence/audit-existing-rules.txt
+PASS docs/harness-reports/english-only-rules-20261019/evidence/check.txt
+PASS docs/harness-reports/english-only-rules-20261019/evidence/historical-pr19-deviation.txt
+PASS docs/harness-reports/english-only-rules-20261019/evidence/language-scan.txt
+PASS docs/harness-reports/english-only-rules-20261019/evidence/provenance.json
+PASS docs/harness-reports/english-only-rules-20261019/evidence/test-run-final.txt
+PASS docs/harness-reports/english-only-rules-20261019/evidence/test-run-green.txt
+PASS docs/harness-reports/english-only-rules-20261019/evidence/test-run-red.txt
+PASS docs/harness-reports/english-only-rules-20261019/evidence/whitespace-and-history.txt
+PASS docs/harness-reports/english-only-rules-20261019/final-report.md
+PASS docs/harness-reports/ysk-version-bump-0.4.5-20261019/english-addendum-20261019.md
+PASS test/repository-language.test.js
+
+files=14
+
+EXIT_CODE=0

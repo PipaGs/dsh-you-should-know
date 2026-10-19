@@ -1,0 +1,55 @@
+# Audit of existing project rules and index
+timestamp_utc: 2026-10-19T10:31:46Z
+base=5929bb3547ba7c8f9f91e711a30880b9d201ea94
+
+## Root tree at origin/main
+.gitignore
+LICENSE
+README.md
+cordis.patch.yml
+docs
+lib
+package.json
+scripts
+test
+
+## Rule-like project files
+NONE
+
+## Existing documentation surfaces
+README.md
+docs/reference.md
+
+## Existing English-only statements (product text only)
+origin/main:README.md:174:- UI strings and all public text are English-only by design.
+origin/main:docs/reference.md:296:- UI strings and all shipped or public text are English-only by design; a source-level test rejects CJK, Cyrillic, Greek, and Hangul ranges in addition to unrelated project references.
+origin/main:test/invariant.test.js:12:// Non-Latin script ranges: CJK/Kana, Hangul, Cyrillic, and Greek. English-only
+origin/main:test/invariant.test.js:162:test('the English-only scan rejects Cyrillic, Greek, and CJK text', () => {
+origin/main:test/invariant.test.js:169:test('public-facing text stays English-only and free of unrelated project references', async () => {
+
+## Existing branches with english in the name
+  backup/pre-english-history
+* docs/english-only-rules-20261019
+  remotes/origin/backup/pre-english-history
+
+## Existing remote branches with english in the name
+fa66ed7b82c9b7af02919d5112440aae1c3b4aa4	refs/heads/backup/pre-english-history
+
+## PRs matching english-only
+6
+
+## Commits matching english-only
+       2
+
+## Result
+No project-level AGENTS.md, CONTRIBUTING.md, or rules index exists at origin/main.
+README.md and docs/reference.md are product documentation; their English-only statements cover shipped/public product text, not repository workflow artifacts.
+The user-level ~/.dsh/AGENTS.md is not a project rule; its commit/PR language line is superseded for this repository by the owner instruction and the new project AGENTS.md.
+
+## Refinement of the GitHub search
+
+The generic search returned six PRs because it tokenizes common English words.
+None is an English-policy or repository-rules task.
+
+PRs with "english-only" in the title: 0
+PRs with "repository rules" in the title: 0

@@ -1,0 +1,15 @@
+# npm run check on the English-only rules tree
+timestamp_utc: 2026-10-19T10:31:28Z
+head_before_commit=5929bb3547ba7c8f9f91e711a30880b9d201ea94
+
+
+> dsh-you-should-know@0.4.5 check
+> node --check lib/core.js && node --check lib/self-check.js && node --check lib/runtime.js && node --check lib/review-profile.js && node --check lib/review-strictness.js && node --check lib/language.js && node --check lib/feedback.js && node --check lib/adaptive.js && node --check lib/evidence.js && node --check lib/explain.js && node --check lib/update.js && node --check lib/index.js && node --check lib/client.js && node --check scripts/note-voice-eval.mjs && node --check scripts/note-voice-eval-deepseek.mjs && node --check scripts/note-voice-eval-live.mjs
+
+npm notice
+npm notice New major version of npm available! 11.19.1 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice
+
+EXIT_CODE=0
