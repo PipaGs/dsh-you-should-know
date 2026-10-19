@@ -2,10 +2,10 @@
 
 **Статус:** READY_FOR_CHATGPT_REVIEW · DSH не мержит, не создаёт тег и не публикует npm.
 **Product head (код, тесты, README, reference):** `eb326ec5eaec3c3d25fcf4c6d4971ed57a4f7827`
-**Evidence head (логи, provenance, этот отчёт):** фиксируется в PR body и в конце отчёта после commit; файл не может содержать собственный SHA.
+**Evidence head:** raw evidence — `b7173c5dfc650dd42f9df040f3188e5ba4144583`; коммит с нормализованным RED-логом и этой правкой отчёта — финальный head PR #19 (файл не может содержать собственный SHA).
 **База:** `origin/main` `c4da5015ac5dea2ebcafee27a296bcd38aa00a78` (merge PR #18).
 **Ветка:** `chore/ysk-version-bump-0.4.5` (worktree `.worktrees/ysk-version-bump-0.4.5`).
-**PR:** будет открыт после push этой ветки; номер и URL фиксируются в отчёте до STATUS: READY_FOR_CHATGPT_REVIEW.
+**PR:** #19 — https://github.com/PipaGs/dsh-you-should-know/pull/19.
 **Инструмент:** DeepSeek Harness, supervised goal `goal-session-2d67076e-1475-4d51-8827-3c68fa11d4ef`, mode strict.
 
 ---
@@ -101,11 +101,11 @@ EXIT_CODE=0
 
 ## 7. Верификация
 
-Сырые логи закоммичены целиком, не выдержки. SHA256:
+Логи закоммичены целиком, не выдержки. Один RED-лог нормализован только по whitespace-only пустым строкам; см. §7.1 и `evidence/whitespace-normalization-log.txt`. SHA256 финальных файлов:
 
 | Лог | SHA256 | Что это |
 |---|---|---|
-| `evidence/test-run-red-version.txt` | `5107f103dc0f266e219b8f4a1c5001d51d2a61fe3ef07db9f228f43d6e5759b3` | RED: 6/7 fail на старом источнике |
+| `evidence/test-run-red-version.txt` | `0c12e3d31dd71284af284ca9c981a5e59a454280278aa53d8962758b58084e55` | RED: 6/7 fail на старом источнике (whitespace-normalized) |
 | `evidence/test-run-green-version.txt` | `a9b0ef24c095e1bea01c6f35880e465d0b76cfd31e4209aea00e9d5c11562593` | GREEN: 7/7 pass после bump |
 | `evidence/test-run-final.txt` | `55adb3a2e4ce1f45fd72b0c90d1c5c647c050fc2c239325880b8b76ea29c8e3d` | полный `npm test` на dirty pre-commit tree: 563/563 |
 | `evidence/test-run-final-committed.txt` | `1776a1ddbdd76ab84fa6eeaabafc2ef051a1ec7a79e2093fc51bd05128d26248` | полный `npm test` на committed head `eb326ec`: 563/563 |
@@ -113,12 +113,17 @@ EXIT_CODE=0
 | `evidence/version-validation.txt` | `84e346c48c1d5469d3bef1a510f89788cb4821a7ef7a6494f5b6cb81eb711823` | явные значения зеркал: PASS |
 | `evidence/version-scan.txt` | `d2570c0dd84df836a34f08dd897de52733224cd51585ef72c86273b438e37a71` | `git grep` 0.4.3/0.4.4/0.4.5 |
 | `evidence/diff-and-security-sanity.txt` | `31308526f8410a87e4312ae3348d0c8569abb7d4eb680bc697e2d4161e3a4e2b` | numstat, client preservation, secret/URL scan |
-| `evidence/whitespace-and-status.txt` | `b63482b29fbcebc7859911e9d1b651251f569903afbc809ca8589329f5845fce` | `git diff --check` + status |
+| `evidence/whitespace-and-status.txt` | `2e1c7f6f0c986cfdb6fd5a7e545871965524417c566b7dbbb7bc0f981129dc43` | финальный `git diff --cached --check` + `git diff --check` + changed paths |
+| `evidence/whitespace-normalization-log.txt` | `e08acf8ec20109b3e602d41901e6266e89a92f89037dbb560650f75eff944ce2` | before/after SHA256 и scope нормализации RED-лога |
 | `evidence/provenance.json` | — | base/product head, branch, runtime, версии |
 
-Хронология: product-коммит `eb326ec`, затем evidence/report-коммит. Профильные RED/GREEN, `npm test`, `npm run check` и scan выполнены до product-коммита на одном и том же дереве; `npm test` повторён после product-коммита на чистом tracked tree. Финальный head PR добавляет только `docs/harness-reports/`, что не инвалидирует product evidence.
+Хронология: product-коммит `eb326ec`, затем raw evidence/report-коммит `b7173c5`, затем нормализация whitespace-only пустых строк в RED-логе и эта правка отчёта. Профильные RED/GREEN, `npm test`, `npm run check` и scan выполнены до product-коммита на одном и том же дереве; `npm test` повторён после product-коммита на чистом tracked tree. Финальный head PR добавляет только `docs/harness-reports/`, что не инвалидирует product evidence.
 
 Runtime: Node `v26.9.0`, npm `11.19.1`.
+
+### 7.1 Нормализация whitespace в RED-логе
+
+`git diff --check` на raw evidence-коммите `b7173c5` пометил 10 строк в `evidence/test-run-red-version.txt` как trailing whitespace. Все 10 строк были пустыми строками, содержащими только пробелы; ни одна строка с реальным содержанием не имела trailing whitespace. Пробелы удалены, файл остался 142-строчным, summary не изменился: 7 tests / 1 pass / 6 fail / EXIT_CODE=1. До и после: `5107f103…` → `0c12e3d3…`. Pre-normalization bytes доступны в коммите `b7173c5`. Подробности: `evidence/whitespace-normalization-log.txt`.
 
 ## 8. Дифф и security sanity
 

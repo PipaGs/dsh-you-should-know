@@ -1,0 +1,32 @@
+# Whitespace normalization log — RED evidence (0.4.5 bump)
+
+Scope: NEW evidence file `test-run-red-version.txt` only. No historical report and no other evidence file was touched.
+
+## Why
+
+`git diff --check` flagged 10 trailing-whitespace warnings on blank lines added by this PR. Every flagged line contained only spaces; no line with real content had trailing whitespace. The 10 whitespace-only blank lines were emptied; nothing else changed.
+
+## Before / after
+
+| Field | Value |
+|---|---|
+| file | `evidence/test-run-red-version.txt` |
+| sha256 before | `5107f103dc0f266e219b8f4a1c5001d51d2a61fe3ef07db9f228f43d6e5759b3` |
+| sha256 after | `0c12e3d31dd71284af284ca9c981a5e59a454280278aa53d8962758b58084e55` |
+| lines before / after | 142 / 142 |
+| test summary before | 7 tests, 1 pass, 6 fail |
+| test summary after | 7 tests, 1 pass, 6 fail |
+
+## What did NOT change
+
+- Test outcome and counts: 7 tests, 1 pass, 6 fail, EXIT_CODE=1.
+- No assertion text, actual/expected value, file path, or stack frame was edited.
+- Every changed line was whitespace-only before and is an empty line after.
+
+## Provenance
+
+The pre-normalization bytes are recoverable from git history at commit `b7173c5dfc650dd42f9df040f3188e5ba4144583` (the parent of the normalization commit). The committed file is the normalized copy; the hashes above pin both sides.
+
+## Verification
+
+See `evidence/whitespace-and-status.txt` (rerun after normalization) and the final PR head diff check.
