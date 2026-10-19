@@ -1,0 +1,122 @@
+{
+  "label": "green-fixed",
+  "capturedAt": "2026-10-19T10:03:21.887Z",
+  "url": "http://127.0.0.1:19593/?token=<redacted>",
+  "playwright": "1.63.0",
+  "viewport": {
+    "width": 1280,
+    "height": 900,
+    "deviceScaleFactor": 2
+  },
+  "fixture": {
+    "entries": 12,
+    "note": "HTTP-boundary fixtures for the plugin routes only"
+  },
+  "pluginClientSha256": "bc7abd92eb076148f327a83e4a815743a9ae5adfc52425dcc30236a4dfddfcfa",
+  "beforeScroll": {
+    "viewportHeight": 900,
+    "toggle": {
+      "top": 227,
+      "bottom": 240,
+      "height": 13,
+      "left": 1065,
+      "width": 67
+    },
+    "toggleInViewport": true,
+    "group": {
+      "top": 246,
+      "bottom": 651,
+      "height": 405,
+      "left": 421,
+      "width": 712
+    },
+    "groupStyle": {
+      "maxHeight": "405px",
+      "overflowY": "auto",
+      "scrollHeight": 1061,
+      "clientHeight": 405
+    },
+    "composerSeat": {
+      "top": 135,
+      "bottom": 805,
+      "height": 670,
+      "left": 280,
+      "width": 993
+    },
+    "seatHeightExceedsViewport": false,
+    "scroll": {
+      "scrollTop": 0,
+      "scrollHeight": 860,
+      "clientHeight": 860
+    }
+  },
+  "afterScrollToTop": {
+    "viewportHeight": 900,
+    "toggle": {
+      "top": 227,
+      "bottom": 240,
+      "height": 13,
+      "left": 1065,
+      "width": 67
+    },
+    "toggleInViewport": true,
+    "group": {
+      "top": 246,
+      "bottom": 651,
+      "height": 405,
+      "left": 421,
+      "width": 712
+    },
+    "groupStyle": {
+      "maxHeight": "405px",
+      "overflowY": "auto",
+      "scrollHeight": 1061,
+      "clientHeight": 405
+    },
+    "composerSeat": {
+      "top": 135,
+      "bottom": 805,
+      "height": 670,
+      "left": 280,
+      "width": 993
+    },
+    "seatHeightExceedsViewport": false,
+    "scroll": {
+      "scrollTop": 0,
+      "scrollHeight": 860,
+      "clientHeight": 860
+    }
+  },
+  "click": {
+    "ok": true,
+    "elapsedMs": 28
+  },
+  "afterClick": {
+    "viewportHeight": 900,
+    "toggle": {
+      "top": 433,
+      "bottom": 446,
+      "height": 13,
+      "left": 1091,
+      "width": 42
+    },
+    "toggleInViewport": true,
+    "group": null,
+    "groupStyle": null,
+    "composerSeat": {
+      "top": 341,
+      "bottom": 600,
+      "height": 259,
+      "left": 280,
+      "width": 993
+    },
+    "seatHeightExceedsViewport": false,
+    "scroll": {
+      "scrollTop": 0,
+      "scrollHeight": 860,
+      "clientHeight": 860
+    }
+  },
+  "panelClosed": true,
+  "toggleLabelAfterClick": "Show notification history"
+}

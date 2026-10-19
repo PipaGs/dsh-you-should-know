@@ -1,0 +1,11 @@
+# security sanity collected 2026-10-19T10:05:18Z
+## secret-like patterns in added product lines
+no matches
+## absolute home paths in added product lines
+no matches
+## live session token in report-round files
+no matches (only the redacted form)
+## user home paths in report-round files
+no matches
+## owner email/private identifiers
+no matches

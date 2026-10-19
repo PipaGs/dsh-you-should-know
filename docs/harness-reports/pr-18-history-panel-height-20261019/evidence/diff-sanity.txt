@@ -1,0 +1,34 @@
+# diff sanity collected 2026-10-19T10:05:39Z
+product_diff_base=82ad0a98b8f70a29b96f562da424c01b501884eb
+product_diff_head=af71dc1c7bc87c2fe620ea8b61cfbd7db72a87db (reviewed head; product source unchanged this round)
+ lib/client.js          | 31 +++++++++++++++++++++++--------
+ test/client-ui.test.js | 36 ++++++++++++++++++++++++++++++++++++
+ 2 files changed, 59 insertions(+), 8 deletions(-)
+product_diff_check_exit=0
+
+# staged code + report, evidence excluded (raw TAP logs are stored verbatim and are not whitespace-normalized)
+staged_check_without_evidence_exit=0
+
+# staged files
+A	docs/harness-reports/pr-18-history-panel-height-20261019/evidence/capture-history.cjs
+A	docs/harness-reports/pr-18-history-panel-height-20261019/evidence/diff-sanity.txt
+A	docs/harness-reports/pr-18-history-panel-height-20261019/evidence/green-fixed-1-after-open-page.png
+A	docs/harness-reports/pr-18-history-panel-height-20261019/evidence/green-fixed-1-after-open.png
+A	docs/harness-reports/pr-18-history-panel-height-20261019/evidence/green-fixed-2-scrolled-to-top.png
+A	docs/harness-reports/pr-18-history-panel-height-20261019/evidence/green-fixed-3-after-click.png
+A	docs/harness-reports/pr-18-history-panel-height-20261019/evidence/green-fixed.json
+A	docs/harness-reports/pr-18-history-panel-height-20261019/evidence/provenance.txt
+A	docs/harness-reports/pr-18-history-panel-height-20261019/evidence/red-unbounded-1-after-open-page.png
+A	docs/harness-reports/pr-18-history-panel-height-20261019/evidence/red-unbounded-1-after-open.png
+A	docs/harness-reports/pr-18-history-panel-height-20261019/evidence/red-unbounded-2-scrolled-to-top.png
+A	docs/harness-reports/pr-18-history-panel-height-20261019/evidence/red-unbounded-3-after-click.png
+A	docs/harness-reports/pr-18-history-panel-height-20261019/evidence/red-unbounded.json
+A	docs/harness-reports/pr-18-history-panel-height-20261019/evidence/security-sanity.txt
+A	docs/harness-reports/pr-18-history-panel-height-20261019/evidence/test-client-ui-final.txt
+A	docs/harness-reports/pr-18-history-panel-height-20261019/evidence/test-full-final.txt
+A	docs/harness-reports/pr-18-history-panel-height-20261019/evidence/test-red-prefix-final.txt
+A	docs/harness-reports/pr-18-history-panel-height-20261019/final-report.md
+
+# per-file sha256
+bc7abd92eb076148f327a83e4a815743a9ae5adfc52425dcc30236a4dfddfcfa  lib/client.js
+f0e1e73541db476bd5b7ad674e00cedcf8570281bbc219d342f2abc0b6b71da2  test/client-ui.test.js

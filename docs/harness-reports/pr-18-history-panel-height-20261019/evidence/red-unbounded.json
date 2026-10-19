@@ -1,0 +1,134 @@
+{
+  "label": "red-unbounded",
+  "capturedAt": "2026-10-19T10:03:54.319Z",
+  "url": "http://127.0.0.1:19594/?token=<redacted>",
+  "playwright": "1.63.0",
+  "viewport": {
+    "width": 1280,
+    "height": 900,
+    "deviceScaleFactor": 2
+  },
+  "fixture": {
+    "entries": 12,
+    "note": "HTTP-boundary fixtures for the plugin routes only"
+  },
+  "pluginClientSha256": "4151fae8011f5842d18c47c0f8eb5141562e8ecd343c1f436740286f17b8e6b5",
+  "beforeScroll": {
+    "viewportHeight": 900,
+    "toggle": {
+      "top": -93,
+      "bottom": -80,
+      "height": 13,
+      "left": 1065,
+      "width": 67
+    },
+    "toggleInViewport": false,
+    "group": {
+      "top": -74,
+      "bottom": 971,
+      "height": 1045,
+      "left": 421,
+      "width": 712
+    },
+    "groupStyle": {
+      "maxHeight": "none",
+      "overflowY": "visible",
+      "scrollHeight": 1045,
+      "clientHeight": 1045
+    },
+    "composerSeat": {
+      "top": -185,
+      "bottom": 1125,
+      "height": 1310,
+      "left": 280,
+      "width": 993
+    },
+    "seatHeightExceedsViewport": true,
+    "scroll": {
+      "scrollTop": 0,
+      "scrollHeight": 1085,
+      "clientHeight": 860
+    }
+  },
+  "afterScrollToTop": {
+    "viewportHeight": 900,
+    "toggle": {
+      "top": -93,
+      "bottom": -80,
+      "height": 13,
+      "left": 1065,
+      "width": 67
+    },
+    "toggleInViewport": false,
+    "group": {
+      "top": -74,
+      "bottom": 971,
+      "height": 1045,
+      "left": 421,
+      "width": 712
+    },
+    "groupStyle": {
+      "maxHeight": "none",
+      "overflowY": "visible",
+      "scrollHeight": 1045,
+      "clientHeight": 1045
+    },
+    "composerSeat": {
+      "top": -185,
+      "bottom": 1125,
+      "height": 1310,
+      "left": 280,
+      "width": 993
+    },
+    "seatHeightExceedsViewport": true,
+    "scroll": {
+      "scrollTop": 0,
+      "scrollHeight": 1085,
+      "clientHeight": 860
+    }
+  },
+  "click": {
+    "ok": false,
+    "elapsedMs": 8010,
+    "error": "locator.click: Timeout 8000ms exceeded."
+  },
+  "afterClick": {
+    "viewportHeight": 900,
+    "toggle": {
+      "top": -93,
+      "bottom": -80,
+      "height": 13,
+      "left": 1065,
+      "width": 67
+    },
+    "toggleInViewport": false,
+    "group": {
+      "top": -74,
+      "bottom": 971,
+      "height": 1045,
+      "left": 421,
+      "width": 712
+    },
+    "groupStyle": {
+      "maxHeight": "none",
+      "overflowY": "visible",
+      "scrollHeight": 1045,
+      "clientHeight": 1045
+    },
+    "composerSeat": {
+      "top": -185,
+      "bottom": 1125,
+      "height": 1310,
+      "left": 280,
+      "width": 993
+    },
+    "seatHeightExceedsViewport": true,
+    "scroll": {
+      "scrollTop": 0,
+      "scrollHeight": 1085,
+      "clientHeight": 860
+    }
+  },
+  "panelClosed": false,
+  "toggleLabelAfterClick": "Hide notification history"
+}
