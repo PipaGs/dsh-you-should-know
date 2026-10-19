@@ -1,0 +1,23 @@
+# GREEN: version-mirror tests after synchronizing 0.4.5
+timestamp_utc: 2026-10-19T10:22:43Z
+head_before_commit: c4da5015ac5dea2ebcafee27a296bcd38aa00a78
+tree_state: dirty version bump, not committed
+
+✔ the manifest declares the bundle, the client half, and no build step (1.794583ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+✔ the authenticated self-check route reports only the bounded running plugin state (19.145792ms)
+✔ the release version is a patch increment over the previous release (0.433333ms)
+✔ package.json, PLUGIN_VERSION, and the README install address agree (0.55775ms)
+✔ every README self-check sample version is the released version (0.166333ms)
+✔ no released artifact still documents the previous version (0.178167ms)
+✔ the exported plugin version mirrors package.json (1.629792ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 158.997709
+
+EXIT_CODE=0

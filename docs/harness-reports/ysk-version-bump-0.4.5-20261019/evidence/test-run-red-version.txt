@@ -1,0 +1,142 @@
+# RED: version-mirror tests updated before the source bump
+timestamp_utc: 2026-10-19T10:22:29Z
+head: c4da5015ac5dea2ebcafee27a296bcd38aa00a78
+branch: chore/ysk-version-bump-0.4.5
+dirty_tree:
+ M test/invariant.test.js
+ M test/plugin.test.js
+ M test/release-consistency.test.js
+ M test/update-route.test.js
+?? docs/harness-reports/ysk-version-bump-0.4.5-20261019/
+
+✖ the manifest declares the bundle, the client half, and no build step (2.174959ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+✖ the authenticated self-check route reports only the bounded running plugin state (17.48525ms)
+✔ the release version is a patch increment over the previous release (0.422583ms)
+✖ package.json, PLUGIN_VERSION, and the README install address agree (0.670916ms)
+✖ every README self-check sample version is the released version (0.208708ms)
+✖ no released artifact still documents the previous version (0.137667ms)
+✖ the exported plugin version mirrors package.json (1.932291ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 1
+ℹ fail 6
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 157.6865
+
+✖ failing tests:
+
+test at test/invariant.test.js:186:1
+✖ the manifest declares the bundle, the client half, and no build step (2.174959ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  '0.4.4' !== '0.4.5'
+
+      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.5/test/invariant.test.js:189:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '0.4.4',
+    expected: '0.4.5',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/plugin.test.js:384:1
+✖ the authenticated self-check route reports only the bounded running plugin state (17.48525ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  '0.4.4' !== '0.4.5'
+
+      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.5/test/plugin.test.js:399:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '0.4.4',
+    expected: '0.4.5',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/release-consistency.test.js:43:1
+✖ package.json, PLUGIN_VERSION, and the README install address agree (0.670916ms)
+  AssertionError [ERR_ASSERTION]: package.json carries the release version
+
+  '0.4.4' !== '0.4.5'
+
+      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.5/test/release-consistency.test.js:45:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '0.4.4',
+    expected: '0.4.5',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/release-consistency.test.js:57:1
+✖ every README self-check sample version is the released version (0.208708ms)
+  AssertionError [ERR_ASSERTION]: pluginVersion names the release version
+      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.5/test/release-consistency.test.js:61:12)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '## Operational verification\n\nThe supported check is **Run self-check** in **Settings -> Plugins -> You Should Know -> Diagnostics**. It calls the read-only `GET`/`HEAD /api/dsh-you-should-know/self-check` route over the same authenticated connection as every other plugin route and reports versions, runtime status, mode, registered routes, capabilities, and the bounded update state. Abridged sample:\n\n```json\n{\n  "ok": true,\n  "authTransport": "host-authenticated-connection",\n  "healthy": true,\n  "configured": true,\n  "pluginVersion": "0.4.4",\n  "runtimeVersion": "0.4.4",\n  "installedVersion": "0.4.4",\n  "runtimeStatus": "idle",\n  "reviewerMode": "balanced",\n  "update": { "currentVersion": "0.4.4", "updateAvailable": false, "automaticSupported": false }\n}\n```\n\nA healthy result shows the running and installed versions and the enabled capabilities. When the installed package version differs from the running module version, the card shows **Restart required**. When either version cannot be read, it says the comparison is unavailable instead of guessing.\n\nA bare `curl` to any `/api/*` route returns `401` before the plugin handler is reached: the connection\'s Host/Origin fence and browser-session authentication run first. That is expected host behavior, not a plugin failure, and it is why external verification needs the authenticated page. Do not bypass authentication or paste a session cookie into a command. For the same reason, read the read-only status route from the page\'s console:\n\n```js\nawait (await fetch(\'api/dsh-you-should-know/status?sessionId=<session-id>\')).json()\n```\n\nField-by-field schemas for both routes: [status and self-check](./docs/reference.md#status-and-self-check-routes).\n\n## Development\n\n```sh\nnpm test\n```\n\nThe suite covers route discovery and recovery, the verdict contract and silence handling, every gate, dedupe, strictness thresholds, language detection, the human-only invariant, the note card and history, runtime queue, retry, and resume, live config, persistence, the update checker, and release consistency. Full coverage list: [test coverage](./docs/reference.md#test-coverage).\n\n## Related work\n\n[omdsh-dev/dsh-advisor](https://github.com/omdsh-dev/dsh-advisor) pairs a second model that passively reviews each turn and **injects its notes into the primary agent**, so the agent sees the advice and can act on it inside the same turn.\n\nThis plugin is the deliberate opposite. Its notes are **human-only**: the primary agent is never steered, injected, woken, or written to, and the advice never enters the transcript or the model context. The value here is an independent opinion for the person, not another instruction for the agent.\n\n## License\n\nMIT. See [LICENSE](./LICENSE).\n',
+    expected: /"pluginVersion": "0.4.5"/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at test/release-consistency.test.js:66:1
+✖ no released artifact still documents the previous version (0.137667ms)
+  AssertionError [ERR_ASSERTION]: package.json still names 0.4.4
+
+  true !== false
+
+      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.5/test/release-consistency.test.js:69:12)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/update-route.test.js:254:1
+✖ the exported plugin version mirrors package.json (1.932291ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  '0.4.4' !== '0.4.5'
+
+      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.5/test/update-route.test.js:257:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '0.4.4',
+    expected: '0.4.5',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+EXIT_CODE=1

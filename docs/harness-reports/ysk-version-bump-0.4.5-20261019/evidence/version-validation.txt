@@ -1,0 +1,13 @@
+# Version validation for 0.4.5
+timestamp_utc: 2026-10-19T10:23:00Z
+npm pkg get version: "0.4.5"
+{
+  "manifest": "0.4.5",
+  "pluginVersion": "0.4.5",
+  "readmeStatus": "0.4.5",
+  "readmeInstall": "github:PipaGs/dsh-you-should-know#v0.4.5",
+  "readmePluginVersion": "0.4.5",
+  "referencePluginVersion": "0.4.5"
+}
+VERSION_VALIDATION=PASS
+EXIT_CODE=0

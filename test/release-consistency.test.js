@@ -25,8 +25,8 @@ import { fileURLToPath } from 'node:url'
 import { PLUGIN_VERSION } from '../lib/index.js'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const CURRENT = '0.4.4'
-const PREVIOUS = '0.4.3'
+const CURRENT = '0.4.5'
+const PREVIOUS = '0.4.4'
 
 function read(path) {
   return readFileSync(join(repoRoot, path), 'utf8')

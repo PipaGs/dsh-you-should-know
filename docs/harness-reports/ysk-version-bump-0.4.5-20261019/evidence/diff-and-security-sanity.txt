@@ -1,0 +1,33 @@
+# Diff and security sanity
+timestamp_utc: 2026-10-19T10:23:07Z
+base: c4da5015ac5dea2ebcafee27a296bcd38aa00a78
+
+## git diff --numstat origin/main (tracked changes)
+6	6	README.md
+4	4	docs/reference.md
+1	1	lib/index.js
+1	1	package.json
+1	1	test/invariant.test.js
+3	3	test/plugin.test.js
+2	2	test/release-consistency.test.js
+1	1	test/update-route.test.js
+
+## changed paths
+M	README.md
+M	docs/reference.md
+M	lib/index.js
+M	package.json
+M	test/invariant.test.js
+M	test/plugin.test.js
+M	test/release-consistency.test.js
+M	test/update-route.test.js
+
+## client half + client tests diff (PR #18 preservation)
+CLIENT_UNCHANGED=PASS
+
+## secret/token/url scan over the product diff
+NO_SECRET_OR_NEW_URL_MATCHES
+
+## dependency manifest changes
+-  "version": "0.4.4",
++  "version": "0.4.5",

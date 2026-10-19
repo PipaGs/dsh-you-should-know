@@ -1,0 +1,32 @@
+# In-scope version scan (tracked files; historical reports and upstream excluded)
+timestamp_utc: 2026-10-19T10:23:03Z
+
+## 0.4.4 occurrences in product/test/docs
+test/release-consistency.test.js:29:const PREVIOUS = '0.4.4'
+test/release-notes-consistency.test.js:1:// Documentation regression gate for the v0.4.4 publication candidate.
+test/release-notes-consistency.test.js:30:const notesPath = join(repoRoot, 'docs/harness-reports/ysk-release-prep-0.4.4/release-notes-v0.4.4.md')
+test/release-notes-consistency.test.js:50:    '0.4.4',
+test/release-notes-consistency.test.js:51:    'github:PipaGs/dsh-you-should-know#v0.4.4',
+
+## 0.4.3 occurrences in product/test/docs
+(none in the selected scope)
+
+## 0.4.5 occurrences in product/test/docs
+README.md:11:Version `0.4.5`, MIT. Host and browser halves ship as plain JavaScript, so a `github:` install needs no build. The scope is intentionally small: a composer-adjacent note card with a bounded in-memory history, a Plugins settings card (strictness mode, additional instructions, custom prompt, update controls), a session-header mode and model override, one reviewer call per qualifying turn, and a per-session runtime that retries one transient failure, bounds the queue, and pauses on quota without losing the turn.
+README.md:74:dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.4.5
+README.md:188:  "pluginVersion": "0.4.5",
+README.md:189:  "runtimeVersion": "0.4.5",
+README.md:190:  "installedVersion": "0.4.5",
+README.md:193:  "update": { "currentVersion": "0.4.5", "updateAvailable": false, "automaticSupported": false }
+docs/reference.md:183:  "pluginVersion": "0.4.5",
+docs/reference.md:184:  "runtimeVersion": "0.4.5",
+docs/reference.md:185:  "installedVersion": "0.4.5",
+docs/reference.md:190:  "update": { "currentVersion": "0.4.5", "latestVersion": "", "latestTag": "", "installSpec": "", "source": "git-tags", "updateAvailable": false, "dismissed": false, "autoCheckUpdates": true, "updateBehavior": "ask-before-update", "automaticSupported": false, "lastAutoCheckDate": "", "lastCheckedAt": null, "lastResult": null }
+lib/index.js:36:export const PLUGIN_VERSION = '0.4.5'
+package.json:3:  "version": "0.4.5",
+test/invariant.test.js:189:  assert.equal(manifest.version, '0.4.5')
+test/plugin.test.js:399:  assert.equal(body.pluginVersion, '0.4.5')
+test/plugin.test.js:400:  assert.equal(body.runtimeVersion, '0.4.5')
+test/plugin.test.js:401:  assert.equal(body.installedVersion, '0.4.5')
+test/release-consistency.test.js:28:const CURRENT = '0.4.5'
+test/update-route.test.js:257:  assert.equal(manifest.version, '0.4.5')

@@ -1,0 +1,39 @@
+# Whitespace and status check after normalizing the RED evidence
+timestamp_utc: 2026-10-19T10:25:18Z
+head_before_normalization_commit: b7173c5dfc650dd42f9df040f3188e5ba4144583
+
+## git diff --cached --check (relative to HEAD)
+EXIT_CODE=0
+
+## git diff --check (working tree)
+EXIT_CODE=0
+
+## changed paths relative to origin/main
+M	README.md
+A	docs/harness-reports/ysk-version-bump-0.4.5-20261019/evidence-sha256.txt
+A	docs/harness-reports/ysk-version-bump-0.4.5-20261019/evidence/check.txt
+A	docs/harness-reports/ysk-version-bump-0.4.5-20261019/evidence/diff-and-security-sanity.txt
+A	docs/harness-reports/ysk-version-bump-0.4.5-20261019/evidence/provenance.json
+A	docs/harness-reports/ysk-version-bump-0.4.5-20261019/evidence/test-run-final-committed.txt
+A	docs/harness-reports/ysk-version-bump-0.4.5-20261019/evidence/test-run-final.txt
+A	docs/harness-reports/ysk-version-bump-0.4.5-20261019/evidence/test-run-green-version.txt
+A	docs/harness-reports/ysk-version-bump-0.4.5-20261019/evidence/test-run-red-version.txt
+A	docs/harness-reports/ysk-version-bump-0.4.5-20261019/evidence/version-scan.txt
+A	docs/harness-reports/ysk-version-bump-0.4.5-20261019/evidence/version-validation.txt
+A	docs/harness-reports/ysk-version-bump-0.4.5-20261019/evidence/whitespace-and-status.txt
+A	docs/harness-reports/ysk-version-bump-0.4.5-20261019/evidence/whitespace-normalization-log.txt
+A	docs/harness-reports/ysk-version-bump-0.4.5-20261019/final-report.md
+M	docs/reference.md
+M	lib/index.js
+M	package.json
+M	test/invariant.test.js
+M	test/plugin.test.js
+M	test/release-consistency.test.js
+M	test/update-route.test.js
+
+## tracked status
+M  docs/harness-reports/ysk-version-bump-0.4.5-20261019/evidence-sha256.txt
+M  docs/harness-reports/ysk-version-bump-0.4.5-20261019/evidence/test-run-red-version.txt
+ M docs/harness-reports/ysk-version-bump-0.4.5-20261019/evidence/whitespace-and-status.txt
+A  docs/harness-reports/ysk-version-bump-0.4.5-20261019/evidence/whitespace-normalization-log.txt
+M  docs/harness-reports/ysk-version-bump-0.4.5-20261019/final-report.md
