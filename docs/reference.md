@@ -180,14 +180,14 @@ The self-check route answers only from in-process state and returns bounded JSON
   "authTransport": "host-authenticated-connection",
   "healthy": true,
   "configured": true,
-  "pluginVersion": "0.4.4",
-  "runtimeVersion": "0.4.4",
-  "installedVersion": "0.4.4",
+  "pluginVersion": "0.4.5",
+  "runtimeVersion": "0.4.5",
+  "installedVersion": "0.4.5",
   "runtimeStatus": "idle",
   "reviewerMode": "balanced",
   "routes": [{ "name": "self-check", "methods": ["GET", "HEAD"], "registered": true }],
   "capabilities": { "feedback": true, "explain": true, "evidence": true, "episodeTrigger": true, "adaptiveBudget": true, "updateChecker": true },
-  "update": { "currentVersion": "0.4.4", "latestVersion": "", "latestTag": "", "installSpec": "", "source": "git-tags", "updateAvailable": false, "dismissed": false, "autoCheckUpdates": true, "updateBehavior": "ask-before-update", "automaticSupported": false, "lastAutoCheckDate": "", "lastCheckedAt": null, "lastResult": null }
+  "update": { "currentVersion": "0.4.5", "latestVersion": "", "latestTag": "", "installSpec": "", "source": "git-tags", "updateAvailable": false, "dismissed": false, "autoCheckUpdates": true, "updateBehavior": "ask-before-update", "automaticSupported": false, "lastAutoCheckDate": "", "lastCheckedAt": null, "lastResult": null }
 }
 ```
 
