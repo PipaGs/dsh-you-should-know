@@ -1,0 +1,33 @@
+collected_at_utc=2026-10-19T10:02:36Z
+repo=<home>/work/dsh-you-should-know
+branch=fix/web-history-panel-height
+head=af71dc1c7bc87c2fe620ea8b61cfbd7db72a87db
+base=82ad0a98b8f70a29b96f562da424c01b501884eb
+remote_head=af71dc1c7bc87c2fe620ea8b61cfbd7db72a87db
+node=v26.9.0
+npm=11.19.1
+dsh_app=<dsh-app>
+dsh_app_version=unknown
+dsh_cli_version=0.2.1-rc.2
+playwright=1.63.0
+chromium_headless_shell=chromium_headless_shell-1243
+plugin_client_sha256=bc7abd92eb076148f327a83e4a815743a9ae5adfc52425dcc30236a4dfddfcfa
+plugin_client_sha256_pre_fix=4151fae8011f5842d18c47c0f8eb5141562e8ecd343c1f436740286f17b8e6b5
+worktrees:
+<home>/work/dsh-you-should-know                                       af71dc1 [fix/web-history-panel-height]
+<home>/work/dsh-you-should-know/.worktrees/ysk-empty-state-dock       4c6a527 (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-hide-empty-banner      e0f8a36 (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-note-voice-eval        517cb78 (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-note-voice-live        e3baf09 (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-note-voice-semantic    fe3a992 (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-postmerge-release-gate 48630ca (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-postmerge-verify       5a8dda3 (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-postmerge-verify-0.4.3 b6a202d (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-postmerge-verify-pr11  ec07de1 (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-postmerge-verify-pr12  7b4ba87 (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-postmerge-verify-pr13  746d1ca (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-postmerge-verify-pr14  3563dd8 (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-postmerge-verify-pr15  b115379 (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-release-prep-0.4.4     67f306f (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-upstream-adoption      32513e9 (detached HEAD)
+<home>/work/dsh-you-should-know/.worktrees/ysk-version-bump           abcc5cb (detached HEAD)

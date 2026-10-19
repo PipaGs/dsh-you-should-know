@@ -1432,6 +1432,42 @@ test('History opens on demand, shows every state, and never polls while closed',
   view.unmount()
 })
 
+test('the open history panel stays inside the viewport so its Hide control remains reachable', async () => {
+  const entries = []
+  for (let index = 0; index < 24; index += 1) {
+    entries.push({
+      id: 'n-' + index,
+      note: 'Finding ' + index + '.',
+      importance: 'high',
+      createdAt: 1700000000000 - index,
+      resolved: true,
+      resolution: 'thanks',
+      resolvedAt: 1700000000000 - index,
+    })
+  }
+  const env = await loadBundle({
+    backend: historyBackend({ notes: [], history: entries }),
+    allowIntervals: true,
+  })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1' })
+  await flushAsync()
+  buttonByText(view.output, 'History').props.onClick()
+  await flushAsync()
+
+  const group = findByAria(view.output, 'Notification history')
+  assert.ok(group, 'the open history renders as one group')
+  // The dock is the first child of a bottom-sticky composer seat: a list taller
+  // than the scrollport pushes its own toggle out of reach, with no scroll
+  // position that brings it back.
+  assert.equal(group.props.style.maxHeight, 'min(45vh, 420px)', 'the list is capped to a fraction of the viewport')
+  assert.equal(group.props.style.overflowY, 'auto', 'the capped list scrolls instead of stretching the seat')
+  assert.equal(group.props.style.maxWidth, 'var(--dsh-composer-card-max-width, 952px)', 'the scroll box keeps the composer card width')
+  assert.equal(findAll(group, 'button').filter((button) => textOf(button).includes('Hide history')).length, 0, 'the toggle sits outside the scrolling box')
+  assert.ok(buttonByText(view.output, 'Hide history'), 'the toggle stays rendered above the list')
+  assert.equal(findAll(group, 'section').length, 24, 'every entry stays inside the scroll box')
+  view.unmount()
+})
+
 test('a resolved history entry is read-only and cannot be re-resolved', async () => {
   const env = await loadBundle({
     backend: historyBackend({
