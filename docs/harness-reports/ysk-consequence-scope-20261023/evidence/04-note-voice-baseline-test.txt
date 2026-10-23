@@ -1,0 +1,42 @@
+command: node --test test/note-voice-baseline.test.js
+start_utc: 2026-10-23T18:41:15Z
+git_head: b5e3a146dbcc9f643946429e5679ce69d9cc6fad
+branch: task/ysk-quality-improvement
+dirty_entries_before: 0
+✔ a silent reply never counts as a pass and is never scored as speak (0.825958ms)
+✔ an unexpected note is unwarranted and a matching one is ok (0.266709ms)
+✔ entailment is never derived from a substring (0.137042ms)
+✔ a mode gate that drops a finding is a gated miss, not silence (0.137625ms)
+✔ summarize counts per class and keeps unclassified separate (0.186167ms)
+✔ the module pins its version, classes, statuses, and entailment labels (0.513583ms)
+✔ the fixture set is twenty-one synthetic English cases, two per class plus a speak runtime failure (0.395791ms)
+✔ the fixture set records at least two paranoid cases (0.101083ms)
+✔ the gated paranoid consequence fixture stays a pinned miss (0.275209ms)
+✔ every consequence and tradeoff case carries a grounded author entailment label (0.346458ms)
+✔ the CLI prints one row per class, reports no INVALID case, and stays unvalidated (150.759959ms)
+✔ the CLI refuses a case with a missing required key and exits non-zero (149.764208ms)
+✔ summarize keeps gated and invalid counts and initializes every class bucket (0.200333ms)
+✔ a malformed reply is INVALID, never a silent pass (0.101334ms)
+✔ an ungrounded because drops the reply as a miss instead of admitting it (0.071959ms)
+✔ a silent voice reply is a miss, never a pass (0.042333ms)
+✔ a runtime failure is its own status, never intentional silence (0.092459ms)
+✔ a speak case that fails at runtime is a runtime error, not an admitted note (0.071417ms)
+✔ a runtime error next to a real reply is contradictory and invalid (0.055875ms)
+✔ a non-string runtime error is invalid, never a runtime failure (0.054958ms)
+✔ intentional silence without a runtime error stays SILENT_OK (0.040375ms)
+✔ an unsupported entailment is admitted structurally with semantics unverified (0.05925ms)
+✔ a misattributed voice reply is admitted structurally with attribution unverified (0.046917ms)
+✔ an unwarranted admitted note is marked semantically unverified too (0.076625ms)
+✔ summarize reports runtime errors and unverified semantics without a quality score (0.05375ms)
+✔ the CLI states that semantic quality is not verified (150.716375ms)
+✔ the scorer opens no network connection and reads no environment variable (0.309667ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 628.476792
+exit_code: 0
+end_utc: 2026-10-23T18:41:16Z

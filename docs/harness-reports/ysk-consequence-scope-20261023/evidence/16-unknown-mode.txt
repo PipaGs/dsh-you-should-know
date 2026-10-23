@@ -1,0 +1,28 @@
+command: node --input-type=module -e '<unknown-mode scoreCase>' (run from the repository root)
+start_utc: 2026-10-23T18:42:58Z
+git_head: b5e3a146dbcc9f643946429e5679ce69d9cc6fad
+dirty_entries_before: 0
+--- source fallback ---
+134:export function reviewModeProfile(mode) {
+135-  return REVIEW_MODE_PROFILES[normalizeReviewMode(mode) ?? DEFAULT_REVIEW_MODE]
+136-}
+137-
+138-/**
+139- * The notification threshold: whether one finding importance is admissible in
+140- * one mode. A null or unknown importance is never admissible.
+141- */
+142-export function admitsFinding(mode, importance) {
+--- pre-existing check against main ---
+129:export function reviewModeProfile(mode) {
+130-  return REVIEW_MODE_PROFILES[normalizeReviewMode(mode) ?? DEFAULT_REVIEW_MODE]
+131-}
+132-
+133-/**
+134- * The notification threshold: whether one finding importance is admissible in
+135- * one mode. A null or unknown importance is never admissible.
+136- */
+137-export function admitsFinding(mode, importance) {
+--- output ---
+{"id":"unknown-mode","class":"material_defect","status":"SPEAK_OK","gated":false,"semantics":"NOT_VERIFIED"}
+exit_code: 0
+end_utc: 2026-10-23T18:42:58Z

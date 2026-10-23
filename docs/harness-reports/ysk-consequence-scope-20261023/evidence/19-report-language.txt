@@ -1,0 +1,34 @@
+command: node /tmp/ysk-scan-language.mjs (report and evidence in the staging directory)
+start_utc: 2026-10-23T18:46:47Z
+git_head: b5e3a146dbcc9f643946429e5679ce69d9cc6fad
+dirty_entries_before: 0
+--- output ---
+PASS final-report.md
+PASS evidence/00-environment.txt
+PASS evidence/01-npm-test.txt
+PASS evidence/02-npm-check.txt
+PASS evidence/03-git-diff-check.txt
+PASS evidence/04-note-voice-baseline-test.txt
+PASS evidence/05-note-voice-baseline-cli.txt
+PASS evidence/06-diff-stat-and-log.txt
+PASS evidence/07-git-status.txt
+PASS evidence/08-invariant-test.txt
+PASS evidence/09-evidence-test.txt
+PASS evidence/10-plugin-status-test.txt
+PASS evidence/11-diff-sanity.txt
+PASS evidence/12-inventory.txt
+PASS evidence/13-secret-grep.txt
+PASS evidence/14-ui-kind.txt
+PASS evidence/15-evidence-bounds.txt
+PASS evidence/16-unknown-mode.txt
+PASS evidence/17-telemetry-deps.txt
+PASS evidence/18-no-quality-metric.txt
+PASS evidence/final-head.txt
+PASS evidence/pr-before-report.txt
+PASS evidence/pr-review.txt
+PASS evidence/repro-current.txt
+PASS evidence/repro-prefix.txt
+non_latin_files: 0
+files_scanned: 25
+exit_code: 0
+end_utc: 2026-10-23T18:46:47Z

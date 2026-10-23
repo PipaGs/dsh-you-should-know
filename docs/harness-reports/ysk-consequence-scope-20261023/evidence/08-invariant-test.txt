@@ -1,0 +1,26 @@
+command: node --test test/invariant.test.js
+start_utc: 2026-10-23T18:41:16Z
+git_head: b5e3a146dbcc9f643946429e5679ce69d9cc6fad
+branch: task/ysk-quality-improvement
+dirty_entries_before: 0
+✔ shipped sources contain no path that could deliver advice to the primary agent (7.437584ms)
+✔ the plugin uses only the sanctioned seams (1.005625ms)
+✔ the auth boundary stays host-owned: no no-auth route registration exists (0.820833ms)
+✔ no shipped source reads, stores, or forwards a cookie, token, or auth header (3.372875ms)
+✔ no shipped source can install, upgrade, or self-modify the plugin (3.837791ms)
+✔ the browser half reaches files and the composer only through their public seams (0.967209ms)
+✔ Add to chat can only compose the draft and never hands the action to the agent (0.878292ms)
+✔ the English-only scan rejects Cyrillic, Greek, and CJK text (0.135167ms)
+✔ public-facing text stays English-only and free of unrelated project references (3.247292ms)
+✔ the bundled row leaves the reviewer route to adaptive discovery (0.415708ms)
+✔ the manifest declares the bundle, the client half, and no build step (0.332208ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 179.826292
+exit_code: 0
+end_utc: 2026-10-23T18:41:16Z

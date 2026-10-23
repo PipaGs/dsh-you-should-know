@@ -1,0 +1,17 @@
+command: node --test --test-name-pattern=status route reports activity test/plugin.test.js
+start_utc: 2026-10-23T18:41:17Z
+git_head: b5e3a146dbcc9f643946429e5679ce69d9cc6fad
+branch: task/ysk-quality-improvement
+dirty_entries_before: 0
+[dsh-you-should-know] update check failed: no public shell service is mounted
+✔ the status route reports activity without exposing conversation or note text (25.446416ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 197.37075
+exit_code: 0
+end_utc: 2026-10-23T18:41:17Z

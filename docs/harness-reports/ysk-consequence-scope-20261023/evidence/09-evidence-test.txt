@@ -1,0 +1,24 @@
+command: node --test test/evidence.test.js
+start_utc: 2026-10-23T18:41:16Z
+git_head: b5e3a146dbcc9f643946429e5679ce69d9cc6fad
+branch: task/ysk-quality-improvement
+dirty_entries_before: 0
+✔ collectEpisodeEvidence reads only the allowlisted public metadata for one turn (1.667792ms)
+✔ subagent provenance is read from the parent catalog and the settled relay only (0.293916ms)
+✔ the capsule never carries raw arguments, output, meta, error messages, or the subagent label (0.25875ms)
+✔ the capsule is bounded by entry count and total characters (0.239875ms)
+✔ a hostile or malformed event shape contributes nothing and never throws (0.12275ms)
+✔ a short ordinary Q&A with no tool or subagent work is not a meaningful episode (0.083625ms)
+✔ a meaningful episode is review-eligible even when assistant prose is short (2.555292ms)
+✔ episode evidence composes with strictness, custom prompt, and instructions without touching the base policy (0.461292ms)
+✔ a short Q&A with no meaningful work stays ineligible under the delta guard (0.177625ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 174.568125
+exit_code: 0
+end_utc: 2026-10-23T18:41:17Z

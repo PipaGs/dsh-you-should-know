@@ -1,0 +1,16 @@
+command: environment and repository identity
+start_utc: 2026-10-23T18:43:41Z
+worktree: .worktrees/ysk-quality-improvement (relative to the repository root)
+branch: task/ysk-quality-improvement
+head: b5e3a146dbcc9f643946429e5679ce69d9cc6fad
+main: a7b652ed41cd2683bf7e491dccc07c3448d05990
+merge_base: a7b652ed41cd2683bf7e491dccc07c3448d05990
+node: v26.9.0
+npm: 11.19.1
+dirty_entries: 0
+--- remotes ---
+origin	https://github.com/PipaGs/dsh-you-should-know.git (fetch)
+origin	https://github.com/PipaGs/dsh-you-should-know.git (push)
+--- head commit subject ---
+b5e3a146dbcc9f643946429e5679ce69d9cc6fad docs: align the baseline contract with its unverified semantics
+end_utc: 2026-10-23T18:43:41Z
