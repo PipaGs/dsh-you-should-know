@@ -362,6 +362,42 @@ test('silence stays exactly note plus importance and never carries a source', ()
   assert.equal(parseVerdict('{"note":null,"importance":null,"source":null}'), null)
 })
 
+test('parseVerdict keeps a known kind and an exact because', () => {
+  const v = parseVerdict('{"note":"N","importance":"high","kind":"consequence","because":"chose the in-memory cache"}')
+  assert.equal(v.kind, 'consequence')
+  assert.equal(v.because, 'chose the in-memory cache')
+})
+
+test('parseVerdict leaves a legacy reply unclassified without adding kind', () => {
+  const v = parseVerdict('{"note":"N","importance":"high"}')
+  assert.equal(Object.prototype.hasOwnProperty.call(v, 'kind'), false)
+})
+
+test('parseVerdict degrades an unknown or malformed kind to unclassified', () => {
+  for (const kind of ['"mystery"', '7', 'null', '{"a":1}']) {
+    const v = parseVerdict('{"note":"N","importance":"high","kind":' + kind + '}')
+    assert.equal(v.kind, 'unclassified', kind)
+    assert.equal(v.note, 'N')
+  }
+})
+
+test('parseVerdict drops a consequence without because and a malformed because', () => {
+  assert.equal(parseVerdict('{"note":"N","importance":"high","kind":"consequence"}'), null)
+  assert.equal(parseVerdict('{"note":"N","importance":"high","kind":"tradeoff"}'), null)
+  for (const because of ['5', '""', '"   "', '"' + 'x'.repeat(241) + '"']) {
+    assert.equal(parseVerdict('{"note":"N","importance":"high","because":' + because + '}'), null, because.slice(0, 12))
+  }
+  assert.equal(parseVerdict('{"note":"N","importance":"high","because":"a\u0007b"}'), null)
+  // The escaped form survives JSON parsing, so this rejection is the parser's
+  // control-character rule rather than JSON.parse refusing the raw byte.
+  assert.equal(parseVerdict('{"note":"N","importance":"high","because":"a\\u0007b"}'), null)
+})
+
+test('parseVerdict rejects silence that carries kind or because', () => {
+  assert.equal(parseVerdict('{"note":null,"importance":null,"kind":"defect"}'), null)
+  assert.equal(parseVerdict('{"note":null,"importance":null,"because":"x"}'), null)
+})
+
 test('dedupeKey normalizes case, punctuation, and whitespace', () => {
   assert.equal(dedupeKey('  Use HTTPS!!  '), 'use https')
   assert.equal(dedupeKey('use-https'), 'use https')
