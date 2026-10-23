@@ -214,6 +214,24 @@ npm test
 
 The suite covers route discovery and recovery, the verdict contract and silence handling, every gate, dedupe, strictness thresholds, language detection, the human-only invariant, the note card and history, runtime queue, retry, and resume, live config, persistence, the update checker, and release consistency. Full coverage list: [test coverage](./docs/reference.md#test-coverage).
 
+### Offline note voice baseline
+
+```sh
+npm run eval:note-voice:baseline
+```
+
+The command scores the hand-authored fixtures in `scripts/fixtures/note-voice-baseline/cases.json` with the same parse, mode gate, and verbatim grounding checks the runtime applies. It is offline and deterministic: it never calls a model, opens a network connection, or reads an environment variable. Each case receives one status:
+
+- `SPEAK_OK`: a note was admitted for a case that expects one;
+- `SPEAK_UNWARRANTED`: a note was admitted for a case that expects silence;
+- `SILENT_OK`: intentional silence for a case that expects silence;
+- `SILENT_MISSED`: no note was admitted for a case that expects one;
+- `RUNTIME_ERROR`: the reviewer call failed; never counted as silence in either direction;
+- `INVALID`: a structurally broken or contradictory case;
+- `NOT_RUN`: reserved for a future live runner.
+
+The output is a per-class count table plus `gated`, `invalid`, `runtime errors`, and `semantics.notVerified` totals. It measures structural admission only. Semantic quality (entailment, voice attribution) is NOT VERIFIED: an `entail` label is the fixture author's label, voice attribution is not checked, and no accuracy or precision is computed. The baseline stays unvalidated until the owner sets a threshold.
+
 ## Repository rules
 
 Repository-facing prose follows the project's [repository rules](./AGENTS.md), including the English-only requirement for new pull request descriptions, commit messages, review comments, reports, and documentation. Human chat language is separate.

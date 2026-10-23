@@ -45,6 +45,24 @@ Qualifying information is deliberately narrow: a contradiction with an explicit 
 
 A review adapts to the conversation through the plugin's review profile. The note is written in the same natural language as the most recent genuine human user message, falling back to the nearest earlier human message when that message is code-only or its language is unclear, and to English when nothing is clear. When the visible conversation reliably shows a programming language through a fenced code tag or a file extension, the instruction also gains a small, bounded set of language-specific correctness skills — at most three, chosen deterministically and never inferred from bare keywords. Each skill is a short plugin-owned checklist of defects that can materially matter: async and promise error flow, listener and resource lifetime, concurrency and races, nullability and type-versus-runtime mismatch, transaction and query semantics, quoting and failure propagation in shell, and similar. They are instruction text only: the reviewer runs no external skill or tool, and the JSON reply contract is unchanged.
 
+## Offline note voice baseline
+
+`npm run eval:note-voice:baseline` scores the hand-authored fixtures in `scripts/fixtures/note-voice-baseline/cases.json` with the same parse, mode gate, and verbatim grounding checks the runtime applies. It is offline and deterministic: it never calls a model, opens a network connection, or reads an environment variable. The CLI prints a per-class count table and the `gated`, `invalid`, `runtime errors`, and `semantics.notVerified` totals.
+
+Each case receives exactly one status:
+
+| Status | Meaning |
+|---|---|
+| `SPEAK_OK` | A note was admitted for a case that expects one. |
+| `SPEAK_UNWARRANTED` | A note was admitted for a case that expects silence. |
+| `SILENT_OK` | Intentional silence for a case that expects silence. |
+| `SILENT_MISSED` | No note was admitted for a case that expects one. |
+| `RUNTIME_ERROR` | The reviewer call failed. A `runtimeError` with a null reply scores this, never `SILENT_OK` or `SILENT_MISSED`. |
+| `INVALID` | A structurally broken case. A `runtimeError` next to a real reply is contradictory and also `INVALID`. |
+| `NOT_RUN` | Reserved for a future live runner. |
+
+The baseline measures structural admission, not reviewer quality. Semantic quality (entailment, voice attribution) is NOT VERIFIED: every admitted note carries `semantics: 'NOT_VERIFIED'`, a voice-attribution case carries `attributionVerified: false`, and an authored `entail` label carries `entailVerified: false` because it is the fixture author's label, not adjudication. No accuracy or precision is computed. The baseline stays unvalidated until the owner sets a threshold.
+
 ## Modes and prompts
 
 Each review runs under exactly one mode. The five modes are `Relaxed`, `Balanced`, `Strict`, `Paranoid`, and `Custom`; the default is `Balanced`. The mode changes both the areas of scrutiny in the reviewer instruction and the notification threshold — the minimum `importance` the engine will actually store as a note:

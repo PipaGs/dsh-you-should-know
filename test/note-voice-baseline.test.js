@@ -93,18 +93,20 @@ test('the module pins its version, classes, statuses, and entailment labels', ()
     'SPEAK_UNWARRANTED',
     'SILENT_OK',
     'SILENT_MISSED',
+    'RUNTIME_ERROR',
     'INVALID',
     'NOT_RUN',
   ])
   assert.deepEqual([...ENTAIL_VERDICTS], ['ENTAIL_OK', 'ENTAIL_WEAK', 'ENTAIL_UNSUPPORTED'])
 })
 
-test('the fixture set is twenty synthetic English cases, two per class', () => {
-  assert.equal(fixtures.length, 20)
-  assert.equal(new Set(fixtures.map((entry) => entry.id)).size, 20, 'case ids are unique')
+test('the fixture set is twenty-one synthetic English cases, two per class plus a speak runtime failure', () => {
+  assert.equal(fixtures.length, 21)
+  assert.equal(new Set(fixtures.map((entry) => entry.id)).size, 21, 'case ids are unique')
   for (const className of BASELINE_CLASSES) {
     const members = fixtures.filter((entry) => entry.class === className)
-    assert.equal(members.length, 2, className + ' has exactly two cases')
+    const expected = className === 'model_runtime_error' ? 3 : 2
+    assert.equal(members.length, expected, className + ' has ' + expected + ' cases')
   }
   const joined = JSON.stringify(fixtures)
   assert.equal(NON_LATIN.test(joined), false, 'fixtures are English-only')
@@ -161,7 +163,12 @@ test('the CLI prints one row per class, reports no INVALID case, and stays unval
     assert.ok(run.stdout.includes(className), 'the table includes ' + className)
   }
   assert.ok(run.stdout.includes('baseline is unvalidated until the owner sets a threshold'))
-  assert.equal(/accuracy/i.test(run.stdout), false, 'the baseline reports no aggregate accuracy')
+  assert.ok(run.stdout.includes('runtime errors: 3'), 'the output totals runtime failures')
+  assert.ok(run.stdout.includes(
+    'semantic quality (entailment, voice attribution): NOT_VERIFIED — structural admission only; no accuracy or precision is computed',
+  ), 'the output marks semantic quality unverified')
+  assert.equal(/\baccuracy\s*[:=]\s*\d/i.test(run.stdout), false, 'the baseline computes no accuracy metric')
+  assert.equal(/\bprecision\s*[:=]\s*\d/i.test(run.stdout), false, 'the baseline computes no precision metric')
 })
 
 test('the CLI refuses a case with a missing required key and exits non-zero', () => {
@@ -221,6 +228,99 @@ test('a silent voice reply is a miss, never a pass', () => {
   const result = scoreCase({ id: 'voice-silent', class: 'voice_attribution', expect: 'speak', reply: null })
   assert.equal(result.status, 'SILENT_MISSED')
   assert.notEqual(result.status, 'SPEAK_OK')
+})
+
+test('a runtime failure is its own status, never intentional silence', () => {
+  const runtimeCases = fixtures.filter((entry) => entry.class === 'model_runtime_error')
+  assert.equal(runtimeCases.length, 3, 'the class keeps two fixtures and adds one speak case')
+  for (const entry of runtimeCases) {
+    assert.equal(scoreCase(entry).status, 'RUNTIME_ERROR', entry.id)
+  }
+  const counts = summarize(runtimeCases.map(scoreCase))
+  assert.equal(counts.byClass.model_runtime_error.RUNTIME_ERROR, 3)
+  assert.equal(counts.byClass.model_runtime_error.SILENT_OK, 0)
+  assert.equal(counts.byClass.model_runtime_error.SILENT_MISSED, 0)
+  assert.equal(counts.runtimeErrors, 3)
+})
+
+test('a speak case that fails at runtime is a runtime error, not an admitted note', () => {
+  const result = scoreCase({
+    id: 'runtime-speak', class: 'model_runtime_error', mode: 'balanced', expect: 'speak',
+    message: 'The change adds a validation branch and the existing tests pass.',
+    runtimeError: 'timeout before any reply', reply: null,
+  })
+  assert.equal(result.status, 'RUNTIME_ERROR')
+  assert.notEqual(result.status, 'SPEAK_OK')
+  assert.equal(result.gated, false)
+})
+
+test('a runtime error next to a real reply is contradictory and invalid', () => {
+  const base = {
+    class: 'model_runtime_error', mode: 'balanced', expect: 'speak',
+    message: 'The change adds a validation branch and the existing tests pass.',
+    runtimeError: 'timeout before any reply',
+  }
+  assert.equal(scoreCase({
+    ...base, id: 'runtime-contradiction', reply: { note: 'N', importance: 'high' },
+  }).status, 'INVALID')
+  assert.equal(scoreCase({ ...base, id: 'runtime-blank', runtimeError: '   ', reply: null }).status, 'INVALID')
+})
+
+test('intentional silence without a runtime error stays SILENT_OK', () => {
+  const result = scoreCase({
+    id: 'silence-clean', class: 'legitimate_silence', mode: 'balanced', expect: 'silent',
+    message: 'The change renames one private helper and all tests pass.', reply: null,
+  })
+  assert.equal(result.status, 'SILENT_OK')
+  assert.equal(Object.prototype.hasOwnProperty.call(result, 'semantics'), false)
+})
+
+test('an unsupported entailment is admitted structurally with semantics unverified', () => {
+  const result = scoreCase({
+    id: 'entail-unsupported', class: 'consequence_of_correct_work', expect: 'speak',
+    mode: 'balanced', entail: 'unsupported', message: 'we use the cache',
+    reply: { note: 'N', importance: 'high', kind: 'consequence', because: 'we use the cache' },
+  })
+  assert.equal(result.status, 'SPEAK_OK')
+  assert.equal(result.semantics, 'NOT_VERIFIED')
+  assert.equal(result.entailVerified, false)
+  assert.equal(Object.prototype.hasOwnProperty.call(result, 'accuracy'), false)
+  assert.equal(Object.prototype.hasOwnProperty.call(result, 'precision'), false)
+})
+
+test('a misattributed voice reply is admitted structurally with attribution unverified', () => {
+  const result = scoreCase({
+    id: 'voice-wrong-actor', class: 'voice_attribution', mode: 'balanced', expect: 'speak',
+    message: 'You required disabling certificate verification in staging.',
+    reply: {
+      note: 'The main agent disabled certificate verification in staging, which exposes the client to interception.',
+      importance: 'high',
+      action: 'Enable certificate verification again in staging.',
+    },
+  })
+  assert.equal(result.status, 'SPEAK_OK')
+  assert.equal(result.semantics, 'NOT_VERIFIED')
+  assert.equal(result.attributionVerified, false)
+})
+
+test('summarize reports runtime errors and unverified semantics without a quality score', () => {
+  const counts = summarize([
+    { class: 'model_runtime_error', status: 'RUNTIME_ERROR' },
+    { class: 'material_defect', status: 'SPEAK_OK', semantics: 'NOT_VERIFIED' },
+  ])
+  assert.equal(counts.runtimeErrors, 1)
+  assert.deepEqual(counts.semantics, { notVerified: 1 })
+  assert.equal(Object.prototype.hasOwnProperty.call(counts, 'accuracy'), false)
+  assert.equal(Object.prototype.hasOwnProperty.call(counts, 'precision'), false)
+})
+
+test('the CLI states that semantic quality is not verified', () => {
+  const run = spawnSync(process.execPath, [scriptPath], { cwd: repoRoot, encoding: 'utf8' })
+  assert.equal(run.status, 0, run.stderr)
+  assert.ok(run.stdout.includes('runtime errors: 3'))
+  assert.ok(run.stdout.includes(
+    'semantic quality (entailment, voice attribution): NOT_VERIFIED — structural admission only; no accuracy or precision is computed',
+  ))
 })
 
 test('the scorer opens no network connection and reads no environment variable', () => {

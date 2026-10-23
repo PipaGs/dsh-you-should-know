@@ -198,6 +198,15 @@
     "reply": null
   },
   {
+    "id": "runtime-speak-timeout",
+    "class": "model_runtime_error",
+    "mode": "balanced",
+    "expect": "speak",
+    "runtimeError": "timeout before any reply",
+    "message": "The change removes the retry limit and the existing tests pass.",
+    "reply": null
+  },
+  {
     "id": "voice-agent-timeout",
     "class": "voice_attribution",
     "mode": "balanced",

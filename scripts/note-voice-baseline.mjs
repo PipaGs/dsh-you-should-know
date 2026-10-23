@@ -5,17 +5,22 @@
 // reports counts per class. It never calls a model, opens a network connection,
 // or reads an environment variable.
 //
-// The observation level is the admitted one. A non-silent reply is parsed and
-// grounded exactly as the runtime does, then passed through `admitsVerdict`.
-// When that mode gate drops a reply that would otherwise have been speakable,
-// the result carries `gated: true` and the silence-side status, so a Paranoid
-// suppression stays visible instead of looking like a correct choice to stay
-// quiet. That flag is the only source of P3 evidence.
+// The observation level is structural admission, not reviewer quality. A
+// non-silent reply is parsed and grounded exactly as the runtime does, then
+// passed through `admitsVerdict`. When that mode gate drops a reply that would
+// otherwise have been speakable, the result carries `gated: true` and the
+// silence-side status, so a Paranoid suppression stays visible instead of
+// looking like a correct choice to stay quiet. That flag is the only source of
+// P3 evidence.
+//
+// A `runtimeError` means the reviewer call itself failed. Such a case scores
+// `RUNTIME_ERROR`, which is distinct from intentional silence, and a runtime
+// error next to a real reply is a contradiction and scores `INVALID`.
 //
 // Entailment is an author label on the case, never a derived property. The
-// scorer reports the case author's label and, separately, whether the reply's
-// quotation literally appears in the case message. A substring match never
-// becomes `ENTAIL_OK`.
+// scorer reports the case author's label and marks it `entailVerified: false`.
+// Voice attribution is not checked either. Every admitted note carries
+// `semantics: 'NOT_VERIFIED'`; no accuracy or precision is computed.
 import { readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -46,6 +51,7 @@ export const CASE_STATUS = Object.freeze([
   'SPEAK_UNWARRANTED',
   'SILENT_OK',
   'SILENT_MISSED',
+  'RUNTIME_ERROR',
   'INVALID',
   'NOT_RUN',
 ])
@@ -93,8 +99,12 @@ function invalidResult(id, className, extra) {
  * grounding is dropped quietly, exactly as the runtime drops it, so its status
  * is the silence-side one without the gate flag.
  *
+ * A `runtimeError` that accompanies a null reply is a runtime failure, never
+ * intentional silence; one that accompanies a real reply is contradictory.
+ *
  * @param caseDef - the fixture case.
- * @returns { id, class, status, gated, entail?, becauseGrounded? }.
+ * @returns { id, class, status, gated, semantics?, entail?, entailVerified?,
+ *   attributionVerified?, becauseGrounded? }.
  */
 export function scoreCase(caseDef) {
   if (!isPlainObject(caseDef)) {
@@ -104,18 +114,30 @@ export function scoreCase(caseDef) {
   const className = typeof caseDef.class === 'string' ? caseDef.class : UNCLASSIFIED_CLASS
   const base = { id, class: className }
   const extra = {}
+  if (className === 'voice_attribution') extra.attributionVerified = false
   if (caseDef.entail !== undefined) {
     const entail = ENTAIL_BY_LABEL[caseDef.entail]
-    if (entail === undefined) return invalidResult(id, className)
+    if (entail === undefined) return invalidResult(id, className, extra)
     extra.entail = entail
+    extra.entailVerified = false
   }
   if (!EXPECTATIONS.includes(caseDef.expect)) return invalidResult(id, className, extra)
   if (!Object.prototype.hasOwnProperty.call(caseDef, 'reply') || caseDef.reply === undefined) {
     return invalidResult(id, className, extra)
   }
+  const hasRuntimeError = Object.prototype.hasOwnProperty.call(caseDef, 'runtimeError')
+  if (
+    hasRuntimeError &&
+    (typeof caseDef.runtimeError !== 'string' || caseDef.runtimeError.trim().length === 0)
+  ) {
+    return invalidResult(id, className, extra)
+  }
   if (caseDef.reply === null) {
+    if (hasRuntimeError) return { ...base, ...extra, status: 'RUNTIME_ERROR', gated: false }
     return { ...base, ...extra, status: SILENT_STATUS[caseDef.expect], gated: false }
   }
+  // A failed call cannot also have produced a reply: that case contradicts itself.
+  if (hasRuntimeError) return invalidResult(id, className, extra)
   if (!isPlainObject(caseDef.reply)) return invalidResult(id, className, extra)
 
   const parsed = parseVerdict(JSON.stringify(caseDef.reply))
@@ -136,12 +158,11 @@ export function scoreCase(caseDef) {
   if (groundVerdict(parsed, caseDef.message) === null) {
     return { ...base, ...extra, status: SILENT_STATUS[caseDef.expect], gated: false }
   }
-  return {
-    ...base,
-    ...extra,
-    status: caseDef.expect === 'speak' ? 'SPEAK_OK' : 'SPEAK_UNWARRANTED',
-    gated: false,
-  }
+  const status = caseDef.expect === 'speak' ? 'SPEAK_OK' : 'SPEAK_UNWARRANTED'
+  const admitted = { ...base, ...extra, status, gated: false }
+  // Structural admission never establishes that the note is semantically right.
+  if (status === 'SPEAK_OK') admitted.semantics = 'NOT_VERIFIED'
+  return admitted
 }
 
 /**
@@ -150,7 +171,7 @@ export function scoreCase(caseDef) {
  * into `unclassified` and is never merged into a known class.
  *
  * @param results - scored case results.
- * @returns { total, byClass, gated, invalid }.
+ * @returns { total, byClass, gated, invalid, runtimeErrors, semantics }.
  */
 export function summarize(results) {
   const list = Array.isArray(results) ? results : []
@@ -160,6 +181,8 @@ export function summarize(results) {
   }
   let gated = 0
   let invalid = 0
+  let runtimeErrors = 0
+  let notVerified = 0
   for (const result of list) {
     const className =
       isPlainObject(result) && BASELINE_CLASSES.includes(result.class)
@@ -170,8 +193,17 @@ export function summarize(results) {
     }
     if (isPlainObject(result) && result.gated === true) gated += 1
     if (isPlainObject(result) && result.status === 'INVALID') invalid += 1
+    if (isPlainObject(result) && result.status === 'RUNTIME_ERROR') runtimeErrors += 1
+    if (isPlainObject(result) && result.semantics === 'NOT_VERIFIED') notVerified += 1
   }
-  return { total: list.length, byClass, gated, invalid }
+  return {
+    total: list.length,
+    byClass,
+    gated,
+    invalid,
+    runtimeErrors,
+    semantics: { notVerified },
+  }
 }
 
 function missingRequiredKeys(entry) {
@@ -233,6 +265,10 @@ function main(argv) {
   console.log(formatTable(counts))
   console.log('gated: ' + counts.gated)
   console.log('invalid: ' + counts.invalid)
+  console.log('runtime errors: ' + counts.runtimeErrors)
+  console.log(
+    'semantic quality (entailment, voice attribution): NOT_VERIFIED — structural admission only; no accuracy or precision is computed',
+  )
   console.log('baseline is unvalidated until the owner sets a threshold')
   if (counts.invalid > 0) process.exitCode = 1
 }
