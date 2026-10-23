@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { LIMITS, createEngine, normalizeConfig } from '../lib/core.js'
+import { LIMITS, createEngine, groundVerdict, normalizeConfig } from '../lib/core.js'
 
 const CONFIGURED = normalizeConfig({ provider: 'p', model: 'm', minDeltaChars: 0, cooldownTurns: 1 }).config
 
@@ -1350,4 +1350,34 @@ test('dispose disposes every runtime and clears all session and override state',
   assert.equal(engine.resume('s1'), false)
   assert.equal(engine.observe(sessionWith('s1', [{ turn: 1, answer: 'two' }]), turnEnd(3, 1)).status, 'disposed')
   engine.dispose()
+})
+
+test('a because that is not verbatim in the excerpt drops the reply', async () => {
+  const quoted = engineWith(['{"note":"N","importance":"high","kind":"consequence","because":"use the cache"}'], { minDeltaChars: 0, cooldownTurns: 1 })
+  const ok = await observeAndSettle(quoted.engine, sessionWith('q1', [{ turn: 1, answer: 'We use the cache for speed.' }]))
+  assert.equal(ok.status, 'noted')
+  assert.equal(quoted.engine.notes('q1').length, 1)
+
+  const invented = engineWith(['{"note":"N","importance":"high","kind":"consequence","because":"use the disk"}'], { minDeltaChars: 0, cooldownTurns: 1 })
+  const dropped = await observeAndSettle(invented.engine, sessionWith('q2', [{ turn: 1, answer: 'We use the cache for speed.' }]))
+  assert.equal(dropped.status, 'silent')
+  assert.equal(invented.engine.notes('q2').length, 0)
+})
+
+test('groundVerdict rejects a near-miss quote and passes silence through', () => {
+  assert.equal(groundVerdict({ note: 'N', importance: 'high', because: 'Use the Cache' }, 'we use the cache'), null)
+  assert.equal(groundVerdict({ note: 'N', importance: 'high', kind: 'defect', because: 'use the disk' }, 'we use the cache'), null)
+  assert.deepEqual(groundVerdict({ note: null, importance: null }, 'we use the cache'), { note: null, importance: null })
+
+  const grounded = { note: 'N', importance: 'high', kind: 'consequence', because: 'use the cache' }
+  assert.equal(groundVerdict(grounded, 'we use the cache'), grounded)
+})
+
+test('groundVerdict drops an unquoted consequence and an unusable message', () => {
+  assert.equal(groundVerdict({ note: 'N', importance: 'high', kind: 'consequence' }, 'we use the cache'), null)
+  assert.equal(groundVerdict({ note: 'N', importance: 'high', kind: 'tradeoff' }, 'we use the cache'), null)
+  assert.equal(groundVerdict({ note: 'N', importance: 'high', because: 'cache' }, ''), null)
+  assert.equal(groundVerdict({ note: 'N', importance: 'high', because: 'cache' }, undefined), null)
+  // A note without a quotation does not depend on the message being readable.
+  assert.equal(groundVerdict({ note: 'N', importance: 'high' }, '').note, 'N')
 })
