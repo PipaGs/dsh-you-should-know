@@ -54,7 +54,7 @@ Rules the implementation must encode:
 | `because` not a string, blank, over 240 chars, or containing `\u0000-\u001f`/`\u007f` | reply dropped (`null`) |
 | silence shape carrying `kind` or `because` | reply dropped (`null`), same as `source`/`action` |
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 In `test/core.test.js`, next to the existing `parseVerdict` tests:
 
@@ -93,12 +93,12 @@ test('parseVerdict rejects silence that carries kind or because', () => {
 })
 ```
 
-- [ ] **Step 2: Run the new tests and watch them fail**
+- [x] **Step 2: Run the new tests and watch them fail**
 
 Run: `node --test --test-name-pattern="parseVerdict" test/core.test.js`
 Expected: FAIL, the `kind`/`because` assertions see `undefined`.
 
-- [ ] **Step 3: Implement the parser**
+- [x] **Step 3: Implement the parser**
 
 Add near `parseAction`:
 
@@ -118,12 +118,12 @@ In `parseVerdict`, after the silence branch rejects `source` and `action`, also 
 - if `because` is present: `parseBecause` must return a string, otherwise `return null`; assign it.
 - if `verdict.kind` is `'consequence'` or `'tradeoff'` and `verdict.because === undefined`, `return null`.
 
-- [ ] **Step 4: Run the tests**
+- [x] **Step 4: Run the tests**
 
 Run: `node --test test/core.test.js`
 Expected: PASS, including the pre-existing verdict tests.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add lib/core.js test/core.test.js
@@ -144,7 +144,7 @@ git commit -m "feat: accept optional kind and because in the verdict contract"
 
 Rules: silence passes through untouched; a verdict with `because` not verbatim in that message returns `null`; a consequence or tradeoff without `because` returns `null`; an empty or non-string message returns `null` for any verdict that carries `because`. No case folding, whitespace normalization, or punctuation trimming: exact `String.prototype.includes` only.
 
-- [ ] **Step 1: Write the failing engine test**
+- [x] **Step 1: Write the failing engine test**
 
 In `test/engine.test.js`, using the file's existing `engineWith` helper:
 
@@ -167,12 +167,12 @@ test('groundVerdict rejects a near-miss quote and passes silence through', () =>
 })
 ```
 
-- [ ] **Step 2: Run it and watch it fail**
+- [x] **Step 2: Run it and watch it fail**
 
 Run: `node --test --test-name-pattern="because" test/engine.test.js`
 Expected: FAIL, the invented quote is currently delivered, and `groundVerdict` is not exported.
 
-- [ ] **Step 3: Implement grounding and wire it**
+- [x] **Step 3: Implement grounding and wire it**
 
 Add the export next to `parseVerdict`. In `observe`, `message` is already built as the excerpt plus the optional capsule; set `state.reviewMessage = message` after it is built and before `runtime.enqueue(...)`, and in the promise's `finally` set `state.reviewMessage = ''`. In `makeRuntime` `onNote`:
 
@@ -185,12 +185,12 @@ onNote: (verdict) => {
 }
 ```
 
-- [ ] **Step 4: Run the engine and core suites**
+- [x] **Step 4: Run the engine and core suites**
 
 Run: `node --test test/engine.test.js test/core.test.js`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add lib/core.js test/engine.test.js
@@ -211,7 +211,7 @@ git commit -m "feat: ground consequence findings in the excerpt that was sent"
 
 Rules: `dedupeKey` stays text-only; the same note text under two classes is one note. A legacy note has `kind: 'unclassified'`. `status` diagnostics keep zero note text and zero class data.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```js
 test('the route exposes kind and an unclassified legacy note', async () => {
@@ -232,21 +232,21 @@ test('the same text under two kinds is one note', async () => {
 })
 ```
 
-- [ ] **Step 2: Run them and watch them fail**
+- [x] **Step 2: Run them and watch them fail**
 
 Run: `node --test --test-name-pattern="kind" test/engine.test.js`
 Expected: FAIL, `kind` is `undefined` on the view.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 In `deliverNote`, after the `action` assignment: `note.kind = verdict.kind === undefined ? UNCLASSIFIED_KIND : verdict.kind` and `if (verdict.because !== undefined) note.because = verdict.because`. In `activeView`, add `kind` the same way (never `undefined`) and `because` only when defined. Do not touch `dedupeKey`.
 
-- [ ] **Step 4: Run the suites**
+- [x] **Step 4: Run the suites**
 
 Run: `node --test test/engine.test.js test/plugin.test.js test/invariant.test.js`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add lib/core.js test/engine.test.js test/plugin.test.js
@@ -268,7 +268,7 @@ git commit -m "feat: store the finding class on notes and keep dedupe text-only"
 
 Rules: the four existing categories stay word for word; the new category is added after them. The note template no longer says "what is wrong". Every mode profile mentions consequences or tradeoffs in material terms; Relaxed keeps its critical-only floor and says so.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```js
 test('the reviewer instruction admits consequences of correct work', () => {
@@ -289,12 +289,12 @@ test('every review mode names consequences or tradeoffs', () => {
 })
 ```
 
-- [ ] **Step 2: Run them and watch them fail**
+- [x] **Step 2: Run them and watch them fail**
 
 Run: `node --test --test-name-pattern="consequence" test/core.test.js test/strictness.test.js`
 Expected: FAIL on the missing phrases.
 
-- [ ] **Step 3: Edit the prompt text**
+- [x] **Step 3: Edit the prompt text**
 
 Add one qualifying bullet to `REVIEW_INSTRUCTIONS`:
 
@@ -310,16 +310,16 @@ Add one paragraph after the JSON example:
 
 Change the note template line to: `'"note" is written for the human: what the human needs to know and why it matters.'` Keep the example sentence. In each profile, add one clause naming the class, for example Balanced: `'Also report a material consequence or tradeoff of the agent\'s own decision, even when the task itself is complete and its checks pass.'` Relaxed adds the same clause with `critical only`.
 
-- [ ] **Step 4: Update the pinned prompt hash and record the comparability break**
+- [x] **Step 4: Update the pinned prompt hash and record the comparability break**
 
 `scripts/note-voice-eval.mjs` derives `promptVersion` from `REVIEW_INSTRUCTIONS`, and `test/note-voice-eval-live.test.js` pins that hash. Recompute the hash from the new instructions, update the pinned value, and add one dated paragraph to `docs/reference.md`: the reviewer instruction changed after the historical eval-2 run, eval-2 keeps the hash recorded when it ran, and comparability across the change is not claimed.
 
-- [ ] **Step 5: Run the suites and fix the assertions the wording break**
+- [x] **Step 5: Run the suites and fix the assertions the wording break**
 
 Run: `npm test`
 Expected: PASS. Where an existing test asserts the old template or exact instruction strings, update that assertion to the new wording; do not weaken it to a substring that would pass for unrelated text.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add lib/core.js lib/review-strictness.js docs/reference.md test/core.test.js test/strictness.test.js test/note-voice-eval-live.test.js
@@ -341,20 +341,20 @@ git commit -m "feat: admit material consequences in the reviewer instruction and
 
 Rules: additive prose only. Do not rewrite the historical sections about the four original categories; extend them.
 
-- [ ] **Step 1: Update the verdict contract**
+- [x] **Step 1: Update the verdict contract**
 
 Document `kind` (optional; unknown or malformed becomes `unclassified` and the note survives) and `because` (optional; required for `consequence` and `tradeoff`; must be a verbatim substring of the excerpt; malformed or unmatched drops the whole reply quietly). State that silence never carries either field, that dedupe remains text-only, and that `kind` is not rendered in the UI.
 
-- [ ] **Step 2: Update the modes table prose**
+- [x] **Step 2: Update the modes table prose**
 
 State that every mode now admits the consequence class in its areas of scrutiny, that Relaxed still stores only `critical`, and that Paranoid still requires a non-blank `action` on a `high` finding.
 
-- [ ] **Step 3: Run the documentation checks**
+- [x] **Step 3: Run the documentation checks**
 
 Run: `node --test test/repository-language.test.js test/release-notes-consistency.test.js`
 Expected: PASS; every new paragraph is English.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add docs/reference.md README.md
@@ -379,7 +379,7 @@ Statuses: `SPEAK_OK`, `SPEAK_UNWARRANTED`, `SILENT_OK`, `SILENT_MISSED`, `INVALI
 
 The scorer observes at the **admitted** level. Each case carries a `mode`; `scoreCase` runs the same `admitsVerdict` gate the engine runs, offline, and returns `gated: true` when the gate drops a reply that was otherwise speakable. A gated drop is scored `SILENT_MISSED` for a speak case and `SILENT_OK` for a silence case, and the flag is what makes a Paranoid suppression visible instead of indistinguishable from a correct silence. That flag is the only source of P3 evidence, so the Paranoid cases must carry `mode: 'paranoid'`.
 
-- [ ] **Step 1: Write the failing scorer tests**
+- [x] **Step 1: Write the failing scorer tests**
 
 ```js
 test('a silent reply never counts as a pass and is never scored as speak', () => {
@@ -427,25 +427,25 @@ test('summarize counts per class and keeps unclassified separate', () => {
 })
 ```
 
-- [ ] **Step 2: Run them and watch them fail**
+- [x] **Step 2: Run them and watch them fail**
 
 Run: `node --test test/note-voice-baseline.test.js`
 Expected: FAIL, the module does not exist.
 
-- [ ] **Step 3: Implement the module**
+- [x] **Step 3: Implement the module**
 
 `scoreCase` parses `caseDef.reply` (already an object or `null`), applies `admitsVerdict(caseDef.mode, reply)` when the reply is non-silent, and returns `{ id, class, status, gated, entail?, becauseGrounded? }`. `becauseGrounded` is a literal `String.prototype.includes` check against `caseDef.message` and is reported, never promoted to `ENTAIL_OK`. `summarize` returns `{ total, byClass, gated, invalid }`, with each class holding a status counter and `unclassified` as its own class. The CLI reads the fixture file, refuses any case with a missing `id`, `class`, `mode`, `expect`, `message`, or `reply` key, prints one row per class, and prints `baseline is unvalidated until the owner sets a threshold`.
 
-- [ ] **Step 4: Write the fixture set**
+- [x] **Step 4: Write the fixture set**
 
 Twenty cases, two per class: `material_defect`, `requirement_violation`, `consequence_of_correct_work`, `hidden_tradeoff`, `unsupported_success`, `duplicate_known`, `legitimate_silence`, `ambiguous_evidence`, `model_runtime_error`, `voice_attribution`. Each case is synthetic, English, carries no real session data, and records its `mode`; at least two cases run in `paranoid` so the gate evidence exists. Each consequence and tradeoff case carries an author `entail` label. The replies are static and hand-authored: no live model output is stored as an expected answer, because that would freeze one run into the ground truth. A live runner that fills reply fields is future work behind P2.
 
-- [ ] **Step 5: Run the scorer test and the suite**
+- [x] **Step 5: Run the scorer test and the suite**
 
 Run: `npm test`
 Expected: PASS; the new module is covered by `node --test`.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add scripts/note-voice-baseline.mjs scripts/fixtures/note-voice-baseline/cases.json package.json test/note-voice-baseline.test.js
@@ -464,7 +464,7 @@ git commit -m "test: add an offline per-class baseline scorer"
 - Consumes: `admitsVerdict` and the stored note behavior from Tasks 1 to 3.
 - Produces: a regression test that fails immediately if someone exempts consequences from the Paranoid `action` requirement without the owner decision P3.
 
-- [ ] **Step 1: Write the guard test**
+- [x] **Step 1: Write the guard test**
 
 ```js
 test('Paranoid still drops a high consequence without an action', () => {
@@ -474,12 +474,12 @@ test('Paranoid still drops a high consequence without an action', () => {
 })
 ```
 
-- [ ] **Step 2: Run it**
+- [x] **Step 2: Run it**
 
 Run: `node --test --test-name-pattern="Paranoid still drops" test/strictness.test.js`
 Expected: PASS without any production change. If it fails, the Paranoid gate was altered in an earlier task; revert that alteration instead of changing this test.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add test/strictness.test.js

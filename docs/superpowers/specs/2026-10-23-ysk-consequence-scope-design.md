@@ -1,9 +1,10 @@
 # Design: material consequences of correct work (YSK quality improvement)
 
-Status: **proposal for owner review, not approved**. No implementation, no commit,
-no release is implied by this document. Prepared from the owner's five-stage
-improvement plan and the prior planning session; every claim below is tagged with
-who decided it.
+Status: **implemented on branch `task/ysk-quality-improvement`; owner approval of
+the design is still pending.** Implementation happened after an explicit owner
+instruction to proceed, not as approval of this document. Prepared from the
+owner's five-stage improvement plan and the prior planning session; every claim
+below is tagged with who decided it.
 
 Observation baseline: repository `PipaGs/dsh-you-should-know`, branch `main` at
 `a7b652ed41cd2683bf7e491dccc07c3448d05990` (product version 0.4.5), read on

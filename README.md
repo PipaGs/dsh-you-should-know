@@ -38,7 +38,7 @@ The reply must be one JSON object:
 
 The **note voice** follows responsibility, using only what the excerpt supports: `we` for joint decisions, `the main agent` for the agent's actions, `you` when the decision or the consequence is the human's. When responsibility is unclear the note stays neutral and never invents blame.
 
-Qualifying information is deliberately narrow: a contradiction with an explicit requirement, an overlooked material constraint, a serious correctness/security/safety/data-loss/reliability problem, or an implication that changes the next decision. Otherwise the reviewer stays silent — no summaries, praise, or style advice.
+Qualifying information is deliberately narrow: a contradiction with an explicit requirement, an overlooked material constraint, a serious correctness/security/safety/data-loss/reliability problem, an implication that changes the next decision, or a material consequence or tradeoff of the agent's own decision even when the task is complete and its checks pass. Otherwise the reviewer stays silent — no summaries, praise, or style advice.
 
 Notes are written in the language of the latest genuine human message, falling back to English; a stored host language preference wins. When the excerpt reliably shows a programming language through a fenced tag or file extension, at most three bounded language-specific correctness checklists are added to the instruction.
 
@@ -48,11 +48,13 @@ Each review runs under exactly one mode. The mode changes both the areas of scru
 
 | Mode | Areas of scrutiny | Notification threshold |
 |---|---|---|
-| `Relaxed` | Only obvious, material problems: real bugs, violated explicit requirements, security or data-loss risks, clearly wrong behavior. | Stores `critical` only; a `high` finding is dropped. |
-| `Balanced` (default) | Material overlooked problems: bugs, requirement violations, invalid states, API contract errors, races, security issues, error-handling and test gaps. | Stores `high` and `critical`. |
-| `Strict` | `Balanced` plus edge cases, stale state, race conditions, exception paths, network behavior, performance problems, missing tests. | Stores `high` and `critical`. |
-| `Paranoid` | Aggressively searches hidden failure modes and regressions: assumptions, concurrency, partial failures, retries, cleanup, lifecycle, boundaries, security, data loss, side effects, API incompatibility. | Stores `high` and `critical`; a `high` note needs a concrete `action`. |
-| `Custom` | Shaped by the saved Custom reviewer prompt, which replaces the strictness profile, with additional instructions as an overlay and the `Balanced` materiality floor. | Stores `high` and `critical`. |
+| `Relaxed` | Only obvious, material problems: real bugs, violated explicit requirements, security or data-loss risks, clearly wrong behavior. Also a material consequence or tradeoff of the agent's own decision. | Stores `critical` only; a `high` finding is dropped. |
+| `Balanced` (default) | Material overlooked problems: bugs, requirement violations, invalid states, API contract errors, races, security issues, error-handling and test gaps. Also a material consequence or tradeoff of the agent's own decision, even when the task is complete and its checks pass. | Stores `high` and `critical`. |
+| `Strict` | `Balanced` plus edge cases, stale state, race conditions, exception paths, network behavior, performance problems, missing tests. Also a material consequence or tradeoff of the agent's own decision. | Stores `high` and `critical`. |
+| `Paranoid` | Aggressively searches hidden failure modes and regressions: assumptions, concurrency, partial failures, retries, cleanup, lifecycle, boundaries, security, data loss, side effects, API incompatibility. Also a material consequence or tradeoff of the agent's own decision. | Stores `high` and `critical`; a `high` note needs a concrete `action`. |
+| `Custom` | Shaped by the saved Custom reviewer prompt, which replaces the strictness profile, with additional instructions as an overlay and the `Balanced` materiality floor. Also a material consequence or tradeoff of the agent's own decision. | Stores `high` and `critical`. |
+
+Every mode admits a material consequence or tradeoff of the agent's own decision, even when the task is complete and its checks pass; the class widens the areas of scrutiny, never the threshold. `Relaxed` therefore stores only a `critical` consequence, and `Paranoid` still requires a non-blank `action` on a `high` finding, whatever its class.
 
 No mode admits style, formatting, lint, naming, or preference findings, and no mode can relax the base policy: the JSON contract, the verbatim-path rule, the untrusted-excerpt rule, and the no-fabrication rule always win. **Additional reviewer instructions** (up to 2000 characters) are appended verbatim in every mode. **The Custom reviewer prompt** (up to 4000 characters) replaces only the strictness-profile portion and never the base policy. Both are preserved exactly, never translated or rewritten. Mode details: [modes and prompts](./docs/reference.md#modes-and-prompts).
 

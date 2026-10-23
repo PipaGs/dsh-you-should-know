@@ -127,6 +127,15 @@ test('the fixture set records at least two paranoid cases', () => {
   assert.ok(paranoid.length >= 2, 'at least two cases run behind the Paranoid gate')
 })
 
+test('the gated paranoid consequence fixture stays a pinned miss', () => {
+  const gatedCase = fixtures.find((entry) => entry.id === 'consequence-cache-growth')
+  assert.ok(gatedCase, 'the gated consequence fixture stays in the set')
+  const scored = scoreCase(gatedCase)
+  assert.equal(scored.gated, true)
+  assert.equal(scored.status, 'SILENT_MISSED')
+  assert.equal(summarize(fixtures.map(scoreCase)).gated, 1)
+})
+
 test('every consequence and tradeoff case carries a grounded author entailment label', () => {
   const evidence = fixtures.filter((entry) =>
     entry.class === 'consequence_of_correct_work' || entry.class === 'hidden_tradeoff')

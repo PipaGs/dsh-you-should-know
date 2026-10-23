@@ -524,9 +524,12 @@ test('the reviewer instruction admits consequences of correct work', () => {
     text.includes('"note" is written for the human: what the human needs to know and why it matters.'),
     'the note template asks what the human needs to know',
   )
+  assert.match(text, /Classify every finding/)
   assert.match(text, /"defect", "requirement_violation", "consequence", or "tradeoff"/)
-  assert.match(text, /"because" must be copied verbatim/)
-  assert.match(text, /dropped unless it appears in the excerpt exactly/)
+  assert.match(text, /must also carry "because"/)
+  assert.match(text, /at most 240 characters/)
+  assert.match(text, /either the conversation excerpt or the episode evidence/)
+  assert.match(text, /discards the whole reply/)
   assert.equal(text.includes('what is wrong and why it matters'), false)
 })
 
