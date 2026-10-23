@@ -1,0 +1,22 @@
+COMMAND: node --test --test-name-pattern='release version is a patch increment|package.json, PLUGIN_VERSION|every README self-check|no released artifact|exported plugin version|manifest declares the bundle|authenticated self-check route' test/invariant.test.js test/plugin.test.js test/update-route.test.js test/release-consistency.test.js
+DATE: 2026-10-23T19:32:34Z / 2026-10-23T22:32:34+0300
+HEAD: 87ae0a956b30c7cf0c471deefee33e5a9a41e15f
+NOTE: filtered subset isolates exactly the seven version-related tests
+--- OUTPUT ---
+✔ the manifest declares the bundle, the client half, and no build step (2.0375ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+✔ the authenticated self-check route reports only the bounded running plugin state (23.610083ms)
+✔ the release version is a patch increment over the previous release (0.53325ms)
+✔ package.json, PLUGIN_VERSION, and the README install address agree (0.695666ms)
+✔ every README self-check sample version is the released version (0.223833ms)
+✔ no released artifact still documents the previous version (0.212166ms)
+✔ the exported plugin version mirrors package.json (2.132625ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 190.231708
+EXIT_CODE: 0

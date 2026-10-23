@@ -1,0 +1,31 @@
+COMMAND: git diff 87ae0a9 --stat/--numstat; unchanged-file checks; diff grep for secrets and external URLs
+DATE: 2026-10-23T19:33:25Z / 2026-10-23T22:33:25+0300
+BASE: 87ae0a956b30c7cf0c471deefee33e5a9a41e15f
+HEAD: 87ae0a956b30c7cf0c471deefee33e5a9a41e15f
+--- git diff 87ae0a9 --stat ---
+ README.md                        | 14 ++++++++------
+ docs/reference.md                |  8 ++++----
+ lib/index.js                     |  2 +-
+ package.json                     |  2 +-
+ test/invariant.test.js           |  2 +-
+ test/plugin.test.js              |  6 +++---
+ test/release-consistency.test.js |  4 ++--
+ test/update-route.test.js        |  2 +-
+ 8 files changed, 21 insertions(+), 19 deletions(-)
+--- git diff 87ae0a9 --numstat ---
+8	6	README.md
+4	4	docs/reference.md
+1	1	lib/index.js
+1	1	package.json
+1	1	test/invariant.test.js
+3	3	test/plugin.test.js
+2	2	test/release-consistency.test.js
+1	1	test/update-route.test.js
+--- unchanged path checks (0 = identical) ---
+lib/client.js unchanged_exit=0
+cordis.patch.yml unchanged_exit=0
+test/client-ui.test.js unchanged_exit=0
+--- secret-pattern matches in diff (expected none) ---
+(no matches)
+--- external URL matches in diff (expected none) ---
+(no matches)

@@ -1,0 +1,60 @@
+COMMAND: version scans; git grep excluding docs/harness-reports and docs/upstream; git ls-remote --tags origin
+DATE: 2026-10-23T19:32:59Z / 2026-10-23T22:32:59+0300
+HEAD: 87ae0a956b30c7cf0c471deefee33e5a9a41e15f
+--- git grep -n '0\.4\.5' (tracked, exclusions) ---
+AGENTS.md:57:[english-addendum-20261019.md](docs/harness-reports/ysk-version-bump-0.4.5-20261019/english-addendum-20261019.md).
+docs/superpowers/specs/2026-10-23-ysk-consequence-scope-design.md:10:`a7b652ed41cd2683bf7e491dccc07c3448d05990` (product version 0.4.5), read on
+docs/superpowers/specs/2026-10-23-ysk-consequence-scope-design.md:227:Observed baseline version: 0.4.5 at `a7b652e`. Proposed-version number: next
+docs/superpowers/specs/2026-10-23-ysk-consequence-scope-design.md:233:   2026-10-14, verify tag `v0.4.5` and the installed plugin version. The ledger
+docs/superpowers/specs/2026-10-23-ysk-consequence-scope-design.md:267:`[UNVERIFIED]` existence of tag `v0.4.5` on GitHub (local tags stop at v0.4.3),
+test/release-consistency.test.js:29:const PREVIOUS = '0.4.5'
+test/repository-language.test.js:17:const PR19 = 'docs/harness-reports/ysk-version-bump-0.4.5-20261019'
+--- git grep -n '0\.4\.6' (tracked, exclusions) ---
+README.md:11:Version `0.4.6`, MIT. Host and browser halves ship as plain JavaScript, so a `github:` install needs no build. The scope is intentionally small: a composer-adjacent note card with a bounded in-memory history, a Plugins settings card (strictness mode, additional instructions, custom prompt, update controls), a session-header mode and model override, one reviewer call per qualifying turn, and a per-session runtime that retries one transient failure, bounds the queue, and pauses on quota without losing the turn.
+README.md:76:dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.4.6
+README.md:79:The `v0.4.6` tag is prospective: it is created when this release is published and does not exist before that. The newest tag published so far is `v0.4.4`.
+README.md:192:  "pluginVersion": "0.4.6",
+README.md:193:  "runtimeVersion": "0.4.6",
+README.md:194:  "installedVersion": "0.4.6",
+README.md:197:  "update": { "currentVersion": "0.4.6", "updateAvailable": false, "automaticSupported": false }
+docs/reference.md:207:  "pluginVersion": "0.4.6",
+docs/reference.md:208:  "runtimeVersion": "0.4.6",
+docs/reference.md:209:  "installedVersion": "0.4.6",
+docs/reference.md:214:  "update": { "currentVersion": "0.4.6", "latestVersion": "", "latestTag": "", "installSpec": "", "source": "git-tags", "updateAvailable": false, "dismissed": false, "autoCheckUpdates": true, "updateBehavior": "ask-before-update", "automaticSupported": false, "lastAutoCheckDate": "", "lastCheckedAt": null, "lastResult": null }
+lib/index.js:36:export const PLUGIN_VERSION = '0.4.6'
+package.json:3:  "version": "0.4.6",
+test/invariant.test.js:189:  assert.equal(manifest.version, '0.4.6')
+test/plugin.test.js:399:  assert.equal(body.pluginVersion, '0.4.6')
+test/plugin.test.js:400:  assert.equal(body.runtimeVersion, '0.4.6')
+test/plugin.test.js:401:  assert.equal(body.installedVersion, '0.4.6')
+test/release-consistency.test.js:28:const CURRENT = '0.4.6'
+test/update-route.test.js:257:  assert.equal(manifest.version, '0.4.6')
+--- package.json version ---
+0.4.6
+--- PLUGIN_VERSION ---
+36:export const PLUGIN_VERSION = '0.4.6'
+220:    currentVersion: PLUGIN_VERSION,
+348:      pluginVersion: PLUGIN_VERSION,
+--- README install spec lines ---
+76:dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.4.6
+--- README self-check fields ---
+192:  "pluginVersion": "0.4.6",
+193:  "runtimeVersion": "0.4.6",
+194:  "installedVersion": "0.4.6",
+197:  "update": { "currentVersion": "0.4.6", "updateAvailable": false, "automaticSupported": false }
+--- docs/reference.md self-check fields ---
+207:  "pluginVersion": "0.4.6",
+208:  "runtimeVersion": "0.4.6",
+209:  "installedVersion": "0.4.6",
+214:  "update": { "currentVersion": "0.4.6", "latestVersion": "", "latestTag": "", "installSpec": "", "source": "git-tags", "updateAvailable": false, "dismissed": false, "autoCheckUpdates": true, "updateBehavior": "ask-before-update", "automaticSupported": false, "lastAutoCheckDate": "", "lastCheckedAt": null, "lastResult": null }
+--- remote tags v0.4.6 and v0.4.5 (empty means absent) ---
+ls_remote_absent_targets_exit=0
+--- newest remote tags by version sort (tail) ---
+v0.3.6
+v0.3.7
+v0.3.8
+v0.4.0
+v0.4.1
+v0.4.2
+v0.4.3
+v0.4.4
