@@ -267,3 +267,22 @@ minimum per class; whether the baseline ships in CI on day one.
 `[UNVERIFIED]` existence of tag `v0.4.5` on GitHub (local tags stop at v0.4.3),
 the installed plugin version, and official Anthropic changes after 2026-10-14.
 These belong to work-order step 1.
+
+## Addendum 2026-10-23 (review round 2)
+
+The implementation on branch `task/ysk-quality-improvement` (commit `c87a33e`)
+went beyond the status list in section 11. The original text above is preserved
+as written; this addendum records the differences.
+
+- The baseline gained the `RUNTIME_ERROR` status. A case whose reviewer call
+  failed carries that status; it is not plotted on either silence side.
+- Runtime failures are excluded from both silence counters. Such a case counts
+  as neither `SILENT_OK` nor `SILENT_MISSED`, so a provider failure can no
+  longer read as a deliberate choice to stay quiet.
+- Semantic quality stays `NOT_VERIFIED`. No accuracy or precision metric is
+  computed, and no aggregate quality score is derived from the run.
+- `SPEAK_OK` and `SPEAK_UNWARRANTED` both carry the `semantics: 'NOT_VERIFIED'`
+  marker. Both statuses report an admitted note; the marker says the scorer
+  checked admission, not meaning.
+- The fixture set is 21 cases: two per class, plus a third
+  `model_runtime_error` case with a speak expectation.

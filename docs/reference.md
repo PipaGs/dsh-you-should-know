@@ -47,7 +47,7 @@ A review adapts to the conversation through the plugin's review profile. The not
 
 ## Offline note voice baseline
 
-`npm run eval:note-voice:baseline` scores the hand-authored fixtures in `scripts/fixtures/note-voice-baseline/cases.json` with the same parse, mode gate, and verbatim grounding checks the runtime applies. It is offline and deterministic: it never calls a model, opens a network connection, or reads an environment variable. The CLI prints a per-class count table and the `gated`, `invalid`, `runtime errors`, and `semantics.notVerified` totals.
+`npm run eval:note-voice:baseline` scores the hand-authored fixtures in `scripts/fixtures/note-voice-baseline/cases.json` with the same parse, mode gate, and verbatim grounding checks the runtime applies. It is offline and deterministic: it never calls a model, opens a network connection, or reads an environment variable. The CLI prints a per-class count table, the `gated`, `invalid`, and `runtime errors` totals, and a NOT VERIFIED statement about semantic quality. `summarize` also returns the `semantics.notVerified` count for programmatic use.
 
 Each case receives exactly one status:
 
@@ -55,13 +55,13 @@ Each case receives exactly one status:
 |---|---|
 | `SPEAK_OK` | A note was admitted for a case that expects one. |
 | `SPEAK_UNWARRANTED` | A note was admitted for a case that expects silence. |
-| `SILENT_OK` | Intentional silence for a case that expects silence. |
+| `SILENT_OK` | No admitted note for a case that expects silence, whether the reply was absent, silent, or dropped by grounding. |
 | `SILENT_MISSED` | No note was admitted for a case that expects one. |
 | `RUNTIME_ERROR` | The reviewer call failed. A `runtimeError` with a null reply scores this, never `SILENT_OK` or `SILENT_MISSED`. |
 | `INVALID` | A structurally broken case. A `runtimeError` next to a real reply is contradictory and also `INVALID`. |
 | `NOT_RUN` | Reserved for a future live runner. |
 
-The baseline measures structural admission, not reviewer quality. Semantic quality (entailment, voice attribution) is NOT VERIFIED: every admitted note carries `semantics: 'NOT_VERIFIED'`, a voice-attribution case carries `attributionVerified: false`, and an authored `entail` label carries `entailVerified: false` because it is the fixture author's label, not adjudication. No accuracy or precision is computed. The baseline stays unvalidated until the owner sets a threshold.
+The baseline measures structural admission, not reviewer quality. Semantic quality (entailment, voice attribution) is NOT VERIFIED: every admitted note, `SPEAK_OK` and `SPEAK_UNWARRANTED` alike, carries `semantics: 'NOT_VERIFIED'`, a voice-attribution case carries `attributionVerified: false`, and an authored `entail` label carries `entailVerified: false` because it is the fixture author's label, not adjudication. No accuracy or precision is computed. The baseline stays unvalidated until the owner sets a threshold.
 
 ## Modes and prompts
 

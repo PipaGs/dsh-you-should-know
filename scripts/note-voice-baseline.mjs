@@ -160,8 +160,9 @@ export function scoreCase(caseDef) {
   }
   const status = caseDef.expect === 'speak' ? 'SPEAK_OK' : 'SPEAK_UNWARRANTED'
   const admitted = { ...base, ...extra, status, gated: false }
-  // Structural admission never establishes that the note is semantically right.
-  if (status === 'SPEAK_OK') admitted.semantics = 'NOT_VERIFIED'
+  // Structural admission never establishes that the note is semantically right,
+  // whether the case expected a note or not.
+  admitted.semantics = 'NOT_VERIFIED'
   return admitted
 }
 

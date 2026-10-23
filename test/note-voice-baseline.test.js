@@ -266,6 +266,18 @@ test('a runtime error next to a real reply is contradictory and invalid', () => 
   assert.equal(scoreCase({ ...base, id: 'runtime-blank', runtimeError: '   ', reply: null }).status, 'INVALID')
 })
 
+test('a non-string runtime error is invalid, never a runtime failure', () => {
+  const base = {
+    class: 'model_runtime_error', mode: 'balanced', expect: 'silent',
+    message: 'The change renames one private helper and all tests pass.', reply: null,
+  }
+  assert.equal(scoreCase({ ...base, id: 'runtime-number', runtimeError: 504 }).status, 'INVALID')
+  assert.equal(
+    scoreCase({ ...base, id: 'runtime-object', runtimeError: { message: 'timeout' } }).status,
+    'INVALID',
+  )
+})
+
 test('intentional silence without a runtime error stays SILENT_OK', () => {
   const result = scoreCase({
     id: 'silence-clean', class: 'legitimate_silence', mode: 'balanced', expect: 'silent',
@@ -301,6 +313,17 @@ test('a misattributed voice reply is admitted structurally with attribution unve
   assert.equal(result.status, 'SPEAK_OK')
   assert.equal(result.semantics, 'NOT_VERIFIED')
   assert.equal(result.attributionVerified, false)
+})
+
+test('an unwarranted admitted note is marked semantically unverified too', () => {
+  const result = scoreCase({
+    id: 'unwarranted', class: 'legitimate_silence', mode: 'balanced', expect: 'silent',
+    message: 'The change renames one private helper and all tests pass.',
+    reply: { note: 'N', importance: 'high' },
+  })
+  assert.equal(result.status, 'SPEAK_UNWARRANTED')
+  assert.equal(result.semantics, 'NOT_VERIFIED')
+  assert.deepEqual(summarize([result]).semantics, { notVerified: 1 })
 })
 
 test('summarize reports runtime errors and unverified semantics without a quality score', () => {

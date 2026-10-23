@@ -224,13 +224,13 @@ The command scores the hand-authored fixtures in `scripts/fixtures/note-voice-ba
 
 - `SPEAK_OK`: a note was admitted for a case that expects one;
 - `SPEAK_UNWARRANTED`: a note was admitted for a case that expects silence;
-- `SILENT_OK`: intentional silence for a case that expects silence;
+- `SILENT_OK`: no admitted note for a case that expects silence, whether the reply was absent, silent, or dropped by grounding;
 - `SILENT_MISSED`: no note was admitted for a case that expects one;
 - `RUNTIME_ERROR`: the reviewer call failed; never counted as silence in either direction;
 - `INVALID`: a structurally broken or contradictory case;
 - `NOT_RUN`: reserved for a future live runner.
 
-The output is a per-class count table plus `gated`, `invalid`, `runtime errors`, and `semantics.notVerified` totals. It measures structural admission only. Semantic quality (entailment, voice attribution) is NOT VERIFIED: an `entail` label is the fixture author's label, voice attribution is not checked, and no accuracy or precision is computed. The baseline stays unvalidated until the owner sets a threshold.
+The output is a per-class count table, the `gated`, `invalid`, and `runtime errors` totals, and a NOT VERIFIED statement about semantic quality. The `summarize` helper also returns the `semantics.notVerified` count for programmatic use. The baseline measures structural admission only. Semantic quality (entailment, voice attribution) is NOT VERIFIED: an `entail` label is the fixture author's label, voice attribution is not checked, and no accuracy or precision is computed. The baseline stays unvalidated until the owner sets a threshold.
 
 ## Repository rules
 
