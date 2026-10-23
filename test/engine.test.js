@@ -277,7 +277,7 @@ test('a valid high or critical reply becomes one session-scoped note', async () 
   assert.equal(outcome.status, 'noted')
   assert.equal(outcome.note.importance, 'critical')
   assert.deepEqual(engine.notes('s1'), [
-    { id: outcome.note.id, note: 'Rotate the key.', importance: 'critical', createdAt: 1700000000000 },
+    { id: outcome.note.id, note: 'Rotate the key.', importance: 'critical', createdAt: 1700000000000, kind: 'unclassified' },
   ])
 })
 
@@ -486,6 +486,59 @@ test('an action persists per note through storage and history and never reaches 
   const entry = engine.history('s1').find((item) => item.id === stored[0].id)
   assert.equal(entry.note, 'Guard the write.', 'history keeps the human note')
   assert.equal(entry.action, 'Fix the store write and add a regression test.', 'history keeps the action')
+})
+
+test('the route exposes kind and an unclassified legacy note', async () => {
+  const { engine } = engineWith(['{"note":"Same","importance":"high"}'], { minDeltaChars: 0, cooldownTurns: 1 })
+  const settled = await observeAndSettle(engine, sessionWith('k1', [{ turn: 1, answer: 'work' }]))
+  assert.equal(settled.status, 'noted')
+  assert.equal(settled.note.kind, 'unclassified')
+  assert.equal(settled.note.because, undefined)
+  assert.equal(engine.notes('k1')[0].kind, 'unclassified')
+  assert.equal(engine.history('k1')[0].kind, 'unclassified')
+  const snapshot = JSON.stringify(engine.status('k1'))
+  assert.equal(snapshot.includes('unclassified'), false, 'status never exposes the class')
+})
+
+test('a stored kind and its quoted basis survive into the notes and history views', async () => {
+  const { engine } = engineWith([
+    '{"note":"Cache grows without bound","importance":"high","kind":"tradeoff","because":"use the cache"}',
+  ], { minDeltaChars: 0, cooldownTurns: 1 })
+  const settled = await observeAndSettle(engine, sessionWith('k3', [{ turn: 1, answer: 'We use the cache for speed.' }]))
+  assert.equal(settled.status, 'noted')
+  assert.equal(settled.note.kind, 'tradeoff')
+  assert.equal(settled.note.because, 'use the cache')
+
+  const active = engine.notes('k3')[0]
+  assert.equal(active.kind, 'tradeoff')
+  assert.equal(active.because, 'use the cache')
+  const [entry] = engine.history('k3')
+  assert.equal(entry.kind, 'tradeoff')
+  assert.equal(entry.because, 'use the cache')
+
+  const snapshot = JSON.stringify(engine.status('k3'))
+  for (const value of ['Cache grows without bound', 'tradeoff', 'use the cache']) {
+    assert.equal(snapshot.includes(value), false, 'status never exposes ' + value)
+  }
+})
+
+test('the same text under two kinds is one note and dedupe stays text-only', async () => {
+  const { engine } = engineWith([
+    '{"note":"Cache is unbounded","importance":"high","kind":"defect"}',
+    '{"note":"Cache is unbounded","importance":"high","kind":"tradeoff","because":"use the cache"}',
+  ], { minDeltaChars: 0, cooldownTurns: 1 })
+  const session = sessionWith('k2', [{ turn: 1, answer: 'use the cache' }])
+  assert.equal((await observeAndSettle(engine, session)).status, 'noted')
+  session.events.push(userEvent(90, 'q2'), assistantEvent(91, 2, 'use the cache'), turnEnd(92, 2))
+  session.lastEvent = session.events[session.events.length - 1]
+  assert.equal((await observeAndSettle(engine, session)).status, 'duplicate')
+  assert.equal(engine.status('k2').session.reviewStarts, 2, 'the second review did run')
+  assert.equal(engine.notes('k2').length, 1)
+  assert.equal(engine.notes('k2')[0].kind, 'defect', 'the first stored class is kept')
+  const snapshot = JSON.stringify(engine.status('k2'))
+  for (const value of ['Cache is unbounded', 'defect', 'use the cache']) {
+    assert.equal(snapshot.includes(value), false, 'status never exposes ' + value)
+  }
 })
 
 test('a reviewer failure is contained and never surfaces as a note', async () => {
