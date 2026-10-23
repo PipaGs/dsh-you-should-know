@@ -152,8 +152,8 @@ In `test/engine.test.js`, using the file's existing `engineWith` helper:
 test('a because that is not verbatim in the excerpt drops the reply', async () => {
   const quoted = engineWith(['{"note":"N","importance":"high","kind":"consequence","because":"use the cache"}'], { minDeltaChars: 0, cooldownTurns: 1 })
   const ok = await observeAndSettle(quoted.engine, sessionWith('q1', [{ turn: 1, answer: 'We use the cache for speed.' }]))
-  assert.equal(ok.notes.length, 1)
-  assert.equal(ok.notes[0].kind, 'consequence')
+  assert.equal(ok.status, 'noted')
+  assert.equal(quoted.engine.notes('q1').length, 1)
 
   const invented = engineWith(['{"note":"N","importance":"high","kind":"consequence","because":"use the disk"}'], { minDeltaChars: 0, cooldownTurns: 1 })
   const dropped = await observeAndSettle(invented.engine, sessionWith('q2', [{ turn: 1, answer: 'We use the cache for speed.' }]))
@@ -217,7 +217,7 @@ Rules: `dedupeKey` stays text-only; the same note text under two classes is one 
 test('the route exposes kind and an unclassified legacy note', async () => {
   const { engine } = engineWith(['{"note":"Same","importance":"high"}'], { minDeltaChars: 0, cooldownTurns: 1 })
   const settled = await observeAndSettle(engine, sessionWith('k1', [{ turn: 1, answer: 'work' }]))
-  assert.equal(settled.notes[0].kind, 'unclassified')
+  assert.equal(settled.note.kind, 'unclassified')
 })
 
 test('the same text under two kinds is one note', async () => {
