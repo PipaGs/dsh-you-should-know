@@ -362,6 +362,42 @@ test('silence stays exactly note plus importance and never carries a source', ()
   assert.equal(parseVerdict('{"note":null,"importance":null,"source":null}'), null)
 })
 
+test('parseVerdict keeps a known kind and an exact because', () => {
+  const v = parseVerdict('{"note":"N","importance":"high","kind":"consequence","because":"chose the in-memory cache"}')
+  assert.equal(v.kind, 'consequence')
+  assert.equal(v.because, 'chose the in-memory cache')
+})
+
+test('parseVerdict leaves a legacy reply unclassified without adding kind', () => {
+  const v = parseVerdict('{"note":"N","importance":"high"}')
+  assert.equal(Object.prototype.hasOwnProperty.call(v, 'kind'), false)
+})
+
+test('parseVerdict degrades an unknown or malformed kind to unclassified', () => {
+  for (const kind of ['"mystery"', '7', 'null', '{"a":1}']) {
+    const v = parseVerdict('{"note":"N","importance":"high","kind":' + kind + '}')
+    assert.equal(v.kind, 'unclassified', kind)
+    assert.equal(v.note, 'N')
+  }
+})
+
+test('parseVerdict drops a consequence without because and a malformed because', () => {
+  assert.equal(parseVerdict('{"note":"N","importance":"high","kind":"consequence"}'), null)
+  assert.equal(parseVerdict('{"note":"N","importance":"high","kind":"tradeoff"}'), null)
+  for (const because of ['5', '""', '"   "', '"' + 'x'.repeat(241) + '"']) {
+    assert.equal(parseVerdict('{"note":"N","importance":"high","because":' + because + '}'), null, because.slice(0, 12))
+  }
+  assert.equal(parseVerdict('{"note":"N","importance":"high","because":"a\u0007b"}'), null)
+  // The escaped form survives JSON parsing, so this rejection is the parser's
+  // control-character rule rather than JSON.parse refusing the raw byte.
+  assert.equal(parseVerdict('{"note":"N","importance":"high","because":"a\\u0007b"}'), null)
+})
+
+test('parseVerdict rejects silence that carries kind or because', () => {
+  assert.equal(parseVerdict('{"note":null,"importance":null,"kind":"defect"}'), null)
+  assert.equal(parseVerdict('{"note":null,"importance":null,"because":"x"}'), null)
+})
+
 test('dedupeKey normalizes case, punctuation, and whitespace', () => {
   assert.equal(dedupeKey('  Use HTTPS!!  '), 'use https')
   assert.equal(dedupeKey('use-https'), 'use https')
@@ -475,6 +511,26 @@ test('the reviewer instruction separates the human note from the agent action', 
   assert.match(REVIEW_INSTRUCTIONS, /only when a valid source object/)
   assert.match(REVIEW_INSTRUCTIONS, /The loading state never clears because GET \/session returns 400\./)
   assert.match(REVIEW_INSTRUCTIONS, /Fix the \/session route registration so GET\/HEAD do not use a streaming request body/)
+})
+
+test('the reviewer instruction admits consequences of correct work', () => {
+  const text = REVIEW_INSTRUCTIONS
+  assert.match(text, /consequence/i)
+  assert.match(text, /even when the (task|work) is (complete|done)/i)
+  assert.match(text, /"kind"/)
+  assert.match(text, /"because"/)
+  assert.match(text, /what the human needs to know/i)
+  assert.ok(
+    text.includes('"note" is written for the human: what the human needs to know and why it matters.'),
+    'the note template asks what the human needs to know',
+  )
+  assert.match(text, /Classify every finding/)
+  assert.match(text, /"defect", "requirement_violation", "consequence", or "tradeoff"/)
+  assert.match(text, /must also carry "because"/)
+  assert.match(text, /at most 240 characters/)
+  assert.match(text, /either the conversation excerpt or the episode evidence/)
+  assert.match(text, /discards the whole reply/)
+  assert.equal(text.includes('what is wrong and why it matters'), false)
 })
 
 test('the note voice follows who was responsible for the decision, without invented blame', () => {

@@ -1,0 +1,7 @@
+command: git diff --cached --check (report and evidence staged)
+start_utc: 2026-10-23T18:46:52Z
+git_head: b5e3a146dbcc9f643946429e5679ce69d9cc6fad
+staged_entries: 26
+--- output ---
+exit_code: 0
+end_utc: 2026-10-23T18:46:52Z

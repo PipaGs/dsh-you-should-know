@@ -1,0 +1,42 @@
+command: node /tmp/ysk-repro-prefix.mjs (pre-fix source exported from fa9d6ce)
+start_utc: 2026-10-23T18:41:00Z
+git_head: b5e3a146dbcc9f643946429e5679ce69d9cc6fad
+source_commit: fa9d6ce08409c014b466dc5bdedd938bc22ba6ce
+source_tree: /tmp/ysk-prefix.cBvJKJ (git archive fa9d6ce)
+--- reproducer ---
+import { readFileSync } from 'node:fs'
+import { scoreCase } from '/tmp/ysk-prefix.cBvJKJ/scripts/note-voice-baseline.mjs'
+const cases = JSON.parse(readFileSync('/tmp/ysk-prefix.cBvJKJ/scripts/fixtures/note-voice-baseline/cases.json', 'utf8'))
+const byId = Object.fromEntries(cases.map((entry) => [entry.id, entry]))
+const show = (label, result) => console.log(label + ': ' + JSON.stringify(result))
+for (const id of ['runtime-timeout', 'runtime-malformed-reply']) {
+  show(id, scoreCase(byId[id]))
+}
+show('entail-unsupported', scoreCase({
+  id: 'prefix-entail-unsupported',
+  class: 'consequence_of_correct_work',
+  mode: 'balanced',
+  expect: 'speak',
+  entail: 'unsupported',
+  message: 'we use the cache',
+  reply: { note: 'N', importance: 'high', kind: 'consequence', because: 'we use the cache' },
+}))
+show('voice-wrong-actor', scoreCase({
+  id: 'prefix-voice-wrong-actor',
+  class: 'voice_attribution',
+  mode: 'balanced',
+  expect: 'speak',
+  message: 'You required disabling certificate verification in staging.',
+  reply: {
+    note: 'The main agent disabled certificate verification in staging, which exposes the client to interception.',
+    importance: 'high',
+    action: 'Enable certificate verification again in staging.',
+  },
+}))
+--- output ---
+runtime-timeout: {"id":"runtime-timeout","class":"model_runtime_error","status":"SILENT_OK","gated":false}
+runtime-malformed-reply: {"id":"runtime-malformed-reply","class":"model_runtime_error","status":"SILENT_OK","gated":false}
+entail-unsupported: {"id":"prefix-entail-unsupported","class":"consequence_of_correct_work","entail":"ENTAIL_UNSUPPORTED","becauseGrounded":true,"status":"SPEAK_OK","gated":false}
+voice-wrong-actor: {"id":"prefix-voice-wrong-actor","class":"voice_attribution","status":"SPEAK_OK","gated":false}
+exit_code: 0
+end_utc: 2026-10-23T18:41:00Z

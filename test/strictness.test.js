@@ -77,6 +77,14 @@ test('a mode-specific probe matches its prompt fragment', () => {
   assert.match(reviewModeProfile('balanced').instruction, /API contract|invalid state/i)
 })
 
+test('every review mode names consequences or tradeoffs', () => {
+  for (const mode of REVIEW_MODES) {
+    const text = buildStrictnessSection(mode, '', undefined)
+    assert.match(text, /consequence|tradeoff/i, mode)
+  }
+  assert.match(buildStrictnessSection('relaxed', '', undefined), /critical only/i)
+})
+
 test('Custom keeps the Balanced materiality floor and blank instructions change no gate', () => {
   const custom = reviewModeProfile('custom')
   const balanced = reviewModeProfile('balanced')
@@ -398,6 +406,12 @@ test('Paranoid admits a high finding only with a concrete action', () => {
   }
   assert.equal(admitsVerdict('balanced', { note: 'N', importance: 'medium' }), false)
   assert.equal(admitsVerdict('balanced', null), false)
+})
+
+test('Paranoid still drops a high consequence without an action', () => {
+  assert.equal(admitsVerdict('paranoid', { note: 'N', importance: 'high', kind: 'consequence', because: 'x' }), false)
+  assert.equal(admitsVerdict('paranoid', { note: 'N', importance: 'critical', kind: 'consequence', because: 'x' }), true)
+  assert.equal(admitsVerdict('balanced', { note: 'N', importance: 'high', kind: 'consequence', because: 'x' }), true)
 })
 
 test('the engine applies the Paranoid action requirement deterministically', async () => {

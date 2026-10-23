@@ -1,0 +1,11 @@
+command: npm run check
+start_utc: 2026-10-23T18:41:12Z
+git_head: b5e3a146dbcc9f643946429e5679ce69d9cc6fad
+branch: task/ysk-quality-improvement
+dirty_entries_before: 0
+
+> dsh-you-should-know@0.4.5 check
+> node --check lib/core.js && node --check lib/self-check.js && node --check lib/runtime.js && node --check lib/review-profile.js && node --check lib/review-strictness.js && node --check lib/language.js && node --check lib/feedback.js && node --check lib/adaptive.js && node --check lib/evidence.js && node --check lib/explain.js && node --check lib/update.js && node --check lib/index.js && node --check lib/client.js && node --check scripts/note-voice-eval.mjs && node --check scripts/note-voice-eval-deepseek.mjs && node --check scripts/note-voice-eval-live.mjs && node --check scripts/note-voice-baseline.mjs
+
+exit_code: 0
+end_utc: 2026-10-23T18:41:15Z

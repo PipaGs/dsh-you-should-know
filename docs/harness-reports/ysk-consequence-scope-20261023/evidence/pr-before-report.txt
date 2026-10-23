@@ -1,0 +1,9 @@
+command: gh pr view 21 --json number,state,headRefName,headRefOid,baseRefName,url,mergeable,isDraft
+start_utc: 2026-10-23T18:42:37Z
+{"baseRefName":"main","headRefName":"task/ysk-quality-improvement","headRefOid":"b5e3a146dbcc9f643946429e5679ce69d9cc6fad","isDraft":false,"mergeable":"MERGEABLE","number":21,"state":"OPEN","url":"https://github.com/PipaGs/dsh-you-should-know/pull/21"}
+--- PRs for branch ---
+21	feat: report material consequences of correct work	task/ysk-quality-improvement	OPEN	2026-10-23T18:19:10Z
+--- open PRs ---
+21	feat: report material consequences of correct work	task/ysk-quality-improvement	OPEN	2026-10-23T18:19:10Z
+--- tags at head ---
+end_utc: 2026-10-23T18:42:39Z

@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { LIMITS, createEngine, normalizeConfig } from '../lib/core.js'
+import { LIMITS, createEngine, groundVerdict, normalizeConfig } from '../lib/core.js'
 
 const CONFIGURED = normalizeConfig({ provider: 'p', model: 'm', minDeltaChars: 0, cooldownTurns: 1 }).config
 
@@ -277,7 +277,7 @@ test('a valid high or critical reply becomes one session-scoped note', async () 
   assert.equal(outcome.status, 'noted')
   assert.equal(outcome.note.importance, 'critical')
   assert.deepEqual(engine.notes('s1'), [
-    { id: outcome.note.id, note: 'Rotate the key.', importance: 'critical', createdAt: 1700000000000 },
+    { id: outcome.note.id, note: 'Rotate the key.', importance: 'critical', createdAt: 1700000000000, kind: 'unclassified' },
   ])
 })
 
@@ -486,6 +486,59 @@ test('an action persists per note through storage and history and never reaches 
   const entry = engine.history('s1').find((item) => item.id === stored[0].id)
   assert.equal(entry.note, 'Guard the write.', 'history keeps the human note')
   assert.equal(entry.action, 'Fix the store write and add a regression test.', 'history keeps the action')
+})
+
+test('the route exposes kind and an unclassified legacy note', async () => {
+  const { engine } = engineWith(['{"note":"Same","importance":"high"}'], { minDeltaChars: 0, cooldownTurns: 1 })
+  const settled = await observeAndSettle(engine, sessionWith('k1', [{ turn: 1, answer: 'work' }]))
+  assert.equal(settled.status, 'noted')
+  assert.equal(settled.note.kind, 'unclassified')
+  assert.equal(settled.note.because, undefined)
+  assert.equal(engine.notes('k1')[0].kind, 'unclassified')
+  assert.equal(engine.history('k1')[0].kind, 'unclassified')
+  const snapshot = JSON.stringify(engine.status('k1'))
+  assert.equal(snapshot.includes('unclassified'), false, 'status never exposes the class')
+})
+
+test('a stored kind and its quoted basis survive into the notes and history views', async () => {
+  const { engine } = engineWith([
+    '{"note":"Cache grows without bound","importance":"high","kind":"tradeoff","because":"use the cache"}',
+  ], { minDeltaChars: 0, cooldownTurns: 1 })
+  const settled = await observeAndSettle(engine, sessionWith('k3', [{ turn: 1, answer: 'We use the cache for speed.' }]))
+  assert.equal(settled.status, 'noted')
+  assert.equal(settled.note.kind, 'tradeoff')
+  assert.equal(settled.note.because, 'use the cache')
+
+  const active = engine.notes('k3')[0]
+  assert.equal(active.kind, 'tradeoff')
+  assert.equal(active.because, 'use the cache')
+  const [entry] = engine.history('k3')
+  assert.equal(entry.kind, 'tradeoff')
+  assert.equal(entry.because, 'use the cache')
+
+  const snapshot = JSON.stringify(engine.status('k3'))
+  for (const value of ['Cache grows without bound', 'tradeoff', 'use the cache']) {
+    assert.equal(snapshot.includes(value), false, 'status never exposes ' + value)
+  }
+})
+
+test('the same text under two kinds is one note and dedupe stays text-only', async () => {
+  const { engine } = engineWith([
+    '{"note":"Cache is unbounded","importance":"high","kind":"defect"}',
+    '{"note":"Cache is unbounded","importance":"high","kind":"tradeoff","because":"use the cache"}',
+  ], { minDeltaChars: 0, cooldownTurns: 1 })
+  const session = sessionWith('k2', [{ turn: 1, answer: 'use the cache' }])
+  assert.equal((await observeAndSettle(engine, session)).status, 'noted')
+  session.events.push(userEvent(90, 'q2'), assistantEvent(91, 2, 'use the cache'), turnEnd(92, 2))
+  session.lastEvent = session.events[session.events.length - 1]
+  assert.equal((await observeAndSettle(engine, session)).status, 'duplicate')
+  assert.equal(engine.status('k2').session.reviewStarts, 2, 'the second review did run')
+  assert.equal(engine.notes('k2').length, 1)
+  assert.equal(engine.notes('k2')[0].kind, 'defect', 'the first stored class is kept')
+  const snapshot = JSON.stringify(engine.status('k2'))
+  for (const value of ['Cache is unbounded', 'defect', 'use the cache']) {
+    assert.equal(snapshot.includes(value), false, 'status never exposes ' + value)
+  }
 })
 
 test('a reviewer failure is contained and never surfaces as a note', async () => {
@@ -1350,4 +1403,34 @@ test('dispose disposes every runtime and clears all session and override state',
   assert.equal(engine.resume('s1'), false)
   assert.equal(engine.observe(sessionWith('s1', [{ turn: 1, answer: 'two' }]), turnEnd(3, 1)).status, 'disposed')
   engine.dispose()
+})
+
+test('a because that is not verbatim in the excerpt drops the reply', async () => {
+  const quoted = engineWith(['{"note":"N","importance":"high","kind":"consequence","because":"use the cache"}'], { minDeltaChars: 0, cooldownTurns: 1 })
+  const ok = await observeAndSettle(quoted.engine, sessionWith('q1', [{ turn: 1, answer: 'We use the cache for speed.' }]))
+  assert.equal(ok.status, 'noted')
+  assert.equal(quoted.engine.notes('q1').length, 1)
+
+  const invented = engineWith(['{"note":"N","importance":"high","kind":"consequence","because":"use the disk"}'], { minDeltaChars: 0, cooldownTurns: 1 })
+  const dropped = await observeAndSettle(invented.engine, sessionWith('q2', [{ turn: 1, answer: 'We use the cache for speed.' }]))
+  assert.equal(dropped.status, 'silent')
+  assert.equal(invented.engine.notes('q2').length, 0)
+})
+
+test('groundVerdict rejects a near-miss quote and passes silence through', () => {
+  assert.equal(groundVerdict({ note: 'N', importance: 'high', because: 'Use the Cache' }, 'we use the cache'), null)
+  assert.equal(groundVerdict({ note: 'N', importance: 'high', kind: 'defect', because: 'use the disk' }, 'we use the cache'), null)
+  assert.deepEqual(groundVerdict({ note: null, importance: null }, 'we use the cache'), { note: null, importance: null })
+
+  const grounded = { note: 'N', importance: 'high', kind: 'consequence', because: 'use the cache' }
+  assert.equal(groundVerdict(grounded, 'we use the cache'), grounded)
+})
+
+test('groundVerdict drops an unquoted consequence and an unusable message', () => {
+  assert.equal(groundVerdict({ note: 'N', importance: 'high', kind: 'consequence' }, 'we use the cache'), null)
+  assert.equal(groundVerdict({ note: 'N', importance: 'high', kind: 'tradeoff' }, 'we use the cache'), null)
+  assert.equal(groundVerdict({ note: 'N', importance: 'high', because: 'cache' }, ''), null)
+  assert.equal(groundVerdict({ note: 'N', importance: 'high', because: 'cache' }, undefined), null)
+  // A note without a quotation does not depend on the message being readable.
+  assert.equal(groundVerdict({ note: 'N', importance: 'high' }, '').note, 'N')
 })

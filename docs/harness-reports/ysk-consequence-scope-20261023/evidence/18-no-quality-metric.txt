@@ -1,0 +1,19 @@
+command: quality-metric surface scan
+start_utc: 2026-10-23T18:44:04Z
+git_head: b5e3a146dbcc9f643946429e5679ce69d9cc6fad
+dirty_entries_before: 0
+--- accuracy/precision references ---
+scripts/note-voice-baseline.mjs:23:// `semantics: 'NOT_VERIFIED'`; no accuracy or precision is computed.
+scripts/note-voice-baseline.mjs:271:    'semantic quality (entailment, voice attribution): NOT_VERIFIED — structural admission only; no accuracy or precision is computed',
+test/note-voice-baseline.test.js:168:    'semantic quality (entailment, voice attribution): NOT_VERIFIED — structural admission only; no accuracy or precision is computed',
+test/note-voice-baseline.test.js:170:  assert.equal(/\baccuracy\s*[:=]\s*\d/i.test(run.stdout), false, 'the baseline computes no accuracy metric')
+test/note-voice-baseline.test.js:171:  assert.equal(/\bprecision\s*[:=]\s*\d/i.test(run.stdout), false, 'the baseline computes no precision metric')
+test/note-voice-baseline.test.js:299:  assert.equal(Object.prototype.hasOwnProperty.call(result, 'accuracy'), false)
+test/note-voice-baseline.test.js:300:  assert.equal(Object.prototype.hasOwnProperty.call(result, 'precision'), false)
+test/note-voice-baseline.test.js:336:  assert.equal(Object.prototype.hasOwnProperty.call(counts, 'accuracy'), false)
+test/note-voice-baseline.test.js:337:  assert.equal(Object.prototype.hasOwnProperty.call(counts, 'precision'), false)
+test/note-voice-baseline.test.js:345:    'semantic quality (entailment, voice attribution): NOT_VERIFIED — structural admission only; no accuracy or precision is computed',
+--- summarize keys ---
+byClass,gated,invalid,runtimeErrors,semantics,total
+exit_code: 0
+end_utc: 2026-10-23T18:44:04Z

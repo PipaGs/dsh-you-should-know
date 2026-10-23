@@ -1,0 +1,43 @@
+command: bash -c git diff --stat a7b652e..HEAD; echo "--- name-status ---"; git diff --name-status a7b652e..HEAD; echo "--- evidence.js diff ---"; git diff --exit-code a7b652e..HEAD -- lib/evidence.js; echo "evidence_js_exit=$?"; echo "--- upstream diff ---"; git diff --exit-code a7b652e..HEAD -- docs/upstream; echo "upstream_exit=$?"; echo "--- binary or generated entries ---"; git diff --numstat a7b652e..HEAD | grep -E "^-|^[0-9]+[[:space:]]+-" || true; echo "end_binary_scan"
+start_utc: 2026-10-23T18:41:29Z
+git_head: b5e3a146dbcc9f643946429e5679ce69d9cc6fad
+branch: task/ysk-quality-improvement
+dirty_entries_before: 0
+ README.md                                          |  36 +-
+ docs/reference.md                                  |  26 +-
+ .../plans/2026-10-23-ysk-consequence-scope.md      | 522 +++++++++++++++++++++
+ .../2026-10-23-ysk-consequence-scope-design.md     | 288 ++++++++++++
+ lib/core.js                                        | 132 +++++-
+ lib/review-strictness.js                           |   7 +-
+ package.json                                       |   7 +-
+ scripts/fixtures/note-voice-baseline/cases.json    | 233 +++++++++
+ scripts/note-voice-baseline.mjs                    | 278 +++++++++++
+ test/core.test.js                                  |  56 +++
+ test/engine.test.js                                |  87 +++-
+ test/note-voice-baseline.test.js                   | 354 ++++++++++++++
+ test/plugin.test.js                                |  25 +
+ test/strictness.test.js                            |  14 +
+ 14 files changed, 2038 insertions(+), 27 deletions(-)
+--- name-status ---
+M	README.md
+M	docs/reference.md
+A	docs/superpowers/plans/2026-10-23-ysk-consequence-scope.md
+A	docs/superpowers/specs/2026-10-23-ysk-consequence-scope-design.md
+M	lib/core.js
+M	lib/review-strictness.js
+M	package.json
+A	scripts/fixtures/note-voice-baseline/cases.json
+A	scripts/note-voice-baseline.mjs
+M	test/core.test.js
+M	test/engine.test.js
+A	test/note-voice-baseline.test.js
+M	test/plugin.test.js
+M	test/strictness.test.js
+--- evidence.js diff ---
+evidence_js_exit=0
+--- upstream diff ---
+upstream_exit=0
+--- binary or generated entries ---
+end_binary_scan
+exit_code: 0
+end_utc: 2026-10-23T18:41:29Z

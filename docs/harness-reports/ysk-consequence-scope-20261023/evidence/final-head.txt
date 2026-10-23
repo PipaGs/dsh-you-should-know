@@ -1,0 +1,12 @@
+Final head
+==========
+
+The commit that adds this report and evidence is the final head of
+task/ysk-quality-improvement for review. A file cannot contain its own commit
+SHA, so the exact SHA is recorded in the PR #21 body:
+
+https://github.com/PipaGs/dsh-you-should-know/pull/21
+
+The pre-report code head tested by the verification transcripts in this
+directory is b5e3a146dbcc9f643946429e5679ce69d9cc6fad. The report commit adds
+only docs/harness-reports/ysk-consequence-scope-20261023/.

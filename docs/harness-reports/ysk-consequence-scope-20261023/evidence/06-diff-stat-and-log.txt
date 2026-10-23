@@ -1,0 +1,36 @@
+command: bash -c git diff --stat a7b652e..HEAD; echo "--- log ---"; git log --oneline a7b652e..HEAD
+start_utc: 2026-10-23T18:41:16Z
+git_head: b5e3a146dbcc9f643946429e5679ce69d9cc6fad
+branch: task/ysk-quality-improvement
+dirty_entries_before: 0
+ README.md                                          |  36 +-
+ docs/reference.md                                  |  26 +-
+ .../plans/2026-10-23-ysk-consequence-scope.md      | 522 +++++++++++++++++++++
+ .../2026-10-23-ysk-consequence-scope-design.md     | 288 ++++++++++++
+ lib/core.js                                        | 132 +++++-
+ lib/review-strictness.js                           |   7 +-
+ package.json                                       |   7 +-
+ scripts/fixtures/note-voice-baseline/cases.json    | 233 +++++++++
+ scripts/note-voice-baseline.mjs                    | 278 +++++++++++
+ test/core.test.js                                  |  56 +++
+ test/engine.test.js                                |  87 +++-
+ test/note-voice-baseline.test.js                   | 354 ++++++++++++++
+ test/plugin.test.js                                |  25 +
+ test/strictness.test.js                            |  14 +
+ 14 files changed, 2038 insertions(+), 27 deletions(-)
+--- log ---
+b5e3a14 docs: align the baseline contract with its unverified semantics
+c87a33e fix: separate runtime failures from silence and mark semantics unverified
+fa9d6ce fix: classify every finding and pin the gated baseline case
+e0df456 test: pin the Paranoid action gate for consequence findings
+2ae883a test: add an offline per-class baseline scorer
+aa1256b docs: state that a malformed because drops the reply
+9f395af docs: document the finding class and its grounding rule
+99b324e feat: admit material consequences in the reviewer instruction and modes
+bdf06c6 feat: store the finding class on notes and keep dedupe text-only
+eb67960 docs: correct the plan's settled-review assertions
+19d436c feat: ground consequence findings in the excerpt that was sent
+a467b03 feat: accept optional kind and because in the verdict contract
+4d8cdf5 docs: add the consequence-scope design and its plan
+exit_code: 0
+end_utc: 2026-10-23T18:41:16Z

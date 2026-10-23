@@ -1,0 +1,25 @@
+command: node scripts/note-voice-baseline.mjs
+start_utc: 2026-10-23T18:41:16Z
+git_head: b5e3a146dbcc9f643946429e5679ce69d9cc6fad
+branch: task/ysk-quality-improvement
+dirty_entries_before: 0
+note-voice-baseline-1: 21 cases
+class                                   SPEAK_OK SPEAK_UNWARRANTED         SILENT_OK     SILENT_MISSED     RUNTIME_ERROR           INVALID           NOT_RUN
+material_defect                                2                 0                 0                 0                 0                 0                 0
+requirement_violation                          2                 0                 0                 0                 0                 0                 0
+consequence_of_correct_work                    1                 0                 0                 1                 0                 0                 0
+hidden_tradeoff                                2                 0                 0                 0                 0                 0                 0
+unsupported_success                            2                 0                 0                 0                 0                 0                 0
+duplicate_known                                0                 1                 1                 0                 0                 0                 0
+legitimate_silence                             0                 0                 2                 0                 0                 0                 0
+ambiguous_evidence                             0                 0                 2                 0                 0                 0                 0
+model_runtime_error                            0                 0                 0                 0                 3                 0                 0
+voice_attribution                              2                 0                 0                 0                 0                 0                 0
+unclassified                                   0                 0                 0                 0                 0                 0                 0
+gated: 1
+invalid: 0
+runtime errors: 3
+semantic quality (entailment, voice attribution): NOT_VERIFIED — structural admission only; no accuracy or precision is computed
+baseline is unvalidated until the owner sets a threshold
+exit_code: 0
+end_utc: 2026-10-23T18:41:16Z

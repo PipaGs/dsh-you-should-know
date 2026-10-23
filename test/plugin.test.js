@@ -504,6 +504,7 @@ test('a configured plugin observes a turn, serves the note, and dismisses it ove
   assert.equal(listed.ok, true)
   assert.equal(listed.notes.length, 1)
   assert.equal(listed.notes[0].importance, 'critical')
+  assert.equal(listed.notes[0].kind, 'unclassified', 'a reply without a class exposes unclassified')
   assert.equal(listed.historyCount, 1, 'the notes payload also carries the bounded history count')
 
   const dismissRoute = harness.fetchRoutes.find((route) => route.path === '/api/dsh-you-should-know/dismiss')
@@ -516,6 +517,29 @@ test('a configured plugin observes a turn, serves the note, and dismisses it ove
 
   const afterResponse = await notesRoute.fetch(new Request('http://127.0.0.1/api/dsh-you-should-know/notes?sessionId=s1', { method: 'GET' }))
   assert.deepEqual((await afterResponse.json()).notes, [])
+  harness.disposeAll()
+})
+
+test('the notes and history routes expose the stored kind and quoted basis', async () => {
+  const llm = makeLlm(['{"note":"Cache grows without bound","importance":"high","kind":"tradeoff","because":"use the cache"}'])
+  const harness = makeCtx({ llm })
+  apply(harness.ctx, { provider: 'p', model: 'm', minDeltaChars: 0, cooldownTurns: 1 })
+  harness.runInjections()
+
+  const listener = listenerOf(harness, 'session/event')
+  const session = sessionWith('s1', 1, 'We use the cache for speed.')
+  listener(session, session.lastEvent)
+  await settle()
+
+  const notesRoute = harness.fetchRoutes.find((route) => route.path === '/api/dsh-you-should-know/notes')
+  const historyRoute = harness.fetchRoutes.find((route) => route.path === '/api/dsh-you-should-know/history')
+  const listed = await (await notesRoute.fetch(new Request('http://127.0.0.1/api/dsh-you-should-know/notes?sessionId=s1', { method: 'GET' }))).json()
+  assert.equal(listed.notes[0].kind, 'tradeoff')
+  assert.equal(listed.notes[0].because, 'use the cache')
+
+  const history = await (await historyRoute.fetch(new Request('http://127.0.0.1/api/dsh-you-should-know/history?sessionId=s1', { method: 'GET' }))).json()
+  assert.equal(history.history[0].kind, 'tradeoff')
+  assert.equal(history.history[0].because, 'use the cache')
   harness.disposeAll()
 })
 
@@ -554,6 +578,7 @@ test('the Fetch resolve route records an exact action and history keeps the note
   assert.equal(history.history[0].resolved, true)
   assert.equal(history.history[0].resolution, 'added_to_chat')
   assert.deepEqual(history.history[0].source, { path: 'src/a.js', line: 4 })
+  assert.equal(history.history[0].kind, 'unclassified')
   assert.equal(typeof history.history[0].resolvedAt, 'number')
 
   const invalid = await resolveRoute.fetch(new Request('http://127.0.0.1/api/dsh-you-should-know/dismiss', {

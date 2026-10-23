@@ -31,14 +31,14 @@ When the gates pass, the host sends one `ctx.llm.stream` request:
 The reply must be one JSON object:
 
 ```json
-{"note": "one or two sentences addressed to the human", "importance": "high", "source": {"path": "src/store.js", "line": 42}, "action": "concrete repair instruction for the coding agent"}
+{"note": "one or two sentences addressed to the human", "importance": "high", "source": {"path": "src/store.js", "line": 42}, "action": "concrete repair instruction for the coding agent", "kind": "tradeoff", "because": "we kept the cache unbounded"}
 ```
 
-`importance` is `high` or `critical`, and a nonempty note requires one of them. `source` is optional: it must be an exact path that appears verbatim in the excerpt, with a line only when the excerpt states one. `action` is optional and, when present, is the agent-facing repair instruction used by **Add to chat**. A malformed source or action drops the whole reply quietly. Silence has exactly one shape, `{"note": null, "importance": null}`; anything else that does not match the contract is dropped quietly. Accepted notes are normalized and deduplicated by text. Full validation rules: [verdict contract](./docs/reference.md#verdict-contract).
+`importance` is `high` or `critical`, and a nonempty note requires one of them. `source` is optional: it must be an exact path that appears verbatim in the excerpt, with a line only when the excerpt states one. `action` is optional and, when present, is the agent-facing repair instruction used by **Add to chat**. A malformed source or action drops the whole reply quietly. `kind` is optional and names `defect`, `requirement_violation`, `consequence`, or `tradeoff`; an unknown or malformed `kind` becomes `unclassified` and the note is kept. `because` is required for `consequence` and `tradeoff` and must be a verbatim quotation of the exact message the reviewer received; a malformed or unmatched value drops the whole reply quietly. Silence has exactly one shape, `{"note": null, "importance": null}`, and never carries either field; anything else that does not match the contract is dropped quietly. Accepted notes are normalized and deduplicated by text only, so the class never affects dedupe. Full validation rules: [verdict contract](./docs/reference.md#verdict-contract).
 
 The **note voice** follows responsibility, using only what the excerpt supports: `we` for joint decisions, `the main agent` for the agent's actions, `you` when the decision or the consequence is the human's. When responsibility is unclear the note stays neutral and never invents blame.
 
-Qualifying information is deliberately narrow: a contradiction with an explicit requirement, an overlooked material constraint, a serious correctness/security/safety/data-loss/reliability problem, or an implication that changes the next decision. Otherwise the reviewer stays silent — no summaries, praise, or style advice.
+Qualifying information is deliberately narrow: a contradiction with an explicit requirement, an overlooked material constraint, a serious correctness/security/safety/data-loss/reliability problem, an implication that changes the next decision, or a material consequence or tradeoff of the agent's own decision even when the task is complete and its checks pass. Otherwise the reviewer stays silent — no summaries, praise, or style advice.
 
 Notes are written in the language of the latest genuine human message, falling back to English; a stored host language preference wins. When the excerpt reliably shows a programming language through a fenced tag or file extension, at most three bounded language-specific correctness checklists are added to the instruction.
 
@@ -48,11 +48,13 @@ Each review runs under exactly one mode. The mode changes both the areas of scru
 
 | Mode | Areas of scrutiny | Notification threshold |
 |---|---|---|
-| `Relaxed` | Only obvious, material problems: real bugs, violated explicit requirements, security or data-loss risks, clearly wrong behavior. | Stores `critical` only; a `high` finding is dropped. |
-| `Balanced` (default) | Material overlooked problems: bugs, requirement violations, invalid states, API contract errors, races, security issues, error-handling and test gaps. | Stores `high` and `critical`. |
-| `Strict` | `Balanced` plus edge cases, stale state, race conditions, exception paths, network behavior, performance problems, missing tests. | Stores `high` and `critical`. |
-| `Paranoid` | Aggressively searches hidden failure modes and regressions: assumptions, concurrency, partial failures, retries, cleanup, lifecycle, boundaries, security, data loss, side effects, API incompatibility. | Stores `high` and `critical`; a `high` note needs a concrete `action`. |
-| `Custom` | Shaped by the saved Custom reviewer prompt, which replaces the strictness profile, with additional instructions as an overlay and the `Balanced` materiality floor. | Stores `high` and `critical`. |
+| `Relaxed` | Only obvious, material problems: real bugs, violated explicit requirements, security or data-loss risks, clearly wrong behavior. Also a material consequence or tradeoff of the agent's own decision. | Stores `critical` only; a `high` finding is dropped. |
+| `Balanced` (default) | Material overlooked problems: bugs, requirement violations, invalid states, API contract errors, races, security issues, error-handling and test gaps. Also a material consequence or tradeoff of the agent's own decision, even when the task is complete and its checks pass. | Stores `high` and `critical`. |
+| `Strict` | `Balanced` plus edge cases, stale state, race conditions, exception paths, network behavior, performance problems, missing tests. Also a material consequence or tradeoff of the agent's own decision. | Stores `high` and `critical`. |
+| `Paranoid` | Aggressively searches hidden failure modes and regressions: assumptions, concurrency, partial failures, retries, cleanup, lifecycle, boundaries, security, data loss, side effects, API incompatibility. Also a material consequence or tradeoff of the agent's own decision. | Stores `high` and `critical`; a `high` note needs a concrete `action`. |
+| `Custom` | Shaped by the saved Custom reviewer prompt, which replaces the strictness profile, with additional instructions as an overlay and the `Balanced` materiality floor. Also a material consequence or tradeoff of the agent's own decision. | Stores `high` and `critical`. |
+
+Every mode admits a material consequence or tradeoff of the agent's own decision, even when the task is complete and its checks pass; the class widens the areas of scrutiny, never the threshold. `Relaxed` therefore stores only a `critical` consequence, and `Paranoid` still requires a non-blank `action` on a `high` finding, whatever its class.
 
 No mode admits style, formatting, lint, naming, or preference findings, and no mode can relax the base policy: the JSON contract, the verbatim-path rule, the untrusted-excerpt rule, and the no-fabrication rule always win. **Additional reviewer instructions** (up to 2000 characters) are appended verbatim in every mode. **The Custom reviewer prompt** (up to 4000 characters) replaces only the strictness-profile portion and never the base policy. Both are preserved exactly, never translated or rewritten. Mode details: [modes and prompts](./docs/reference.md#modes-and-prompts).
 
@@ -211,6 +213,24 @@ npm test
 ```
 
 The suite covers route discovery and recovery, the verdict contract and silence handling, every gate, dedupe, strictness thresholds, language detection, the human-only invariant, the note card and history, runtime queue, retry, and resume, live config, persistence, the update checker, and release consistency. Full coverage list: [test coverage](./docs/reference.md#test-coverage).
+
+### Offline note voice baseline
+
+```sh
+npm run eval:note-voice:baseline
+```
+
+The command scores the hand-authored fixtures in `scripts/fixtures/note-voice-baseline/cases.json` with the same parse, mode gate, and verbatim grounding checks the runtime applies. It is offline and deterministic: it never calls a model, opens a network connection, or reads an environment variable. Each case receives one status:
+
+- `SPEAK_OK`: a note was admitted for a case that expects one;
+- `SPEAK_UNWARRANTED`: a note was admitted for a case that expects silence;
+- `SILENT_OK`: no admitted note for a case that expects silence, whether the reply was absent, silent, or dropped by grounding;
+- `SILENT_MISSED`: no note was admitted for a case that expects one;
+- `RUNTIME_ERROR`: the reviewer call failed; never counted as silence in either direction;
+- `INVALID`: a structurally broken or contradictory case;
+- `NOT_RUN`: reserved for a future live runner.
+
+The output is a per-class count table, the `gated`, `invalid`, and `runtime errors` totals, and a NOT VERIFIED statement about semantic quality. The `summarize` helper also returns the `semantics.notVerified` count for programmatic use. The baseline measures structural admission only. Semantic quality (entailment, voice attribution) is NOT VERIFIED: an `entail` label is the fixture author's label, voice attribution is not checked, and no accuracy or precision is computed. The baseline stays unvalidated until the owner sets a threshold.
 
 ## Repository rules
 

@@ -1,0 +1,43 @@
+command: node /tmp/ysk-repro-current.mjs (current tree, run from the repository root)
+start_utc: 2026-10-23T18:42:58Z
+git_head: b5e3a146dbcc9f643946429e5679ce69d9cc6fad
+dirty_entries_before: 0
+--- reproducer ---
+import { readFileSync } from 'node:fs'
+const root = process.cwd()
+const { scoreCase } = await import(root + '/scripts/note-voice-baseline.mjs')
+const cases = JSON.parse(readFileSync(root + '/scripts/fixtures/note-voice-baseline/cases.json', 'utf8'))
+const byId = Object.fromEntries(cases.map((entry) => [entry.id, entry]))
+const show = (label, result) => console.log(label + ': ' + JSON.stringify(result))
+for (const id of ['runtime-timeout', 'runtime-malformed-reply', 'runtime-speak-timeout']) {
+  show(id, scoreCase(byId[id]))
+}
+show('entail-unsupported', scoreCase({
+  id: 'current-entail-unsupported',
+  class: 'consequence_of_correct_work',
+  mode: 'balanced',
+  expect: 'speak',
+  entail: 'unsupported',
+  message: 'we use the cache',
+  reply: { note: 'N', importance: 'high', kind: 'consequence', because: 'we use the cache' },
+}))
+show('voice-wrong-actor', scoreCase({
+  id: 'current-voice-wrong-actor',
+  class: 'voice_attribution',
+  mode: 'balanced',
+  expect: 'speak',
+  message: 'You required disabling certificate verification in staging.',
+  reply: {
+    note: 'The main agent disabled certificate verification in staging, which exposes the client to interception.',
+    importance: 'high',
+    action: 'Enable certificate verification again in staging.',
+  },
+}))
+--- output ---
+runtime-timeout: {"id":"runtime-timeout","class":"model_runtime_error","status":"RUNTIME_ERROR","gated":false}
+runtime-malformed-reply: {"id":"runtime-malformed-reply","class":"model_runtime_error","status":"RUNTIME_ERROR","gated":false}
+runtime-speak-timeout: {"id":"runtime-speak-timeout","class":"model_runtime_error","status":"RUNTIME_ERROR","gated":false}
+entail-unsupported: {"id":"current-entail-unsupported","class":"consequence_of_correct_work","entail":"ENTAIL_UNSUPPORTED","entailVerified":false,"becauseGrounded":true,"status":"SPEAK_OK","gated":false,"semantics":"NOT_VERIFIED"}
+voice-wrong-actor: {"id":"current-voice-wrong-actor","class":"voice_attribution","attributionVerified":false,"status":"SPEAK_OK","gated":false,"semantics":"NOT_VERIFIED"}
+exit_code: 0
+end_utc: 2026-10-23T18:42:58Z

@@ -1,0 +1,20 @@
+command: gh pr view 21 --json comments
+start_utc: 2026-10-23T18:42:39Z
+head_under_review: fa9d6ce08409c014b466dc5bdedd938bc22ba6ce
+author: PipaGs
+createdAt: 2026-10-23T18:22:13Z
+--- body ---
+REVIEW UPDATE — correction to my earlier review of head `fa9d6ce08409c014b466dc5bdedd938bc22ba6ce` against `main` (`a7b652ed41cd2683bf7e491dccc07c3448d05990`).
+
+**The previous authorization/scope objection is withdrawn.** The owner has directly confirmed granting DSH separate permission to implement. I incorrectly inferred a lack of permission from the narrower branch-preparation goal in one supervised session. That was insufficient evidence for an authorization violation, and must not be used to block this PR. The following technical findings are independent of that correction.
+
+CHANGES_REQUIRED — remaining findings:
+
+1. **P1 — Offline baseline counts runtime failures as correct silence.** In `scripts/fixtures/note-voice-baseline/cases.json`, `runtime-timeout` and `runtime-malformed-reply` have `runtimeError` and `reply: null` with `expect: silent`. In `scripts/note-voice-baseline.mjs:116-117`, `scoreCase` does not inspect `runtimeError` and awards both `SILENT_OK`. Account for model/runtime errors distinctly and add regression tests; a failed reviewer call is not an intentional, correct decision to remain silent.
+
+2. **P1 — Do not present the authored-response baseline as a measured voice/consequence quality result.** In `scripts/note-voice-baseline.mjs:108-142`, `entail` is an author-provided label and an admitted authored speaking reply gets `SPEAK_OK` based on `expect: speak`; even an `ENTAIL_UNSUPPORTED` consequence can count as `SPEAK_OK`. Voice cases likewise receive `SPEAK_OK` without a check of who the note attributes the decision to. These deterministic parser/gate checks are useful, but cannot establish semantic quality or reviewer performance. Either add distinct offline adjudication and its evidence, or expressly mark semantic voice/entailment acceptance as NOT VERIFIED and keep it out of any readiness claim.
+
+3. **P1 — Task-owned final evidence/report is absent from this diff.** None of the 14 changed files adds a `docs/harness-reports/.../final-report.md`, required by the project task lifecycle. The PR body claims `npm test` 601 PASS, `npm run check`, and `git diff --check`, but does not include run-level command logs, acceptance matrix and evidence tied to the final head. GitHub currently exposes no Actions runs or commit statuses for this head; that is not by itself a mandatory CI failure, but include the mandatory final report and verifiable task evidence, noting any process deviation truthfully.
+
+Re-run affected checks after changes, and request re-review on the new head. The design's owner-pending P1/P2/P3 decisions must not be silently treated as approved. This technical review does not approve merge yet.
+end_utc: 2026-10-23T18:42:40Z
