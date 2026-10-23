@@ -5,7 +5,8 @@ BRANCH: chore/ysk-version-bump-0.4.6
 WORKTREE: /Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6
 BASE_SHA: 87ae0a956b30c7cf0c471deefee33e5a9a41e15f
 COMMIT1_SHA: 5516c6033865998b9b2cec3f3d258525b0a06b17
-COMMIT2_SHA: this evidence/report commit. Its SHA is the final PR head recorded in the PR body; a file cannot contain its own commit SHA.
+COMMIT2_SHA: 33a25a2fb1b4e3ba9425cc7b98a3414eadbc77f8
+COMMIT3_SHA: this follow-up evidence/report commit. Its SHA is the final PR head recorded in the PR body; a file cannot contain its own commit SHA.
 
 NODE: v26.9.0
 NPM: 11.19.1
@@ -27,4 +28,4 @@ WHITESPACE_NORMALIZATION:
 - 02b-red-version-filtered.txt: 10 whitespace-only blank lines normalized; sha256 before 226e6aecb41d3d6e374bb3ebaeedfe2ef669ee52ce76059c03e31d28fead772c; after cc9113be03d9754e2ee27754384fb8d0df05eb40901ba3ffe5158dbf4d786bfe.
 - No nonblank content, test count, pass count, fail count, or exit code changed.
 
-NOTE: final post-commit status, log, and diff check are reported in the final response and PR body. This file is committed by the evidence/report commit it describes.
+NOTE: final post-commit status, log, and diff check are reported in the final response and PR body. This file is committed by commit 3, the report/evidence follow-up commit it describes.

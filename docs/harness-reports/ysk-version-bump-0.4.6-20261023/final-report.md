@@ -13,7 +13,7 @@
 
 ## 1. Request and scope
 
-The task was a patch bump from `0.4.5` to `0.4.6` after PR #21: update every version mirror, run a targeted RED/GREEN check, run the full repository suite, and commit task-owned raw evidence plus this report on an isolated branch. Tags, GitHub Releases, npm publication, pushes, PR creation, and merges were explicitly out of scope.
+The task was a patch bump from `0.4.5` to `0.4.6` after PR #21: update every version mirror, run a targeted RED/GREEN check, run the full repository suite, and commit task-owned raw evidence plus this report on an isolated branch. Tags, GitHub Releases, npm publication, and merges were explicitly out of scope. The branch and this report are delivered as one pull request for independent review.
 
 The tracked write set is eight files:
 
@@ -103,7 +103,7 @@ The full 61/61 run shows that the 19 cascade failures disappear once the self-ch
 
 | Check | Result | Evidence |
 |---|---|---|
-| Baseline full `npm test` at `87ae0a9` | `611/611` pass, exit `0`, clean tree at start | `01-baseline-npm-test.txt` |
+| Baseline full `npm test` at `87ae0a9` | `611/611` pass, exit `0`, no tracked changes at start (the task report directory was still untracked) | `01-baseline-npm-test.txt` |
 | Full `npm test` on dirty pre-commit tree | `611/611` pass, exit `0`; later committed as `5516c60` | `04-npm-test-full.txt` |
 | Full `npm test` on committed product head `5516c60` | `611/611` pass, exit `0` | `04b-npm-test-full-committed.txt` |
 | `npm run check` | exit `0` | `05-npm-check.txt` |
@@ -113,6 +113,8 @@ The full 61/61 run shows that the 19 cascade failures disappear once the self-ch
 | Remote tags | `v0.4.5` and `v0.4.6` absent; latest is `v0.4.4` | `07-version-scan.txt` |
 
 Two RED logs retained Node's blank assertion lines with two trailing spaces. Before commit, 26 whitespace-only blank lines were normalized to empty lines: 16 in `02-red-version.txt` and 10 in `02b-red-version-filtered.txt`. No nonblank content, test count, pass count, fail count, or exit code changed. SHA256 before and after: `76c4552f...` -> `99bddd52...` and `226e6aec...` -> `cc9113be...`.
+
+Provenance limitation: the two RED logs were normalized before their only commit, so the pre-normalization bytes are not retained in any commit. The before-normalization SHA256 values in `evidence/09-provenance.txt` were captured from the working files and cannot be re-verified from git history; the transformation itself is therefore self-attested. The committed counts (61/36/25 and 7/1/6) and nonblank content are unchanged. An independent review on 2026-10-23 reproduced the counts, confirmed that Node 26.9.0 emits exactly two-space blank lines at those positions, and found no evidence of a content change, but the pre-image is not recoverable. This deviates from the PR #19 pattern, where the raw pre-image stayed reachable in an earlier commit.
 
 The scan found `0.4.5` only in historical or intentionally previous-release locations:
 
@@ -127,9 +129,9 @@ No `0.4.5` remains in `package.json`, `lib/index.js`, `README.md`, or `docs/refe
 | AC | Requirement | Status | Evidence |
 |---|---|---|---|
 | AC1 | All version mirrors and test literals updated to `0.4.6`; `CURRENT` / `PREVIOUS` updated | **PASS** | `07-version-scan.txt`; `03b-green-version-filtered.txt` |
-| AC2 | Post-PR #21 behavior preserved: full suite, `npm run check`, `git diff --check`; invariant, privacy, and fail-quiet tests untouched; no reviewer logic change | **PASS** | `04b-npm-test-full-committed.txt` 611/611; `05` exit 0; `06` exit 0; diff contains only version mirrors |
+| AC2 | Post-PR #21 behavior preserved: full suite, `npm run check`, `git diff --check`; no invariant, privacy, or fail-quiet assertion changed (only the manifest version literal in `test/invariant.test.js` changed); no reviewer logic change | **PASS** | `04b-npm-test-full-committed.txt` 611/611; `05` exit 0; `06` exit 0; diff contains only version mirrors |
 | AC3 | Isolated branch and worktree, task-owned report, raw evidence, AC matrix | **PASS** | branch `chore/ysk-version-bump-0.4.6`; worktree `.worktrees/ysk-version-bump-0.4.6`; this file; `evidence/` |
-| AC4 | Single-PR readiness, no tag/release/npm/merge | **PASS** | status `READY_FOR_CHATGPT_REVIEW`; only local commits; no network publication |
+| AC4 | Single-PR readiness, no tag/release/npm/merge | **PASS** | status `READY_FOR_CHATGPT_REVIEW`; commit set only; no tag, release, npm publication, or merge |
 | Gate | DIFF_SANITY | **PASS** | `08-diff-sanity.txt`: 8 files, expected mirrors only; `lib/client.js`, `cordis.patch.yml`, `test/client-ui.test.js` unchanged |
 | Gate | SECURITY_SANITY | **PASS** | secret-pattern and external-URL scans in the product diff returned no matches |
 | Gate | VISUAL_GATE | **NOT REQUIRED** | no DOM, CSS, client, or route behavior changed |
@@ -146,9 +148,12 @@ No `0.4.5` remains in `package.json`, `lib/index.js`, `README.md`, or `docs/refe
 - No tag was created.
 - No GitHub Release was created.
 - No npm publication was performed.
-- No merge was performed and no push was made.
+- No merge was performed; the branch and this report are delivered as a single pull request for independent review, and tags, releases, and npm publication remain with the owner.
 - The managed Desktop profile was not updated.
 - Older reports and historical records were not modified.
+- The pre-normalization bytes of the two RED logs are not retained in any commit (see §5).
+- When `v0.4.6` is tagged, the prospective-tag paragraph in the README must be updated or removed; that publication step is not part of this change.
+- `test/release-consistency.test.js` does not scan `docs/reference.md`; that pre-existing gate gap is recorded here and deliberately left unchanged to keep this change a version bump.
 - No live or paid model calls were made.
 - Release gating is unchanged; publication remains with the owner and reviewer.
 
@@ -156,7 +161,7 @@ No `0.4.5` remains in `package.json`, `lib/index.js`, `README.md`, or `docs/refe
 
 | File | Contents |
 |---|---|
-| `01-baseline-npm-test.txt` | Baseline `npm test`: 611/611 pass, exit 0; command, date, HEAD, clean status |
+| `01-baseline-npm-test.txt` | Baseline `npm test`: 611/611 pass, exit 0; command, date, HEAD, and no tracked changes at start (report directory untracked) |
 | `02-red-version.txt` | Literal four-file RED: 61 tests, 36 pass, 25 fail, exit 1 |
 | `02b-red-version-filtered.txt` | Filtered seven version tests RED: 7 tests, 1 pass, 6 fail, exit 1 |
 | `03-green-version.txt` | Literal four-file GREEN: 61 tests, 61 pass, 0 fail, exit 0 |
@@ -167,4 +172,5 @@ No `0.4.5` remains in `package.json`, `lib/index.js`, `README.md`, or `docs/refe
 | `06-diff-check.txt` | `git diff --check`, status, and numstat |
 | `07-version-scan.txt` | `git grep` for `0.4.5` / `0.4.6`, explicit mirror values, remote tag absence |
 | `08-diff-sanity.txt` | Diff stat/numstat against `87ae0a9`, unchanged-file checks, secret and external-URL scans |
-| `09-provenance.txt` | Branch, worktree, base, commit SHAs, runtime, date, final status |
+| `09-provenance.txt` | Branch, worktree, base, commit 1 and commit 2 SHAs, commit 3 self-reference, runtime, date, and final-status note |
+| `10-review-followups.txt` | Independent-review follow-up: full remote tag listing, product-diff secret/URL scan, and `/Users/` path scan; raw output and exit codes |
