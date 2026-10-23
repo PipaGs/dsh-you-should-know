@@ -408,6 +408,12 @@ test('Paranoid admits a high finding only with a concrete action', () => {
   assert.equal(admitsVerdict('balanced', null), false)
 })
 
+test('Paranoid still drops a high consequence without an action', () => {
+  assert.equal(admitsVerdict('paranoid', { note: 'N', importance: 'high', kind: 'consequence', because: 'x' }), false)
+  assert.equal(admitsVerdict('paranoid', { note: 'N', importance: 'critical', kind: 'consequence', because: 'x' }), true)
+  assert.equal(admitsVerdict('balanced', { note: 'N', importance: 'high', kind: 'consequence', because: 'x' }), true)
+})
+
 test('the engine applies the Paranoid action requirement deterministically', async () => {
   const noAction = engineWith(['{"note":"H","importance":"high"}'], { reviewerMode: 'paranoid' })
   const dropped = await observeAndSettle(noAction.engine, sessionWith('p1', [{ turn: 1, answer: 'work' }]))
