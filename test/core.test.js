@@ -513,6 +513,23 @@ test('the reviewer instruction separates the human note from the agent action', 
   assert.match(REVIEW_INSTRUCTIONS, /Fix the \/session route registration so GET\/HEAD do not use a streaming request body/)
 })
 
+test('the reviewer instruction admits consequences of correct work', () => {
+  const text = REVIEW_INSTRUCTIONS
+  assert.match(text, /consequence/i)
+  assert.match(text, /even when the (task|work) is (complete|done)/i)
+  assert.match(text, /"kind"/)
+  assert.match(text, /"because"/)
+  assert.match(text, /what the human needs to know/i)
+  assert.ok(
+    text.includes('"note" is written for the human: what the human needs to know and why it matters.'),
+    'the note template asks what the human needs to know',
+  )
+  assert.match(text, /"defect", "requirement_violation", "consequence", or "tradeoff"/)
+  assert.match(text, /"because" must be copied verbatim/)
+  assert.match(text, /dropped unless it appears in the excerpt exactly/)
+  assert.equal(text.includes('what is wrong and why it matters'), false)
+})
+
 test('the note voice follows who was responsible for the decision, without invented blame', () => {
   const system = buildReviewerSystemPrompt([{ role: 'user', text: 'Ship the release.' }])
   assert.match(system, /who was responsible for (a|the) decision/, 'the rule ties the voice to the decision owner')

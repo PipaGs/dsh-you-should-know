@@ -77,6 +77,14 @@ test('a mode-specific probe matches its prompt fragment', () => {
   assert.match(reviewModeProfile('balanced').instruction, /API contract|invalid state/i)
 })
 
+test('every review mode names consequences or tradeoffs', () => {
+  for (const mode of REVIEW_MODES) {
+    const text = buildStrictnessSection(mode, '', undefined)
+    assert.match(text, /consequence|tradeoff/i, mode)
+  }
+  assert.match(buildStrictnessSection('relaxed', '', undefined), /critical only/i)
+})
+
 test('Custom keeps the Balanced materiality floor and blank instructions change no gate', () => {
   const custom = reviewModeProfile('custom')
   const balanced = reviewModeProfile('balanced')
