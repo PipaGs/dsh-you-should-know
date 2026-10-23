@@ -36,11 +36,12 @@
     "LICENSE"
   ],
   "scripts": {
-    "check": "node --check lib/core.js && node --check lib/self-check.js && node --check lib/runtime.js && node --check lib/review-profile.js && node --check lib/review-strictness.js && node --check lib/language.js && node --check lib/feedback.js && node --check lib/adaptive.js && node --check lib/evidence.js && node --check lib/explain.js && node --check lib/update.js && node --check lib/index.js && node --check lib/client.js && node --check scripts/note-voice-eval.mjs && node --check scripts/note-voice-eval-deepseek.mjs && node --check scripts/note-voice-eval-live.mjs",
-    "test": "node --check lib/core.js && node --check lib/self-check.js && node --check lib/runtime.js && node --check lib/review-profile.js && node --check lib/review-strictness.js && node --check lib/language.js && node --check lib/feedback.js && node --check lib/adaptive.js && node --check lib/evidence.js && node --check lib/explain.js && node --check lib/update.js && node --check lib/index.js && node --check lib/client.js && node --check scripts/note-voice-eval.mjs && node --check scripts/note-voice-eval-deepseek.mjs && node --check scripts/note-voice-eval-live.mjs && node --test test/*.test.js",
+    "check": "node --check lib/core.js && node --check lib/self-check.js && node --check lib/runtime.js && node --check lib/review-profile.js && node --check lib/review-strictness.js && node --check lib/language.js && node --check lib/feedback.js && node --check lib/adaptive.js && node --check lib/evidence.js && node --check lib/explain.js && node --check lib/update.js && node --check lib/index.js && node --check lib/client.js && node --check scripts/note-voice-eval.mjs && node --check scripts/note-voice-eval-deepseek.mjs && node --check scripts/note-voice-eval-live.mjs && node --check scripts/note-voice-baseline.mjs",
+    "test": "node --check lib/core.js && node --check lib/self-check.js && node --check lib/runtime.js && node --check lib/review-profile.js && node --check lib/review-strictness.js && node --check lib/language.js && node --check lib/feedback.js && node --check lib/adaptive.js && node --check lib/evidence.js && node --check lib/explain.js && node --check lib/update.js && node --check lib/index.js && node --check lib/client.js && node --check scripts/note-voice-eval.mjs && node --check scripts/note-voice-eval-deepseek.mjs && node --check scripts/note-voice-eval-live.mjs && node --check scripts/note-voice-baseline.mjs && node --test test/*.test.js",
     "smoke:install": "node scripts/install-smoke.mjs",
     "eval:note-voice": "node scripts/note-voice-eval.mjs",
-    "eval:note-voice:live": "node scripts/note-voice-eval-live.mjs"
+    "eval:note-voice:live": "node scripts/note-voice-eval-live.mjs",
+    "eval:note-voice:baseline": "node scripts/note-voice-baseline.mjs"
   },
   "engines": {
     "node": ">=22.19.0"

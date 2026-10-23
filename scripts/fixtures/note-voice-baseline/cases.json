@@ -1,0 +1,224 @@
+[
+  {
+    "id": "defect-retry-zero",
+    "class": "material_defect",
+    "mode": "balanced",
+    "expect": "speak",
+    "message": "We set the retry limit to zero, so the uploader gives up on the first transient error.",
+    "reply": {
+      "note": "The uploader gives up on the first transient error because the retry limit is zero.",
+      "importance": "high",
+      "action": "Restore a non-zero retry limit with backoff."
+    }
+  },
+  {
+    "id": "defect-shared-queue",
+    "class": "material_defect",
+    "mode": "strict",
+    "expect": "speak",
+    "message": "The background worker writes to the shared queue without a lock, so two workers can process the same job.",
+    "reply": {
+      "note": "Two workers can process the same job because the shared queue is written without a lock.",
+      "importance": "high",
+      "action": "Claim each job atomically before processing it."
+    }
+  },
+  {
+    "id": "violation-log-format",
+    "class": "requirement_violation",
+    "mode": "balanced",
+    "expect": "speak",
+    "message": "The task requires one JSON object per log line, and the service now prints plain text.",
+    "reply": {
+      "note": "The service prints plain text logs, which violates the requirement for one JSON object per line.",
+      "importance": "high",
+      "action": "Emit one JSON object per log line."
+    }
+  },
+  {
+    "id": "violation-public-api",
+    "class": "requirement_violation",
+    "mode": "strict",
+    "expect": "speak",
+    "message": "The requirement says the public API must not change, and this change removes the retry option.",
+    "reply": {
+      "note": "Removing the retry option changes the public API, which the requirement forbids.",
+      "importance": "high",
+      "action": "Keep the retry option and add the new behavior beside it."
+    }
+  },
+  {
+    "id": "consequence-cache-growth",
+    "class": "consequence_of_correct_work",
+    "mode": "paranoid",
+    "expect": "speak",
+    "entail": "ok",
+    "message": "We cache every rendered page in memory for an hour so repeat visits are faster.",
+    "reply": {
+      "note": "Caching every rendered page for an hour grows memory with the number of distinct pages.",
+      "importance": "high",
+      "kind": "consequence",
+      "because": "We cache every rendered page in memory for an hour"
+    }
+  },
+  {
+    "id": "consequence-index-lock",
+    "class": "consequence_of_correct_work",
+    "mode": "paranoid",
+    "expect": "speak",
+    "entail": "weak",
+    "message": "The migration adds an index on the email column so lookups are faster; the table is written during peak hours.",
+    "reply": {
+      "note": "Adding the index holds a write lock during peak hours, so writes can stall.",
+      "importance": "high",
+      "kind": "consequence",
+      "because": "The migration adds an index on the email column",
+      "action": "Schedule the migration outside peak hours."
+    }
+  },
+  {
+    "id": "tradeoff-profile-staleness",
+    "class": "hidden_tradeoff",
+    "mode": "balanced",
+    "expect": "speak",
+    "entail": "ok",
+    "message": "We cache the profile for two minutes so the profile page loads faster.",
+    "reply": {
+      "note": "Caching the profile for two minutes means an edited profile can stay stale for that window.",
+      "importance": "high",
+      "kind": "tradeoff",
+      "because": "We cache the profile for two minutes"
+    }
+  },
+  {
+    "id": "tradeoff-bundle-size",
+    "class": "hidden_tradeoff",
+    "mode": "strict",
+    "expect": "speak",
+    "entail": "ok",
+    "message": "We bundle the chart library into the main entry point to remove one network request.",
+    "reply": {
+      "note": "Bundling the chart library removes one request but adds its full size to every page load.",
+      "importance": "high",
+      "kind": "tradeoff",
+      "because": "We bundle the chart library into the main entry point"
+    }
+  },
+  {
+    "id": "success-tests-not-run",
+    "class": "unsupported_success",
+    "mode": "balanced",
+    "expect": "speak",
+    "message": "The agent says all tests pass, but it did not run the test command and shows no output.",
+    "reply": {
+      "note": "The claim that all tests pass is unsupported: the test command was never run and no output is shown.",
+      "importance": "high",
+      "action": "Run the test command and report its output."
+    }
+  },
+  {
+    "id": "success-partial-migration",
+    "class": "unsupported_success",
+    "mode": "strict",
+    "expect": "speak",
+    "message": "The agent reports the migration succeeded after one of the two shards failed to apply.",
+    "reply": {
+      "note": "The migration cannot be called successful while one of the two shards failed to apply.",
+      "importance": "high",
+      "action": "Apply the failed shard and report both results."
+    }
+  },
+  {
+    "id": "duplicate-repeated-note",
+    "class": "duplicate_known",
+    "mode": "balanced",
+    "expect": "silent",
+    "message": "The panel already lists the missing timeout as a known issue; the agent repeats the same note with no new evidence.",
+    "reply": {
+      "note": "The timeout is missing.",
+      "importance": "high"
+    }
+  },
+  {
+    "id": "duplicate-known-silence",
+    "class": "duplicate_known",
+    "mode": "balanced",
+    "expect": "silent",
+    "message": "The panel already lists the missing timeout as a known issue, and the agent adds no new evidence.",
+    "reply": null
+  },
+  {
+    "id": "silence-private-rename",
+    "class": "legitimate_silence",
+    "mode": "balanced",
+    "expect": "silent",
+    "message": "The change renames one private helper and all tests pass; nothing else changed.",
+    "reply": null
+  },
+  {
+    "id": "silence-readme-typo",
+    "class": "legitimate_silence",
+    "mode": "relaxed",
+    "expect": "silent",
+    "message": "The change fixes a typo in the README.",
+    "reply": null
+  },
+  {
+    "id": "ambiguous-request-context",
+    "class": "ambiguous_evidence",
+    "mode": "balanced",
+    "expect": "silent",
+    "message": "A log line shows a timeout, but the excerpt does not show which request triggered it.",
+    "reply": null
+  },
+  {
+    "id": "ambiguous-truncated-output",
+    "class": "ambiguous_evidence",
+    "mode": "strict",
+    "expect": "silent",
+    "message": "The deployment output is truncated before it shows whether the new setting was applied.",
+    "reply": null
+  },
+  {
+    "id": "runtime-timeout",
+    "class": "model_runtime_error",
+    "mode": "balanced",
+    "expect": "silent",
+    "runtimeError": "timeout before any reply",
+    "message": "The change updates the retry count in one config file and the existing tests pass.",
+    "reply": null
+  },
+  {
+    "id": "runtime-malformed-reply",
+    "class": "model_runtime_error",
+    "mode": "strict",
+    "expect": "silent",
+    "runtimeError": "malformed reply dropped by the parser",
+    "message": "The change adds one validation branch and the existing tests pass.",
+    "reply": null
+  },
+  {
+    "id": "voice-agent-timeout",
+    "class": "voice_attribution",
+    "mode": "balanced",
+    "expect": "speak",
+    "message": "The main agent lowered the default request timeout to 500 ms without being asked.",
+    "reply": {
+      "note": "The main agent lowered the default request timeout to 500 ms without being asked.",
+      "importance": "high",
+      "action": "Restore the previous timeout or make the new value explicit."
+    }
+  },
+  {
+    "id": "voice-human-certificate",
+    "class": "voice_attribution",
+    "mode": "balanced",
+    "expect": "speak",
+    "message": "You required disabling certificate verification in staging.",
+    "reply": {
+      "note": "You required disabling certificate verification in staging, which exposes the client to interception.",
+      "importance": "high",
+      "action": "Enable certificate verification again in staging."
+    }
+  }
+]
