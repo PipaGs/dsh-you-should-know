@@ -184,6 +184,8 @@ Evidence parity: for 02 and 02b, the only content change is the path-token subst
 
 Post-sanitization full-PR scan: 0 matches for account-bearing home paths, 0 secret matches, and 0 email/IPv4 matches in the task-owned files. Raw output and exit codes are in `evidence/11-security-scan.txt`.
 
+Final-head full-tree scan: PASS 1 covered 23 files changed against `87ae0a9` at commit 4 (`9ad7c43`); PASS 2 re-ran the same scans after `evidence/12` was written and covered 24 files, including the artifact itself. Both passes returned 0 matches for account-bearing home paths, secrets, and email/IPv4; raw output and exit codes are in `evidence/12-final-security-scan.txt`. The earlier 22-file result in `evidence/11` was the commit-3 tree; the final-head result is `evidence/12`. The secret patterns match token-shaped values, so the scanner's own command lines do not self-match and no lines or files were excluded from either pass.
+
 Disclosure: the pre-sanitization bytes remain in the already-submitted commits `33a25a2` and `e8ead72` and in the branch history. No history rewrite was performed. The path segment is the local OS account name, which is also present in public git commit metadata and the remote URL. The decision to rewrite history belongs to the owner.
 
 ## 11. Evidence files
@@ -204,3 +206,4 @@ Disclosure: the pre-sanitization bytes remain in the already-submitted commits `
 | `09-provenance.txt` | Branch, project-relative worktree, base, commit 1, commit 2, actual commit 3 SHA, commit 4 self-reference, runtime, DATE labels, and final-status note |
 | `10-review-followups.txt` | Independent-review follow-up: full remote tag listing and product-diff-only secret/URL and `/Users/` scans; raw output and exit codes |
 | `11-security-scan.txt` | Full 22-file security scan: account-bearing home paths, secrets, email/IPv4; pre/post redaction counts and per-file SHA256 |
+| `12-final-security-scan.txt` | Two-pass final-head scan: 23 files in PASS 1, 24 files including this artifact in PASS 2; raw output, exit codes, and counts |
