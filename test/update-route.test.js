@@ -254,7 +254,7 @@ test('without a preserve hook the reviewer patch is unchanged', async () => {
 test('the exported plugin version mirrors package.json', async () => {
   const manifest = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'))
   assert.equal(PLUGIN_VERSION, manifest.version)
-  assert.equal(manifest.version, '0.4.5')
+  assert.equal(manifest.version, '0.4.6')
 })
 
 test('the Config schema declares the update fields with conservative defaults', () => {

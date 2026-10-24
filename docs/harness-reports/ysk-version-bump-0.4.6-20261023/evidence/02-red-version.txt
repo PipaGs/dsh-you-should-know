@@ -1,0 +1,460 @@
+COMMAND: node --test test/invariant.test.js test/plugin.test.js test/update-route.test.js test/release-consistency.test.js
+DATE: 2026-10-23T19:30:14Z / 2026-10-23T22:30:14+0300
+HEAD: 87ae0a956b30c7cf0c471deefee33e5a9a41e15f
+GIT STATUS --short:
+ M test/invariant.test.js
+ M test/plugin.test.js
+ M test/release-consistency.test.js
+ M test/update-route.test.js
+?? docs/harness-reports/ysk-version-bump-0.4.6-20261023/
+--- OUTPUT ---
+✔ shipped sources contain no path that could deliver advice to the primary agent (7.815917ms)
+✔ the plugin uses only the sanctioned seams (1.033292ms)
+✔ the auth boundary stays host-owned: no no-auth route registration exists (0.945875ms)
+✔ no shipped source reads, stores, or forwards a cookie, token, or auth header (3.489917ms)
+✔ no shipped source can install, upgrade, or self-modify the plugin (4.482583ms)
+✔ the browser half reaches files and the composer only through their public seams (0.971875ms)
+✔ Add to chat can only compose the draft and never hands the action to the agent (0.896875ms)
+✔ the English-only scan rejects Cyrillic, Greek, and CJK text (0.149542ms)
+✔ public-facing text stays English-only and free of unrelated project references (3.459ms)
+✔ the bundled row leaves the reviewer route to adaptive discovery (0.467ms)
+✖ the manifest declares the bundle, the client half, and no build step (0.954375ms)
+✔ the plugin exports the package name (0.711334ms)
+✔ an explicitly blank provider or model registers nothing at all (0.472667ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+✔ the built-in default discovers the DeepSeek route a current DSH build registers (7.001417ms)
+✔ an automatic row with no DeepSeek provider stays quiet and never calls the model (0.631417ms)
+✔ a provider and model override reaches the reviewer channel (0.561167ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+✔ a live config change moves from the automatic route to an explicit override (1.108ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+✔ a changed volatile provider/model ref updates the live reviewer route (2.058416ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+[dsh-you-should-know] live config update failed; keeping the previous config: Cannot read properties of null (reading 'provider')
+✔ a changed volatile gate ref is applied to the live turn gates (0.768ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+[dsh-you-should-know] already composed in this process; this duplicate row stays inert
+✔ a throwing volatile ref keeps the prior live config and never escapes the listener (0.831667ms)
+✔ an inert row does not consume the single-reviewer slot (0.228125ms)
+✔ composing the plugin twice keeps exactly one reviewer, until the first is disposed (0.167083ms)
+✔ the plugin registers its browser routes on the connection Fetch carrier (0.867958ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+[dsh-you-should-know] already composed in this process; this duplicate row stays inert
+[dsh-you-should-know] already composed in this process; this duplicate row stays inert
+[dsh-you-should-know] already composed in this process; this duplicate row stays inert
+[dsh-you-should-know] already composed in this process; this duplicate row stays inert
+[dsh-you-should-know] already composed in this process; this duplicate row stays inert
+[dsh-you-should-know] already composed in this process; this duplicate row stays inert
+[dsh-you-should-know] already composed in this process; this duplicate row stays inert
+[dsh-you-should-know] already composed in this process; this duplicate row stays inert
+[dsh-you-should-know] already composed in this process; this duplicate row stays inert
+[dsh-you-should-know] already composed in this process; this duplicate row stays inert
+[dsh-you-should-know] already composed in this process; this duplicate row stays inert
+[dsh-you-should-know] already composed in this process; this duplicate row stays inert
+[dsh-you-should-know] already composed in this process; this duplicate row stays inert
+[dsh-you-should-know] already composed in this process; this duplicate row stays inert
+[dsh-you-should-know] already composed in this process; this duplicate row stays inert
+[dsh-you-should-know] already composed in this process; this duplicate row stays inert
+[dsh-you-should-know] already composed in this process; this duplicate row stays inert
+[dsh-you-should-know] already composed in this process; this duplicate row stays inert
+✖ the authenticated self-check route reports only the bounded running plugin state (19.207792ms)
+✖ every declared Fetch route crosses the connection bridge for each of its methods (0.545167ms)
+✖ a configured plugin observes a turn, serves the note, and dismisses it over Fetch (0.215917ms)
+✖ the notes and history routes expose the stored kind and quoted basis (0.150042ms)
+✖ the Fetch resolve route records an exact action and history keeps the note (0.183958ms)
+✖ the status route reports activity without exposing conversation or note text (0.150417ms)
+✖ a listener failure is contained instead of escaping into the host (0.080833ms)
+✖ the session route is registered with GET, HEAD, and POST on the Fetch carrier (0.158875ms)
+✖ the session route serves the effective route and its source without leaking text (0.159916ms)
+✖ the session route POST set-model and reset-model change the reviewer route (0.172083ms)
+✖ the session route POST resume reports whether a paused runtime resumed (0.079084ms)
+✖ the session route bounds and rejects invalid POSTs without throwing (0.115417ms)
+✖ session/disposed forgets the session notes and its override (0.135708ms)
+✔ the session route turns an unexpected engine failure into a bounded 500 (0.885292ms)
+✖ ownership is a process-global token across fresh module imports and releases on disposal (2.595333ms)
+✖ the plugin registers the config route on the connection Fetch carrier (0.129333ms)
+✖ the config route is writable and persists the row through the settings service (0.164666ms)
+✖ the config route reports read-only and refuses to persist without a settings service (0.107ms)
+✖ the session route POST set-mode and reset-mode isolate the strictness mode (0.160042ms)
+[dsh-you-should-know] already composed in this process; this duplicate row stays inert
+✖ the plugin runs the day-first automatic update check through the shell and settings seams (2000.267875ms)
+✖ a volatile config edit reaches the update state without a remount (0.528917ms)
+✔ the release version is a patch increment over the previous release (0.536209ms)
+✖ package.json, PLUGIN_VERSION, and the README install address agree (0.820583ms)
+✖ every README self-check sample version is the released version (0.295166ms)
+✖ no released artifact still documents the previous version (0.179209ms)
+✔ GET update returns the bounded update status and writability (18.638167ms)
+✔ GET update reports a read-only host and HEAD stays bodyless (0.556417ms)
+✔ an update POST with a malformed body or unknown action is rejected (0.756042ms)
+✔ a manual check reports up to date, update available, or failed (1.426042ms)
+✔ set-preferences persists valid values and rejects invalid ones (0.828833ms)
+✔ dismiss persists a stable version and refuses anything else (0.458083ms)
+✔ the update response carries only bounded update fields, never prompt or note text (0.238042ms)
+✔ an automatic reviewer save preserves the live update state across the replace (1.036958ms)
+✔ a pinned reviewer save merges, so the settings service preserves the update state itself (1.031041ms)
+✔ the config GET carries the bounded update status only when the host wires one (0.3915ms)
+✔ without a preserve hook the reviewer patch is unchanged (0.248ms)
+✖ the exported plugin version mirrors package.json (3.758375ms)
+✔ the Config schema declares the update fields with conservative defaults (1.742917ms)
+ℹ tests 61
+ℹ suites 0
+ℹ pass 36
+ℹ fail 25
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2211.092625
+
+✖ failing tests:
+
+test at test/invariant.test.js:186:1
+✖ the manifest declares the bundle, the client half, and no build step (0.954375ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  '0.4.5' !== '0.4.6'
+
+      at TestContext.<anonymous> (file://<worktree>/test/invariant.test.js:189:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '0.4.5',
+    expected: '0.4.6',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/plugin.test.js:384:1
+✖ the authenticated self-check route reports only the bounded running plugin state (19.207792ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  '0.4.5' !== '0.4.6'
+
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:399:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '0.4.5',
+    expected: '0.4.6',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/plugin.test.js:449:1
+✖ every declared Fetch route crosses the connection bridge for each of its methods (0.545167ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'methods')
+      at bridgeRequest (file://<worktree>/test/plugin.test.js:459:24)
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:482:20)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at test/plugin.test.js:489:1
+✖ a configured plugin observes a turn, serves the note, and dismisses it over Fetch (0.215917ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'listener')
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:495:41)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at test/plugin.test.js:523:1
+✖ the notes and history routes expose the stored kind and quoted basis (0.150042ms)
+  TypeError [Error]: listener is not a function
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:531:3)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at test/plugin.test.js:546:1
+✖ the Fetch resolve route records an exact action and history keeps the note (0.183958ms)
+  TypeError [Error]: listener is not a function
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:554:3)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at test/plugin.test.js:594:1
+✖ the status route reports activity without exposing conversation or note text (0.150417ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'listener')
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:601:41)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at test/plugin.test.js:630:1
+✖ a listener failure is contained instead of escaping into the host (0.080833ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'listener')
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:633:41)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at test/plugin.test.js:662:1
+✖ the session route is registered with GET, HEAD, and POST on the Fetch carrier (0.158875ms)
+  AssertionError [ERR_ASSERTION]: Expected "actual" to be strictly unequal to:
+
+  undefined
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:668:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'notStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/plugin.test.js:675:1
+✖ the session route serves the effective route and its source without leaking text (0.159916ms)
+  TypeError [Error]: listener is not a function
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:684:3)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at test/plugin.test.js:711:1
+✖ the session route POST set-model and reset-model change the reviewer route (0.172083ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'fetch')
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:718:27)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at test/plugin.test.js:757:1
+✖ the session route POST resume reports whether a paused runtime resumed (0.079084ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'fetch')
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:761:49)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at test/plugin.test.js:767:1
+✖ the session route bounds and rejects invalid POSTs without throwing (0.115417ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'fetch')
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:773:35)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at test/plugin.test.js:795:1
+✖ session/disposed forgets the session notes and its override (0.135708ms)
+  TypeError [Error]: listener is not a function
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:803:3)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at test/plugin.test.js:857:1
+✖ ownership is a process-global token across fresh module imports and releases on disposal (2.595333ms)
+  AssertionError [ERR_ASSERTION]: the first fresh module owns the process-global slot
+
+  0 !== 3
+
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:864:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 3,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/plugin.test.js:883:1
+✖ the plugin registers the config route on the connection Fetch carrier (0.129333ms)
+  AssertionError [ERR_ASSERTION]: Expected "actual" to be strictly unequal to:
+
+  undefined
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:889:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'notStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/plugin.test.js:896:1
+✖ the config route is writable and persists the row through the settings service (0.164666ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'fetch')
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:914:28)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at test/plugin.test.js:933:1
+✖ the config route reports read-only and refuses to persist without a settings service (0.107ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'fetch')
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:939:28)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at test/plugin.test.js:952:1
+✖ the session route POST set-mode and reset-mode isolate the strictness mode (0.160042ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'fetch')
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:959:27)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at test/plugin.test.js:990:1
+✖ the plugin runs the day-first automatic update check through the shell and settings seams (2000.267875ms)
+  AssertionError [ERR_ASSERTION]: one automatic check runs on the first activation of the day
+
+  0 !== 1
+
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:1014:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/plugin.test.js:1035:1
+✖ a volatile config edit reaches the update state without a remount (0.528917ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'listener')
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:1059:99)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at test/release-consistency.test.js:43:1
+✖ package.json, PLUGIN_VERSION, and the README install address agree (0.820583ms)
+  AssertionError [ERR_ASSERTION]: package.json carries the release version
+
+  '0.4.5' !== '0.4.6'
+
+      at TestContext.<anonymous> (file://<worktree>/test/release-consistency.test.js:45:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '0.4.5',
+    expected: '0.4.6',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/release-consistency.test.js:57:1
+✖ every README self-check sample version is the released version (0.295166ms)
+  AssertionError [ERR_ASSERTION]: pluginVersion names the release version
+      at TestContext.<anonymous> (file://<worktree>/test/release-consistency.test.js:61:12)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '## Operational verification\n\nThe supported check is **Run self-check** in **Settings -> Plugins -> You Should Know -> Diagnostics**. It calls the read-only `GET`/`HEAD /api/dsh-you-should-know/self-check` route over the same authenticated connection as every other plugin route and reports versions, runtime status, mode, registered routes, capabilities, and the bounded update state. Abridged sample:\n\n```json\n{\n  "ok": true,\n  "authTransport": "host-authenticated-connection",\n  "healthy": true,\n  "configured": true,\n  "pluginVersion": "0.4.5",\n  "runtimeVersion": "0.4.5",\n  "installedVersion": "0.4.5",\n  "runtimeStatus": "idle",\n  "reviewerMode": "balanced",\n  "update": { "currentVersion": "0.4.5", "updateAvailable": false, "automaticSupported": false }\n}\n```\n\nA healthy result shows the running and installed versions and the enabled capabilities. When the installed package version differs from the running module version, the card shows **Restart required**. When either version cannot be read, it says the comparison is unavailable instead of guessing.\n\nA bare `curl` to any `/api/*` route returns `401` before the plugin handler is reached: the connection\'s Host/Origin fence and browser-session authentication run first. That is expected host behavior, not a plugin failure, and it is why external verification needs the authenticated page. Do not bypass authentication or paste a session cookie into a command. For the same reason, read the read-only status route from the page\'s console:\n\n```js\nawait (await fetch(\'api/dsh-you-should-know/status?sessionId=<session-id>\')).json()\n```\n\nField-by-field schemas for both routes: [status and self-check](./docs/reference.md#status-and-self-check-routes).\n\n## Development\n\n```sh\nnpm test\n```\n\nThe suite covers route discovery and recovery, the verdict contract and silence handling, every gate, dedupe, strictness thresholds, language detection, the human-only invariant, the note card and history, runtime queue, retry, and resume, live config, persistence, the update checker, and release consistency. Full coverage list: [test coverage](./docs/reference.md#test-coverage).\n\n### Offline note voice baseline\n\n```sh\nnpm run eval:note-voice:baseline\n```\n\nThe command scores the hand-authored fixtures in `scripts/fixtures/note-voice-baseline/cases.json` with the same parse, mode gate, and verbatim grounding checks the runtime applies. It is offline and deterministic: it never calls a model, opens a network connection, or reads an environment variable. Each case receives one status:\n\n- `SPEAK_OK`: a note was admitted for a case that expects one;\n- `SPEAK_UNWARRANTED`: a note was admitted for a case that expects silence;\n- `SILENT_OK`: no admitted note for a case that expects silence, whether the reply was absent, silent, or dropped by grounding;\n- `SILENT_MISSED`: no note was admitted for a case that expects one;\n- `RUNTIME_ERROR`: the reviewer call failed; never counted as silence in either direction;\n- `INVALID`: a structurally broken or contradictory case;\n- `NOT_RUN`: reserved for a future live runner.\n\nThe output is a per-class count table, the `gated`, `invalid`, and `runtime errors` totals, and a NOT VERIFIED statement about semantic quality. The `summarize` helper also returns the `semantics.notVerified` count for programmatic use. The baseline measures structural admission only. Semantic quality (entailment, voice attribution) is NOT VERIFIED: an `entail` label is the fixture author\'s label, voice attribution is not checked, and no accuracy or precision is computed. The baseline stays unvalidated until the owner sets a threshold.\n\n## Repository rules\n\nRepository-facing prose follows the project\'s [repository rules](./AGENTS.md), including the English-only requirement for new pull request descriptions, commit messages, review comments, reports, and documentation. Human chat language is separate.\n\n## Related work\n\n[omdsh-dev/dsh-advisor](https://github.com/omdsh-dev/dsh-advisor) pairs a second model that passively reviews each turn and **injects its notes into the primary agent**, so the agent sees the advice and can act on it inside the same turn.\n\nThis plugin is the deliberate opposite. Its notes are **human-only**: the primary agent is never steered, injected, woken, or written to, and the advice never enters the transcript or the model context. The value here is an independent opinion for the person, not another instruction for the agent.\n\n## License\n\nMIT. See [LICENSE](./LICENSE).\n',
+    expected: /"pluginVersion": "0.4.6"/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at test/release-consistency.test.js:66:1
+✖ no released artifact still documents the previous version (0.179209ms)
+  AssertionError [ERR_ASSERTION]: package.json still names 0.4.5
+
+  true !== false
+
+      at TestContext.<anonymous> (file://<worktree>/test/release-consistency.test.js:69:12)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/update-route.test.js:254:1
+✖ the exported plugin version mirrors package.json (3.758375ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  '0.4.5' !== '0.4.6'
+
+      at TestContext.<anonymous> (file://<worktree>/test/update-route.test.js:257:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '0.4.5',
+    expected: '0.4.6',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+EXIT_CODE: 1

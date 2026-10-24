@@ -8,7 +8,7 @@ The intent mirrors Claude Code's *You Should Know* with one deliberately harder 
 
 ## Status
 
-Version `0.4.5`, MIT. Host and browser halves ship as plain JavaScript, so a `github:` install needs no build. The scope is intentionally small: a composer-adjacent note card with a bounded in-memory history, a Plugins settings card (strictness mode, additional instructions, custom prompt, update controls), a session-header mode and model override, one reviewer call per qualifying turn, and a per-session runtime that retries one transient failure, bounds the queue, and pauses on quota without losing the turn.
+Version `0.4.6`, MIT. Host and browser halves ship as plain JavaScript, so a `github:` install needs no build. The scope is intentionally small: a composer-adjacent note card with a bounded in-memory history, a Plugins settings card (strictness mode, additional instructions, custom prompt, update controls), a session-header mode and model override, one reviewer call per qualifying turn, and a per-session runtime that retries one transient failure, bounds the queue, and pauses on quota without losing the turn.
 
 ## What it does
 
@@ -73,8 +73,10 @@ Notes live in plugin-owned, in-memory, per-session state. The only consumer is t
 The built host and browser halves are committed, so installation needs no source build. Install an immutable release ref:
 
 ```sh
-dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.4.5
+dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.4.6
 ```
+
+The `v0.4.6` tag is prospective: it is created when this release is published and does not exist before that. The newest tag published so far is `v0.4.4`.
 
 A bare `github:PipaGs/dsh-you-should-know` address is saved as the same value on every run, so a second install cannot be told from the dependency change; a ref-pinned address is saved verbatim, so each install and upgrade is attributed to `dsh-you-should-know`. Enter the same pinned address in the Desktop **Add plugin** dialog. To move to a later release, install its tag; to reinstall the exact version already present, remove the plugin first.
 
@@ -187,12 +189,12 @@ The supported check is **Run self-check** in **Settings -> Plugins -> You Should
   "authTransport": "host-authenticated-connection",
   "healthy": true,
   "configured": true,
-  "pluginVersion": "0.4.5",
-  "runtimeVersion": "0.4.5",
-  "installedVersion": "0.4.5",
+  "pluginVersion": "0.4.6",
+  "runtimeVersion": "0.4.6",
+  "installedVersion": "0.4.6",
   "runtimeStatus": "idle",
   "reviewerMode": "balanced",
-  "update": { "currentVersion": "0.4.5", "updateAvailable": false, "automaticSupported": false }
+  "update": { "currentVersion": "0.4.6", "updateAvailable": false, "automaticSupported": false }
 }
 ```
 

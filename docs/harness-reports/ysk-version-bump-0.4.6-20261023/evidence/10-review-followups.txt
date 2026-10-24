@@ -1,0 +1,45 @@
+TASK: ysk-version-bump-0.4.6-20261023
+DATE: 2026-10-23T19:43:21Z / 2026-10-23T22:43:21+0300
+
+COMMAND: git ls-remote --tags origin
+--- OUTPUT ---
+a57e310d61dc11f946b6f517dfe270590de81c8c	refs/tags/v0.3.1
+b344d8df563f0e3cfd2f41e8ed31903a3dee14a2	refs/tags/v0.3.1^{}
+2f6361d66a5cf0ddfe594dba1500393f22b0d5b8	refs/tags/v0.3.2
+39ee8aa037db6fe3db5bfbe218b3638b3b32c67c	refs/tags/v0.3.2^{}
+29755a861d140ac4207a01d6d123ac0dbb0c3bd8	refs/tags/v0.3.3
+55a2d270765cc4f4c73617803ccdbb2b9f51cb3f	refs/tags/v0.3.4
+91c82bcba2b8c197dd7b684441c1541df36c80f9	refs/tags/v0.3.4^{}
+ebae1e0510c02d4a213baf1bea2c09aae799933f	refs/tags/v0.3.5
+606597fb6f4c44b2234895d92a057f52764a57d5	refs/tags/v0.3.5^{}
+1b02494b0e9055d5a7d462c1704e079489b697b2	refs/tags/v0.3.6
+e96c5bbab8d34ca722d8b5edc8b91d59234d873f	refs/tags/v0.3.6^{}
+5d9ecace0845c67bb0a80cb2b4aadfa0725a67b6	refs/tags/v0.3.7
+a929d4ffdd72adb017bf77fad3004ef4a233f2cb	refs/tags/v0.3.7^{}
+4596e070776073117afff25b85f964ac150f1460	refs/tags/v0.3.8
+d830efbb66d7bcdac00c4d7fbf020385108cdee9	refs/tags/v0.3.8^{}
+029de45b72174a5879704155266fd789aa78eb25	refs/tags/v0.4.0
+1266a997170db32de8e89deadeeeb32d35d07651	refs/tags/v0.4.0^{}
+5d000f5f501e2f8f114df90ab5da66b16acc8f03	refs/tags/v0.4.1
+d511e8e163b726bbfcecde454dfe6d30a55cced2	refs/tags/v0.4.1^{}
+ea1d37a7c88e50f7d736b3bf3be5beb05f514b42	refs/tags/v0.4.2
+af401479a6335982074ae9b9285efb26114237d5	refs/tags/v0.4.2^{}
+7d392bd65e07fdbd42530e56d32698a05edeba52	refs/tags/v0.4.3
+b6a202d00e80e6069c07b03e65034b4280756f1d	refs/tags/v0.4.3^{}
+f189e3db8d4f1ea7ae68dffeedb647c5d2010c6b	refs/tags/v0.4.4
+48630cae8c42d5e4a5f39d71a5e3e2ee1b3f932e	refs/tags/v0.4.4^{}
+EXIT_CODE: 0
+
+NOTE: v0.4.5 and v0.4.6 are absent from this listing; v0.4.4 is the highest stable tag.
+
+COMMAND: git diff 87ae0a9..5516c60 | grep -nEi 'api[_-]?key|secret|token|password|BEGIN [A-Z ]*PRIVATE KEY|https?://'
+--- OUTPUT ---
+(empty output)
+no matches
+EXIT_CODE: 1
+
+COMMAND: git diff --name-only 87ae0a9..5516c60 | xargs grep -n '/Users/'
+--- OUTPUT ---
+(empty output)
+no matches
+EXIT_CODE: 1

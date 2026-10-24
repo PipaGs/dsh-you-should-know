@@ -1,0 +1,24 @@
+COMMAND: git diff --check; git status --short; git diff --numstat
+DATE: 2026-10-23T19:32:55Z / 2026-10-23T22:32:55+0300
+HEAD: 87ae0a956b30c7cf0c471deefee33e5a9a41e15f
+--- git diff --check ---
+diff_check_exit=0
+--- git status --short ---
+ M README.md
+ M docs/reference.md
+ M lib/index.js
+ M package.json
+ M test/invariant.test.js
+ M test/plugin.test.js
+ M test/release-consistency.test.js
+ M test/update-route.test.js
+?? docs/harness-reports/ysk-version-bump-0.4.6-20261023/
+--- git diff --numstat ---
+8	6	README.md
+4	4	docs/reference.md
+1	1	lib/index.js
+1	1	package.json
+1	1	test/invariant.test.js
+3	3	test/plugin.test.js
+2	2	test/release-consistency.test.js
+1	1	test/update-route.test.js

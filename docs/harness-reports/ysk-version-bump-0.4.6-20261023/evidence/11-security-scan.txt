@@ -1,0 +1,40 @@
+TASK: ysk-version-bump-0.4.6-20261023
+DATE: 2026-10-24T03:31:24Z / 2026-10-24T06:31:24+0300
+SCAN_SCOPE: all 22 files changed against 87ae0a9 at commit3 e8ead72; this new evidence file did not exist when the scan ran.
+FILES_SCANNED: 22
+
+COMMAND: grep -RInE '/Users/[A-Za-z0-9._-]+/|/home/[A-Za-z0-9._-]+/' $(git diff --name-only 87ae0a9..HEAD)
+--- OUTPUT ---
+(empty output)
+no matches
+EXIT_CODE: 1
+
+COMMAND: grep -RInE 'ghp_|github_pat_|BEGIN [A-Z ]*PRIVATE KEY|AKIA[0-9A-Z]{16}|Bearer [A-Za-z0-9._-]{20,}' $(git diff --name-only 87ae0a9..HEAD)
+--- OUTPUT ---
+(empty output)
+no matches
+EXIT_CODE: 1
+
+COMMAND: grep -RInE '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}|([0-9]{1,3}\.){3}[0-9]{1,3}' docs/harness-reports/ysk-version-bump-0.4.6-20261023
+--- OUTPUT ---
+(empty output)
+no matches
+EXIT_CODE: 1
+
+PRE_SANITIZATION_COUNTS (git show 33a25a2:<path> | grep -o '/Users/[^ "]*' | wc -l):
+evidence/02-red-version.txt: 26
+evidence/02b-red-version-filtered.txt: 6
+evidence/09-provenance.txt: 1
+
+POST_SANITIZATION_COUNTS (working tree):
+evidence/02-red-version.txt: 0
+evidence/02b-red-version-filtered.txt: 0
+evidence/09-provenance.txt: 0
+
+PER_FILE_SHA256_BEFORE_AFTER:
+02-red-version.txt before(33a25a2): 99bddd52173006387c6340b249a8e7ff5c022986fb31d32d49ac1cdd6f0bd37f
+02-red-version.txt after(working):  3b7aa36a47a4e60b3fb83f60668a06888b91c5417ac80ae9208feb7cda11f93a
+02b-red-version-filtered.txt before(33a25a2): cc9113be03d9754e2ee27754384fb8d0df05eb40901ba3ffe5158dbf4d786bfe
+02b-red-version-filtered.txt after(working):  4fb84e74a3f0c9ad92fe999819929b6814e36cc4e6c4690b9db398d05e41b39b
+09-provenance.txt before(e8ead72): 49ee54fa7cf50ac026cd6d44bf6ff70d6deb58d98205e64528ae65d807ce6afc
+09-provenance.txt after(working):  9c70ae04fc3fd2215f68f9a3008a0c5b213c8e884f2b9aa83cc81b5f99f33baf

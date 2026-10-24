@@ -1,0 +1,19 @@
+COMMAND: npm run check
+DATE: 2026-10-23T19:32:45Z / 2026-10-23T22:32:45+0300
+HEAD: 87ae0a956b30c7cf0c471deefee33e5a9a41e15f
+GIT STATUS --short:
+ M README.md
+ M docs/reference.md
+ M lib/index.js
+ M package.json
+ M test/invariant.test.js
+ M test/plugin.test.js
+ M test/release-consistency.test.js
+ M test/update-route.test.js
+?? docs/harness-reports/ysk-version-bump-0.4.6-20261023/
+--- OUTPUT ---
+
+> dsh-you-should-know@0.4.6 check
+> node --check lib/core.js && node --check lib/self-check.js && node --check lib/runtime.js && node --check lib/review-profile.js && node --check lib/review-strictness.js && node --check lib/language.js && node --check lib/feedback.js && node --check lib/adaptive.js && node --check lib/evidence.js && node --check lib/explain.js && node --check lib/update.js && node --check lib/index.js && node --check lib/client.js && node --check scripts/note-voice-eval.mjs && node --check scripts/note-voice-eval-deepseek.mjs && node --check scripts/note-voice-eval-live.mjs && node --check scripts/note-voice-baseline.mjs
+
+EXIT_CODE: 0
