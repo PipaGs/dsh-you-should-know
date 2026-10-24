@@ -113,7 +113,7 @@ test at test/invariant.test.js:186:1
 
   '0.4.5' !== '0.4.6'
 
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/invariant.test.js:189:10)
+      at TestContext.<anonymous> (file://<worktree>/test/invariant.test.js:189:10)
       at async Test.run (node:internal/test_runner/test:1409:7)
       at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
     generatedMessage: true,
@@ -130,7 +130,7 @@ test at test/plugin.test.js:384:1
 
   '0.4.5' !== '0.4.6'
 
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/plugin.test.js:399:10)
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:399:10)
       at async Test.run (node:internal/test_runner/test:1409:7)
       at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
     generatedMessage: true,
@@ -144,8 +144,8 @@ test at test/plugin.test.js:384:1
 test at test/plugin.test.js:449:1
 ✖ every declared Fetch route crosses the connection bridge for each of its methods (0.545167ms)
   TypeError [Error]: Cannot read properties of undefined (reading 'methods')
-      at bridgeRequest (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/plugin.test.js:459:24)
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/plugin.test.js:482:20)
+      at bridgeRequest (file://<worktree>/test/plugin.test.js:459:24)
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:482:20)
       at Test.runInAsyncScope (node:async_hooks:226:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -156,7 +156,7 @@ test at test/plugin.test.js:449:1
 test at test/plugin.test.js:489:1
 ✖ a configured plugin observes a turn, serves the note, and dismisses it over Fetch (0.215917ms)
   TypeError [Error]: Cannot read properties of undefined (reading 'listener')
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/plugin.test.js:495:41)
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:495:41)
       at Test.runInAsyncScope (node:async_hooks:226:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -167,7 +167,7 @@ test at test/plugin.test.js:489:1
 test at test/plugin.test.js:523:1
 ✖ the notes and history routes expose the stored kind and quoted basis (0.150042ms)
   TypeError [Error]: listener is not a function
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/plugin.test.js:531:3)
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:531:3)
       at Test.runInAsyncScope (node:async_hooks:226:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -178,7 +178,7 @@ test at test/plugin.test.js:523:1
 test at test/plugin.test.js:546:1
 ✖ the Fetch resolve route records an exact action and history keeps the note (0.183958ms)
   TypeError [Error]: listener is not a function
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/plugin.test.js:554:3)
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:554:3)
       at Test.runInAsyncScope (node:async_hooks:226:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -189,7 +189,7 @@ test at test/plugin.test.js:546:1
 test at test/plugin.test.js:594:1
 ✖ the status route reports activity without exposing conversation or note text (0.150417ms)
   TypeError [Error]: Cannot read properties of undefined (reading 'listener')
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/plugin.test.js:601:41)
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:601:41)
       at Test.runInAsyncScope (node:async_hooks:226:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -200,7 +200,7 @@ test at test/plugin.test.js:594:1
 test at test/plugin.test.js:630:1
 ✖ a listener failure is contained instead of escaping into the host (0.080833ms)
   TypeError [Error]: Cannot read properties of undefined (reading 'listener')
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/plugin.test.js:633:41)
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:633:41)
       at Test.runInAsyncScope (node:async_hooks:226:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -213,7 +213,7 @@ test at test/plugin.test.js:662:1
   AssertionError [ERR_ASSERTION]: Expected "actual" to be strictly unequal to:
 
   undefined
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/plugin.test.js:668:10)
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:668:10)
       at Test.runInAsyncScope (node:async_hooks:226:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -231,7 +231,7 @@ test at test/plugin.test.js:662:1
 test at test/plugin.test.js:675:1
 ✖ the session route serves the effective route and its source without leaking text (0.159916ms)
   TypeError [Error]: listener is not a function
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/plugin.test.js:684:3)
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:684:3)
       at Test.runInAsyncScope (node:async_hooks:226:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -242,7 +242,7 @@ test at test/plugin.test.js:675:1
 test at test/plugin.test.js:711:1
 ✖ the session route POST set-model and reset-model change the reviewer route (0.172083ms)
   TypeError [Error]: Cannot read properties of undefined (reading 'fetch')
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/plugin.test.js:718:27)
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:718:27)
       at Test.runInAsyncScope (node:async_hooks:226:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -253,7 +253,7 @@ test at test/plugin.test.js:711:1
 test at test/plugin.test.js:757:1
 ✖ the session route POST resume reports whether a paused runtime resumed (0.079084ms)
   TypeError [Error]: Cannot read properties of undefined (reading 'fetch')
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/plugin.test.js:761:49)
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:761:49)
       at Test.runInAsyncScope (node:async_hooks:226:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -264,7 +264,7 @@ test at test/plugin.test.js:757:1
 test at test/plugin.test.js:767:1
 ✖ the session route bounds and rejects invalid POSTs without throwing (0.115417ms)
   TypeError [Error]: Cannot read properties of undefined (reading 'fetch')
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/plugin.test.js:773:35)
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:773:35)
       at Test.runInAsyncScope (node:async_hooks:226:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -275,7 +275,7 @@ test at test/plugin.test.js:767:1
 test at test/plugin.test.js:795:1
 ✖ session/disposed forgets the session notes and its override (0.135708ms)
   TypeError [Error]: listener is not a function
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/plugin.test.js:803:3)
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:803:3)
       at Test.runInAsyncScope (node:async_hooks:226:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -289,7 +289,7 @@ test at test/plugin.test.js:857:1
 
   0 !== 3
 
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/plugin.test.js:864:10)
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:864:10)
       at async Test.run (node:internal/test_runner/test:1409:7)
       at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
     generatedMessage: false,
@@ -305,7 +305,7 @@ test at test/plugin.test.js:883:1
   AssertionError [ERR_ASSERTION]: Expected "actual" to be strictly unequal to:
 
   undefined
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/plugin.test.js:889:10)
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:889:10)
       at Test.runInAsyncScope (node:async_hooks:226:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -323,7 +323,7 @@ test at test/plugin.test.js:883:1
 test at test/plugin.test.js:896:1
 ✖ the config route is writable and persists the row through the settings service (0.164666ms)
   TypeError [Error]: Cannot read properties of undefined (reading 'fetch')
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/plugin.test.js:914:28)
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:914:28)
       at Test.runInAsyncScope (node:async_hooks:226:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -334,7 +334,7 @@ test at test/plugin.test.js:896:1
 test at test/plugin.test.js:933:1
 ✖ the config route reports read-only and refuses to persist without a settings service (0.107ms)
   TypeError [Error]: Cannot read properties of undefined (reading 'fetch')
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/plugin.test.js:939:28)
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:939:28)
       at Test.runInAsyncScope (node:async_hooks:226:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -345,7 +345,7 @@ test at test/plugin.test.js:933:1
 test at test/plugin.test.js:952:1
 ✖ the session route POST set-mode and reset-mode isolate the strictness mode (0.160042ms)
   TypeError [Error]: Cannot read properties of undefined (reading 'fetch')
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/plugin.test.js:959:27)
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:959:27)
       at Test.runInAsyncScope (node:async_hooks:226:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -359,7 +359,7 @@ test at test/plugin.test.js:990:1
 
   0 !== 1
 
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/plugin.test.js:1014:10)
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:1014:10)
       at async Test.run (node:internal/test_runner/test:1409:7)
       at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
     generatedMessage: false,
@@ -373,7 +373,7 @@ test at test/plugin.test.js:990:1
 test at test/plugin.test.js:1035:1
 ✖ a volatile config edit reaches the update state without a remount (0.528917ms)
   TypeError [Error]: Cannot read properties of undefined (reading 'listener')
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/plugin.test.js:1059:99)
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:1059:99)
       at Test.runInAsyncScope (node:async_hooks:226:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -387,7 +387,7 @@ test at test/release-consistency.test.js:43:1
 
   '0.4.5' !== '0.4.6'
 
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/release-consistency.test.js:45:10)
+      at TestContext.<anonymous> (file://<worktree>/test/release-consistency.test.js:45:10)
       at Test.runInAsyncScope (node:async_hooks:226:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -405,7 +405,7 @@ test at test/release-consistency.test.js:43:1
 test at test/release-consistency.test.js:57:1
 ✖ every README self-check sample version is the released version (0.295166ms)
   AssertionError [ERR_ASSERTION]: pluginVersion names the release version
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/release-consistency.test.js:61:12)
+      at TestContext.<anonymous> (file://<worktree>/test/release-consistency.test.js:61:12)
       at Test.runInAsyncScope (node:async_hooks:226:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -426,7 +426,7 @@ test at test/release-consistency.test.js:66:1
 
   true !== false
 
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/release-consistency.test.js:69:12)
+      at TestContext.<anonymous> (file://<worktree>/test/release-consistency.test.js:69:12)
       at Test.runInAsyncScope (node:async_hooks:226:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -447,7 +447,7 @@ test at test/update-route.test.js:254:1
 
   '0.4.5' !== '0.4.6'
 
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/update-route.test.js:257:10)
+      at TestContext.<anonymous> (file://<worktree>/test/update-route.test.js:257:10)
       at async Test.run (node:internal/test_runner/test:1409:7)
       at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
     generatedMessage: true,

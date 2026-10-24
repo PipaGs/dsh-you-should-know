@@ -28,7 +28,7 @@ test at test/invariant.test.js:186:1
 
   '0.4.5' !== '0.4.6'
 
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/invariant.test.js:189:10)
+      at TestContext.<anonymous> (file://<worktree>/test/invariant.test.js:189:10)
       at async Test.run (node:internal/test_runner/test:1409:7)
       at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
     generatedMessage: true,
@@ -45,7 +45,7 @@ test at test/plugin.test.js:384:1
 
   '0.4.5' !== '0.4.6'
 
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/plugin.test.js:399:10)
+      at TestContext.<anonymous> (file://<worktree>/test/plugin.test.js:399:10)
       at async Test.run (node:internal/test_runner/test:1409:7)
       at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
     generatedMessage: true,
@@ -62,7 +62,7 @@ test at test/release-consistency.test.js:43:1
 
   '0.4.5' !== '0.4.6'
 
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/release-consistency.test.js:45:10)
+      at TestContext.<anonymous> (file://<worktree>/test/release-consistency.test.js:45:10)
       at Test.runInAsyncScope (node:async_hooks:226:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -80,7 +80,7 @@ test at test/release-consistency.test.js:43:1
 test at test/release-consistency.test.js:57:1
 ✖ every README self-check sample version is the released version (0.291ms)
   AssertionError [ERR_ASSERTION]: pluginVersion names the release version
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/release-consistency.test.js:61:12)
+      at TestContext.<anonymous> (file://<worktree>/test/release-consistency.test.js:61:12)
       at Test.runInAsyncScope (node:async_hooks:226:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -101,7 +101,7 @@ test at test/release-consistency.test.js:66:1
 
   true !== false
 
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/release-consistency.test.js:69:12)
+      at TestContext.<anonymous> (file://<worktree>/test/release-consistency.test.js:69:12)
       at Test.runInAsyncScope (node:async_hooks:226:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -122,7 +122,7 @@ test at test/update-route.test.js:254:1
 
   '0.4.5' !== '0.4.6'
 
-      at TestContext.<anonymous> (file:///Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6/test/update-route.test.js:257:10)
+      at TestContext.<anonymous> (file://<worktree>/test/update-route.test.js:257:10)
       at async Test.run (node:internal/test_runner/test:1409:7)
       at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
     generatedMessage: true,

@@ -154,10 +154,39 @@ No `0.4.5` remains in `package.json`, `lib/index.js`, `README.md`, or `docs/refe
 - The pre-normalization bytes of the two RED logs are not retained in any commit (see §5).
 - When `v0.4.6` is tagged, the prospective-tag paragraph in the README must be updated or removed; that publication step is not part of this change.
 - `test/release-consistency.test.js` does not scan `docs/reference.md`; that pre-existing gate gap is recorded here and deliberately left unchanged to keep this change a version bump.
+- The absolute host path remains visible in commits `33a25a2` and `e8ead72` until the owner decides whether to rewrite history.
 - No live or paid model calls were made.
 - Release gating is unchanged; publication remains with the owner and reviewer.
 
-## 9. Evidence files
+## 9. Visual gate
+
+**NOT REQUIRED.** Only version metadata, report text, and evidence changed. No DOM, CSS, client code, or route behavior changed; `lib/client.js` and `test/client-ui.test.js` are unchanged.
+
+## 10. Security gate and path redaction
+
+The earlier scans in `08-diff-sanity.txt` and `10-review-followups.txt` covered only the product diff. The task-owned reports and evidence were not scanned, so the gate below closes that gap by scanning all 22 files changed against `87ae0a9` at commit 3 (`e8ead72`), not only product files.
+
+Finding: 33 occurrences of an absolute host worktree path in three task-owned files. The path contained the local OS account name:
+
+- `evidence/02-red-version.txt`: 26 occurrences;
+- `evidence/02b-red-version-filtered.txt`: 6 occurrences;
+- `evidence/09-provenance.txt`: 1 occurrence.
+
+Action: the exact worktree prefix in 02 and 02b was replaced with `<worktree>` (26 and 6 replacements). The `WORKTREE` line in 09 was replaced with the project-relative path and a redaction note (1 replacement). No account-bearing absolute path remains in the task-owned tree.
+
+Evidence parity: for 02 and 02b, the only content change is the path-token substitution; all counts, exit codes, nonblank lines, and other bytes are unchanged. For 09, the path line was redacted and the requested DATE labels and commit NOTE were updated; that file contains no test count or exit code. Pre-sanitization bytes are reachable at `33a25a2` (02, 02b) and `e8ead72` (09), so parity is checkable with the commit 4 diff. Per-file SHA256:
+
+| File | SHA256 before | SHA256 after |
+|---|---|---|
+| `evidence/02-red-version.txt` | `99bddd52173006387c6340b249a8e7ff5c022986fb31d32d49ac1cdd6f0bd37f` | `3b7aa36a47a4e60b3fb83f60668a06888b91c5417ac80ae9208feb7cda11f93a` |
+| `evidence/02b-red-version-filtered.txt` | `cc9113be03d9754e2ee27754384fb8d0df05eb40901ba3ffe5158dbf4d786bfe` | `4fb84e74a3f0c9ad92fe999819929b6814e36cc4e6c4690b9db398d05e41b39b` |
+| `evidence/09-provenance.txt` | `49ee54fa7cf50ac026cd6d44bf6ff70d6deb58d98205e64528ae65d807ce6afc` | `cdb298bb9db8793622bd4d1a9bf4f50f2dc024c194b88835bea7962da96ccd33` |
+
+Post-sanitization full-PR scan: 0 matches for account-bearing home paths, 0 secret matches, and 0 email/IPv4 matches in the task-owned files. Raw output and exit codes are in `evidence/11-security-scan.txt`.
+
+Disclosure: the pre-sanitization bytes remain in the already-submitted commits `33a25a2` and `e8ead72` and in the branch history. No history rewrite was performed. The path segment is the local OS account name, which is also present in public git commit metadata and the remote URL. The decision to rewrite history belongs to the owner.
+
+## 11. Evidence files
 
 | File | Contents |
 |---|---|
@@ -172,5 +201,6 @@ No `0.4.5` remains in `package.json`, `lib/index.js`, `README.md`, or `docs/refe
 | `06-diff-check.txt` | `git diff --check`, status, and numstat |
 | `07-version-scan.txt` | `git grep` for `0.4.5` / `0.4.6`, explicit mirror values, remote tag absence |
 | `08-diff-sanity.txt` | Diff stat/numstat against `87ae0a9`, unchanged-file checks, secret and external-URL scans |
-| `09-provenance.txt` | Branch, worktree, base, commit 1 and commit 2 SHAs, commit 3 self-reference, runtime, date, and final-status note |
-| `10-review-followups.txt` | Independent-review follow-up: full remote tag listing, product-diff secret/URL scan, and `/Users/` path scan; raw output and exit codes |
+| `09-provenance.txt` | Branch, project-relative worktree, base, commit 1, commit 2, actual commit 3 SHA, commit 4 self-reference, runtime, DATE labels, and final-status note |
+| `10-review-followups.txt` | Independent-review follow-up: full remote tag listing and product-diff-only secret/URL and `/Users/` scans; raw output and exit codes |
+| `11-security-scan.txt` | Full 22-file security scan: account-bearing home paths, secrets, email/IPv4; pre/post redaction counts and per-file SHA256 |

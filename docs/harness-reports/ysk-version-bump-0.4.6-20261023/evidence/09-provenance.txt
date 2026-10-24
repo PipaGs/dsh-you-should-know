@@ -2,15 +2,17 @@
 
 TASK: ysk-version-bump-0.4.6-20261023
 BRANCH: chore/ysk-version-bump-0.4.6
-WORKTREE: /Users/pipags/work/dsh-you-should-know/.worktrees/ysk-version-bump-0.4.6
+WORKTREE: .worktrees/ysk-version-bump-0.4.6 (project-relative; host path redacted)
 BASE_SHA: 87ae0a956b30c7cf0c471deefee33e5a9a41e15f
 COMMIT1_SHA: 5516c6033865998b9b2cec3f3d258525b0a06b17
 COMMIT2_SHA: 33a25a2fb1b4e3ba9425cc7b98a3414eadbc77f8
-COMMIT3_SHA: this follow-up evidence/report commit. Its SHA is the final PR head recorded in the PR body; a file cannot contain its own commit SHA.
+COMMIT3_SHA: e8ead72ff9cc12e802810bbf3d2c672d74391956
+COMMIT4_SHA: this security follow-up commit. Its SHA is the final PR head recorded in the PR body; a file cannot contain its own commit SHA.
 
 NODE: v26.9.0
 NPM: 11.19.1
-DATE: 2026-10-23T22:35:00+03:00 (Europe/Moscow)
+DATE_INITIAL_CAPTURE: 2026-10-23T22:35:00+03:00 (Europe/Moscow)
+DATE_FOLLOWUP: 2026-10-24T06:30:00+03:00 (Europe/Moscow)
 
 PRE_EVIDENCE_COMMIT_GIT_LOG:
 5516c60 chore: raise the version to 0.4.6 after PR #21
@@ -28,4 +30,4 @@ WHITESPACE_NORMALIZATION:
 - 02b-red-version-filtered.txt: 10 whitespace-only blank lines normalized; sha256 before 226e6aecb41d3d6e374bb3ebaeedfe2ef669ee52ce76059c03e31d28fead772c; after cc9113be03d9754e2ee27754384fb8d0df05eb40901ba3ffe5158dbf4d786bfe.
 - No nonblank content, test count, pass count, fail count, or exit code changed.
 
-NOTE: final post-commit status, log, and diff check are reported in the final response and PR body. This file is committed by commit 3, the report/evidence follow-up commit it describes.
+NOTE: this file was created by commit 2, extended by commit 3 with the commit-2 SHA and a commit-3 self-reference, and revised by commit 4 with path redaction and DATE labels. No SHA for commit 4 is claimed here; the final PR head is recorded in the PR body.
