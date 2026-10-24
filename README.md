@@ -76,8 +76,6 @@ The built host and browser halves are committed, so installation needs no source
 dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.4.6
 ```
 
-The `v0.4.6` tag is prospective: it is created when this release is published and does not exist before that. The newest tag published so far is `v0.4.4`.
-
 A bare `github:PipaGs/dsh-you-should-know` address is saved as the same value on every run, so a second install cannot be told from the dependency change; a ref-pinned address is saved verbatim, so each install and upgrade is attributed to `dsh-you-should-know`. Enter the same pinned address in the Desktop **Add plugin** dialog. To move to a later release, install its tag; to reinstall the exact version already present, remove the plugin first.
 
 The bundle contributes one row, `you-should-know`, with the reviewer route left automatic. At the first qualifying turn the plugin asks the live LLM registry for a DeepSeek route and picks a stable, inexpensive chat/flash model from that route's own catalog: the documented `deepseek`/`deepseek-chat` pair where it exists, otherwise `deepseek-official`/`deepseek-flash` on a current build. No DeepSeek route means no note, zero model calls, and no effect on the agent. Restart or let HMR reload the profile after changing the patch.
