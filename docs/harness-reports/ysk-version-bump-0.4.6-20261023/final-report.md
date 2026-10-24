@@ -180,13 +180,13 @@ Evidence parity: for 02 and 02b, the only content change is the path-token subst
 |---|---|---|
 | `evidence/02-red-version.txt` | `99bddd52173006387c6340b249a8e7ff5c022986fb31d32d49ac1cdd6f0bd37f` | `3b7aa36a47a4e60b3fb83f60668a06888b91c5417ac80ae9208feb7cda11f93a` |
 | `evidence/02b-red-version-filtered.txt` | `cc9113be03d9754e2ee27754384fb8d0df05eb40901ba3ffe5158dbf4d786bfe` | `4fb84e74a3f0c9ad92fe999819929b6814e36cc4e6c4690b9db398d05e41b39b` |
-| `evidence/09-provenance.txt` | `49ee54fa7cf50ac026cd6d44bf6ff70d6deb58d98205e64528ae65d807ce6afc` | `cdb298bb9db8793622bd4d1a9bf4f50f2dc024c194b88835bea7962da96ccd33` |
+| `evidence/09-provenance.txt` | `49ee54fa7cf50ac026cd6d44bf6ff70d6deb58d98205e64528ae65d807ce6afc` | `9c70ae04fc3fd2215f68f9a3008a0c5b213c8e884f2b9aa83cc81b5f99f33baf` |
 
 Post-sanitization full-PR scan: 0 matches for account-bearing home paths, 0 secret matches, and 0 email/IPv4 matches in the task-owned files. Raw output and exit codes are in `evidence/11-security-scan.txt`.
 
-Final-head full-tree scan: PASS 1 covered 23 files changed against `87ae0a9` at commit 4 (`9ad7c43`); PASS 2 re-ran the same scans after `evidence/12` was written and covered 24 files, including the artifact itself. Both passes returned 0 matches for account-bearing home paths, secrets, and email/IPv4; raw output and exit codes are in `evidence/12-final-security-scan.txt`. The earlier 22-file result in `evidence/11` was the commit-3 tree; the final-head result is `evidence/12`. The secret patterns match token-shaped values, so the scanner's own command lines do not self-match and no lines or files were excluded from either pass.
+Final-head full-tree scan: PASS 1 covered 23 files changed against `87ae0a9` at commit 4 (`9ad7c43`); PASS 2 re-ran the same scans after `evidence/12` was written and covered 24 files, including the artifact itself. Both passes returned 0 matches for account-bearing home paths, secrets, and email/IPv4; raw output and exit codes are in `evidence/12-final-security-scan.txt`. `evidence/11` used the commit-3 file scope (22 files) while reading content from the post-sanitization working tree. The secret patterns match token-shaped values, so the scanner's own command lines do not self-match and no lines or files were excluded from either pass.
 
-Disclosure: the pre-sanitization bytes remain in the already-submitted commits `33a25a2` and `e8ead72` and in the branch history. No history rewrite was performed. The path segment is the local OS account name, which is also present in public git commit metadata and the remote URL. The decision to rewrite history belongs to the owner.
+Disclosure: the pre-sanitization bytes remain in the already-submitted commits `33a25a2` and `e8ead72` and in the branch history. No rewrite of published history was performed; the local amends 3f101f0 -> e8ead72 and 426ea7c -> 9dfb1f8 happened before those commits were pushed. The path segment is the local OS account name, which is also present in public git commit metadata and the remote URL. The decision to rewrite history belongs to the owner.
 
 ## 11. Evidence files
 
@@ -203,7 +203,7 @@ Disclosure: the pre-sanitization bytes remain in the already-submitted commits `
 | `06-diff-check.txt` | `git diff --check`, status, and numstat |
 | `07-version-scan.txt` | `git grep` for `0.4.5` / `0.4.6`, explicit mirror values, remote tag absence |
 | `08-diff-sanity.txt` | Diff stat/numstat against `87ae0a9`, unchanged-file checks, secret and external-URL scans |
-| `09-provenance.txt` | Branch, project-relative worktree, base, commit 1, commit 2, actual commit 3 SHA, commit 4 self-reference, runtime, DATE labels, and final-status note |
+| `09-provenance.txt` | Branch, project-relative worktree, base, commit 1, commit 2, actual commit 3 and commit 4 SHAs, LATER_COMMITS note, runtime, DATE labels, and final-status note |
 | `10-review-followups.txt` | Independent-review follow-up: full remote tag listing and product-diff-only secret/URL and `/Users/` scans; raw output and exit codes |
 | `11-security-scan.txt` | Full 22-file security scan: account-bearing home paths, secrets, email/IPv4; pre/post redaction counts and per-file SHA256 |
 | `12-final-security-scan.txt` | Two-pass final-head scan: 23 files in PASS 1, 24 files including this artifact in PASS 2; raw output, exit codes, and counts |

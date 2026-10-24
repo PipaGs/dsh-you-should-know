@@ -37,4 +37,4 @@ PER_FILE_SHA256_BEFORE_AFTER:
 02b-red-version-filtered.txt before(33a25a2): cc9113be03d9754e2ee27754384fb8d0df05eb40901ba3ffe5158dbf4d786bfe
 02b-red-version-filtered.txt after(working):  4fb84e74a3f0c9ad92fe999819929b6814e36cc4e6c4690b9db398d05e41b39b
 09-provenance.txt before(e8ead72): 49ee54fa7cf50ac026cd6d44bf6ff70d6deb58d98205e64528ae65d807ce6afc
-09-provenance.txt after(working):  cdb298bb9db8793622bd4d1a9bf4f50f2dc024c194b88835bea7962da96ccd33
+09-provenance.txt after(working):  9c70ae04fc3fd2215f68f9a3008a0c5b213c8e884f2b9aa83cc81b5f99f33baf

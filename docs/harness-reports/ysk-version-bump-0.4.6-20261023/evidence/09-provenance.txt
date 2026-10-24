@@ -7,7 +7,8 @@ BASE_SHA: 87ae0a956b30c7cf0c471deefee33e5a9a41e15f
 COMMIT1_SHA: 5516c6033865998b9b2cec3f3d258525b0a06b17
 COMMIT2_SHA: 33a25a2fb1b4e3ba9425cc7b98a3414eadbc77f8
 COMMIT3_SHA: e8ead72ff9cc12e802810bbf3d2c672d74391956
-COMMIT4_SHA: this security follow-up commit. Its SHA is the final PR head recorded in the PR body; a file cannot contain its own commit SHA.
+COMMIT4_SHA: 9ad7c43e0b89f9e0ed57ffd4a51b2a2cc5330aa3 (path redaction, DATE labels, metadata lines)
+LATER_COMMITS: report/evidence-only commits after commit 4 are not enumerated here; a file cannot record the SHA of the commit that contains it. The final PR head is recorded in the PR body.
 
 NODE: v26.9.0
 NPM: 11.19.1
@@ -26,8 +27,8 @@ DIFF_CHECK_BASE_TO_COMMIT1: exit 0
 CYRILLIC_SCAN_REPORT_AND_EVIDENCE: no matches
 
 WHITESPACE_NORMALIZATION:
-- 02-red-version.txt: 16 whitespace-only blank lines normalized; sha256 before 76c4552f14ead0123d19720726921361b83888af1b4a308a3df0424575010498; after 99bddd52173006387c6340b249a8e7ff5c022986fb31d32d49ac1cdd6f0bd37f.
-- 02b-red-version-filtered.txt: 10 whitespace-only blank lines normalized; sha256 before 226e6aecb41d3d6e374bb3ebaeedfe2ef669ee52ce76059c03e31d28fead772c; after cc9113be03d9754e2ee27754384fb8d0df05eb40901ba3ffe5158dbf4d786bfe.
+- 02-red-version.txt: 16 whitespace-only blank lines normalized; sha256 before 76c4552f14ead0123d19720726921361b83888af1b4a308a3df0424575010498; after 99bddd52173006387c6340b249a8e7ff5c022986fb31d32d49ac1cdd6f0bd37f (intermediate, post-normalization, pre-redaction); current 3b7aa36a47a4e60b3fb83f60668a06888b91c5417ac80ae9208feb7cda11f93a.
+- 02b-red-version-filtered.txt: 10 whitespace-only blank lines normalized; sha256 before 226e6aecb41d3d6e374bb3ebaeedfe2ef669ee52ce76059c03e31d28fead772c; after cc9113be03d9754e2ee27754384fb8d0df05eb40901ba3ffe5158dbf4d786bfe (intermediate, post-normalization, pre-redaction); current 4fb84e74a3f0c9ad92fe999819929b6814e36cc4e6c4690b9db398d05e41b39b.
 - No nonblank content, test count, pass count, fail count, or exit code changed.
 
-NOTE: this file was created by commit 2, extended by commit 3 with the commit-2 SHA and a commit-3 self-reference, and revised by commit 4 with path redaction and DATE labels. No SHA for commit 4 is claimed here; the final PR head is recorded in the PR body.
+NOTE: this file was created by commit 2; commit 3 added the commit-2 SHA and a commit-3 self-reference; commit 4 performed path redaction, DATE labels, and the commit-3/commit-4 metadata; commit 6 clarified wording only and did not change the content of the scan sections.
