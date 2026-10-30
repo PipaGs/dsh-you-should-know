@@ -111,7 +111,7 @@ The completed turn is the episode boundary. The plugin reads only the allowliste
 
 Internal trusted prompts, JSON keys, and importance values are always English regardless.
 
-The note card and history set `dir="auto"` on human note and explanation text, so a note that starts in a right-to-left script reads from its correct edge; text that starts with a Latin token keeps the host direction, and the English labels, actions, source paths, and the plain-text composer draft are unchanged.
+The note card and history set `dir="auto"` on human note and explanation text, so a note that starts in a right-to-left script reads from its correct edge; text that starts with a Latin token stays left-to-right, and the English labels, actions, source paths, and the plain-text composer draft are unchanged.
 
 ## Status and self-check routes
 

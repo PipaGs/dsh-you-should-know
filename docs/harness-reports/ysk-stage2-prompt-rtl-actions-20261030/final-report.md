@@ -235,8 +235,15 @@ code did not change. The reviewer independently reproduced the pre-fix state in 
 also ran the full suite (642 pass), `npm run check` (exit 0), and the base-range
 whitespace check (exit 0), and confirmed the four `dir="auto"` locations, the
 unchanged parser and Explain path, the human-only seam, the version, and the
-`docs/upstream` tree hash. DSH does not merge; ChatGPT performs the merge
-review.
+`docs/upstream` tree hash.
+
+The delta review at 0cebe5e found two remaining evidence and report issues: the
+run-meta check entry recorded a raw hash that did not match the normalized
+committed body and did not state the hash rule, and the reference sentence said
+Latin-first text keeps the host direction rather than staying left-to-right.
+The hash block now separates raw and committed-body hashes with an explicit
+rule, and the reference sentence is corrected. Product code and test counts did
+not change. DSH does not merge; ChatGPT performs the merge review.
 
 ## 8. Residual risks and follow-ups
 
