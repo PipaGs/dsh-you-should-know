@@ -1,0 +1,19 @@
+Content scan
+
+Artifact byte sizes:
+  docs/upstream/workflow.md: 9478 bytes
+  docs/upstream/README.md: 11462 bytes
+  docs/upstream/ledger.json: 25736 bytes
+  test/upstream-ledger.test.js: 42276 bytes
+  docs/harness-reports/ysk-upstream-source-policy-20261030/final-report.md: 12285 bytes
+
+Official quoted material in the ledger:
+  quoted entries: 7
+  total quoted bytes: 908
+  longest quoted line: 229 chars (claude-code-changelog-page-20261014 matchedLines v2.1.287)
+  longest quoted line text: Added You should know, a built-in mod where a side agent watches your back and flags things you or Claude might miss. Turn it on with `/plugin enable cc-plugin-you-should-know@builtin` (for first-party sessions with telemetry on)
+  quoted lines over 400 chars: 0
+  quoted entries with a newline or a code fence: 0
+  full upstream page, full release body, or upstream code committed here: no
+
+Result: PASS. The record keeps short official sentences only; no full page or code is copied.

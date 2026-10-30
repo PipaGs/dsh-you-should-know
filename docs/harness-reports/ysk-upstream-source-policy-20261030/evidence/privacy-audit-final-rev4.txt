@@ -1,0 +1,86 @@
+Final privacy audit - rev4 round
+
+Scanned all 56 existing PR files at the rev4 final pre-commit working
+tree, including the task report, all evidence, the rev4 manifest, the tests, and
+the policy files.
+Base: 0419b70797a8d37db245d55817a7be273b5edcdb
+Scan base: rev4 final pre-commit working tree. HEAD is commit C 07d728b35cc51380f4d11e623016773978df077e (parent 16c0891) plus uncommitted evidence-only commit D files.
+
+Coverage (56 files):
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/artifacts-hashes-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/artifacts-hashes-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/artifacts-hashes-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/artifacts-hashes.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/baseline-meta.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-baseline-fix.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-baseline.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/content-scan-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/content-scan-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/content-scan-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/content-scan.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/defect-repro.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-range-final.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/pr-diff-check-after.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/pr-diff-check-before.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/privacy-audit-final.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/privacy-audit-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/privacy-audit.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-baseline-full.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-baseline-targeted.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-failing-regression.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-full-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-full-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-full-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-full.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-targeted-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-targeted-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-targeted-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-targeted.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/final-report.md
+  docs/upstream/README.md
+  docs/upstream/ledger.json
+  docs/upstream/workflow.md
+  test/pr-diff-check.test.js
+  test/task-evidence-paths.test.js
+  test/upstream-ledger.test.js
+
+Result: 56/56 files scanned.
+  absolute file URL: 0
+  home-directory marker: 0
+  secret-like token or private key: 0
+  email-pattern matches: 3
+
+Allowlist (grounded fixtures only):
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan-followup.txt:19
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan.txt:19
+  test/upstream-ledger.test.js:401
+
+This final-audit file is post-manifest and is written last. test/task-evidence-paths.test.js
+covers it for absolute paths in the 629-test suite, so no task artifact is left
+unscanned for absolute paths.
+Manifest: artifacts-hashes-rev4.txt records 55 artifacts with 0
+mismatches at generation and re-hash.
+
+Result: PASS. All 56 existing PR files were scanned; no absolute file URL,
+no home-directory marker, and no secret was found. The only email-pattern matches
+are the three grounded fixtures above.

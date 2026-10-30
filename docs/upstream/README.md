@@ -22,6 +22,45 @@ change can be triaged reproducibly instead of guessed at.
 | Previous baseline | version 0.4.3, head 746d1caa2101b96c97f85b0a0e387b57e77fc436, annotated tag v0.4.3 (object 7d392bd65e07fdbd42530e56d32698a05edeba52) points at b6a202d00e80e6069c07b03e65034b4280756f1d, not at 746d1caa2101b96c97f85b0a0e387b57e77fc436. The previous ledger recorded the later untagged head 746d1caa (five commits after v0.4.3, contained in v0.4.4); this baseline keeps that distinction explicit |
 | Shipped artifact | the v0.4.6 host and browser halves |
 
+## Source policy accepted in Stage 1B
+
+Stage 1B accepted this two-class source policy on 2026-10-30. GitHub tagged
+Releases and CHANGELOG.md remain canonical for version and date. Official
+Anthropic Claude Code documentation under https://code.claude.com/docs/ is
+behavior evidence only.
+
+| Class | Accepted source | Role | May establish version or date |
+| --- | --- | --- | --- |
+| Release | https://github.com/anthropics/claude-code/releases/tag/<tag> and https://github.com/anthropics/claude-code/blob/<full-40-hex-commit>/CHANGELOG.md | canonical-release-version-date | yes |
+| Behavior | https://code.claude.com/docs/ pages | behavior-evidence-only | no |
+
+The exact behavior allowlist is https only, host exactly code.claude.com
+(case-insensitive after URL parsing), path starting with /docs/, no userinfo,
+no non-default port, no query, no fragment, and no parent path segment
+(including encoded %2e%2e). Raw parent segments are rejected before URL
+normalization. No other website and no other Anthropic host is accepted.
+
+A docs source record requires id, kind "official-docs-page", url, immutable
+false, sha256 (64 lowercase hex of the exact retrieved bytes), and fetchedAt
+(ISO UTC). lastModified is optional metadata only; when present the record must
+carry lastModifiedIsPublicationProof false, and it never becomes publishedAt or
+upstreamDate. A docs record carries no publishedAt.
+
+Re-fetch every cycle and compare sha256 with the previous verified capture. A
+changed hash is a new capture with a new fetchedAt. An unchanged hash is not a
+new upstream signal. On an unreachable, moved, truncated, rate-limited, or
+otherwise unverifiable source, the item and cycle are unknown, never "no
+change". The previous verified baseline is retained, and an offline or cached
+copy is not a fresh verification.
+
+Security: never send a private project, session, note, prompt, transcript,
+credential, or repository content to a public page or search. Never copy
+private Claude internals or closed-source code. Use short official excerpts
+only.
+
+Stage 1B adds no interactive-mode behavior findings; Stage 1C owns those. Stage
+1B adds no new docs page source and no new upstream item.
+
 ## Upstream baseline
 
 Captured 2026-10-14 from official Anthropic sources and re-verified 2026-10-30
@@ -105,10 +144,14 @@ pinned CHANGELOG.md source, and the docs page contained the same line. The page
 was used because the GitHub hosts were unreachable that day. This was a process
 deviation. The dated English addendum
 [addendum-20261030-source-policy-deviation.md](./addendum-20261030-source-policy-deviation.md)
-records it; the policy text is unchanged and the decision whether to accept
-official code.claude.com behavioral documentation is deferred to Stage 1B. Task
-1A re-sourced the active items to immutable GitHub releases and kept the
-changelog page as a historical trace.
+records it. Task 1A re-sourced the active items to immutable GitHub releases and
+kept the changelog page as a historical trace.
+
+Stage 1B accepted official code.claude.com documentation as a behavior source
+on 2026-10-30, but the 2026-10-14 capture remains a recorded deviation and is
+not retroactively authorized. The addendum is preserved unchanged. The
+historical docs source is not an active item source, and its fetchedAt is not a
+publication date.
 
 ## Open unknowns
 
@@ -121,5 +164,9 @@ changelog page as a historical trace.
 
 See [workflow.md](./workflow.md) for the read-only triage pipeline. Every new
 official signal is verified against a pinned source, deduplicated against
-ledger.json, assessed against named local evidence, and dispositioned. An
-unreachable source is recorded as unknown, never as "no change".
+ledger.json, assessed against named local evidence, and dispositioned. Release
+signals stay canonical for version and date. Docs pages are re-fetched every
+cycle and serve as behavior evidence only; a changed sha256 is a new capture and
+an unchanged hash is not a new signal. An unreachable source is recorded as
+unknown, never as "no change", and the previous verified baseline stays in
+place.

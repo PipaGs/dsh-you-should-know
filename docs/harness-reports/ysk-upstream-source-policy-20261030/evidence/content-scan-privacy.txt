@@ -1,0 +1,18 @@
+Content scan - privacy remediation
+
+Artifact byte sizes:
+  docs/upstream/workflow.md: 9571 bytes
+  docs/upstream/README.md: 11521 bytes
+  docs/upstream/ledger.json: 25736 bytes
+  test/upstream-ledger.test.js: 48290 bytes
+  test/task-evidence-paths.test.js: 2164 bytes
+  docs/harness-reports/ysk-upstream-source-policy-20261030/final-report.md: 20315 bytes
+
+Official quoted material in the ledger:
+  quoted entries: 7
+  total quoted bytes: 908
+  longest quoted line: 229 chars (claude-code-changelog-page-20261014 matchedLines v2.1.287)
+  quoted lines over 400 chars: 0
+  full upstream page, full release body, or upstream code committed here: no
+
+Result: PASS. The record keeps short official sentences only; no full page or code is copied.

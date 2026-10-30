@@ -1,7 +1,8 @@
 {
   "schemaVersion": 1,
-  "taskId": "ysk-upstream-ledger-correction-20261030",
-  "generatedAt": "2026-10-30T06:40:37Z",
+  "taskId": "ysk-upstream-source-policy-20261030",
+  "previousTaskId": "ysk-upstream-ledger-correction-20261030",
+  "generatedAt": "2026-10-30T07:14:50Z",
   "upstream": {
     "project": "anthropics/claude-code",
     "feature": "You should know (built-in mod, cc-plugin-you-should-know@builtin)",
@@ -326,9 +327,92 @@
     "evidence": "docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/github-releases-2.1.287-2.1.312.json",
     "verifiedAt": "2026-10-30T06:40:37Z"
   },
+  "sourcePolicy": {
+    "acceptedIn": "Stage 1B",
+    "acceptedAt": "2026-10-30T07:14:50Z",
+    "policyDocument": "docs/upstream/workflow.md",
+    "releaseSources": {
+      "role": "canonical-release-version-date",
+      "githubRelease": {
+        "kind": "github-release",
+        "scheme": "https",
+        "host": "github.com",
+        "pathPrefix": "/anthropics/claude-code/releases/tag/",
+        "immutable": true,
+        "required": [
+          "tag",
+          "tagRefSha",
+          "publishedAt",
+          "releaseBodySha256",
+          "provenance"
+        ]
+      },
+      "githubChangelog": {
+        "kind": "github-changelog",
+        "scheme": "https",
+        "host": "github.com",
+        "pathPrefix": "/anthropics/claude-code/blob/",
+        "pin": "commitSha",
+        "required": [
+          "commitSha",
+          "commitDate",
+          "fetchedAt",
+          "sha256"
+        ]
+      }
+    },
+    "behaviorSources": {
+      "role": "behavior-evidence-only",
+      "kind": "official-docs-page",
+      "allowlist": {
+        "scheme": "https",
+        "host": "code.claude.com",
+        "pathPrefix": "/docs/"
+      },
+      "immutable": false,
+      "required": [
+        "id",
+        "kind",
+        "url",
+        "immutable",
+        "sha256",
+        "fetchedAt"
+      ],
+      "optionalMetadata": [
+        "lastModified"
+      ],
+      "lastModifiedIsPublicationProof": false,
+      "allowedForVersionDate": false,
+      "allowedForPublicationDate": false,
+      "reFetchEveryCycle": true,
+      "changeDetection": "sha256",
+      "excerptPolicy": "short-official-sentences-only"
+    },
+    "provenance": {
+      "verifiedOnlyWithExactBytes": true,
+      "requireContentHash": true,
+      "requireFetchedAt": true,
+      "retainPreviousVerifiedBaselineOnFailure": true,
+      "unreachableState": "unknown",
+      "silentNoChangeFallback": false
+    },
+    "historicalDeviation": {
+      "sourceId": "claude-code-changelog-page-20261014",
+      "recordedIn": "docs/upstream/addendum-20261030-source-policy-deviation.md",
+      "retroactivelyAuthorized": false
+    },
+    "security": {
+      "privateProjectOrSessionDataToPublicPages": "forbidden",
+      "copyPrivateClaudeInternals": "forbidden",
+      "copyClosedSourceCode": "forbidden"
+    }
+  },
   "outagePolicy": {
-    "rule": "If any primary source is unreachable, moved, truncated, or otherwise unverifiable, the affected item is recorded as unknown for this cycle; it is never recorded as no change. The previous verified baseline stays in place, and the outage plus the attempted URLs are recorded in the next review update.",
+    "rule": "If any primary source is unreachable, moved, truncated, rate-limited, or otherwise unverifiable, the affected item is recorded as unknown for this cycle; it is never recorded as no change. The previous verified baseline is retained explicitly, and the outage plus the attempted URLs are recorded in the next review update.",
     "appliesTo": "every verification step, including the source list itself",
+    "provenanceRule": "A source is verified only when the exact bytes were retrieved and hashed in the same cycle.",
+    "offlineCopyRule": "An offline, cached, or remembered copy is not a fresh verification. It may be cited only as the previous verified baseline.",
+    "silentFallback": false,
     "lastOutage": {
       "observedAt": "2026-10-14T09:54:42Z",
       "what": "The GitHub-hosted endpoints (raw.githubusercontent.com, api.github.com) and the docs host resolved to non-public addresses in this environment, so this cycle re-read the served official changelog page instead.",
@@ -338,16 +422,34 @@
       "clearedNote": "The GitHub API and tag refs were reachable on 2026-10-30. This task re-verified the release sources directly and did not reuse the docs page as an accepted source."
     }
   },
-  "openPolicyDecisions": [
+  "resolvedPolicyDecisions": [
     {
       "id": "stage-1b-official-docs-source-policy",
-      "question": "Should official code.claude.com behavioral documentation be an accepted source, in addition to GitHub tagged release notes and CHANGELOG.md?",
-      "currentPolicy": "workflow.md accepts only official GitHub tagged release notes and CHANGELOG.md under https://github.com/anthropics/claude-code/.",
-      "status": "deferred-to-stage-1b",
-      "whyDeferred": "Task 1A records the historical 2026-10-14 deviation and corrects the dates. It does not change the source policy.",
-      "evidence": "docs/upstream/addendum-20261030-source-policy-deviation.md"
+      "status": "accepted",
+      "acceptedIn": "Stage 1B",
+      "acceptedAt": "2026-10-30T07:14:50Z",
+      "decision": "Official Anthropic Claude Code documentation under HTTPS https://code.claude.com/docs/ is accepted as behavior evidence only, for documented feature behavior, availability, cost, and UI contract. It is never a versioned release signal and never establishes a version or a publication date. GitHub tagged releases and CHANGELOG.md remain canonical for version, date, and release content.",
+      "scope": [
+        "feature behavior",
+        "availability",
+        "cost",
+        "UI contract"
+      ],
+      "outOfScope": [
+        "version",
+        "publication date",
+        "release note",
+        "changelog line"
+      ],
+      "notRetroactive": "The 2026-10-14 docs-page capture remains a recorded deviation and is not retroactively authorized.",
+      "evidence": [
+        "docs/upstream/workflow.md",
+        "docs/upstream/addendum-20261030-source-policy-deviation.md",
+        "test/upstream-ledger.test.js"
+      ]
     }
   ],
+  "openPolicyDecisions": [],
   "openUnknowns": [
     {
       "id": "upstream-selection-algorithm",

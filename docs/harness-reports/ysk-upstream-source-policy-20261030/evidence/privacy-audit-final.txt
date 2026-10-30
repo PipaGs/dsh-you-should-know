@@ -1,0 +1,62 @@
+Final privacy audit - ysk-upstream-source-policy-20261030
+
+Scanned all 40 existing added or modified PR files, including this task report, all evidence, the new test, and the privacy manifest.
+Base: 0419b70797a8d37db245d55817a7be273b5edcdb
+Scan base: pre-amend working tree at 98a05f4; this evidence is committed in the amended tip.
+
+Coverage (40 files):
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/artifacts-hashes-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/artifacts-hashes-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/artifacts-hashes.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/baseline-meta.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-baseline.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/content-scan-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/content-scan-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/content-scan.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/defect-repro.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/privacy-audit.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-baseline-full.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-baseline-targeted.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-failing-regression.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-full-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-full-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-full.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-targeted-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-targeted-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-targeted.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/final-report.md
+  docs/upstream/README.md
+  docs/upstream/ledger.json
+  docs/upstream/workflow.md
+  test/task-evidence-paths.test.js
+  test/upstream-ledger.test.js
+
+Result: 40/40 files scanned.
+  absolute workstation file URL: 0
+  home-directory marker: 0
+  secret-like token or private key: 0
+  email-pattern matches: 3
+
+Allowlist (grounded fixtures only):
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan-followup.txt:19
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan.txt:19
+  test/upstream-ledger.test.js:401
+
+This final-audit file itself is post-manifest and is covered by test/task-evidence-paths.test.js in the 628-test suite, so no task artifact is left unscanned for absolute paths.
+
+Result: PASS. All 40 existing PR files were scanned; no absolute workstation file URL, no home-directory marker, and no secret was found. The only email-pattern matches are the grounded fixtures above.

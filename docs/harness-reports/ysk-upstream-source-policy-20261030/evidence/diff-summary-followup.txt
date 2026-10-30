@@ -1,0 +1,74 @@
+$ git diff --stat 0419b70797a8d37db245d55817a7be273b5edcdb
+ .../evidence/artifacts-hashes.txt                  |  20 +
+ .../evidence/baseline-meta.txt                     |   9 +
+ .../evidence/check-baseline.txt                    |   4 +
+ .../evidence/check.txt                             |   5 +
+ .../evidence/content-scan.txt                      |  19 +
+ .../evidence/diff-check.txt                        |   2 +
+ .../evidence/diff-summary.txt                      |  35 ++
+ .../evidence/invariants.txt                        |  58 ++
+ .../evidence/security-scan.txt                     |  38 ++
+ .../evidence/test-run-baseline-full.txt            | 641 ++++++++++++++++++++
+ .../evidence/test-run-baseline-targeted.txt        |  23 +
+ .../evidence/test-run-full.txt                     | 655 +++++++++++++++++++++
+ .../evidence/test-run-targeted.txt                 |  32 +
+ .../final-report.md                                | 336 +++++++++++
+ docs/upstream/README.md                            |  59 +-
+ docs/upstream/ledger.json                          | 120 +++-
+ docs/upstream/workflow.md                          | 114 +++-
+ test/upstream-ledger.test.js                       | 610 +++++++++++++++++--
+ 18 files changed, 2706 insertions(+), 74 deletions(-)
+
+$ git diff --numstat 0419b70797a8d37db245d55817a7be273b5edcdb
+20	0	docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/artifacts-hashes.txt
+9	0	docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/baseline-meta.txt
+4	0	docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-baseline.txt
+5	0	docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check.txt
+19	0	docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/content-scan.txt
+2	0	docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check.txt
+35	0	docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary.txt
+58	0	docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants.txt
+38	0	docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan.txt
+641	0	docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-baseline-full.txt
+23	0	docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-baseline-targeted.txt
+655	0	docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-full.txt
+32	0	docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-targeted.txt
+336	0	docs/harness-reports/ysk-upstream-source-policy-20261030/final-report.md
+53	6	docs/upstream/README.md
+111	9	docs/upstream/ledger.json
+99	15	docs/upstream/workflow.md
+566	44	test/upstream-ledger.test.js
+
+$ git diff --name-only 0419b70797a8d37db245d55817a7be273b5edcdb
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/artifacts-hashes.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/baseline-meta.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-baseline.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/content-scan.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-baseline-full.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-baseline-targeted.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-full.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-targeted.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/final-report.md
+docs/upstream/README.md
+docs/upstream/ledger.json
+docs/upstream/workflow.md
+test/upstream-ledger.test.js
+
+$ git ls-files --others --exclude-standard
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/artifacts-hashes-followup.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-followup.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/content-scan-followup.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/defect-repro.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-followup.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary-followup.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants-followup.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan-followup.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-failing-regression.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-full-followup.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-targeted-followup.txt
+exit=0

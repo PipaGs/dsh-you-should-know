@@ -1,0 +1,32 @@
+✔ the upstream ledger cites pinned official Claude Code sources (2.410834ms)
+✔ a valid official docs page is accepted as a behavior source only (0.245625ms)
+✔ the docs allowlist rejects every unaccepted URL shape and field (0.5415ms)
+✔ a release source must be immutable and carry its exact identity (0.232208ms)
+✔ a changelog source is pinned to a full commit and hashed (0.204125ms)
+✔ the ledger records the local baseline on a real named revision (37.160333ms)
+✔ the local baseline records v0.4.6 and the v0.4.3 predecessor without conflating them (0.358375ms)
+✔ every tracked upstream signal has its own item with evidence and a disposition (0.429417ms)
+✔ every item date comes from an immutable release and keeps its changelog trace (0.445958ms)
+✔ the date provenance check rejects a fetch-day date and an unpinned release (0.894042ms)
+✔ the date provenance check rejects a behavior source and a docs lastModified date (0.27325ms)
+✔ the new provenance check rejects the historical 2026-10-14 ledger state (9.584583ms)
+✔ a gap or an adaptation is never dispositioned as applicable-with-nothing-to-do (0.325208ms)
+✔ an uncontested upstream unknown is recorded, not resolved by guessing (0.206709ms)
+✔ a source outage is recorded as unknown, never as no change (0.278375ms)
+✔ the outage and provenance policy keeps the previous verified baseline (0.724916ms)
+✔ the ledger carries no private or unrelated project data (0.376417ms)
+✔ the historical 2026-10-14 docs capture stays a recorded deviation (0.34ms)
+✔ the addendum and the raw 2026-10-14 evidence stay byte-identical (0.816958ms)
+✔ the ledger source policy matches the exact allowlist and role limits (0.518584ms)
+✔ the coverage record is pinned to v2.1.312 and does not claim behavior stability (0.250792ms)
+✔ the committed coverage evidence supports the recorded release dates (0.680667ms)
+✔ the human-readable workflow and baseline documents exist and agree with the ledger (0.208625ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 226.001875
+exit=0

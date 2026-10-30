@@ -1,0 +1,23 @@
+✔ the upstream ledger cites pinned official Claude Code sources (1.231375ms)
+✔ the ledger records the local baseline on a real named revision (39.223958ms)
+✔ the local baseline records v0.4.6 and the v0.4.3 predecessor without conflating them (0.369583ms)
+✔ every tracked upstream signal has its own item with evidence and a disposition (0.881084ms)
+✔ every item date comes from an immutable release and keeps its changelog trace (0.584084ms)
+✔ the date provenance check rejects a fetch-day date and an unpinned release (0.942875ms)
+✔ the new provenance check rejects the historical 2026-10-14 ledger state (9.711083ms)
+✔ a gap or an adaptation is never dispositioned as applicable-with-nothing-to-do (0.442458ms)
+✔ an uncontested upstream unknown is recorded, not resolved by guessing (0.250667ms)
+✔ a source outage is recorded as unknown, never as no change (0.25525ms)
+✔ the ledger carries no private or unrelated project data (0.358584ms)
+✔ the source policy keeps only the 2026-10-14 docs page as a recorded deviation (0.389666ms)
+✔ the coverage record is pinned to v2.1.312 and does not claim behavior stability (0.619125ms)
+✔ the committed coverage evidence supports the recorded release dates (0.424625ms)
+✔ the human-readable workflow and baseline documents exist and agree with the ledger (0.211625ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 223.871459

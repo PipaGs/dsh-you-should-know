@@ -1,0 +1,15 @@
+# Whitespace checks
+# captured at: 2026-10-30T09:25:20Z
+# note: this checkout's absolute root was replaced with <repo>
+
+## git diff --check
+# exit code: 0
+
+## git diff --check 0419b70797a8d37db245d55817a7be273b5edcdb (base to working tree)
+# exit code: 0
+
+## git diff --check 0419b70797a8d37db245d55817a7be273b5edcdb..16c08918333d6884d98d334d0141ee6a5820094f (old HEAD, not yet the fixed tree)
+# exit code: 2
+# expected to fail at this uncommitted state: 16c0891 is the prior commit.
+# the fixed working tree becomes the next commit, and the parent runs this range again.
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-baseline.txt:4: new blank line at EOF.

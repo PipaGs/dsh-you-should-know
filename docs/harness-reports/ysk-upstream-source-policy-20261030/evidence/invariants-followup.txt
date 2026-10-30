@@ -1,0 +1,61 @@
+Invariants at the follow-up pre-commit working tree
+
+$ git rev-parse --abbrev-ref HEAD
+task/upstream-source-policy-20261030
+
+$ git rev-parse HEAD
+98040f92ca52e0a985b0e33973f638aa5a8afd04
+
+$ node -p "require("./package.json").version"
+0.4.6
+
+$ git diff --name-only 0419b70797a8d37db245d55817a7be273b5edcdb | rg "^(lib/|scripts/|cordis.patch.yml|package.json)"
+no product file changed
+
+$ shasum -a 256 docs/upstream/addendum-20261030-source-policy-deviation.md
+1355c524b48e01a6d870fd010ccdcc4456c5070991f8ded2b2ff9035776eedc7  docs/upstream/addendum-20261030-source-policy-deviation.md
+
+$ shasum -a 256 docs/upstream/evidence/claude-code-upstream-20261014.json
+c5fac2b1502d8a221ec4a7e229012c645f84be0d9310791173af84031e809d7a  docs/upstream/evidence/claude-code-upstream-20261014.json
+
+Ledger source and item counts (unchanged):
+{
+  "sources": 5,
+  "items": 4,
+  "docsSources": 1,
+  "openUnknowns": 2,
+  "openPolicyDecisions": [],
+  "resolvedPolicyDecisions": 1
+}
+
+Policy documents:
+  ledger.json unchanged: yes
+  workflow.md and README.md changed only by the raw-path note: yes
+  sourcePolicy semantics and host/path allowlist unchanged: yes
+
+Follow-up working-tree state:
+ M docs/harness-reports/ysk-upstream-source-policy-20261030/final-report.md
+ M docs/upstream/README.md
+ M docs/upstream/workflow.md
+ M test/upstream-ledger.test.js
+?? docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/artifacts-hashes-followup.txt
+?? docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-followup.txt
+?? docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/content-scan-followup.txt
+?? docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/defect-repro.txt
+?? docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-followup.txt
+?? docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary-followup.txt
+?? docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants-followup.txt
+?? docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan-followup.txt
+?? docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-failing-regression.txt
+?? docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-full-followup.txt
+?? docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-targeted-followup.txt
+
+Process invariants:
+  product version stays 0.4.6: yes
+  no product file or version change: yes
+  follow-up changes uncommitted: yes
+  no tag, release, npm install, npm publish, or live model call: yes
+  no commit, push, or merge: yes
+  no new docs page source and no new upstream item: yes
+
+Result: PASS.

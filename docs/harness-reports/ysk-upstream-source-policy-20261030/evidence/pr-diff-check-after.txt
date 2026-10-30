@@ -1,0 +1,15 @@
+# Raw node --test output, post-fix run
+# command: node --test test/pr-diff-check.test.js
+# exit code: 0
+# captured at: 2026-10-30T09:24:51Z
+# note: this checkout's absolute root was replaced with <repo>
+
+✔ the PR patch from the base commit has no whitespace errors (45.820417ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 200.987709

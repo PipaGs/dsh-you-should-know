@@ -1,0 +1,38 @@
+Security scan of changed and new authored files
+scanned files:
+  docs/upstream/workflow.md
+  docs/upstream/README.md
+  docs/upstream/ledger.json
+  test/upstream-ledger.test.js
+  docs/harness-reports/ysk-upstream-source-policy-20261030/final-report.md
+
+Reproducibility note:
+  The scan uses ripgrep (rg) over exactly the files listed above.
+  The scan file is not in that list, so it excludes itself.
+  Pattern labels are written in a redacted form; the match lines below show the actual hits.
+  The two allowlisted test matches are the only expected hits.
+
+$ rg -n "<absolute user-home path prefix>" <files>
+no matches
+
+$ rg -n "<email address regex>" <files>
+test/upstream-ledger.test.js:321:    ['userinfo', () => ({ url: 'https://user:secret@code.claude.com/docs/en/x' })],
+
+$ rg -n -i "<token/secret/password/private-key assignment regex>" <files>
+no matches
+
+$ rg -n "<private key header>" <files>
+no matches
+
+$ rg -n "<plain-http scheme>" <files>
+test/upstream-ledger.test.js:309:    ['http scheme', () => ({ url: 'http://code.claude.com/docs/en/x' })],
+
+$ rg -n "<non-ASCII byte>" <files>
+no matches
+
+Allowlist:
+  - READY_FOR_CHATGPT_REVIEW is the required report status word.
+  - test/upstream-ledger.test.js line(s) 309: the negative plain-HTTP URL literal (pattern literal).
+  - test/upstream-ledger.test.js line(s) 321: the negative userinfo URL literal; it is not an email address.
+Raw test logs under this evidence directory contain the test runner status glyphs; they are captured output, not authored prose.
+Result: PASS. No absolute local path, real email, token, private key, insecure URL used as a source, or non-English prose was found in the authored files.
