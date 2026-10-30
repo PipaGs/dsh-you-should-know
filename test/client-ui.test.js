@@ -1107,6 +1107,68 @@ test('the card strips bidi controls from a hostile payload without corrupting na
   view.unmount()
 })
 
+test('the card shows a bidi-hostile path as stripped plain text and never links it', async () => {
+  const opened = []
+  const env = await loadBundle({
+    backend: notesBackend([
+      { id: 'n-rlo', note: 'RLO source.', importance: 'high', createdAt: 1, source: { path: 'src/\u202Efile.js' } },
+      { id: 'n-lri', note: 'LRI source.', importance: 'high', createdAt: 2, source: { path: 'src/\u2066file.js' } },
+      { id: 'n-he', note: 'Hebrew source.', importance: 'high', createdAt: 3, source: { path: 'src/\u05E7\u05D5\u05D1\u05E5.js', line: 4 } },
+      { id: 'n-safe', note: 'Safe source.', importance: 'high', createdAt: 4, source: { path: 'src/plain.js' } },
+    ]),
+    allowIntervals: true,
+    sidebarRight: { openResource: (address, options) => opened.push({ address, options }) },
+  })
+  const dock = env.dockComponent()
+  const face = dock.spec.inject('s-1')
+  const view = env.runtime.mount(dock.component, { ...face, inputActions: null, input: null })
+  await flushAsync()
+
+  const cards = findAll(view.output, 'section')
+  assert.equal(cards.length, 4)
+  for (const card of cards.slice(0, 2)) {
+    assert.equal(buttonByText(card, 'Open file'), null, 'a control-carrying path never gets a link')
+    assert.equal(textOf(findAll(card, 'code')[0]), 'src/file.js', 'the stripped path stays visible as plain text')
+    assert.equal(BIDI_CONTROLS.test(textOf(card)), false, 'the card carries no bidi control')
+  }
+
+  const hebrewOpen = buttonByText(cards[2], 'Open file')
+  assert.ok(hebrewOpen, 'a natural Hebrew path still gets a link')
+  hebrewOpen.props.onClick()
+  assert.equal(opened[0].address, 'dsh-resource://file/session/s-1/src/%D7%A7%D7%95%D7%91%D7%A5.js')
+  assert.equal(opened[0].options.params.line, 4)
+
+  const safeOpen = buttonByText(cards[3], 'Open file')
+  assert.ok(safeOpen, 'an ordinary path is unchanged')
+  safeOpen.props.onClick()
+  assert.equal(opened[1].address, 'dsh-resource://file/session/s-1/src/plain.js')
+  assert.equal(opened[1].options, undefined)
+  view.unmount()
+})
+
+test('the file-address seam fails closed for bidi-hostile paths but keeps safe RTL and ASCII paths', async () => {
+  const opened = []
+  const env = await loadBundle({
+    backend: notesBackend([]),
+    allowIntervals: true,
+    sidebarRight: { openResource: (address) => opened.push(address) },
+  })
+  const face = env.dockComponent().spec.inject('s-1')
+  for (const path of ['src/\u202Efile.js', 'src/\u2066file.js', 'src/\u202Efile.js']) {
+    face.onOpenFile({ path, line: 2 })
+  }
+  assert.deepEqual(opened, [], 'a control-carrying path never reaches the resource service')
+
+  face.onOpenFile({ path: 'src/\u05E7\u05D5\u05D1\u05E5.js' })
+  assert.deepEqual(opened, ['dsh-resource://file/session/s-1/src/%D7%A7%D7%95%D7%91%D7%A5.js'], 'a natural Hebrew path still addresses normally')
+
+  face.onOpenFile({ path: 'src/a.js', line: 4 })
+  assert.deepEqual(opened, [
+    'dsh-resource://file/session/s-1/src/%D7%A7%D7%95%D7%91%D7%A5.js',
+    'dsh-resource://file/session/s-1/src/a.js',
+  ], 'an ordinary safe path is unchanged')
+})
+
 test('Add to chat writes a draft with no bidi controls', async () => {
   const composer = createComposer('s-1')
   const hostile = {
@@ -1119,8 +1181,12 @@ test('Add to chat writes a draft with no bidi controls', async () => {
   }
   const { view } = await mountNotes([hostile], composer)
   assert.equal(BIDI_CONTROLS.test(textOf(view.output)), false, 'the card never renders a control')
+  assert.equal(textOf(findAll(view.output, 'code')[0]), 'src/a.js', 'the card may still show the stripped path as plain text')
   pressControl('Add to chat', buttonByText(view.output, 'Add to chat'), composer)
-  assert.equal(composer.draft, 'Fix it.\nFile: src/a.js:4')
+  assert.equal(composer.draft, 'Fix it.', 'a hostile source path contributes no File line')
+  assert.equal(composer.draft.includes('File:'), false, 'the draft carries no File line')
+  assert.equal(composer.draft.includes('src/a.js'), false, 'the stripped hostile path never reaches the draft')
+  assert.equal(composer.draft.includes('src/\u202Ea.js'), false, 'the raw hostile path never reaches the draft')
   assert.equal(BIDI_CONTROLS.test(composer.draft), false, 'the draft carries no control')
   view.unmount()
 })
