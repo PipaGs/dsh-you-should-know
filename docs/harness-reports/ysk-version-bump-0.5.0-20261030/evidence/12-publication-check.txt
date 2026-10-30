@@ -1,0 +1,31 @@
+COMMIT A: fe7bdef008983443c647a7fa8234930a8da52ccc
+COMMIT A SUBJECT: chore: raise the version to 0.5.0 after the validated stage merges
+PURPOSE: check that no v0.5.0 tag and no GitHub release exist at commit A. This confirms the claim that publication was not performed.
+DATE_UTC: 2026-10-30T18:25:42Z
+DATE_LOCAL: 2026-10-30T21:25:42+0300 (MSK)
+HEAD: fe7bdef008983443c647a7fa8234930a8da52ccc
+GIT STATUS --short:
+  ?? .rollout-restart-verify.log
+  ?? docs/harness-reports/ysk-version-bump-0.5.0-20261030/
+
+### local tag list for v0.5*
+COMMAND: git tag --list v0.5*
+--- OUTPUT ---
+--- EXIT CODE: 0 ---
+
+### remote tag list for v0.5* (network read, no write)
+COMMAND: env GIT_TERMINAL_PROMPT=0 git ls-remote --tags origin refs/tags/v0.5*
+--- OUTPUT ---
+--- EXIT CODE: 0 ---
+
+### GitHub release lookup for v0.5.0
+COMMAND: gh release view v0.5.0 --repo PipaGs/dsh-you-should-know
+--- OUTPUT ---
+release not found
+--- EXIT CODE: 1 ---
+
+### interpretation
+- git tag --list 'v0.5*' prints nothing: no local v0.5.0 tag exists, and this task created none.
+- git ls-remote --tags origin 'refs/tags/v0.5*' prints nothing: no remote v0.5.0 tag exists.
+- gh release view v0.5.0 reports that the release was not found: no GitHub release exists.
+- npm publication was not attempted. Its registry state is out of scope and is NOT verified.

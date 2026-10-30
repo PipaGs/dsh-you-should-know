@@ -1,0 +1,11 @@
+COMMIT A: fe7bdef008983443c647a7fa8234930a8da52ccc
+COMMIT A SUBJECT: chore: raise the version to 0.5.0 after the validated stage merges
+COMMAND: git diff --check 992de15cd4c32b3f8c625a7cdb97ec2daa8dbe09..HEAD
+DATE_UTC: 2026-10-30T18:25:03Z
+DATE_LOCAL: 2026-10-30T21:25:03+0300 (MSK)
+HEAD: fe7bdef008983443c647a7fa8234930a8da52ccc
+GIT STATUS --short:
+  ?? .rollout-restart-verify.log
+  ?? docs/harness-reports/ysk-version-bump-0.5.0-20261030/
+--- OUTPUT ---
+--- EXIT CODE: 0 ---

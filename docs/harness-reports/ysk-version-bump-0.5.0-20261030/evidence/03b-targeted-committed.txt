@@ -1,0 +1,144 @@
+COMMIT A: fe7bdef008983443c647a7fa8234930a8da52ccc
+COMMIT A SUBJECT: chore: raise the version to 0.5.0 after the validated stage merges
+COMMAND: node --test test/release-consistency.test.js test/invariant.test.js test/plugin.test.js test/update-route.test.js test/recent-check-diagnostics.test.js test/upstream-ledger.test.js test/install-discovery.test.js
+DATE_UTC: 2026-10-30T18:24:58Z
+DATE_LOCAL: 2026-10-30T21:24:58+0300 (MSK)
+HEAD: fe7bdef008983443c647a7fa8234930a8da52ccc
+GIT STATUS --short:
+  ?? .rollout-restart-verify.log
+  ?? docs/harness-reports/ysk-version-bump-0.5.0-20261030/
+--- OUTPUT ---
+✔ the package name is the dependency key a GitHub install records (15.176875ms)
+✔ a first GitHub install is discovered from the dependency change (0.591542ms)
+✔ a bare default-branch spec cannot be re-attributed after the first install (0.116125ms)
+✔ a tag-pinned spec is discovered over an existing bare install (3.391833ms)
+✔ the README documents only tag-pinned GitHub install addresses (1.676333ms)
+✔ shipped sources contain no path that could deliver advice to the primary agent (26.661834ms)
+✔ the plugin uses only the sanctioned seams (2.42875ms)
+✔ the auth boundary stays host-owned: no no-auth route registration exists (1.570292ms)
+✔ no shipped source reads, stores, or forwards a cookie, token, or auth header (4.652167ms)
+✔ no shipped source can install, upgrade, or self-modify the plugin (6.143959ms)
+✔ the browser half reaches files and the composer only through their public seams (1.214792ms)
+✔ Add to chat can only compose the draft and never hands the action to the agent (1.139916ms)
+✔ the English-only scan rejects Cyrillic, Greek, and CJK text (0.223333ms)
+✔ public-facing text stays English-only and free of unrelated project references (4.673625ms)
+✔ the bundled row leaves the reviewer route to adaptive discovery (0.554625ms)
+✔ the manifest declares the bundle, the client half, and no build step (0.371792ms)
+✔ the plugin exports the package name (1.599666ms)
+✔ an explicitly blank provider or model registers nothing at all (0.532375ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+✔ the built-in default discovers the DeepSeek route a current DSH build registers (7.329459ms)
+✔ an automatic row with no DeepSeek provider stays quiet and never calls the model (0.817541ms)
+✔ a provider and model override reaches the reviewer channel (0.74875ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+✔ a live config change moves from the automatic route to an explicit override (1.282375ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+✔ a changed volatile provider/model ref updates the live reviewer route (2.443625ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+[dsh-you-should-know] live config update failed; keeping the previous config: Cannot read properties of null (reading 'provider')
+✔ a changed volatile gate ref is applied to the live turn gates (0.870875ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+[dsh-you-should-know] already composed in this process; this duplicate row stays inert
+✔ a throwing volatile ref keeps the prior live config and never escapes the listener (1.366083ms)
+✔ an inert row does not consume the single-reviewer slot (0.392083ms)
+✔ composing the plugin twice keeps exactly one reviewer, until the first is disposed (0.230209ms)
+✔ the plugin registers its browser routes on the connection Fetch carrier (0.853792ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+✔ the authenticated self-check route reports only the bounded running plugin state (22.918ms)
+✔ every declared Fetch route crosses the connection bridge for each of its methods (2.044542ms)
+✔ a configured plugin observes a turn, serves the note, and dismisses it over Fetch (2.865ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+✔ the notes and history routes expose the stored kind and quoted basis (1.042333ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+✔ the Fetch resolve route records an exact action and history keeps the note (1.226167ms)
+[dsh-you-should-know] observation failed: hostile session
+✔ the status route reports activity without exposing conversation or note text (1.208542ms)
+✔ a listener failure is contained instead of escaping into the host (0.413458ms)
+✔ the session route is registered with GET, HEAD, and POST on the Fetch carrier (0.223666ms)
+✔ the session route serves the effective route and its source without leaking text (0.836084ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+✔ the session route POST set-model and reset-model change the reviewer route (1.490417ms)
+✔ the session route POST resume reports whether a paused runtime resumed (0.333375ms)
+✔ the session route bounds and rejects invalid POSTs without throwing (1.105083ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+[dsh-you-should-know] session cleanup failed: hostile session
+[dsh-you-should-know] already composed in this process; this duplicate row stays inert
+✔ session/disposed forgets the session notes and its override (1.207458ms)
+✔ the session route turns an unexpected engine failure into a bounded 500 (0.371ms)
+✔ ownership is a process-global token across fresh module imports and releases on disposal (2.3145ms)
+✔ the plugin registers the config route on the connection Fetch carrier (0.108459ms)
+✔ the config route is writable and persists the row through the settings service (1.044083ms)
+✔ the config route reports read-only and refuses to persist without a settings service (0.331541ms)
+✔ the session route POST set-mode and reset-mode isolate the strictness mode (0.672167ms)
+✔ the plugin runs the day-first automatic update check through the shell and settings seams (2.4535ms)
+✔ a volatile config edit reaches the update state without a remount (0.991458ms)
+✔ the recent-check outcome allowlist and the cap are explicit and frozen (1.086666ms)
+✔ recent-check diagnostics stay off by default in config, status, diagnostics, and self-check (28.318583ms)
+✔ enabled diagnostics expose newest-first records with only at, outcome, and turn (1.1675ms)
+✔ the per-session history keeps only the newest records up to the cap (3.119208ms)
+✔ a record keeps the reviewed turn ordinal while a later turn is in flight (0.466792ms)
+✔ the tracked-session cap drops the oldest history with its session (6.403292ms)
+✔ an unusable clock never breaks a record and stores a null timestamp (0.661125ms)
+✔ forget, dispose, and a disabled toggle drop or hide the per-session history (0.367834ms)
+✔ secret event, reason, and note text never reach the diagnostic records (0.6575ms)
+✔ a reviewer failure and an unexpected failure stay allowlisted and never throw (0.558166ms)
+✔ a pinned config save preserves the live recent-check opt-in (1.204167ms)
+✔ the config route persists the opt-in, rejects non-booleans, and preserves it on an automatic save (1.416041ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+✔ the plugin serves the opt-in history and capability over its routes (8.62425ms)
+✔ the release version is one patch or one minor step over the previous release (1.045459ms)
+✔ package.json, PLUGIN_VERSION, and the README install address agree (0.704042ms)
+✔ every README and docs/reference self-check sample version is the released version (0.299834ms)
+✔ no released artifact still documents the previous version (0.286875ms)
+✔ GET update returns the bounded update status and writability (22.183584ms)
+✔ GET update reports a read-only host and HEAD stays bodyless (0.733416ms)
+✔ an update POST with a malformed body or unknown action is rejected (0.791834ms)
+✔ a manual check reports up to date, update available, or failed (1.513583ms)
+✔ set-preferences persists valid values and rejects invalid ones (0.602583ms)
+✔ dismiss persists a stable version and refuses anything else (0.356042ms)
+✔ the update response carries only bounded update fields, never prompt or note text (0.227416ms)
+✔ an automatic reviewer save preserves the live update state across the replace (1.209209ms)
+✔ a pinned reviewer save carries the preserved fields into the live patch (0.626083ms)
+✔ the config GET carries the bounded update status only when the host wires one (1.135125ms)
+✔ without a preserve hook the reviewer patch is unchanged (0.403916ms)
+✔ the exported plugin version mirrors package.json (3.368792ms)
+✔ the Config schema declares the update fields with conservative defaults (1.569583ms)
+✔ the upstream ledger cites pinned official Claude Code sources (2.204ms)
+✔ a valid official docs page is accepted as a behavior source only (0.228625ms)
+✔ the docs allowlist rejects every unaccepted URL shape and field (0.640292ms)
+✔ the docs allowlist rejects raw parent segments that normalize inside /docs (0.97725ms)
+✔ a release source must be immutable and carry its exact identity (0.245625ms)
+✔ a changelog source is pinned to a full commit and hashed (0.177917ms)
+✔ the ledger records the local baseline on a real named revision (45.042333ms)
+✔ the local baseline records v0.4.6 and the v0.4.3 predecessor without conflating them (0.5765ms)
+✔ every tracked upstream signal has its own item with evidence and a disposition (3.0905ms)
+✔ every release item date comes from an immutable release and keeps its changelog trace (0.51ms)
+✔ the date provenance check rejects a fetch-day date and an unpinned release (1.111083ms)
+✔ the date provenance check rejects a behavior source and a docs lastModified date (0.379208ms)
+✔ the new provenance check rejects the historical 2026-10-14 ledger state (9.934833ms)
+✔ docs sources never establish a version or a publication date (0.828667ms)
+✔ documented behavior items stay deduplicated and structurally accepted (1.942541ms)
+✔ the committed docs capture evidence matches the ledger provenance (0.595208ms)
+✔ the chat handoff parity note records the action-first content difference (0.827875ms)
+✔ historical 2026-10-14 evidence and previous task reports are unchanged (13.273042ms)
+✔ the ledger uses the six required local statuses (0.958667ms)
+✔ a gap or an adaptation is never dispositioned as applicable-with-nothing-to-do (0.393875ms)
+✔ an uncontested upstream unknown is recorded, not resolved by guessing (0.203042ms)
+✔ a source outage is recorded as unknown, never as no change (0.235875ms)
+✔ the outage and provenance policy keeps the previous verified baseline (0.285583ms)
+✔ the ledger carries no private or unrelated project data (0.676916ms)
+✔ the historical 2026-10-14 docs capture stays a recorded deviation (0.443625ms)
+✔ the addendum and the raw 2026-10-14 evidence stay byte-identical (0.170667ms)
+✔ the ledger source policy matches the exact allowlist and role limits (0.627708ms)
+✔ the coverage record is pinned to v2.1.312 and does not claim behavior stability (0.27675ms)
+✔ the committed coverage evidence supports the recorded release dates (0.488167ms)
+✔ the human-readable workflow and baseline documents exist and agree with the ledger (0.218875ms)
+ℹ tests 109
+ℹ suites 0
+ℹ pass 109
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 299.318833
+--- EXIT CODE: 0 ---

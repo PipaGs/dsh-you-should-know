@@ -1,0 +1,134 @@
+COMMAND GROUP: diff stat, changed file list, secret and privacy scan
+COMMIT A: fe7bdef008983443c647a7fa8234930a8da52ccc (chore: raise the version to 0.5.0 after the validated stage merges)
+BASE: 992de15cd4c32b3f8c625a7cdb97ec2daa8dbe09
+DATE_UTC: 2026-10-30T18:28:54Z
+DATE_LOCAL: 2026-10-30T21:28:54+0300 (MSK)
+HEAD: the pre-amend docs commit (that commit was amended after this capture, so its SHA is not retained)
+TRACKED STATE: commit A is committed and the docs commit follows it. The report directory is tracked by the docs commit, so the base-to-HEAD diff includes the report files. Section 1a isolates the product change of commit A; section 1b shows the whole branch at capture time, before the amend, so its line counts are a snapshot. At the first capture of this file the report directory was untracked, before the docs commit; that is why earlier versions of this scan showed a nine-file diff only.
+TWO SELF-EXCLUSIONS, both stated: this file (08) is excluded because it quotes the pattern inventory, and 09-provenance.txt is excluded because it must quote the redaction expression, which contains the very path prefix that section 6 searches for. Everything it names appears only in the inventory lines below or in the 09 redaction note, never as a stored value. Every other file in the new report directory is scanned, including the final report.
+### 1a. git diff --stat 992de15..A (product change only)
+ README.md                             | 12 +++---
+ docs/reference.md                     |  8 ++--
+ lib/index.js                          |  2 +-
+ package.json                          |  2 +-
+ test/invariant.test.js                |  2 +-
+ test/plugin.test.js                   |  6 +--
+ test/recent-check-diagnostics.test.js |  4 +-
+ test/release-consistency.test.js      | 70 ++++++++++++++++++++++++++---------
+ test/update-route.test.js             |  2 +-
+ 9 files changed, 72 insertions(+), 36 deletions(-)
+
+### 1b. git diff --stat 992de15..HEAD (product plus report and evidence)
+ README.md                                          |  12 +-
+ .../evidence/01-baseline-targeted.txt              | 142 ++++
+ .../evidence/02-red-patch-only-gate.txt            | 120 +++
+ .../evidence/03-green-targeted.txt                 | 149 ++++
+ .../evidence/03b-targeted-committed.txt            | 144 ++++
+ .../evidence/04-npm-test-full-dirty-tree.txt       | 703 +++++++++++++++++
+ .../evidence/04b-npm-test-full-committed.txt       | 694 +++++++++++++++++
+ .../evidence/05-npm-check.txt                      |  22 +
+ .../evidence/06-diff-check.txt                     |  18 +
+ .../evidence/06b-diff-check-committed.txt          |  11 +
+ .../evidence/07-version-scan.txt                   | 162 ++++
+ .../evidence/08-diff-stat-and-security.txt         | 101 +++
+ .../evidence/09-provenance.txt                     |  57 ++
+ .../evidence/10-gate-negative-probe.txt            |  50 ++
+ .../evidence/11-final-verification.txt             | 857 +++++++++++++++++++++
+ .../evidence/12-publication-check.txt              |  31 +
+ .../final-report.md                                | 110 +++
+ docs/reference.md                                  |   8 +-
+ lib/index.js                                       |   2 +-
+ package.json                                       |   2 +-
+ test/invariant.test.js                             |   2 +-
+ test/plugin.test.js                                |   6 +-
+ test/recent-check-diagnostics.test.js              |   4 +-
+ test/release-consistency.test.js                   |  70 +-
+ test/update-route.test.js                          |   2 +-
+ 25 files changed, 3443 insertions(+), 36 deletions(-)
+
+### 2. git status --porcelain (working tree at scan time)
+ M docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/02-red-patch-only-gate.txt
+ M docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/11-final-verification.txt
+ M docs/harness-reports/ysk-version-bump-0.5.0-20261030/final-report.md
+?? .rollout-restart-verify.log
+?? docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/13-final-npm-test.txt
+
+  Context: the report directory was untracked at the first capture, before the docs commit. It is tracked now and shows the review fixes as modifications, so it appears in the base-to-HEAD diff but not in the product-only diff of section 1a.
+
+### 3. scan scope
+tracked files changed by commit A (9):
+  package.json
+  lib/index.js
+  README.md
+  docs/reference.md
+  test/invariant.test.js
+  test/plugin.test.js
+  test/update-route.test.js
+  test/recent-check-diagnostics.test.js
+  test/release-consistency.test.js
+new report directory: docs/harness-reports/ysk-version-bump-0.5.0-20261030
+scanned there: 15 files
+  docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/01-baseline-targeted.txt
+  docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/02-red-patch-only-gate.txt
+  docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/03-green-targeted.txt
+  docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/03b-targeted-committed.txt
+  docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/04-npm-test-full-dirty-tree.txt
+  docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/04b-npm-test-full-committed.txt
+  docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/05-npm-check.txt
+  docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/06-diff-check.txt
+  docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/06b-diff-check-committed.txt
+  docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/07-version-scan.txt
+  docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/10-gate-negative-probe.txt
+  docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/11-final-verification.txt
+  docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/12-publication-check.txt
+  docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/13-final-npm-test.txt
+  docs/harness-reports/ysk-version-bump-0.5.0-20261030/final-report.md
+excluded: .rollout-restart-verify.log, a pre-existing untracked file dated 2026-10-24 that this task did not create and did not touch.
+
+### 4. secret token patterns, one pattern per run (fixed-length shapes only)
+pattern [ghp_ classic PAT]
+  matches: 0 (grep exit 1; 1 = no match)
+pattern [github_pat_ fine-grained PAT]
+  matches: 0 (grep exit 1; 1 = no match)
+pattern [sk- API key]
+  matches: 0 (grep exit 1; 1 = no match)
+pattern [AKIA access key id]
+  matches: 0 (grep exit 1; 1 = no match)
+pattern [private key block]
+  matches: 0 (grep exit 1; 1 = no match)
+
+### 5. authorization header and cookie literal
+pattern [authorization bearer header]
+  matches: 0 (grep exit 1; 1 = no match)
+pattern [cookie/ literal (as required by the task list)]
+  matches: 2 (grep exit 0; 1 = no match)
+  test/invariant.test.js:93:    { label: 'cookie jar read', pattern: /document\.cookie/ },
+  test/invariant.test.js:97:    { label: 'set-cookie write', pattern: /set-cookie/i },
+  The cookie/ matches are source-code regex literals in test/invariant.test.js that assert the plugin never reads or writes cookies. They are not a cookie path or a cookie value.
+
+### 6. absolute workstation path patterns
+pattern [/Users/ literal]
+  matches: 0 (grep exit 1; 1 = no match)
+pattern [file:///Users literal]
+  matches: 0 (grep exit 1; 1 = no match)
+pattern [/home/ literal]
+  matches: 0 (grep exit 1; 1 = no match)
+pattern [C:/Users literal]
+  matches: 0 (grep exit 1; 1 = no match)
+pattern [/Applications/ literal]
+  matches: 0 (grep exit 1; 1 = no match)
+  No match anywhere in the scan scope. Every captured log passed through the redaction recorded in 09.
+
+### 7. non-ASCII character audit of the new report directory (08 and 09 excluded)
+files scanned: 15
+U+2714 x3063 ("✔")
+U+2139 x81 ("ℹ")
+U+2716 x24 ("✖")
+Cyrillic matches: 0
+CJK matches: 0
+
+### 8. interpretation
+- No GitHub token, API key, access key id, private-key block, authorization bearer header, or cookie value appears in the scan scope.
+- The only non-ASCII characters are the node test reporter glyphs in the captured run logs (01-05, 10-13, 03b, 04b): U+2714, U+2716, U+2139. They are raw command output, not authored prose.
+- No authored report or evidence text uses Cyrillic or CJK; final-report.md is pure ASCII.
+- No absolute workstation path appears in the scan scope.
