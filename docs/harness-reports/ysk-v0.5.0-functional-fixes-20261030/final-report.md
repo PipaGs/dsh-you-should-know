@@ -8,7 +8,7 @@
 
 **Product head:** 611369c2b39d99d2c181d315e94b9d964cdb66aa (product version 0.5.0, unchanged)
 
-**PR:** added in the handoff commit that follows this report
+**PR:** https://github.com/PipaGs/dsh-you-should-know/pull/30
 
 **Tool:** DeepSeek Harness supervised Goal. Two implementation subagents wrote the regression tests and fixes; DSH ran the gates and the actual-host capture; DSH did not merge. ChatGPT independently reviews and merges.
 
@@ -153,6 +153,11 @@ Screenshot SHA-256 values and the structured interaction states are in
   reported as NOT VERIFIED at the host level, not as PASS.
 - No live reviewer or paid model call was made. Live note delivery and the
   native desktop window remain NOT VERIFIED.
+- The spaced-path continuation rule is conservative. A valid path immediately
+  followed by a URL or a date-looking token can be dropped as if it were a
+  longer spaced path (for example `src/a.js http://example.com/x`). This is a
+  fail-closed false negative, not acceptance of a wrong source; a later
+  refinement can exclude URL and date tokens.
 - The report describes the web UI served by the 0.2.1-rc.5 desktop CLI, not a
   native-window capture.
 
