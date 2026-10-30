@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { LIMITS, createEngine, groundVerdict, normalizeConfig } from '../lib/core.js'
+import { LIMITS, createEngine, groundVerdict, normalizeConfig, parseVerdict } from '../lib/core.js'
 
 const CONFIGURED = normalizeConfig({ provider: 'p', model: 'm', minDeltaChars: 0, cooldownTurns: 1 }).config
 
@@ -1443,6 +1443,49 @@ test('a source must name a whole path token in the conversation excerpt', () => 
   assert.equal(groundVerdict(withSource('src/a.js'), ''), null, 'a source without an excerpt is never grounded')
 })
 
+test('a role label never grounds a source path or a quoted basis', async () => {
+  const answer = 'The fix is in src/a.js, done.'
+  const withSource = (path) => JSON.stringify({ note: 'N', importance: 'high', source: { path } })
+  for (const [id, path] of [['d1-role-assistant', 'assistant'], ['d1-role-user', 'user']]) {
+    const { engine, llm } = engineWith([withSource(path)], { minDeltaChars: 0, cooldownTurns: 1 })
+    const outcome = await observeAndSettle(engine, sessionWith(id, [{ turn: 1, answer }]))
+    assert.equal(outcome.status, 'silent')
+    assert.equal(engine.notes(id).length, 0)
+    const prompt = llm.calls[0].messages[0].content[0].text
+    assert.ok(prompt.includes('[assistant]'), 'the prompt excerpt still carries the role label')
+    assert.ok(prompt.includes('[user]'), 'the prompt excerpt still carries the role label')
+  }
+
+  const becauseReply = JSON.stringify({ note: 'N', importance: 'high', kind: 'consequence', because: 'assistant' })
+  const { engine: becauseEngine } = engineWith([becauseReply], { minDeltaChars: 0, cooldownTurns: 1 })
+  const dropped = await observeAndSettle(becauseEngine, sessionWith('d1-role-because', [{ turn: 1, answer }]))
+  assert.equal(dropped.status, 'silent', 'a role label is not a quotable basis')
+  assert.equal(becauseEngine.notes('d1-role-because').length, 0)
+
+  const real = engineWith([withSource('src/a.js')], { minDeltaChars: 0, cooldownTurns: 1 })
+  const noted = await observeAndSettle(real.engine, sessionWith('d1-role-real', [{ turn: 1, answer }]))
+  assert.equal(noted.status, 'noted')
+  assert.equal(real.engine.notes('d1-role-real')[0].source.path, 'src/a.js', 'real message text still grounds normally')
+})
+
+test('a source path token respects percent and spaced continuations', () => {
+  const withSource = (path) => ({ note: 'N', importance: 'high', source: { path } })
+  assert.equal(groundVerdict(withSource('src/a.js'), 'src/a.js%2e'), null, 'a percent continuation is not the exact path')
+  assert.equal(groundVerdict(withSource('src/my'), 'src/my file.js'), null, 'a spaced filename continuation is not the exact path')
+  assert.deepEqual(groundVerdict(withSource('src/my file.js'), 'src/my file.js'), withSource('src/my file.js'), 'the full spaced path still grounds')
+  assert.deepEqual(groundVerdict(withSource('src/a.js'), 'src/a.js and more'), withSource('src/a.js'), 'ordinary prose still grounds the path')
+})
+
+test('a line marker rejects a trailing continuation', () => {
+  const sourceAt = (path, line) => ({ note: 'N', importance: 'high', source: { path, line } })
+  const pathOnly = (path) => ({ note: 'N', importance: 'high', source: { path } })
+  assert.deepEqual(groundVerdict(sourceAt('src/a.js', 42), 'src/a.js:42x'), pathOnly('src/a.js'), ':42x is not a line marker')
+  assert.deepEqual(groundVerdict(sourceAt('src/a.js', 42), 'src/a.js#L42x'), pathOnly('src/a.js'), '#L42x is not a line marker')
+  assert.deepEqual(groundVerdict(sourceAt('src/a.js', 42), 'src/a.js:42_'), pathOnly('src/a.js'), ':42_ is not a line marker')
+  assert.deepEqual(groundVerdict(sourceAt('src/a.js', 42), 'src/a.js:42.'), sourceAt('src/a.js', 42), 'a sentence period still ends the marker')
+  assert.deepEqual(groundVerdict(sourceAt('src/a.js', 42), 'src/a.js#L42.'), sourceAt('src/a.js', 42), 'a sentence period still ends the marker')
+})
+
 test('a source path is grounded in the conversation only, never in the capsule', async () => {
   const reply = '{"note":"N","importance":"high","source":{"path":"src/forged.js"}}'
   const { engine, llm } = engineWith([reply], { minDeltaChars: 0, cooldownTurns: 1 })
@@ -1468,9 +1511,16 @@ test('a source line is kept only for an explicit marker on the exact path', () =
 test('a Windows path is grounded verbatim without normalization', () => {
   const relative = { note: 'N', importance: 'high', source: { path: 'src\\app\\a.ts' } }
   assert.equal(groundVerdict(relative, 'edited src\\app\\a.ts today'), relative)
-  const drive = { note: 'N', importance: 'high', source: { path: 'C:\\repo\\src\\a.ts' } }
-  assert.equal(groundVerdict(drive, 'opened C:\\repo\\src\\a.ts'), drive, 'grounding is a verbatim lookup, not a path resolution')
   assert.deepEqual(groundVerdict({ note: 'N', importance: 'high', source: { path: 'src/app/a.ts' } }, 'edited src\\app\\a.ts'), null, 'no separator normalization')
+
+  // The host parser and grounding agree end to end: a Windows-style relative
+  // path survives parseVerdict and still grounds, while the drive-absolute form
+  // never reaches groundVerdict because parseVerdict rejects it.
+  const parsed = parseVerdict(JSON.stringify({ note: 'N', importance: 'high', source: { path: 'src\\app\\a.ts' } }))
+  assert.equal(parsed.source.path, 'src\\app\\a.ts')
+  assert.equal(groundVerdict(parsed, 'edited src\\app\\a.ts today'), parsed)
+  const drive = parseVerdict(JSON.stringify({ note: 'N', importance: 'high', source: { path: 'C:\\repo\\src\\a.ts' } }))
+  assert.equal(drive, null, 'parseVerdict rejects a drive-absolute path')
 })
 
 test('a because quoted from the evidence capsule is not grounded in the conversation', async () => {

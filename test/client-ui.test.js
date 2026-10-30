@@ -653,6 +653,7 @@ test('the session action shows the effective route, source, status, and pending 
   assert.match(rendered, /alpha/)
   assert.match(rendered, /a-model/)
   assert.match(rendered, /Global/i)
+  assert.match(rendered, /Effective: alpha\/a-model · Global/, 'the effective route source label is rendered')
   assert.match(rendered, /quota_exhausted/)
   assert.match(rendered, /Pending notes: 1/, 'pending note count is shown')
   assert.equal(env.calls[0].url, 'api/dsh-you-should-know/session?sessionId=s-1')

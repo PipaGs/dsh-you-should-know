@@ -167,6 +167,49 @@ test('a review that settles after disabling adds no recent-check record', async 
   )
 })
 
+test('a review aborted by a disable and settled after a quick re-enable adds no recent-check record', async () => {
+  let calls = 0
+  const engine = createEngine({
+    config: normalizedConfig({ recentCheckDiagnostics: true }),
+    getLlm: () => ({
+      resolveModelInfo: async (provider, model) => ({ provider, id: model, name: model }),
+      stream() {
+        calls += 1
+        const hang = calls === 1
+        return (async function* stream() {
+          if (hang) await new Promise(() => {})
+          yield { type: 'text-delta', index: 0, text: '{"note":null,"importance":null}' }
+        })()
+      },
+    }),
+    now: () => NOW,
+    onError: () => {},
+  })
+  const session = sessionWith('s-rapid-toggle', [{ turn: 1, answer: 'one' }])
+  const reviewing = engine.observe(session, session.lastEvent)
+  assert.equal(reviewing.status, 'reviewing')
+  await settle()
+
+  engine.updateConfig({ ...engine.config(), provider: '', model: '' })
+  // Re-enable before the aborted review settles: the settle must still belong to
+  // the disabled epoch and must not refill the history the disable cleared.
+  engine.updateConfig({ ...engine.config(), provider: 'p', model: 'm' })
+  assert.equal((await reviewing.promise).status, 'aborted', 'disabling aborts the in-flight review')
+  assert.deepEqual(
+    engine.status('s-rapid-toggle').session.recentChecks,
+    [],
+    'an aborted review settling after the re-enable adds no record',
+  )
+
+  appendTurn(session, 2, 'two')
+  assert.equal((await observeTurn(engine, session)).status, 'silent')
+  assert.deepEqual(
+    engine.status('s-rapid-toggle').session.recentChecks,
+    [{ at: NOW, turn: 2, outcome: 'silent' }],
+    'a review started after the re-enable records normally',
+  )
+})
+
 test('disabling the reviewer preserves notes, dedupe, and known fingerprints', async () => {
   const { engine } = engineWith([
     '{"note":"First finding.","importance":"high"}',
