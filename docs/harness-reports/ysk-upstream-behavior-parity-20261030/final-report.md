@@ -6,7 +6,7 @@
 
 **Branch:** task/upstream-behavior-parity-20261030
 
-**Product head:** PENDING_PRODUCT_COMMIT
+**Product head:** b63e56bdb0ac404e544ac2f11751cd6659f3693a
 
 **PR:** PENDING_PR
 
@@ -202,7 +202,32 @@ Raw output is in the evidence directory.
 
 ## 11. Independent review
 
-PENDING_INDEPENDENT_REVIEW
+APPROVE from a separate read-only review subagent that did not write the
+changes.
+
+The first review of the pre-fix tree found no BLOCKER, HIGH, or MEDIUM issue.
+It found six LOW and four NIT issues, all folded into the product commit:
+
+1. the report status count now says the ten behavior items use four statuses;
+2. `content-scan.txt` recomputes the evidence byte count;
+3. `security-scan.txt` covers the full 18-file PR set;
+4. the six-status test reads the ledger and workflow instead of a literal Set;
+5. `supportingBehaviorSourceIds` is documented and validated;
+6. the Understood excerpt is captured and traceable;
+7. normalization names ASCII apostrophe normalization;
+8. the duplicate Stage 1A evidence path alias is removed;
+9. the schema version is 2 for the additive source-role and behavior-class
+   fields;
+10. the report placeholders are filled at handoff.
+
+The re-review of the fix commit confirmed nine fixes and found one new LOW: the
+new Understood excerpt carried a terminal period that the page does not have.
+The period was dropped from both the capture and the item, and the targeted
+ledger test stayed green. That satisfies the conditional approval. Residual
+risk: quote traceability is anchored to the committed capture, so a fabricated
+excerpt plus a matching quote would pass; the independent reviewer verified the
+excerpts against the live pages, and the pinned sha256 is the anchor for a
+future re-capture.
 
 ## 12. Limitations
 
