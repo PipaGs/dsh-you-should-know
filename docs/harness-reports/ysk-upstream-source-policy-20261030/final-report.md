@@ -239,3 +239,151 @@ the five authored files without evidence/*.txt. Neither NIT gates the handoff.
 - Status: READY_FOR_CHATGPT_REVIEW.
 - DSH did not merge. No tag, release, npm publish, or live model call.
 - The final PR head is the report-only handoff commit that contains this block.
+
+## Follow-up review round - 2026-10-30
+
+PR #25 review comment P2: WHATWG URL normalization removed raw parent segments
+before docsUrlProblem inspected the path. The two reported URLs,
+https://code.claude.com/docs/en/../example and
+https://code.claude.com/docs/en/%2e%2e/example, were accepted with problem null.
+
+Root cause: docsUrlProblem called new URL(raw).pathname first. The parser
+resolves ../ and %2e%2e, so the path became /docs/example and the later dot
+segment check no longer saw a parent segment. The exact pre-fix command and
+output are in defect-repro.txt.
+
+Failing regression evidence: test-run-failing-regression.txt shows 24 tests, 23
+pass, 1 fail before the fix. The new test is "the docs allowlist rejects raw
+parent segments that normalize inside /docs".
+
+Fix: validate the raw path before URL normalization. The validator strips the
+scheme and host from the trimmed raw string, rejects ASCII tab, CR, and LF before
+parsing, normalizes backslashes, checks the /docs/ prefix, rejects any %2e, runs a
+bounded decode loop of eight passes and rejects remaining encoded dot escapes
+after the bound, and then rejects ., .., and segments beginning with ..; or ..,.
+Only the first decode is authoritative: a later decode failure breaks the loop
+and keeps the previous probe, so a valid encoded percent such as /docs/en/100%25,
+/docs/en/100%25ab, or /docs/en/100%25zz stays accepted. The existing normalized
+pathname checks stay as defense in depth.
+
+When a later decode fails, a per-segment decode-error fallback inspects the
+current probe. It decodes each segment up to eight times, uses a decoded-segment
+classifier, and salvages a segment that cannot decode as a whole. The classifier
+rejects a segment that is ., .., starts with ..; or ..,, or starts with a ..
+prefix followed by a character that is not a filename character [A-Za-z0-9._-].
+That covers the same-segment invalid-tail form, such as ..%zz and ..%. After
+salvage, a changed segment that still carries %2e or a residual percent escape is
+rejected; this covers the ten-times-encoded parent with a same-segment tail and
+deeper encodings. The fallback also rejects, after at least one successful
+decode, a residual percent escape on the original part. This covers the
+decode-error path without rejecting a valid encoded percent. The exact regression
+cases are plain ../, %2e%2e, %2E%2E, %2e., .%2e, ..%2f, %2e%2e%2f, double-encoded
+%252e%252e, ..%5c, ..;, ..%3b, literal tab/CR/LF inside a dot segment, the
+six-times-encoded %25252525252e%25252525252e, the seven-times-encoded
+%2525252525252e%2525252525252e, the nine-times-encoded
+%25252525252525252e%25252525252525252e, the ten-times-encoded
+%2525252525252525252e%2525252525252525252e, the three-times-encoded parent with
+an invalid-escape tail: %25252e%25252e/%25zz, %25252e%25252e/%25ab, and
+%25252e%25252e/%25, the same-segment form: %25252e%25252e%25zz,
+%25252e%25252e%25ab, %25252e%25252e%25, and %2525252e%2525252e%25zz, and the
+ten-times-encoded parent with a same-segment tail:
+%2525252525252525252e%2525252525252525252e%25zz,
+%2525252525252525252e%2525252525252525252e%25ab, and
+%2525252525252525252e%2525252525252525252e%25. The regression test covers the
+eight-pass bound and both post-loop branches: the residual %2e branch for 9x and
+the residual-percent branch for 10x, plus the decode-error fallback. The exact host and path allowlist is unchanged.
+workflow.md and README.md now state that the raw path is checked before URL
+normalization.
+
+Tests: 24 pass / 0 fail targeted; 627 pass / 0 fail full; npm run check exit 0;
+git diff --check exit 0; security and content scans PASS.
+
+Follow-up evidence files:
+- defect-repro.txt
+- test-run-failing-regression.txt
+- test-run-targeted-followup.txt
+- test-run-full-followup.txt
+- check-followup.txt
+- diff-check-followup.txt
+- diff-summary-followup.txt
+- security-scan-followup.txt
+- content-scan-followup.txt
+- invariants-followup.txt
+- artifacts-hashes-followup.txt
+
+Follow-up commit: the follow-up commit that contains this block; GitHub records
+its SHA in PR #25.
+
+This follow-up block supersedes the 98040f9 final-head note in the original
+handoff.
+
+The original product-commit evidence, including artifacts-hashes.txt, is
+preserved as historical evidence; artifacts-hashes-followup.txt is the current
+manifest.
+
+The pre-fix failing-regression log predates the final control-character and
+deep-encoding additions; it remains the historical failing evidence for the
+original P2 repro.
+
+Independent review: APPROVE. A fresh independent DSH reviewer verified the
+raw-path fix, control-character rejection, eight-pass bound, 6x/7x/9x/10x
+branches, same-segment invalid-tail classifier and salvage, 10x+tail/deeper
+residual checks, 100%25/100%25ab/100%25zz positives, safe ..foo/.../..-/.._
+names, host/default-port/relative/query/fragment controls, scope, and evidence;
+no BLOCKER/HIGH/MEDIUM/LOW defect.
+
+Status: READY_FOR_CHATGPT_REVIEW. DSH did not merge. No tag, release, npm
+publish, or live model call.
+
+## Privacy remediation - 2026-10-30
+
+Finding: the ChatGPT review found an absolute workstation file URL in
+test-run-failing-regression.txt in the public PR diff. The earlier security scan
+covered only five authored files and skipped the evidence directory.
+
+Audit: the audit scanned every added or modified PR file by category, without
+printing match content. Only test-run-failing-regression.txt had an absolute workstation
+path. The email-pattern matches are grounded test fixtures at
+test/upstream-ledger.test.js:401, security-scan.txt:19, and
+security-scan-followup.txt:19. No secrets were found.
+
+Sanitization: the absolute file URL in the stack frame is replaced with the
+portable relative location test/upstream-ledger.test.js, with the trailing
+line:column and all test title, output, failure, and exit=1 text preserved. The
+historical failing-regression log stays as evidence. The old
+artifacts-hashes-followup.txt still records the pre-sanitization hash and is
+historical; artifacts-hashes-privacy.txt is the current manifest.
+
+Coverage: security-scan-privacy.txt directly scans 38 of the 40 added or
+modified PR files; the two it does not scan directly are the scan log itself and
+artifacts-hashes-privacy.txt, which is generated after the scan. privacy-audit.txt
+also records a direct scan of 38 of 40 and the same category counts. The final
+post-write audit privacy-audit-final.txt scans all 40 existing PR files, reports
+40/40, and passes. The final-audit file itself is post-manifest and is covered by
+test/task-evidence-paths.test.js in the 628-test suite, so no task artifact is
+left unscanned for absolute paths. The allowlist contains only the grounded
+fixtures above. The deterministic test scans this task report directory for
+absolute file URLs and home-path markers, and fails with only the artifact path
+and a generic category. Targeted tests are 24/24 and the full suite is 628/628.
+
+History: the prior unmerged tip 98a05f4 contained the leak. The parent amended
+only that tip (parent 98040f9); this block is in the amended tip, and the parent
+force-with-lease pushes it to the same branch; main is not rewritten. The
+independent review verified that no reachable commit in the amended ancestry
+contains the leak; the parent will verify the remote head after force-push. Main,
+the historical 2026-10-14 evidence, and the old product-commit evidence remain
+unchanged. Residual risk: GitHub may
+retain the old commit in the PR timeline or caches, or in the existing review
+comment. Force-push cannot guarantee removal from GitHub object caches or
+comments.
+
+New head: the rewritten follow-up commit that contains this block; GitHub records
+its SHA in PR #25.
+
+Independent review: APPROVE. An independent DSH reviewer verified the 41-file
+audit, sanitized regression evidence, the new task-artifact path test, privacy
+scan/audit coverage, scope, and the amended ancestry; no
+BLOCKER/HIGH/MEDIUM/LOW defect.
+
+Status: READY_FOR_CHATGPT_REVIEW. DSH did not merge. No tag, release, npm
+publish, or live model call.

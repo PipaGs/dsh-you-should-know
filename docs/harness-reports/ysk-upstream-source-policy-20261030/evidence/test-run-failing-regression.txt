@@ -1,0 +1,53 @@
+✔ the upstream ledger cites pinned official Claude Code sources (2.204292ms)
+✔ a valid official docs page is accepted as a behavior source only (0.239125ms)
+✔ the docs allowlist rejects every unaccepted URL shape and field (0.539459ms)
+✖ the docs allowlist rejects raw parent segments that normalize inside /docs (0.817041ms)
+✔ a release source must be immutable and carry its exact identity (0.290417ms)
+✔ a changelog source is pinned to a full commit and hashed (0.212042ms)
+✔ the ledger records the local baseline on a real named revision (38.599666ms)
+✔ the local baseline records v0.4.6 and the v0.4.3 predecessor without conflating them (0.356625ms)
+✔ every tracked upstream signal has its own item with evidence and a disposition (0.468292ms)
+✔ every item date comes from an immutable release and keeps its changelog trace (0.524667ms)
+✔ the date provenance check rejects a fetch-day date and an unpinned release (1.164125ms)
+✔ the date provenance check rejects a behavior source and a docs lastModified date (0.279041ms)
+✔ the new provenance check rejects the historical 2026-10-14 ledger state (11.780458ms)
+✔ a gap or an adaptation is never dispositioned as applicable-with-nothing-to-do (0.326625ms)
+✔ an uncontested upstream unknown is recorded, not resolved by guessing (0.177666ms)
+✔ a source outage is recorded as unknown, never as no change (0.19875ms)
+✔ the outage and provenance policy keeps the previous verified baseline (0.928833ms)
+✔ the ledger carries no private or unrelated project data (0.583084ms)
+✔ the historical 2026-10-14 docs capture stays a recorded deviation (0.466333ms)
+✔ the addendum and the raw 2026-10-14 evidence stay byte-identical (1.453375ms)
+✔ the ledger source policy matches the exact allowlist and role limits (0.896667ms)
+✔ the coverage record is pinned to v2.1.312 and does not claim behavior stability (0.850875ms)
+✔ the committed coverage evidence supports the recorded release dates (0.73575ms)
+✔ the human-readable workflow and baseline documents exist and agree with the ledger (0.189875ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 23
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 249.458333
+
+✖ failing tests:
+
+test at test/upstream-ledger.test.js:349:1
+✖ the docs allowlist rejects raw parent segments that normalize inside /docs (0.817041ms)
+  AssertionError [ERR_ASSERTION]: https://code.claude.com/docs/en/../example must be rejected before URL normalization
+      at TestContext.<anonymous> (test/upstream-ledger.test.js:364:12)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: null,
+    operator: 'notStrictEqual',
+    diff: 'simple'
+  }
+exit=1

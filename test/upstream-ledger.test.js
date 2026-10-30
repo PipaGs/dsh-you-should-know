@@ -65,6 +65,17 @@ function normalizeQuote(text) {
 }
 
 /**
+ * A decoded path segment is unsafe when it is a dot segment or starts with a
+ * ".." prefix that is followed by a character that is not a filename character.
+ */
+function isUnsafeDotSegment(segment) {
+  if (segment === '.' || segment === '..') return true
+  if (/^\.\.[;,]/.test(segment)) return true
+  if (segment.startsWith('..') && !/^\.\.[A-Za-z0-9._-]/.test(segment)) return true
+  return false
+}
+
+/**
  * The exact behavior-source allowlist: https only, host exactly
  * code.claude.com, path under /docs/, no userinfo, no non-default port, no
  * query, no fragment, no parent segment (including encoded %2e%2e).
@@ -74,6 +85,7 @@ function docsUrlProblem(raw) {
   if (typeof raw !== 'string' || raw.trim().length === 0) return 'url is missing'
   const text = raw.trim()
   if (text.includes('?') || text.includes('#')) return 'query strings and fragments are not part of the source identity'
+  if (/[\t\n\r]/.test(text)) return 'control characters are not allowed'
   let url
   try {
     url = new URL(raw)
@@ -86,6 +98,74 @@ function docsUrlProblem(raw) {
   if (url.port !== '') return 'non-default port is not allowed'
   if (url.search !== '') return 'query strings are not part of the source identity'
   if (url.hash !== '') return 'fragments are not part of the source identity'
+  const rawPath = text.replace(/^https:\/\/[^/]*/i, '').replace(/\\/g, '/')
+  if (!rawPath.startsWith(DOCS_ALLOWLIST.pathPrefix)) return 'path must start with /docs/'
+  if (/%2e/i.test(rawPath)) return 'encoded dot segments are not allowed'
+  let probe = rawPath
+  let exhausted = true
+  let decodeError = false
+  for (let i = 0; i < 8; i++) {
+    let decoded
+    try {
+      decoded = decodeURIComponent(probe)
+    } catch {
+      if (i === 0) return 'path is not valid percent-encoding'
+      exhausted = false
+      decodeError = true
+      break
+    }
+    const normalized = decoded.replace(/\\/g, '/')
+    if (normalized === probe) {
+      exhausted = false
+      break
+    }
+    probe = normalized
+  }
+  if (/%2e/i.test(probe)) return 'encoded dot segments are not allowed'
+  if (exhausted && /%[0-9a-f]{2}/i.test(probe)) return 'encoded dot segments are not allowed'
+  if (probe.split('/').some(isUnsafeDotSegment)) {
+    return 'parent path segments are not allowed'
+  }
+  if (decodeError) {
+    for (const segment of probe.split('/')) {
+      let part = segment
+      let decodedSomething = false
+      for (let i = 0; i < 8; i++) {
+        let decoded
+        try {
+          decoded = decodeURIComponent(part)
+        } catch {
+          break
+        }
+        const normalized = decoded.replace(/\\/g, '/')
+        if (normalized === part) break
+        part = normalized
+        decodedSomething = true
+        if (part.split('/').some(isUnsafeDotSegment)) {
+          return 'parent path segments are not allowed'
+        }
+      }
+      if (!decodedSomething) {
+        let salvaged = part
+        for (let i = 0; i < 8; i++) {
+          const next = salvaged.replace(/%([0-9a-f]{2})/gi, (match, hex) => {
+            try {
+              return decodeURIComponent('%' + hex)
+            } catch {
+              return match
+            }
+          })
+          if (next === salvaged) break
+          salvaged = next
+        }
+        if (salvaged.split('/').some(isUnsafeDotSegment)) return 'parent path segments are not allowed'
+        if (salvaged !== part && /%2e/i.test(salvaged)) return 'encoded dot segments are not allowed'
+        if (salvaged !== part && /%[0-9a-f]{2}/i.test(salvaged)) return 'encoded dot segments are not allowed'
+      }
+      if (/%2e/i.test(part)) return 'encoded dot segments are not allowed'
+      if (decodedSomething && /%[0-9a-f]{2}/i.test(part)) return 'encoded dot segments are not allowed'
+    }
+  }
   const path = url.pathname
   if (!path.startsWith(DOCS_ALLOWLIST.pathPrefix)) return 'path must start with /docs/'
   if (/%2e/i.test(path)) return 'encoded dot segments are not allowed'
@@ -95,7 +175,7 @@ function docsUrlProblem(raw) {
   } catch {
     return 'path is not valid percent-encoding'
   }
-  if (decoded.split('/').some((segment) => segment === '..' || segment === '.')) {
+  if (decoded.split('/').some(isUnsafeDotSegment)) {
     return 'parent path segments are not allowed'
   }
   return null
@@ -344,6 +424,55 @@ test('the docs allowlist rejects every unaccepted URL shape and field', () => {
     Object.assign(source, patch)
     assert.throws(() => assertBehaviorSource(source), Error, name)
   }
+})
+
+test('the docs allowlist rejects raw parent segments that normalize inside /docs', () => {
+  const rejected = [
+    'https://code.claude.com/docs/en/../example',
+    'https://code.claude.com/docs/en/%2e%2e/example',
+    'https://code.claude.com/docs/en/%2E%2E/example',
+    'https://code.claude.com/docs/en/%2e./example',
+    'https://code.claude.com/docs/en/.%2e/example',
+    'https://code.claude.com/docs/en/..%2fexample',
+    'https://code.claude.com/docs/en/%2e%2e%2fexample',
+    'https://code.claude.com/docs/en/%252e%252e/example',
+    'https://code.claude.com/docs/en/..%5cexample',
+    'https://code.claude.com/docs/en/..;/example',
+    'https://code.claude.com/docs/en/..%3b/example',
+    'https://code.claude.com/docs/en/.\t./example',
+    'https://code.claude.com/docs/en/.\n./example',
+    'https://code.claude.com/docs/en/.\r./example',
+    'https://code.claude.com/docs/en/%25252525252e%25252525252e/example',
+    'https://code.claude.com/docs/en/%2525252525252e%2525252525252e/example',
+    'https://code.claude.com/docs/en/%25252525252525252e%25252525252525252e/example',
+    'https://code.claude.com/docs/en/%2525252525252525252e%2525252525252525252e/example',
+    'https://code.claude.com/docs/en/%25252e%25252e/%25zz',
+    'https://code.claude.com/docs/en/%25252e%25252e/%25ab',
+    'https://code.claude.com/docs/en/%25252e%25252e/%25',
+    'https://code.claude.com/docs/en/%25252e%25252e%25zz',
+    'https://code.claude.com/docs/en/%25252e%25252e%25ab',
+    'https://code.claude.com/docs/en/%25252e%25252e%25',
+    'https://code.claude.com/docs/en/%2525252e%2525252e%25zz',
+    'https://code.claude.com/docs/en/%2525252525252525252e%2525252525252525252e%25zz',
+    'https://code.claude.com/docs/en/%2525252525252525252e%2525252525252525252e%25ab',
+    'https://code.claude.com/docs/en/%2525252525252525252e%2525252525252525252e%25',
+  ]
+  for (const url of rejected) {
+    assert.notEqual(docsUrlProblem(url), null, url + ' must be rejected before URL normalization')
+    assert.throws(
+      () => assertBehaviorSource({ ...validDocsSource(), url }),
+      Error,
+      url + ' must not pass as a behavior source',
+    )
+  }
+  assert.equal(docsUrlProblem('https://CODE.CLAUDE.COM/docs/en/example'), null, 'the host stays case-insensitive')
+  assert.equal(docsUrlProblem('https://code.claude.com:443/docs/en/example'), null, 'the default https port stays accepted')
+  assert.equal(docsUrlProblem('https://code.claude.com/docs/en/100%25'), null, 'a valid encoded percent stays accepted')
+  assert.equal(docsUrlProblem('https://code.claude.com/docs/en/100%25ab'), null, 'a valid encoded percent followed by hex stays accepted')
+  assert.equal(docsUrlProblem('https://code.claude.com/docs/en/100%25zz'), null, 'a valid encoded percent followed by non-hex stays accepted')
+  assert.notEqual(docsUrlProblem('/docs/en/example'), null, 'a relative path is rejected')
+  assert.notEqual(docsUrlProblem('https://code.claude.com/docs/en/example?x=1'), null, 'a query is rejected')
+  assert.notEqual(docsUrlProblem('https://code.claude.com/docs/en/example#x'), null, 'a fragment is rejected')
 })
 
 test('a release source must be immutable and carry its exact identity', () => {

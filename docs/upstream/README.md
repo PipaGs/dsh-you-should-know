@@ -37,8 +37,8 @@ behavior evidence only.
 The exact behavior allowlist is https only, host exactly code.claude.com
 (case-insensitive after URL parsing), path starting with /docs/, no userinfo,
 no non-default port, no query, no fragment, and no parent path segment
-(including encoded %2e%2e). No other website and no other Anthropic host is
-accepted.
+(including encoded %2e%2e). Raw parent segments are rejected before URL
+normalization. No other website and no other Anthropic host is accepted.
 
 A docs source record requires id, kind "official-docs-page", url, immutable
 false, sha256 (64 lowercase hex of the exact retrieved bytes), and fetchedAt

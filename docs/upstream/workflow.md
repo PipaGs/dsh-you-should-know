@@ -51,7 +51,8 @@ documentation page under https://code.claude.com/docs/. The exact allowlist is:
   subdomain, no other host, no userinfo, and no non-default port.
 - path: starts with /docs/. Query strings and fragments are not part of the
   source identity and are rejected for source records. Parent path segments,
-  including encoded %2e%2e, are rejected.
+  including encoded %2e%2e, are rejected. The raw path is checked before URL
+  normalization; a normalized path alone is not accepted.
 - No other website and no other Anthropic host is accepted.
 
 A docs source record has these fields:

@@ -1,0 +1,56 @@
+Defect reproduction - docsUrlProblem accepts raw parent segments that normalize inside /docs
+
+Worktree HEAD: 98040f92ca52e0a985b0e33973f638aa5a8afd04
+Source under test: test/upstream-ledger.test.js at that HEAD
+Defect: docsUrlProblem calls new URL(raw).pathname before it looks for dot segments.
+WHATWG normalization resolves ../ and %2e%2e first, so the dangerous segment disappears.
+The normalized path still starts with /docs/, so the validator returns null.
+
+Command (run from the repository root):
+node <<'EOF'
+const fs = require('node:fs')
+const testSource = fs.readFileSync('test/upstream-ledger.test.js', 'utf8')
+
+const allowlistLine = testSource.split('\n').find((line) => line.startsWith('const DOCS_ALLOWLIST ='))
+if (!allowlistLine) throw new Error('DOCS_ALLOWLIST not found in test/upstream-ledger.test.js')
+const start = testSource.indexOf('function docsUrlProblem(raw) {')
+if (start === -1) throw new Error('docsUrlProblem not found in test/upstream-ledger.test.js')
+const end = testSource.indexOf('\n}\n', start)
+if (end === -1) throw new Error('docsUrlProblem end not found')
+const functionSource = testSource.slice(start, end + 3)
+const docsUrlProblem = new Function(allowlistLine + '\n' + functionSource + '\nreturn docsUrlProblem')()
+
+const urls = [
+  'https://code.claude.com/docs/en/example',
+  'https://code.claude.com/docs/en/../example',
+  'https://code.claude.com/docs/en/%2e%2e/example',
+  'https://code.claude.com/docs/en/%2E%2E/example',
+  'https://code.claude.com/docs/en/%2e./example',
+  'https://code.claude.com/docs/en/.%2e/example',
+]
+console.log('capturedAt=' + new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'))
+console.log('node=' + process.version)
+console.log('source=test/upstream-ledger.test.js at HEAD 98040f92ca52e0a985b0e33973f638aa5a8afd04')
+console.log('')
+for (const raw of urls) {
+  let pathname
+  try {
+    pathname = new URL(raw).pathname
+  } catch {
+    pathname = '<parse error>'
+  }
+  console.log(JSON.stringify({ raw, pathname, problem: docsUrlProblem(raw) }))
+}
+EOF
+
+Output:
+capturedAt=2026-10-30T07:50:40Z
+node=v26.12.1
+source=test/upstream-ledger.test.js at HEAD 98040f92ca52e0a985b0e33973f638aa5a8afd04
+
+{"raw":"https://code.claude.com/docs/en/example","pathname":"/docs/en/example","problem":null}
+{"raw":"https://code.claude.com/docs/en/../example","pathname":"/docs/example","problem":null}
+{"raw":"https://code.claude.com/docs/en/%2e%2e/example","pathname":"/docs/example","problem":null}
+{"raw":"https://code.claude.com/docs/en/%2E%2E/example","pathname":"/docs/example","problem":null}
+{"raw":"https://code.claude.com/docs/en/%2e./example","pathname":"/docs/example","problem":null}
+{"raw":"https://code.claude.com/docs/en/.%2e/example","pathname":"/docs/example","problem":null}
