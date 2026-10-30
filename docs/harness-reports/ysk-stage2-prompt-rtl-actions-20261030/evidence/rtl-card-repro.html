@@ -1,0 +1,33 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>RTL note card reproduction</title>
+<style>
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:#fff;color:#111;margin:20px;width:760px}
+h3{font-size:12px;margin:0 0 4px;color:#333}
+.card{box-sizing:border-box;width:100%;display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border-radius:10px;border:1px solid rgba(127,127,127,.25);border-left:3px solid rgba(245,158,11,.95);background:rgba(127,127,127,.08);font-size:13px;line-height:1.45;margin-bottom:14px}
+.body{flex:1;min-width:0}
+.title{display:flex;align-items:center;gap:6px;font-weight:600;color:rgba(245,158,11,.95);margin-bottom:2px}
+.note{white-space:pre-wrap;word-break:break-word}
+.actions{display:flex;gap:10px;margin-top:5px;flex-wrap:wrap;font-size:12px;opacity:.8}
+.side{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex:0 0 auto;font-size:12px;opacity:.8}
+</style></head>
+<body>
+<h3>Current markup: no base direction (inherits LTR)</h3>
+<section class="card"><div class="body"><div class="title">You should know</div>
+<div class="note">הקובץ lib/runtime.js:42 לא נטען כי הבקשה נכשלה.</div>
+<div class="actions"><span>Knew it</span><span>Thanks</span><span>Explain</span></div>
+<div><code>lib/runtime.js:42</code></div></div><div class="side"><span>Add to chat</span><span>Dismiss</span></div></section>
+<h3>Fixed markup: dir="auto" on the note text</h3>
+<section class="card"><div class="body"><div class="title">You should know</div>
+<div class="note" dir="auto">הקובץ lib/runtime.js:42 לא נטען כי הבקשה נכשלה.</div>
+<div class="actions"><span>Knew it</span><span>Thanks</span><span>Explain</span></div>
+<div><code>lib/runtime.js:42</code></div></div><div class="side"><span>Add to chat</span><span>Dismiss</span></div></section>
+<h3>Arabic, current vs dir="auto"</h3>
+<section class="card"><div class="body"><div class="title">You should know</div>
+<div class="note">الملف lib/runtime.js:42 لم يتم تحميله لأن الطلب فشل.</div>
+<div class="actions"><span>Knew it</span><span>Thanks</span><span>Explain</span></div>
+<div><code>lib/runtime.js:42</code></div></div><div class="side"><span>Add to chat</span><span>Dismiss</span></div></section>
+<section class="card"><div class="body"><div class="title">You should know</div>
+<div class="note" dir="auto">الملف lib/runtime.js:42 لم يتم تحميله لأن الطلب فشل.</div>
+<div class="actions"><span>Knew it</span><span>Thanks</span><span>Explain</span></div>
+<div><code>lib/runtime.js:42</code></div></div><div class="side"><span>Add to chat</span><span>Dismiss</span></div></section>
+</body></html>

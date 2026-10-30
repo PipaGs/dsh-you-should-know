@@ -1,0 +1,36 @@
+UPSTREAM PROVENANCE CHECK - docs/upstream must stay byte-identical
+BASE: 697765379635e75e0c690db22f53aa1550b90a1f
+HEAD: 9c93017 (product head)
+
+COMMAND: git diff --name-only 6977653 -- docs/upstream
+OUTPUT:
+EXIT: 0
+
+COMMAND: git status --porcelain docs/upstream
+OUTPUT:
+EXIT: 0
+
+COMMAND: git ls-tree -r 6977653 docs/upstream
+OUTPUT:
+100644 blob e45997a7631d6aab04f84c82cc6f2f93bd77c8cf	docs/upstream/README.md
+100644 blob a765096f3465cf50834f65f3d90ae65990d1b1e2	docs/upstream/addendum-20261030-source-policy-deviation.md
+100644 blob 335e982b49d061fcddb92f129e03124ee8b63f89	docs/upstream/evidence/claude-code-upstream-20261014.json
+100644 blob 447e3d744e23d1a9a69a3d70b559bb26d38826cb	docs/upstream/ledger.json
+100644 blob 92a97544cb6d79489930c937d670ee6c501f3272	docs/upstream/workflow.md
+COMMAND: git ls-tree -r HEAD docs/upstream
+
+OUTPUT:
+
+100644 blob e45997a7631d6aab04f84c82cc6f2f93bd77c8cf	docs/upstream/README.md
+100644 blob a765096f3465cf50834f65f3d90ae65990d1b1e2	docs/upstream/addendum-20261030-source-policy-deviation.md
+100644 blob 335e982b49d061fcddb92f129e03124ee8b63f89	docs/upstream/evidence/claude-code-upstream-20261014.json
+100644 blob 447e3d744e23d1a9a69a3d70b559bb26d38826cb	docs/upstream/ledger.json
+100644 blob 92a97544cb6d79489930c937d670ee6c501f3272	docs/upstream/workflow.md
+COMMAND: git for-each-ref refs/tags/v0.4.6
+
+OUTPUT:
+
+2dd722eb691493281aefa081ebfc722afb7d117f tag	refs/tags/v0.4.6
+The two tree listings are identical, so the ledger, workflow, README, and captured evidence are unchanged.
+
+No tag or release operation was performed.

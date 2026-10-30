@@ -1,0 +1,197 @@
+COMMAND: node --test test/language.test.js test/client-ui.test.js
+TREE: pre-fix working tree at base 697765379635e75e0c690db22f53aa1550b90a1f plus new tests only
+EXIT: 1
+RAW_SHA256: d05d024ad1c159ea4e24fa8ff36c71a7c0a57f5104023005ac75e16e3ac653ad
+SANITIZATION: the test-file file URL prefix under the repository worktree was replaced with <worktree>/, and trailing spaces were removed on formatting lines (the test runner's two-space diff padding). No test name, count, timestamp, or assertion text changed.
+
+✔ the client registers the plugins.bundle.config slot with the exact key and inject contract (7.283166ms)
+✔ the client registers the conversation.session.header.actions slot with inject(sessionId) (1.08475ms)
+✔ the settings card refreshes once on mount from the document-relative config route (5.859416ms)
+✔ the provider select lists only catalog providers and the model select follows the provider (6.23225ms)
+✔ Save posts the exact bounded config for the selected route (10.327167ms)
+✔ Save posts automatic mode without a provider or model (7.835125ms)
+✔ an invalid pinned selection blocks Save and shows a bounded message (9.07275ms)
+✔ a read-only host disables every control and explains why (5.04675ms)
+✔ the settings card refreshes on window focus and on connection reset without any interval (11.915084ms)
+✔ a stale config response for an old generation never overwrites a newer one (12.817417ms)
+✔ the note card code is preserved alongside the new settings surfaces (0.774666ms)
+✔ the session action shows the effective route, source, status, and pending count (5.222791ms)
+✔ pinning a session route posts set-model, reset posts reset-model, and quota enables resume (19.8915ms)
+✔ a non-quota runtime never offers resume (8.109833ms)
+✔ a stale session response for session A never populates session B (12.771625ms)
+✔ the session action refreshes on focus and connection reset and on session change (16.942125ms)
+✔ the session action never renders a transcript or posts to the primary agent (3.567709ms)
+✔ the note card wrapper mirrors the composer root instead of a fixed column (5.704292ms)
+✔ the note card resolves to the exact composer card width at every breakpoint (5.56525ms)
+✔ the note card renders every undismissed note oldest-first and dismisses only the clicked one (4.20325ms)
+✔ the note card renders a source row only when the note carries a valid one (4.94475ms)
+✔ a source without a file-navigation service renders copyable text and no fake link (4.747292ms)
+✔ Open file navigates through the sidebar resource API and never runs a command (4.9775ms)
+✔ Add to chat inserts the actionable repair instruction instead of the human note (4.934875ms)
+✔ Add to chat appends File only when the action does not already name the exact source path (8.091541ms)
+✔ Add to chat appends File when the action names only a longer path that contains the source path (5.373ms)
+✔ Add to chat does not duplicate File when the action names the exact path with punctuation (4.852791ms)
+✔ a stale action card cannot write into the next session draft (3.707167ms)
+✔ a note without an action falls back to an imperative wrapper (5.000166ms)
+✔ Add to chat keeps an existing draft and separates the action with a blank line (4.910583ms)
+✔ Add to chat with an action resolves the note and removes the card (5.059917ms)
+✔ Add to chat then Enter submits the action draft once and never replays it (4.937166ms)
+✔ History keeps showing the human finding rather than the action (9.953542ms)
+✔ one Add to chat click writes the finding into the draft exactly once and never sends (3.944292ms)
+✔ Add to chat then Enter submits the existing draft and does not replay the insertion (4.973416ms)
+✔ Add to chat keeps an existing draft and separates the finding with a blank line (4.989834ms)
+✔ a second Add to chat click is impossible because the resolved card is gone (5.417792ms)
+✔ a card from a previous session cannot write into the next session draft (4.917792ms)
+✔ Add to chat fails quietly when the composer action face is unavailable (4.777542ms)
+✔ Add to chat resolves the note, removes the card immediately, and posts added_to_chat (4.99725ms)
+✔ Add to chat then Enter submits the existing draft once and never replays the insertion (5.022ms)
+✔ Add to chat that cannot write the draft leaves the card active and never resolves (4.8505ms)
+✔ a resolved Add to chat card cannot be re-inserted or re-resolved (5.021875ms)
+✔ History opens on demand, shows every state, and never polls while closed (21.916416ms)
+✔ the open history panel stays inside the viewport so its Hide control remains reachable (9.444375ms)
+✔ a resolved history entry is read-only and cannot be re-resolved (8.727083ms)
+✔ an active history entry keeps Add to chat while a resolved one stays read-only (9.22325ms)
+✔ history refreshes after a resolve while it stays open (13.003667ms)
+✔ a stale history response for session A never populates session B (15.560667ms)
+✔ a session with no notes and no history renders no dock at all (4.797708ms)
+✔ an empty session stays empty across an unmount and a fresh mount after a host restart (9.443959ms)
+✔ a real note appears as soon as the poll reports one, with its heading and actions (8.923458ms)
+✔ switching from a note session to an empty session hides the dock, and back (13.09875ms)
+✔ the settings card renders the exact five reviewer modes with a mode helper line (4.742292ms)
+✔ Save posts the reviewer mode and the exact additional instructions (9.152125ms)
+✔ the settings card populates the mode and instructions from the live config (4.882208ms)
+✔ the session header offers Default plus the five modes and never posts global config (11.578459ms)
+✔ the session header shows the effective mode and its source (4.934708ms)
+✔ the settings card shows the custom prompt only in Custom mode and posts it exactly (9.025833ms)
+✔ the settings card populates the saved custom prompt from the live config (4.856542ms)
+✔ the session header has no per-session custom prompt field and notes the global reuse (4.9545ms)
+✔ the update settings render the controls and versions from the single config read (5.557167ms)
+✔ changing the automatic-check toggle persists the boolean through the update route (8.955042ms)
+✔ the behavior select persists each value and Automatic shows the exact unsupported helper (13.083416ms)
+✔ the Check for updates button runs one manual check and shows deterministic feedback (8.980584ms)
+✔ the update card shows the exact pinned spec and the restart note, and installs nothing (4.930292ms)
+✔ the update card names the Git tag source and the exact target address (4.798791ms)
+✔ dismissing a version hides its card while a newer release surfaces again (12.419166ms)
+✔ without an update status the card still offers the conservative defaults and no notice (3.976708ms)
+✔ a read-only host disables the update controls too (4.933125ms)
+✔ the note card offers Knew it, Thanks, and Explain alongside the existing actions (3.530958ms)
+✔ Knew it and Thanks post their exact resolutions and remove the card (12.789334ms)
+✔ Explain is collapsed by default, expands inline, and reuses the cached text (17.038667ms)
+✔ a failed Explain shows a retry and never blocks the other card actions (12.955041ms)
+✔ a note that already carries an explanation expands it without a request (9.046417ms)
+✔ History renders every resolution state distinctly and shows a bounded explanation (8.001291ms)
+✔ the settings card renders and posts the hourly reviewer-call budget (9.328584ms)
+✔ the settings card offers a Diagnostics control that runs the self-check on demand (5.281375ms)
+✔ Run self-check calls the document-relative route through the authenticated session, never a token (8.879417ms)
+✔ the self-check shows checking, then a bounded failure state (9.15475ms)
+✔ a running version that differs from the installed package shows Restart required (7.926334ms)
+✔ a not-healthy payload is never shown as Healthy and names why (8.319166ms)
+✔ an unavailable installed version is not guessed into a restart notice (7.971375ms)
+✖ a Hebrew human note and its explanation declare their own base direction (4.923375ms)
+✖ an Arabic human note and its explanation declare their own base direction (5.839625ms)
+✖ a Hebrew history entry declares its own base direction (9.3225ms)
+✔ an actionless RTL note keeps the deliberate plain-text fallback draft (10.531708ms)
+✔ an action-carrying RTL note still inserts exactly its action (4.19775ms)
+✔ the human-only card actions never write or send a composer draft (33.372959ms)
+✔ a host language tag is normalized only when it is a bounded BCP-47-like value (0.74775ms)
+✔ the latest genuine human message is detected only from a visible human entry (0.136083ms)
+✔ language priority is host setting, then latest human message, then English (0.490208ms)
+✔ each language source yields a distinct, deterministic directive (0.19075ms)
+✔ the reviewer system prompt carries the resolved host language and never leaks an invalid one (0.689292ms)
+✔ the profile section alone accepts a host language without a conversation entry (0.662333ms)
+✔ the engine passes the resolved host language into the reviewer system prompt (2.741125ms)
+✔ a throwing host-language resolver never breaks the review call (0.418417ms)
+✖ the localization directive names every key the verdict parser reads (1.088ms)
+ℹ tests 98
+ℹ suites 0
+ℹ pass 94
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 873.966083
+
+✖ failing tests:
+
+test at test/client-ui.test.js:2317:1
+✖ a Hebrew human note and its explanation declare their own base direction (4.923375ms)
+  AssertionError [ERR_ASSERTION]: the human note declares dir=auto
+  + actual - expected
+
+  + undefined
+  - 'auto'
+
+      at TestContext.<anonymous> (<worktree>/test/client-ui.test.js:2326:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: 'auto',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/client-ui.test.js:2335:1
+✖ an Arabic human note and its explanation declare their own base direction (5.839625ms)
+  AssertionError [ERR_ASSERTION]: the human note declares dir=auto
+  + actual - expected
+
+  + undefined
+  - 'auto'
+
+      at TestContext.<anonymous> (<worktree>/test/client-ui.test.js:2344:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: 'auto',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/client-ui.test.js:2353:1
+✖ a Hebrew history entry declares its own base direction (9.3225ms)
+  AssertionError [ERR_ASSERTION]: the history note declares dir=auto
+  + actual - expected
+
+  + undefined
+  - 'auto'
+
+      at TestContext.<anonymous> (<worktree>/test/client-ui.test.js:2365:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: 'auto',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/language.test.js:171:1
+✖ the localization directive names every key the verdict parser reads (1.088ms)
+  AssertionError [ERR_ASSERTION]: the JSON-contract sentence must name every key the parser reads
+  + actual - expected
+
+  + [
+  +   'kind',
+  +   'because'
+  + ]
+  - []
+
+      at TestContext.<anonymous> (<worktree>/test/language.test.js:190:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [ 'kind', 'because' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

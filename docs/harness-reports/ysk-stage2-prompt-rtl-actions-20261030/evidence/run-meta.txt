@@ -1,0 +1,36 @@
+TASK: ysk-stage2-prompt-rtl-actions-20261030
+MODE: DeepSeek Harness supervised Goal, Stage 2 scoped implementation
+DATE: 2026-10-30 (Europe/Moscow)
+
+REPOSITORY: PipaGs/dsh-you-should-know
+BASE_COMMIT: 697765379635e75e0c690db22f53aa1550b90a1f
+BASE_SUBJECT: Merge pull request #26 from PipaGs/task/upstream-behavior-parity-20261030
+BRANCH: task/stage2-prompt-rtl-actions-20261030
+WORKTREE: .worktrees/task-2a
+PRODUCT_VERSION: 0.4.6 (unchanged)
+NODE: v26.12.1
+NPM: 11.20.0
+
+BASELINE_BEFORE_CHANGE:
+- npm test: 635 tests, 635 pass, 0 fail, exit 0 (evidence/test-run-baseline.txt)
+- npm run check: exit 0
+- git diff --check: exit 0
+
+RED_BEFORE_FIX:
+- node --test test/language.test.js test/client-ui.test.js: 98 tests, 94 pass, 4 fail, exit 1 (evidence/test-run-red.txt)
+- failing: 3 RTL direction tests and 1 localization-key test
+
+GREEN_AFTER_FIX:
+- node --test test/language.test.js test/client-ui.test.js: 98 tests, 98 pass, 0 fail, exit 0 (evidence/test-run-targeted.txt)
+- npm test: 642 tests, 642 pass, 0 fail, exit 0 (evidence/test-run-full.txt)
+- npm run check: exit 0 (evidence/check.txt)
+
+RAW_LOG_SHA256 (before sanitization):
+- red: d05d024ad1c159ea4e24fa8ff36c71a7c0a57f5104023005ac75e16e3ac653ad
+- targeted: 5a24dc9e0fa0b5d1035585b39f85908647e573ae0770b56961e19f8388fd7aba
+- full (final tree, includes this report and evidence): 5fbec509b29632f9e05cddfc8ae3bea9ad3c3574ad87a25ae52ebed63f5d0766
+- check: 83981642533d017d476edec19c7641f0117e1f4cec4f0f8d11c1d52b2debc9d6
+- baseline: 3d4fe0b963ef959c692c4eb0822acc44bde9549bec4f7e10dccf13320612fe89
+
+The red log is committed with the worktree file-URL prefix replaced by <worktree>/.
+No test result, count, timestamp, or assertion text was edited.
