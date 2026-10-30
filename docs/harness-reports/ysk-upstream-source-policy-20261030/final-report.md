@@ -1,14 +1,14 @@
 # Final report - ysk-upstream-source-policy-20261030
 
-**Status:** READY_FOR_CHATGPT_REVIEW (draft)
+**Status:** READY_FOR_CHATGPT_REVIEW
 
 **Base:** 0419b70797a8d37db245d55817a7be273b5edcdb
 
 **Branch:** task/upstream-source-policy-20261030
 
-**Product head:** PENDING
+**Product head:** b62215b2434f9015dd6499b74ef14e45b16a2b07
 
-**PR:** PENDING
+**PR:** https://github.com/PipaGs/dsh-you-should-know/pull/25
 
 **Tool:** DeepSeek Harness, delegated implementation subagent, Stage 1B.
 
@@ -29,8 +29,11 @@ captures raw verification evidence. The historical 2026-10-14 docs-page deviatio
 stays explicit and is not retroactively authorized.
 
 Out of scope: product code, prompts, configs, package.json, the version, tags,
-releases, npm install or publish, live model calls, commits, pushes, merges, and
-functional behavior findings. Stage 1C owns interactive-mode behavior findings.
+releases, npm install or publish, live model calls, and functional behavior
+findings. Stage 1C owns interactive-mode behavior findings. The implementation
+subagent made no commit, push, or merge. The parent created the product commit
+and the report-only handoff commit, opened PR #25, and left merge to the
+reviewer.
 
 ## 2. Preflight facts
 
@@ -169,7 +172,9 @@ test-run-targeted.txt, test-run-full.txt, check.txt, and diff-check.txt.
 - The addendum and the raw 2026-10-14 evidence are byte-identical. Their hashes
   are unchanged and asserted by test.
 - No tag, release, npm install, npm publish, or live model call.
-- No commit, push, or merge.
+- The implementation subagent made no commit, push, or merge. The parent
+  created product commit b62215b2434f9015dd6499b74ef14e45b16a2b07. This
+  report-only handoff commit is next. DSH did not merge.
 - local.head, local.tag, local.tagIdentity, local.previousBaseline, coverage,
   existing source entries, existing items, and existing openUnknowns are
   unchanged.
@@ -177,7 +182,13 @@ test-run-targeted.txt, test-run-full.txt, check.txt, and diff-check.txt.
 
 ## 8. Independent review
 
-PENDING. This report does not claim any review approval.
+APPROVE from the independent review, on both the first review and the
+re-review. The review found no BLOCKER, HIGH, or MEDIUM finding. One LOW defect
+was found: a bare trailing empty query or fragment passed docsUrlProblem. The
+implementation fixed it with a raw-string guard and two negative cases, and the
+review re-approved. Two non-blocking NITs remain: the baseline check log lacks an
+exit=0 line (baseline-meta.txt records check_exit=0), and the security scan lists
+the five authored files without evidence/*.txt. Neither NIT gates the handoff.
 
 ## 9. Limitations
 
@@ -192,8 +203,11 @@ PENDING. This report does not claim any review approval.
 - Timestamps in this repository use second precision with a Z suffix. The
   validators accept that exact ISO UTC form, which is the stricter reading of the
   requirement.
-- The product head and the PR remain PENDING until the parent agent commits and
-  opens the PR.
+- The final PR head is the report-only handoff commit that contains this block.
+  GitHub records its SHA in PR #25.
+- Two residual review NITs are non-blocking: the baseline check log lacks an
+  exit=0 line (baseline-meta.txt records check_exit=0), and the security scan
+  lists the five authored files without evidence/*.txt.
 
 ## 10. Evidence index
 
@@ -213,6 +227,15 @@ PENDING. This report does not claim any review approval.
 
 ## 11. Handoff
 
-PENDING. The parent agent commits on task/upstream-source-policy-20261030 and
-opens the PR. This report must not claim an approved review or a created PR
-before those events happen.
+- Base: 0419b70797a8d37db245d55817a7be273b5edcdb
+- Branch: task/upstream-source-policy-20261030
+- Product commit: b62215b2434f9015dd6499b74ef14e45b16a2b07
+- PR: https://github.com/PipaGs/dsh-you-should-know/pull/25
+- Product version: 0.4.6
+- Verification at the product commit: node --test test/upstream-ledger.test.js
+  23 pass / 0 fail; npm test 626 pass / 0 fail; npm run check exit 0;
+  git diff --check exit 0; security and content scans PASS.
+- Independent review: APPROVE.
+- Status: READY_FOR_CHATGPT_REVIEW.
+- DSH did not merge. No tag, release, npm publish, or live model call.
+- The final PR head is the report-only handoff commit that contains this block.

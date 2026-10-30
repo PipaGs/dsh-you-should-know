@@ -5,7 +5,7 @@ Artifact byte sizes:
   docs/upstream/README.md: 11462 bytes
   docs/upstream/ledger.json: 25736 bytes
   test/upstream-ledger.test.js: 42276 bytes
-  docs/harness-reports/ysk-upstream-source-policy-20261030/final-report.md: 10675 bytes
+  docs/harness-reports/ysk-upstream-source-policy-20261030/final-report.md: 12285 bytes
 
 Official quoted material in the ledger:
   quoted entries: 7

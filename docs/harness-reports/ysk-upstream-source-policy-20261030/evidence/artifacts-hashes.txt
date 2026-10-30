@@ -4,7 +4,7 @@ This file excludes itself.
 90b2b0f83887bc18a4b5e24abd21c9ed04fc05b77a4ab7a73af9fb1c8ec80841  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/baseline-meta.txt
 83981642533d017d476edec19c7641f0117e1f4cec4f0f8d11c1d52b2debc9d6  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-baseline.txt
 16fa1ce2b9ffa1b1aef902b9f23e8bf00a87bcd79e06c40dd53a7859965194e5  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check.txt
-bac1dfcfa5a6ecbb1f6caf08058fd7c929542ca7c94ac811802e2cee7adcf8c1  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/content-scan.txt
+c17d9ff9b93d0adb364010083e37ed580b533eeef889da5a0e728afc12aea5d2  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/content-scan.txt
 7b5bd51a8d0d15cac6e98791a9e40e50204eab9c47021717b8cc4c1bc54fbe10  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check.txt
 fe2d93110ba59d131262d4442a340a349586954bb947e549d9f785719f2c6e80  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary.txt
 13a4b126a3802d2492b6f774642b3aef86f4fb44266f2cd3b1796b33c6792d95  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants.txt
@@ -13,7 +13,7 @@ fe2d93110ba59d131262d4442a340a349586954bb947e549d9f785719f2c6e80  docs/harness-r
 a736b17946ac552d4ebcefa5c18a043d4f1b7c0ec3c9cb45b2ce2a7f9b5719c1  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-baseline-targeted.txt
 44c8ee4a7f5322af21652db540a24dceb320a3e7243c3414888ac5dad8cf36a5  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-full.txt
 e938c2f8caa079e81c286461527e480f83b3f9ec314eb7fc10da9a49a0dc19c8  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-targeted.txt
-3910a3d89c73bcbe1f51e54d326442f4f3542d11c804ff291c02979fd692a89a  docs/harness-reports/ysk-upstream-source-policy-20261030/final-report.md
+e1ccfba52dd413679f3721f1bc6df6f1e4e36cae2e84de18ddcda4dd72c737db  docs/harness-reports/ysk-upstream-source-policy-20261030/final-report.md
 efd16f3c983eba0183337e2272a4d81076532a2c1821b2ff221ccac8d1870a2d  docs/upstream/README.md
 a7d85d091acdf5b44d043aef21c9b71dd624f17876d41d1d7ef823bc321957b3  docs/upstream/ledger.json
 a03b9d58cf792f1314d042c845480dff7eecdba7d22953309a990ff3c075ad9b  docs/upstream/workflow.md
