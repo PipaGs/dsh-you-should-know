@@ -1,0 +1,281 @@
+{
+  "target": {
+    "host": "DeepSeek Harness web host (desktop app CLI), isolated profile",
+    "desktopVersion": "0.2.1-rc.5",
+    "cliVersion": "0.2.1-rc.5",
+    "pluginVersion": "0.5.0",
+    "pluginSource": "worktree symlink at capture head f6a9ac9 (product version 0.5.0). The final product head 212179b changes host grounding and client fail-closed path validation; the fixtures contain no bidi-control source path, so client visuals are identical.",
+    "capturedAt": "2026-10-30T19:57Z-20:02Z",
+    "isolation": "temporary DSH_HOME under a private temp directory; profile created from the shipped web template; no user profile, credential, session, or installed plugin file was modified (the desktop profile package.json was read only to confirm the installed 0.5.0 dependency)",
+    "auth": "browser-authenticated connection through the real host (self-check authTransport host-authenticated-connection); the launch token is not recorded",
+    "fixtureBoundary": "a local proxy forwarded HTTP/WS to the real host and replaced only the plugin notes and history responses with synthetic fixtures; the shell, plugin bundles, session, composer, cards, and actions were served by the real host",
+    "noLiveCalls": "no API key or provider credential was configured; the global status route reported route=null; no reviewer or primary model call was made",
+    "captureHead": "f6a9ac9",
+    "finalProductHead": "212179b"
+  },
+  "fixtures": {
+    "activeNotes": [
+      {
+        "id": "e2e-he-1",
+        "language": "he",
+        "source": "lib/core.js:42",
+        "action": true,
+        "explanation": true
+      },
+      {
+        "id": "e2e-ar-2",
+        "language": "ar",
+        "source": "lib/language.js:30"
+      },
+      {
+        "id": "e2e-he-long",
+        "language": "he+Latin",
+        "source": "src/very/long/nested/path/that/keeps/going/without/any/break/live-bridge.js:123"
+      },
+      {
+        "id": "e2e-traversal",
+        "hostiles": "source.path ../../etc/passwd"
+      },
+      {
+        "id": "e2e-bidi",
+        "hostiles": "note contains U+202E and U+202C"
+      }
+    ],
+    "history": [
+      {
+        "id": "e2e-hist-1",
+        "state": "thanks",
+        "language": "he"
+      }
+    ],
+    "data": "synthetic only; no real session text, user data, credentials, or tool output"
+  },
+  "desktop1280": {
+    "viewport": {
+      "innerWidth": 1280,
+      "scrollWidth": 1280
+    },
+    "cards": 5,
+    "maxCardRight": 1133,
+    "rtlMeasure": {
+      "he": {
+        "dir": "rtl",
+        "firstX": 1032,
+        "lastX": 629
+      },
+      "ar": {
+        "dir": "rtl",
+        "firstX": 1037,
+        "lastX": 781
+      },
+      "long": {
+        "dir": "rtl",
+        "firstX": 1032,
+        "lastX": 750
+      }
+    },
+    "longNote": {
+      "wrapped": true,
+      "lines": 2
+    },
+    "traversal": {
+      "codeText": "../../etc/passwd",
+      "openFile": false
+    },
+    "bidi": {
+      "controlPresent": false,
+      "renderedText": "Bidi fixture: invoice gnp.exe must render as plain text, not as a spoofed name."
+    },
+    "dshResourceStringsInDom": 0,
+    "draft": "",
+    "sendDisabled": true,
+    "transcriptMessages": 0
+  },
+  "narrow700": {
+    "viewport": {
+      "innerWidth": 700,
+      "scrollWidth": 700
+    },
+    "cards": 5,
+    "maxCardRight": 677,
+    "composerRight": 673,
+    "longNote": {
+      "dir": "rtl",
+      "firstX": 577,
+      "lastX": 174,
+      "wrapped": true
+    },
+    "horizontalOverflow": false,
+    "traversal": {
+      "openFile": false
+    },
+    "bidiControlPresent": false
+  },
+  "actions": [
+    {
+      "name": "Explain",
+      "target": "Hebrew note with cached explanation",
+      "before": {
+        "openExplanations": 0
+      },
+      "after": {
+        "openExplanations": 1,
+        "explanationPresent": true,
+        "dir": "rtl",
+        "explainRequests": 0
+      },
+      "note": "no reviewer call and no provider request"
+    },
+    {
+      "name": "Add to chat",
+      "target": "Hebrew note",
+      "before": {
+        "activeNotes": 5,
+        "draft": "",
+        "sendDisabled": true,
+        "transcriptMessages": 0
+      },
+      "after": {
+        "activeNotes": 4,
+        "draft": "Fix the reviewer deadline in lib/core.js and add a regression test.",
+        "sendDisabled": false,
+        "composerFocused": true,
+        "transcriptMessages": 0
+      },
+      "note": "draft only; Enter was never pressed"
+    },
+    {
+      "name": "Thanks",
+      "target": "Arabic note",
+      "before": {
+        "activeNotes": 5,
+        "draft": "",
+        "sendDisabled": true,
+        "transcriptMessages": 0
+      },
+      "after": {
+        "activeNotes": 4,
+        "draft": "",
+        "sendDisabled": true,
+        "transcriptMessages": 0
+      }
+    },
+    {
+      "name": "Knew it",
+      "target": "long Hebrew/Latin note",
+      "before": {
+        "activeNotes": 5,
+        "draft": "",
+        "sendDisabled": true,
+        "transcriptMessages": 0
+      },
+      "after": {
+        "activeNotes": 4,
+        "draft": "",
+        "sendDisabled": true,
+        "transcriptMessages": 0
+      }
+    },
+    {
+      "name": "Dismiss",
+      "target": "traversal fixture",
+      "before": {
+        "activeNotes": 5,
+        "draft": "",
+        "sendDisabled": true,
+        "transcriptMessages": 0
+      },
+      "after": {
+        "activeNotes": 4,
+        "draft": "",
+        "sendDisabled": true,
+        "transcriptMessages": 0
+      }
+    },
+    {
+      "name": "Add to chat (traversal)",
+      "target": "hostile source path",
+      "before": {
+        "activeNotes": 5,
+        "draft": ""
+      },
+      "after": {
+        "activeNotes": 4,
+        "draft": "Inspect the generated address for the traversal fixture.",
+        "sendDisabled": false,
+        "pathLeakedIntoDraft": false
+      },
+      "note": "the unsafe path is plain text on the card and never enters the draft or a resource URL"
+    },
+    {
+      "name": "Add to chat (bidi)",
+      "target": "hostile control characters",
+      "before": {
+        "activeNotes": 5,
+        "draft": ""
+      },
+      "after": {
+        "activeNotes": 4,
+        "draft": "Confirm the bidi controls are stripped from the card and the draft.",
+        "sendDisabled": false,
+        "bidiControlInDraft": false
+      }
+    },
+    {
+      "name": "History",
+      "target": "resolved entry",
+      "after": {
+        "state": "Thanks",
+        "hebrewExplanationPresent": true
+      }
+    }
+  ],
+  "hostRoutes": "evidence/actual-host-status.json (authenticated self-check, config, global status, and recentChecks opt-in toggles; browser origins only http://127.0.0.1:51509)",
+  "screenshots": [
+    {
+      "file": "evidence/actual-host-add-to-chat-1280.png",
+      "bytes": 127995,
+      "sha256": "46779fc8c9e8f535ee3c2faeac9cbb59e9bd8f98ab087a35327e1f5473ea295b"
+    },
+    {
+      "file": "evidence/actual-host-dismiss-1280.png",
+      "bytes": 130349,
+      "sha256": "c0cb6133f42c57cf163ed8c4df8cb251b74c84bc878079bc228623a94cb5eaae"
+    },
+    {
+      "file": "evidence/actual-host-explanation-1280.png",
+      "bytes": 147311,
+      "sha256": "5de0021eb986865db2120c64776fbab9a022c3198a9a6902721fae79f0998f37"
+    },
+    {
+      "file": "evidence/actual-host-history-1280.png",
+      "bytes": 153103,
+      "sha256": "6b69334e6bf4168edc7ab444661dcd3cc0158c4d95b73cdeb3ca622e5213107b"
+    },
+    {
+      "file": "evidence/actual-host-knew-it-1280.png",
+      "bytes": 117170,
+      "sha256": "bcdf676839e3a2a170082e4116e3c0219a76f05e69d80584adf6e02f957d7b09"
+    },
+    {
+      "file": "evidence/actual-host-narrow-700.png",
+      "bytes": 117371,
+      "sha256": "53b04c23f77658679ae3ac893987ecb4147fd7b869c37945fe2e7c45bfd306f1"
+    },
+    {
+      "file": "evidence/actual-host-notes-1280.png",
+      "bytes": 143205,
+      "sha256": "88d46d114a9486ef26b1fb986b0aa7afcb5fd067e5cbca893def14f5ffc7359e"
+    },
+    {
+      "file": "evidence/actual-host-thanks-1280.png",
+      "bytes": 129401,
+      "sha256": "e7eb90101a1bf4a3f5840233bc72ffbada3925e620fa8d8b17216b62d10f1e2d"
+    }
+  ],
+  "limitations": [
+    "The notes/history payloads are synthetic fixtures injected at the plugin routes; the reviewer model did not produce them and no live model call ran.",
+    "The isolated host has no tracked review session (no credentials and no completed agent turn), so the per-session status.session.recentChecks field and session cleanup were not observable in the host; unit tests cover them.",
+    "The native desktop window was not automated; the target was the desktop app CLI serving the same web UI, version 0.2.1-rc.5."
+  ]
+}

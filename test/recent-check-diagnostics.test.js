@@ -358,12 +358,14 @@ test('forget, dispose, and a disabled toggle drop or hide the per-session histor
   const toggleSession = sessionWith('s-toggle', [{ turn: 1, answer: 'one' }])
   await observeTurn(toggled, toggleSession)
   assert.equal(toggled.status('s-toggle').session.recentChecks.length, 1)
-  toggled.updateConfig({ ...toggled.config(), recentCheckDiagnostics: false })
+  // Toggle only the opt-in. Spreading config() into updateConfig would send
+  // blank route halves, and an explicit blank half disables the reviewer.
+  toggled.updateConfig({ minDeltaChars: 0, cooldownTurns: 1, recentCheckDiagnostics: false })
   assert.equal('recentChecks' in toggled.status('s-toggle').session, false, 'a disabled toggle hides the field')
   appendTurn(toggleSession, 2, 'two')
   await observeTurn(toggled, toggleSession)
   assert.equal('recentChecks' in toggled.status('s-toggle').session, false, 'a disabled toggle records nothing')
-  toggled.updateConfig({ ...toggled.config(), recentCheckDiagnostics: true })
+  toggled.updateConfig({ minDeltaChars: 0, cooldownTurns: 1, recentCheckDiagnostics: true })
   assert.equal(toggled.status('s-toggle').session.recentChecks.length, 0, 're-enabling starts empty because disabling cleared the history')
 })
 

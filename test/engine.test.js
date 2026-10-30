@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { LIMITS, createEngine, groundVerdict, normalizeConfig } from '../lib/core.js'
+import { LIMITS, createEngine, groundVerdict, normalizeConfig, parseVerdict } from '../lib/core.js'
 
 const CONFIGURED = normalizeConfig({ provider: 'p', model: 'm', minDeltaChars: 0, cooldownTurns: 1 }).config
 
@@ -27,6 +27,29 @@ function assistantEvent(seq, turn, text) {
       stream: [],
     },
   }
+}
+
+/** Build one completed turn with a meaningful tool episode and a capsule path. */
+function episodeSession(id, options = {}) {
+  const answer = options.answer === undefined ? 'work' : options.answer
+  const metaPath = options.metaPath === undefined ? 'src/touched.js' : options.metaPath
+  const events = [
+    userEvent(1, options.question === undefined ? 'run the checks' : options.question),
+    assistantEvent(2, 1, answer),
+    { type: 'tool/call', seq: 3, data: { turn: 1, step: 1, callId: 'c1', name: 'edit' } },
+    {
+      type: 'tool/result',
+      seq: 4,
+      data: {
+        turn: 1,
+        step: 1,
+        message: { role: 'tool', toolCallId: 'c1', content: [{ type: 'text', text: 'RAW' }], isError: false },
+        meta: { path: metaPath },
+      },
+    },
+    turnEnd(5, 1),
+  ]
+  return { id, header: { id }, events, lastEvent: events[4] }
 }
 
 /** Build a session whose log ends with the given turn/end event. */
@@ -442,7 +465,8 @@ test('a source persists per note through storage and dismissal and never reaches
     '{"note":"Guard the write.","importance":"high","source":{"path":"src/store.js","line":42}}',
     '{"note":"A second finding.","importance":"high"}',
   ])
-  const session = sessionWith('s1', [{ turn: 1, answer: 'one' }])
+  // D1: the source path and its line marker must be grounded in the excerpt.
+  const session = sessionWith('s1', [{ turn: 1, answer: 'The write is in src/store.js:42.' }])
   assert.equal((await observeAndSettle(engine, session)).status, 'noted')
   session.events.push(userEvent(90, 'q2'), assistantEvent(91, 2, 'two'), turnEnd(92, 2))
   session.lastEvent = session.events[session.events.length - 1]
@@ -467,7 +491,8 @@ test('an action persists per note through storage and history and never reaches 
     '{"note":"Guard the write.","importance":"high","source":{"path":"src/store.js","line":42},"action":"Fix the store write and add a regression test."}',
     '{"note":"A second finding.","importance":"high"}',
   ])
-  const session = sessionWith('s1', [{ turn: 1, answer: 'one' }])
+  // D1: the source path and its line marker must be grounded in the excerpt.
+  const session = sessionWith('s1', [{ turn: 1, answer: 'The write is in src/store.js:42.' }])
   assert.equal((await observeAndSettle(engine, session)).status, 'noted')
   session.events.push(userEvent(90, 'q2'), assistantEvent(91, 2, 'two'), turnEnd(92, 2))
   session.lastEvent = session.events[session.events.length - 1]
@@ -627,7 +652,8 @@ test('history includes active and resolved notes newest-first with lifecycle met
     '{"note":"second","importance":"critical"}',
     '{"note":"third","importance":"high"}',
   ])
-  const session = sessionWith('s1', [{ turn: 1, answer: 'one' }])
+  // D1: the stored source needs a grounded path and line marker.
+  const session = sessionWith('s1', [{ turn: 1, answer: 'The fix is in src/a.js:3.' }])
   await observeAndSettle(engine, session)
   for (let turn = 2; turn <= 3; turn += 1) {
     session.events.push(userEvent(100 + turn * 3, 'q' + turn), assistantEvent(101 + turn * 3, turn, 'a' + turn), turnEnd(102 + turn * 3, turn))
@@ -695,7 +721,8 @@ test('history is session-scoped, survives a model change, and forget clears it',
 test('status exposes an active and a history count without note or source text', async () => {
   const secret = 'PRIVATE-MARKER-77'
   const { engine } = engineWith(['{"note":"note ' + secret + '","importance":"high","source":{"path":"src/secret.js"}}'])
-  await observeAndSettle(engine, sessionWith('s1', [{ turn: 1, answer: 'one' }]))
+  // D1: the source path must appear verbatim in the excerpt to be stored.
+  await observeAndSettle(engine, sessionWith('s1', [{ turn: 1, answer: 'The fix is in src/secret.js, done.' }]))
   const id = engine.notes('s1')[0].id
   assert.equal(engine.resolve('s1', id, 'dismissed'), true)
 
@@ -1403,6 +1430,147 @@ test('dispose disposes every runtime and clears all session and override state',
   assert.equal(engine.resume('s1'), false)
   assert.equal(engine.observe(sessionWith('s1', [{ turn: 1, answer: 'two' }]), turnEnd(3, 1)).status, 'disposed')
   engine.dispose()
+})
+
+test('a source must name a whole path token in the conversation excerpt', () => {
+  const withSource = (path, line) => ({ note: 'N', importance: 'high', source: line === undefined ? { path } : { path, line } })
+  const exact = withSource('src/a.js')
+  assert.deepEqual(groundVerdict(exact, '[assistant]\nThe fix is in src/a.js, done.'), exact)
+  assert.equal(groundVerdict(withSource('src/a.js'), 'src/a.js.map'), null, 'a longer path token is not an exact path')
+  assert.equal(groundVerdict(withSource('src/a.js'), 'xsrc/a.js'), null, 'a prefixed token is not an exact path')
+  assert.equal(groundVerdict(withSource('a.js'), 'data.js'), null, 'a suffix of a longer filename is not an exact path')
+  assert.equal(groundVerdict(withSource('a.js'), 'a.jsx'), null, 'a longer token after the path is rejected')
+  assert.equal(groundVerdict(withSource('src/a.js'), ''), null, 'a source without an excerpt is never grounded')
+  assert.equal(groundVerdict(withSource('file.js'), 'The fix is in src/my file.js and then.'), null, 'a spaced path suffix is not a standalone token')
+  assert.equal(groundVerdict(withSource('src/my'), 'The fix is in src/my dir/file.js and then.'), null, 'a spaced directory continuation is not the exact path')
+  assert.equal(groundVerdict(withSource('dir/file.js'), 'src/my dir/file.js'), null, 'a spaced path suffix is not a standalone token')
+  assert.deepEqual(groundVerdict(withSource('src/my file.js'), 'The fix is in src/my file.js and then.'), withSource('src/my file.js'), 'the full spaced path still grounds in a sentence')
+  assert.deepEqual(groundVerdict(withSource('src/a.js'), 'see src/a.js v2.0'), withSource('src/a.js'), 'a version word after a path is not a continuation')
+  assert.deepEqual(groundVerdict(withSource('src/a.js'), 'see src/a.js!'), withSource('src/a.js'), 'punctuation after a path is a boundary')
+})
+
+test('a role label never grounds a source path or a quoted basis', async () => {
+  const answer = 'The fix is in src/a.js, done.'
+  const withSource = (path) => JSON.stringify({ note: 'N', importance: 'high', source: { path } })
+  for (const [id, path] of [['d1-role-assistant', 'assistant'], ['d1-role-user', 'user']]) {
+    const { engine, llm } = engineWith([withSource(path)], { minDeltaChars: 0, cooldownTurns: 1 })
+    const outcome = await observeAndSettle(engine, sessionWith(id, [{ turn: 1, answer }]))
+    assert.equal(outcome.status, 'silent')
+    assert.equal(engine.notes(id).length, 0)
+    const prompt = llm.calls[0].messages[0].content[0].text
+    assert.ok(prompt.includes('[assistant]'), 'the prompt excerpt still carries the role label')
+    assert.ok(prompt.includes('[user]'), 'the prompt excerpt still carries the role label')
+  }
+
+  const becauseReply = JSON.stringify({ note: 'N', importance: 'high', kind: 'consequence', because: 'assistant' })
+  const { engine: becauseEngine } = engineWith([becauseReply], { minDeltaChars: 0, cooldownTurns: 1 })
+  const dropped = await observeAndSettle(becauseEngine, sessionWith('d1-role-because', [{ turn: 1, answer }]))
+  assert.equal(dropped.status, 'silent', 'a role label is not a quotable basis')
+  assert.equal(becauseEngine.notes('d1-role-because').length, 0)
+
+  const real = engineWith([withSource('src/a.js')], { minDeltaChars: 0, cooldownTurns: 1 })
+  const noted = await observeAndSettle(real.engine, sessionWith('d1-role-real', [{ turn: 1, answer }]))
+  assert.equal(noted.status, 'noted')
+  assert.equal(real.engine.notes('d1-role-real')[0].source.path, 'src/a.js', 'real message text still grounds normally')
+})
+
+test('a source path token respects percent and spaced continuations', () => {
+  const withSource = (path) => ({ note: 'N', importance: 'high', source: { path } })
+  assert.equal(groundVerdict(withSource('src/a.js'), 'src/a.js%2e'), null, 'a percent continuation is not the exact path')
+  assert.equal(groundVerdict(withSource('src/my'), 'src/my file.js'), null, 'a spaced filename continuation is not the exact path')
+  assert.deepEqual(groundVerdict(withSource('src/my file.js'), 'src/my file.js'), withSource('src/my file.js'), 'the full spaced path still grounds')
+  assert.deepEqual(groundVerdict(withSource('src/a.js'), 'src/a.js and more'), withSource('src/a.js'), 'ordinary prose still grounds the path')
+})
+
+test('a line marker rejects a trailing continuation', () => {
+  const sourceAt = (path, line) => ({ note: 'N', importance: 'high', source: { path, line } })
+  const pathOnly = (path) => ({ note: 'N', importance: 'high', source: { path } })
+  assert.deepEqual(groundVerdict(sourceAt('src/a.js', 42), 'src/a.js:42x'), pathOnly('src/a.js'), ':42x is not a line marker')
+  assert.deepEqual(groundVerdict(sourceAt('src/a.js', 42), 'src/a.js#L42x'), pathOnly('src/a.js'), '#L42x is not a line marker')
+  assert.deepEqual(groundVerdict(sourceAt('src/a.js', 42), 'src/a.js:42_'), pathOnly('src/a.js'), ':42_ is not a line marker')
+  assert.deepEqual(groundVerdict(sourceAt('src/a.js', 42), 'src/a.js:42-3'), pathOnly('src/a.js'), ':42-3 is a line range, not a marker')
+  assert.deepEqual(groundVerdict(sourceAt('src/a.js', 42), 'src/a.js:42/3'), pathOnly('src/a.js'), ':42/3 is not a line marker')
+  assert.deepEqual(groundVerdict(sourceAt('src/a.js', 42), 'src/a.js:42.'), sourceAt('src/a.js', 42), 'a sentence period still ends the marker')
+  assert.deepEqual(groundVerdict(sourceAt('src/a.js', 42), 'src/a.js#L42.'), sourceAt('src/a.js', 42), 'a sentence period still ends the marker')
+})
+
+test('a spaced path and a line range never ground an end-to-end source', async () => {
+  const forged = JSON.stringify({ note: 'N', importance: 'high', source: { path: 'file.js', line: 42 } })
+  const { engine } = engineWith([forged], { minDeltaChars: 0, cooldownTurns: 1 })
+  const dropped = await observeAndSettle(engine, sessionWith('d1-spaced-forged', [{ turn: 1, answer: 'The fix is in src/my file.js:42 and then.' }]))
+  assert.equal(dropped.status, 'silent', 'a spaced path suffix cannot ground a source')
+  assert.equal(engine.notes('d1-spaced-forged').length, 0)
+
+  const range = JSON.stringify({ note: 'N', importance: 'high', source: { path: 'src/a.js', line: 42 } })
+  const { engine: rangeEngine } = engineWith([range], { minDeltaChars: 0, cooldownTurns: 1 })
+  const noted = await observeAndSettle(rangeEngine, sessionWith('d1-line-range', [{ turn: 1, answer: 'The fix is in src/a.js:42-3.' }]))
+  assert.equal(noted.status, 'noted')
+  assert.deepEqual(rangeEngine.notes('d1-line-range')[0].source, { path: 'src/a.js' }, 'a line range drops only the line')
+})
+
+test('a source path is grounded in the conversation only, never in the capsule', async () => {
+  const reply = '{"note":"N","importance":"high","source":{"path":"src/forged.js"}}'
+  const { engine, llm } = engineWith([reply], { minDeltaChars: 0, cooldownTurns: 1 })
+  const outcome = await observeAndSettle(engine, episodeSession('d1-capsule', { answer: 'work', metaPath: 'src/forged.js' }))
+  assert.equal(outcome.status, 'silent')
+  assert.equal(engine.notes('d1-capsule').length, 0)
+  const prompt = llm.calls[0].messages[0].content[0].text
+  assert.ok(prompt.includes('src/forged.js'), 'the capsule still carries the path for corroboration')
+  assert.ok(prompt.includes('BEGIN EPISODE EVIDENCE'))
+})
+
+test('a source line is kept only for an explicit marker on the exact path', () => {
+  const sourceAt = (path, line) => ({ note: 'N', importance: 'high', source: { path, line } })
+  const pathOnly = (path) => ({ note: 'N', importance: 'high', source: { path } })
+  assert.deepEqual(groundVerdict(sourceAt('src/a.js', 42), 'The fix is in src/a.js:42.'), sourceAt('src/a.js', 42))
+  assert.deepEqual(groundVerdict(sourceAt('src/a.js', 42), 'The fix is in src/a.js#L42.'), sourceAt('src/a.js', 42))
+  assert.deepEqual(groundVerdict(sourceAt('src/a.js', 42), 'The fix is in src/a.js, done.'), pathOnly('src/a.js'), 'no marker drops only the line')
+  assert.deepEqual(groundVerdict(sourceAt('src/a.js', 42), 'The fix is in src/a.js:43.'), pathOnly('src/a.js'), 'a marker for another line drops only the line')
+  assert.deepEqual(groundVerdict(sourceAt('src/a.js', 42), 'src/a.js.map:42 and src/a.js, done.'), pathOnly('src/a.js'), 'a marker on a longer path is not this path')
+  assert.deepEqual(groundVerdict(sourceAt('src/a.js', 42), 'src/a.js:0'), pathOnly('src/a.js'), 'a non-positive marker is not a line')
+})
+
+test('a Windows path is grounded verbatim without normalization', () => {
+  const relative = { note: 'N', importance: 'high', source: { path: 'src\\app\\a.ts' } }
+  assert.equal(groundVerdict(relative, 'edited src\\app\\a.ts today'), relative)
+  assert.deepEqual(groundVerdict({ note: 'N', importance: 'high', source: { path: 'src/app/a.ts' } }, 'edited src\\app\\a.ts'), null, 'no separator normalization')
+
+  // The host parser and grounding agree end to end: a Windows-style relative
+  // path survives parseVerdict and still grounds, while the drive-absolute form
+  // never reaches groundVerdict because parseVerdict rejects it.
+  const parsed = parseVerdict(JSON.stringify({ note: 'N', importance: 'high', source: { path: 'src\\app\\a.ts' } }))
+  assert.equal(parsed.source.path, 'src\\app\\a.ts')
+  assert.equal(groundVerdict(parsed, 'edited src\\app\\a.ts today'), parsed)
+  const drive = parseVerdict(JSON.stringify({ note: 'N', importance: 'high', source: { path: 'C:\\repo\\src\\a.ts' } }))
+  assert.equal(drive, null, 'parseVerdict rejects a drive-absolute path')
+})
+
+test('a because quoted from the evidence capsule is not grounded in the conversation', async () => {
+  const headerReply = '{"note":"N","importance":"high","kind":"consequence","because":"Episode evidence (untrusted metadata)"}'
+  const header = engineWith([headerReply], { minDeltaChars: 0, cooldownTurns: 1 })
+  const first = await observeAndSettle(header.engine, episodeSession('d2-header', { answer: 'work' }))
+  assert.equal(first.status, 'silent')
+  assert.equal(header.engine.notes('d2-header').length, 0)
+  assert.ok(header.llm.calls[0].messages[0].content[0].text.includes('Episode evidence (untrusted metadata)'))
+
+  const genericReply = '{"note":"N","importance":"high","kind":"tradeoff","because":"provenance: root"}'
+  const generic = engineWith([genericReply], { minDeltaChars: 0, cooldownTurns: 1 })
+  const second = await observeAndSettle(generic.engine, episodeSession('d2-generic', { answer: 'work' }))
+  assert.equal(second.status, 'silent')
+  assert.equal(generic.engine.notes('d2-generic').length, 0)
+  assert.ok(generic.llm.calls[0].messages[0].content[0].text.includes('provenance: root'))
+})
+
+test('a because taken from the conversation keeps RTL text and punctuation intact', async () => {
+  const hebrew = 'הסוכן מחק את הקובץ (בטעות).'
+  const arabic = 'حذف الوكيل الملف (عن طريق الخطأ).'
+  for (const [id, quote] of [['d2-he', hebrew], ['d2-ar', arabic]]) {
+    const reply = JSON.stringify({ note: 'N', importance: 'high', kind: 'defect', because: quote })
+    const { engine } = engineWith([reply], { minDeltaChars: 0, cooldownTurns: 1 })
+    const outcome = await observeAndSettle(engine, sessionWith(id, [{ turn: 1, answer: 'The log says: ' + quote }]))
+    assert.equal(outcome.status, 'noted')
+    assert.equal(engine.notes(id)[0].because, quote)
+  }
 })
 
 test('a because that is not verbatim in the excerpt drops the reply', async () => {
