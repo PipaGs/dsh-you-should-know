@@ -1,0 +1,23 @@
+# SHA-256 of task artifacts, pre-commit working tree, 2026-10-30
+# Capture point: after the final test run, the review approval, and the check.txt EOF trim; before the product commit.
+
+a539e5fb18ac73eeea3507e9d28a7b01326467d8b760b25e12d3dd1359645f96  docs/upstream/ledger.json
+afa67b3781609e442988fd4b2880c337709a0ef21ac0c122f3ddd59304527355  docs/upstream/README.md
+b2dd896d90151536a505dc720ebd76286ebd8b3aba6953663d9faf7611780695  docs/upstream/workflow.md
+1355c524b48e01a6d870fd010ccdcc4456c5070991f8ded2b2ff9035776eedc7  docs/upstream/addendum-20261030-source-policy-deviation.md
+fdf0cca2b983de61e04a645ffa04044ce7454db6635b588d745fec64d9f72eea  test/upstream-ledger.test.js
+5fc6ad4d20f74f67e5e68df1af0335ce10ad02b311a45e1d3e0d51bc18d45a1d  docs/harness-reports/ysk-upstream-ledger-correction-20261030/final-report.md
+951b2f172b4ce8e374c6f6e815725bea4531bd807ab2bc0c80bbcf27ba26de86  docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/github-releases-2.1.287-2.1.312.json
+d06b5b2a0f716f4acafcb4d9f08e8e748734c60015ab78e6947df092591f7495  docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/local-tag-identity.txt
+40449b2ebcd074ef5e2b9112c81645a481b63f0df5a21656cef92ad5a8507a73  docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/release-body-hashes.txt
+a6a85b6676c9eb2378fdf2d0ffc92513e36adf3743eeb57f16f6083bf35739d3  docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/security-scan.txt
+45e3e449371fb794917e5ae2b3cd4eb81b3167e6ece216e5c0b7a72aa76298ad  docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/content-scan.txt
+db256f63d7af13789c1c8ccf6708e9a88b87f879dbf60e92b62558d7e5ad7ef5  docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/invariants.txt
+254af3d0a28f0548089fe099034493cf7e853d1c5c42000ed39b7ad4b5776da7  docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/diff-summary.txt
+0724714785ae32754f864a9e74086a317970de58ffd8e8d8f8e0be54ca40987e  docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/check.txt
+de2675db31b4b86b957bbe9bb39dc5b3fd2cfcbfe71c2c34fc68b54bd1963293  docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/test-run-targeted.txt
+116d7c4dc359d554b6db5d1a924b85fa8008e822b59747741fdcb771416b2374  docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/test-run-full.txt
+29613a2fa07c3ae67bb3af37debff84cb757b71c68bebd9fbe682a9b9321ff83  docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/test-run-baseline-targeted.txt
+8fa473694cbb79277d3062af6ebda024028aafe8b3c29a6177954409856725b7  docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/test-run-baseline-full.txt
+959258b3c448ff0442dce31cca2f627e714202b910c63ef7881dec50f4f4b3c2  docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/upstream-tag-refs.txt
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/diff-check.txt

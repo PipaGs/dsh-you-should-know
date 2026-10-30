@@ -1,0 +1,42 @@
+# Invariants, pre-commit working tree
+
+$ node -e 'console.log(require(./package.json).version)'
+0.4.6
+$ node --input-type=module -e 'import {PLUGIN_VERSION} from ./lib/index.js; console.log(PLUGIN_VERSION)'
+0.4.6
+
+$ git diff --name-only
+docs/upstream/README.md
+docs/upstream/ledger.json
+docs/upstream/workflow.md
+test/upstream-ledger.test.js
+$ git ls-files --others --exclude-standard
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/artifacts-hashes.txt
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/check.txt
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/content-scan.txt
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/diff-check.txt
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/diff-summary.txt
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/github-releases-2.1.287-2.1.312.json
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/invariants.txt
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/local-tag-identity.txt
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/release-body-hashes.txt
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/security-scan.txt
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/test-run-baseline-full.txt
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/test-run-baseline-targeted.txt
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/test-run-full.txt
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/test-run-targeted.txt
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/upstream-tag-refs.txt
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/final-report.md
+docs/upstream/addendum-20261030-source-policy-deviation.md
+
+# Product paths changed by this task (expect empty):
+(none)
+
+$ git diff --quiet -- docs/upstream/evidence/claude-code-upstream-20261014.json; echo exit=$?
+exit=0
+$ shasum -a 256 docs/upstream/evidence/claude-code-upstream-20261014.json
+c5fac2b1502d8a221ec4a7e229012c645f84be0d9310791173af84031e809d7a  docs/upstream/evidence/claude-code-upstream-20261014.json
+
+$ git rev-parse v0.4.6 v0.4.6^{}
+2dd722eb691493281aefa081ebfc722afb7d117f
+038dcdac90c4dbb32e18d21a21bfa56d83bbc6c2

@@ -1,0 +1,15 @@
+# Content scan
+# The coverage evidence keeps release metadata and matched lines, not the full upstream bodies.
+
+Release object keys: bodyLineCount, bodySha256, createdAt, draft, id, immutable, name, prerelease, publishedAt, tag, tagRefSha, tagRefType, url, youShouldKnowLines
+Release count: 24
+Total direct You should know lines: 3
+Longest direct line: 231 characters
+
+docs/upstream/ledger.json: 22563 bytes
+docs/upstream/README.md: 8893 bytes
+docs/upstream/workflow.md: 5224 bytes
+docs/upstream/addendum-20261030-source-policy-deviation.md: 4589 bytes
+test/upstream-ledger.test.js: 22867 bytes
+
+RESULT: PASS (no full upstream body and no long quoted line)

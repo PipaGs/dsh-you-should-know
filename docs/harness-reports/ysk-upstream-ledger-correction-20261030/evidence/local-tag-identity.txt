@@ -1,0 +1,33 @@
+# Local release-tag identity, captured 2026-10-30
+# Tagger identity is redacted; the object, type, target, and date are kept.
+$ git rev-parse v0.4.6 v0.4.6^{} v0.4.3 v0.4.3^{}
+2dd722eb691493281aefa081ebfc722afb7d117f
+038dcdac90c4dbb32e18d21a21bfa56d83bbc6c2
+7d392bd65e07fdbd42530e56d32698a05edeba52
+b6a202d00e80e6069c07b03e65034b4280756f1d
+
+$ git for-each-ref refs/tags/v0.4.6 refs/tags/v0.4.3 --format='%(refname) object=%(objectname) type=%(objecttype) tagger=%(taggerdate:iso-strict) subject=%(subject)'
+refs/tags/v0.4.3 object=7d392bd65e07fdbd42530e56d32698a05edeba52 type=tag tagger=2026-10-13T17:51:08+03:00 subject=v0.4.3
+refs/tags/v0.4.6 object=2dd722eb691493281aefa081ebfc722afb7d117f type=tag tagger=2026-10-24T07:43:12+03:00 subject=v0.4.6
+
+$ git cat-file -p refs/tags/v0.4.6 | sed -E 's/^tagger .*/tagger [redacted]/'
+object 038dcdac90c4dbb32e18d21a21bfa56d83bbc6c2
+type commit
+tag v0.4.6
+tagger [redacted]
+
+v0.4.6
+
+$ git cat-file -p refs/tags/v0.4.3 | sed -E 's/^tagger .*/tagger [redacted]/'
+object b6a202d00e80e6069c07b03e65034b4280756f1d
+type commit
+tag v0.4.3
+tagger [redacted]
+
+v0.4.3
+
+$ git ls-remote --tags origin 'refs/tags/v0.4.6*' 'refs/tags/v0.4.3*'
+7d392bd65e07fdbd42530e56d32698a05edeba52	refs/tags/v0.4.3
+b6a202d00e80e6069c07b03e65034b4280756f1d	refs/tags/v0.4.3^{}
+2dd722eb691493281aefa081ebfc722afb7d117f	refs/tags/v0.4.6
+038dcdac90c4dbb32e18d21a21bfa56d83bbc6c2	refs/tags/v0.4.6^{}

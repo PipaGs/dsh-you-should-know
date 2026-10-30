@@ -1,0 +1,16 @@
+✔ the upstream ledger cites pinned official Claude Code sources (2.99425ms)
+✔ the ledger records the local baseline on a real named revision (12.146584ms)
+✔ every tracked upstream signal has its own item with evidence and a disposition (0.53275ms)
+✔ a gap or an adaptation is never dispositioned as applicable-with-nothing-to-do (0.284084ms)
+✔ an uncontested upstream unknown is recorded, not resolved by guessing (0.313917ms)
+✔ a source outage is recorded as unknown, never as no change (0.250541ms)
+✔ the ledger carries no private or unrelated project data (1.560666ms)
+✔ the human-readable workflow and baseline documents exist and agree with the ledger (0.842833ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 201.862417

@@ -1,0 +1,38 @@
+# Diff summary, pre-commit working tree
+$ git diff --stat
+ docs/upstream/README.md      |  65 ++++++++---
+ docs/upstream/ledger.json    | 169 +++++++++++++++++++++++++---
+ docs/upstream/workflow.md    |   8 ++
+ test/upstream-ledger.test.js | 261 +++++++++++++++++++++++++++++++++++++++++--
+ 4 files changed, 467 insertions(+), 36 deletions(-)
+
+$ git diff --numstat
+50	15	docs/upstream/README.md
+156	13	docs/upstream/ledger.json
+8	0	docs/upstream/workflow.md
+253	8	test/upstream-ledger.test.js
+
+$ git diff --name-only
+docs/upstream/README.md
+docs/upstream/ledger.json
+docs/upstream/workflow.md
+test/upstream-ledger.test.js
+
+$ git ls-files --others --exclude-standard
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/artifacts-hashes.txt
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/check.txt
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/content-scan.txt
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/diff-check.txt
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/diff-summary.txt
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/github-releases-2.1.287-2.1.312.json
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/invariants.txt
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/local-tag-identity.txt
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/release-body-hashes.txt
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/security-scan.txt
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/test-run-baseline-full.txt
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/test-run-baseline-targeted.txt
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/test-run-full.txt
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/test-run-targeted.txt
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/upstream-tag-refs.txt
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/final-report.md
+docs/upstream/addendum-20261030-source-policy-deviation.md
