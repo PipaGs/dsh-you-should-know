@@ -1,0 +1,185 @@
+✖ the recent-check outcome allowlist and the cap are explicit and frozen (0.744084ms)
+✖ recent-check diagnostics stay off by default in config, status, diagnostics, and self-check (5.292792ms)
+✖ enabled diagnostics expose newest-first records with only at, outcome, and turn (0.864625ms)
+✖ the per-session history keeps only the newest records up to the cap (1.796834ms)
+✖ a record keeps the reviewed turn ordinal while a later turn is in flight (0.462167ms)
+✖ the tracked-session cap drops the oldest history with its session (6.393166ms)
+✖ an unusable clock never breaks a record and stores a null timestamp (0.45225ms)
+✖ forget, dispose, and a disabled toggle drop or hide the per-session history (0.200125ms)
+✖ secret event, reason, and note text never reach the diagnostic records (1.330833ms)
+✖ a reviewer failure and an unexpected failure stay allowlisted and never throw (0.454625ms)
+✖ a pinned config save preserves the live recent-check opt-in (30.03525ms)
+✖ the config route persists the opt-in, rejects non-booleans, and preserves it on an automatic save (0.4615ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+✖ the plugin serves the opt-in history and capability over its routes (7.83575ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 0
+ℹ fail 13
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 243.830792
+
+✖ failing tests:
+
+test at test/recent-check-diagnostics.test.js:215:1
+✖ the recent-check outcome allowlist and the cap are explicit and frozen (0.744084ms)
+  TypeError [Error]: core.RECENT_CHECK_OUTCOMES is not iterable
+      at TestContext.<anonymous> (file:///private/tmp/ysk-stage4c-base/test/recent-check-diagnostics.test.js:216:29)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)
+
+test at test/recent-check-diagnostics.test.js:222:1
+✖ recent-check diagnostics stay off by default in config, status, diagnostics, and self-check (5.292792ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+    {
+      configured: true,
+  -   recentCheckDiagnostics: false,
+      reviewerMode: 'balanced',
+      runtimeStatus: 'idle'
+    }
+
+      at TestContext.<anonymous> (file:///private/tmp/ysk-stage4c-base/test/recent-check-diagnostics.test.js:229:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { configured: true, reviewerMode: 'balanced', runtimeStatus: 'idle' },
+    expected: { configured: true, reviewerMode: 'balanced', runtimeStatus: 'idle', recentCheckDiagnostics: false },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/recent-check-diagnostics.test.js:246:1
+✖ enabled diagnostics expose newest-first records with only at, outcome, and turn (0.864625ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  false !== true
+
+      at TestContext.<anonymous> (file:///private/tmp/ysk-stage4c-base/test/recent-check-diagnostics.test.js:257:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/recent-check-diagnostics.test.js:267:1
+✖ the per-session history keeps only the newest records up to the cap (1.796834ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'length')
+      at TestContext.<anonymous> (file:///private/tmp/ysk-stage4c-base/test/recent-check-diagnostics.test.js:277:24)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at test/recent-check-diagnostics.test.js:284:1
+✖ a record keeps the reviewed turn ordinal while a later turn is in flight (0.462167ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'length')
+      at TestContext.<anonymous> (file:///private/tmp/ysk-stage4c-base/test/recent-check-diagnostics.test.js:314:24)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at test/recent-check-diagnostics.test.js:318:1
+✖ the tracked-session cap drops the oldest history with its session (6.393166ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'length')
+      at TestContext.<anonymous> (file:///private/tmp/ysk-stage4c-base/test/recent-check-diagnostics.test.js:326:74)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at test/recent-check-diagnostics.test.js:329:1
+✖ an unusable clock never breaks a record and stores a null timestamp (0.45225ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+  + undefined
+  - [
+  -   {
+  -     at: null,
+  -     outcome: 'unroutable',
+  -     turn: 1
+  -   }
+  - ]
+
+      at TestContext.<anonymous> (file:///private/tmp/ysk-stage4c-base/test/recent-check-diagnostics.test.js:334:12)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: [ { at: null, turn: 1, outcome: 'unroutable' } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/recent-check-diagnostics.test.js:342:1
+✖ forget, dispose, and a disabled toggle drop or hide the per-session history (0.200125ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'length')
+      at TestContext.<anonymous> (file:///private/tmp/ysk-stage4c-base/test/recent-check-diagnostics.test.js:346:61)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at test/recent-check-diagnostics.test.js:370:1
+✖ secret event, reason, and note text never reach the diagnostic records (1.330833ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'length')
+      at TestContext.<anonymous> (file:///private/tmp/ysk-stage4c-base/test/recent-check-diagnostics.test.js:394:46)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at test/recent-check-diagnostics.test.js:410:1
+✖ a reviewer failure and an unexpected failure stay allowlisted and never throw (0.454625ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'map')
+      at TestContext.<anonymous> (file:///private/tmp/ysk-stage4c-base/test/recent-check-diagnostics.test.js:415:27)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at test/recent-check-diagnostics.test.js:431:1
+✖ a pinned config save preserves the live recent-check opt-in (30.03525ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + undefined
+  - true
+
+      at TestContext.<anonymous> (file:///private/tmp/ysk-stage4c-base/test/recent-check-diagnostics.test.js:441:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/recent-check-diagnostics.test.js:449:1
+✖ the config route persists the opt-in, rejects non-booleans, and preserves it on an automatic save (0.4615ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + undefined
+  - false
+
+      at TestContext.<anonymous> (file:///private/tmp/ysk-stage4c-base/test/recent-check-diagnostics.test.js:458:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/recent-check-diagnostics.test.js:487:1
+✖ the plugin serves the opt-in history and capability over its routes (7.83575ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'map')
+      at TestContext.<anonymous> (file:///private/tmp/ysk-stage4c-base/test/recent-check-diagnostics.test.js:501:52)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)

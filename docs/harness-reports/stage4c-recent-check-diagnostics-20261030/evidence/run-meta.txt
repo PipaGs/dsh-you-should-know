@@ -1,0 +1,50 @@
+# Stage 4C evidence metadata
+
+## Baseline
+
+- Tree: 96b728166eabd5e360d0d55ec31f544aab573b01 (origin/main before this feature).
+- Checkout: a clean detached git worktree of that commit; the new test file was absent.
+- Command: npm test 2>&1 | tail -12
+- Result: 642 tests, 642 pass, 0 fail, exit 0.
+- File: test-baseline.txt. Its first line adds "# clean base tree, 96b7281" to identify the
+  checkout; the captured command output below it is unchanged.
+
+## Red reproduction
+
+- Base commit: 96b728166eabd5e360d0d55ec31f544aab573b01.
+- Checkout: a clean detached git worktree of that commit.
+- Tests: the final 13-test test/recent-check-diagnostics.test.js from this branch, copied into that
+  checkout.
+- Command: node --test test/recent-check-diagnostics.test.js
+- Result: 13 tests, 0 pass, 13 fail, exit 1.
+- Captured (UTC): 2026-10-30T17:46:12Z.
+- The checkout had no feature code, so all final tests are red without the implementation.
+
+## Red log normalization
+
+- test-red-raw.txt is the captured output with only trailing spaces/tabs removed from every line,
+  because the repository PR whitespace gate rejects trailing whitespace in the committed patch.
+  It keeps the temporary-worktree path; that path is not a user home path.
+- test-red-raw.txt SHA-256: f111c1fdc55ec28e36583074ad37de68bd3bcd8d67531919ce34cbe48ea55ea9
+- test-red.txt is the readable copy. Besides the same trailing-space removal, each machine-local file
+  URL and absolute path under the temporary base worktree was replaced with <base-worktree>/, and one
+  command header line and one exit-code footer line were added.
+- Counts, durations, assertion text, and every other character are unchanged.
+- test-red.txt SHA-256: 2a8cf5963dd420f67b8287ec30978165f60a51000c0eddead7321648946fc574
+- The pre-normalization capture was not retained. The normalization above is the only difference.
+
+## Chronology note
+
+- The implementation subagent authored the tests before the product code. Its first red run covered 9
+  tests. During evidence normalization that log was replaced by base-tree reproductions; the committed
+  red log is a reproduction of the final 13-test file. It proves that all final tests fail on the base
+  tree; it does not by itself prove the authoring order.
+
+## Final gates
+
+- test-green.txt: targeted recent-check tests, 13 pass, exit 0. The header names product head
+  08d3ea2f5dc21c294f2ce30b3390e53db50e3d0d.
+- test-full.txt: full npm test summary, 656 pass, exit 0. The header names the same product head.
+- check.txt: npm run check, exit 0.
+- diff-check.txt: git diff --cached --check 96b728166eabd5e360d0d55ec31f544aab573b01 on the staged
+  final tree (report and evidence included), exit 0.

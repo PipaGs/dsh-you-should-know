@@ -1,0 +1,25 @@
+# product tree: 08d3ea2f5dc21c294f2ce30b3390e53db50e3d0d
+$ node --test test/recent-check-diagnostics.test.js
+✔ the recent-check outcome allowlist and the cap are explicit and frozen (0.986125ms)
+✔ recent-check diagnostics stay off by default in config, status, diagnostics, and self-check (22.202292ms)
+✔ enabled diagnostics expose newest-first records with only at, outcome, and turn (0.782791ms)
+✔ the per-session history keeps only the newest records up to the cap (2.443167ms)
+✔ a record keeps the reviewed turn ordinal while a later turn is in flight (0.489667ms)
+✔ the tracked-session cap drops the oldest history with its session (5.572666ms)
+✔ an unusable clock never breaks a record and stores a null timestamp (0.583208ms)
+✔ forget, dispose, and a disabled toggle drop or hide the per-session history (0.36925ms)
+✔ secret event, reason, and note text never reach the diagnostic records (0.526875ms)
+✔ a reviewer failure and an unexpected failure stay allowlisted and never throw (0.4465ms)
+✔ a pinned config save preserves the live recent-check opt-in (1.367875ms)
+✔ the config route persists the opt-in, rejects non-booleans, and preserves it on an automatic save (1.270625ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+✔ the plugin serves the opt-in history and capability over its routes (8.644208ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 217.693334
+exit code: 0

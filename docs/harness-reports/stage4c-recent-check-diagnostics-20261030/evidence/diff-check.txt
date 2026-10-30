@@ -1,0 +1,4 @@
+# product tree: 08d3ea2f5dc21c294f2ce30b3390e53db50e3d0d
+# staged final tree: product, report, and evidence; committed as the report commit
+$ git diff --cached --check 96b728166eabd5e360d0d55ec31f544aab573b01
+exit code: 0
