@@ -1,4 +1,4 @@
-SHA-256 of all task artifacts, old and new, at the rev4 pre-commit working tree
+SHA-256 of all task artifacts, old and new, at the rev4 final pre-commit working tree
 Exclusions: this file excludes itself and privacy-audit-final-rev4.txt, the
 post-manifest final audit written last. The final audit scans this manifest,
 and test/task-evidence-paths.test.js covers privacy-audit-final-rev4.txt for
@@ -15,29 +15,30 @@ da6ae53d498389e460622618d4d0eb6dc6a0cd0e38460c477af7002688d5adfe  docs/harness-r
 16fa1ce2b9ffa1b1aef902b9f23e8bf00a87bcd79e06c40dd53a7859965194e5  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check.txt
 3eeba67d7f7d0eee80b2aa20655c275da49ecf46ca90a35e89eb1c1709b50136  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/content-scan-followup.txt
 86fcb05ae5f959d01889f2fb3fc1715c41c28700ffdf2c240ca81d3e239fc1d7  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/content-scan-privacy.txt
-cf401f9d080c06b3a8522c47295620f3bad21982aabecdbcce428192c119d8d4  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/content-scan-rev4.txt
+3d3610da17ff4e003e0f574f1404eafd0579f5865395374a429b7144488bc125  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/content-scan-rev4.txt
 c17d9ff9b93d0adb364010083e37ed580b533eeef889da5a0e728afc12aea5d2  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/content-scan.txt
 5dbc1c165d6b86102d311da44eea8fc232bc7bf9a151d63f0e51ebb062ecf8c2  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/defect-repro.txt
 7b5bd51a8d0d15cac6e98791a9e40e50204eab9c47021717b8cc4c1bc54fbe10  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-followup.txt
 7b5bd51a8d0d15cac6e98791a9e40e50204eab9c47021717b8cc4c1bc54fbe10  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-privacy.txt
+a8a6cb496e3ac930d28118a8c37d0947166975a6fb8c3a7fddd5ac1c64180f52  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-range-final.txt
 2475744dd50ac717b7c601923a2c090d3c3cdb44e5b2b0fe062eaa2546b2714e  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-rev4.txt
 7b5bd51a8d0d15cac6e98791a9e40e50204eab9c47021717b8cc4c1bc54fbe10  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check.txt
 a196a02fc43cf8cc611ad90b0c65dab80efd1152ff831909ac3d8019f7f9c0a6  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary-followup.txt
 627225f6a22c449e41b767d1f99166f312ae3ee0a2a0b27fb6119d6a7f1016e9  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary-privacy.txt
-e121474065e237cf64f159a52dc7470015df0efc4ef57e633908d139aa2e2efd  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary-rev4.txt
+82be804799c522d09e0cc0bd906ac49505a1d196a8d70f3598e0cf9b8befd51d  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary-rev4.txt
 fe2d93110ba59d131262d4442a340a349586954bb947e549d9f785719f2c6e80  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary.txt
 2f6fa8691c64d0aa0db8c25c39bff40c46d41c2dc1bbc517d79d7dc2e8cb7410  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants-followup.txt
 14829183781abef0f625bf3667309d8e138e000b05e951eb3ce570c26c6fc177  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants-privacy.txt
-276334a760a3ecf6fb37efce2118207bfa4e525badb53bfbdc59f0d340def578  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants-rev4.txt
+986de290b78b2b7e8becabb8abc9b615f7416e3422ab7e7135cea25b981bc765  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants-rev4.txt
 13a4b126a3802d2492b6f774642b3aef86f4fb44266f2cd3b1796b33c6792d95  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants.txt
 98f4f6ae01856993f24604630c1c6e242ae9a6786d6e87f212b040f3e86c69d2  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/pr-diff-check-after.txt
 173d01b471434228a776ec5e09b4b38145050ef885cab8e39cf14989af91d81e  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/pr-diff-check-before.txt
 f2dd83a8e4d269e5dc2dba20b834435f9815aeb96785b07dd3c04ca0e8e03703  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/privacy-audit-final.txt
-d6c21755e0c3f956fe45a865b6ec2f7412198ea85c4ab142c4ffea26cd203767  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/privacy-audit-rev4.txt
+99a636d1dc1cf8321b18dce63d6eafe34695a5ffa1a7e6871f646cfc6349cd32  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/privacy-audit-rev4.txt
 5888e413b60f1355849839bceb39dcb78128006d18a699aacc51fcc58e6f801d  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/privacy-audit.txt
 7bdae2fbaa93922d42b1bde5fc3f02ff24e48c794ae49770817a17a1acb13052  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan-followup.txt
 18a718b3328b7d37d9a061592abe09fb382c33daff59a16f2e2b8f583d39ecf7  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan-privacy.txt
-bc05fa003ce6f8ec3240bd6fddc1a5b2597f039f0df8715c86d58fd6d0ac2363  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan-rev4.txt
+e89cceceaf23d6512ae7fc030be1e94c54a93c9ec05363885beaf96155ad29d6  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan-rev4.txt
 36839b9b98a2338d041859ad0089a307f31e52b8fdccf793437c314ec6888f16  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan.txt
 6b79e8431230216f01a63e1983196bb7435e2e22da3f140e3c584ea610060216  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-baseline-full.txt
 a736b17946ac552d4ebcefa5c18a043d4f1b7c0ec3c9cb45b2ce2a7f9b5719c1  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-baseline-targeted.txt
@@ -50,7 +51,7 @@ f1d837463740f00d4fd0e4e346e84962d38b84a1992dec095e5007fb544481f9  docs/harness-r
 b448bc98526d7b952b7b4be6b489bec773fa02d2b35a98c89725fcb32252e34d  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-targeted-privacy.txt
 b55b92e7436eeef6b128c5f01e6666268df2a2961f38ed6b4d3fb1bb2fd4eb59  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-targeted-rev4.txt
 e938c2f8caa079e81c286461527e480f83b3f9ec314eb7fc10da9a49a0dc19c8  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-targeted.txt
-f55862a8cb08a45039dd89cf1b32bf79035e2829893d5ca42a09d1f3de118c34  docs/harness-reports/ysk-upstream-source-policy-20261030/final-report.md
+7d26a06eac88ea3ec9e87a87c4b045720280b6a8a420bdf56fbd67b46c0f5fb2  docs/harness-reports/ysk-upstream-source-policy-20261030/final-report.md
 4b3f8a9be50247e3ee22119d035935ab6554eef0d324ffb37206cc1137821509  docs/upstream/README.md
 a7d85d091acdf5b44d043aef21c9b71dd624f17876d41d1d7ef823bc321957b3  docs/upstream/ledger.json
 124fc5504b444b5f1194a68096de1fba4173de9902185df87f95b3bf1a9528b7  docs/upstream/workflow.md

@@ -1,0 +1,13 @@
+# Post-commit exact whitespace check on the committed PR range
+# base: 0419b70797a8d37db245d55817a7be273b5edcdb
+# commit C: 07d728b35cc51380f4d11e623016773978df077e
+# parent of C: 16c08918333d6884d98d334d0141ee6a5820094f
+# command: git diff --check 0419b70..07d728b
+# exit code: 0
+# output: (empty)
+# clean tree: git diff --check exit code 0
+#
+# This file records the exact post-commit check. Commit D adds this record
+# and regenerates the report and evidence; it changes no code and no test.
+# The final BASE..D range check is run after commit D and recorded in the PR
+# body and the final answer.

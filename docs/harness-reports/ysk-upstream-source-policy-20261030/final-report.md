@@ -425,6 +425,8 @@ Checks on the rev4 pre-commit working tree:
 Evidence: test-run-targeted-rev4.txt, test-run-full-rev4.txt, check-rev4.txt,
 diff-check-rev4.txt, check-baseline-fix.txt.
 
+Post-commit exact range check: git diff --check 0419b70..07d728b exited 0 with no output. This evidence-only commit adds that result; the final BASE..D check is re-run after it.
+
 Scans: security-scan-rev4.txt and privacy-audit-rev4.txt scan every changed file
 and all evidence. privacy-audit-final-rev4.txt re-scans the final set.
 content-scan-rev4.txt checks quoted length. The scans report zero absolute file

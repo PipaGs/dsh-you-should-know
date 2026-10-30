@@ -62,3 +62,9 @@ Process invariants:
   no new docs page source and no new upstream item: yes
 
 Result: PASS.
+
+Evidence-only commit D:
+  adds evidence/diff-check-range-final.txt and changes no product file, test, or
+  version. HEAD is commit C 07d728b (parent 16c0891) plus this uncommitted
+  evidence. Final PR file count: 57. Final manifest entries: 55.
+  The checks above are the rev4 pre-commit snapshot.

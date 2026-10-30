@@ -1,8 +1,8 @@
 Security scan of every changed file and all task evidence (rev4 round)
 
 Base: 0419b70797a8d37db245d55817a7be273b5edcdb
-Scan base: rev4 pre-commit working tree at HEAD 16c08918333d6884d98d334d0141ee6a5820094f plus uncommitted rev4 files.
-Coverage: 54 files, 54 of 54 in scope.
+Scan base: rev4 final pre-commit working tree. HEAD is commit C 07d728b35cc51380f4d11e623016773978df077e (parent 16c0891) plus uncommitted evidence-only commit D files.
+Coverage: 55 files, 55 of 55 in scope.
 
 Scanned files:
   docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/artifacts-hashes-followup.txt
@@ -22,6 +22,7 @@ Scanned files:
   docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/defect-repro.txt
   docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-followup.txt
   docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-range-final.txt
   docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-rev4.txt
   docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check.txt
   docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary-followup.txt
@@ -87,7 +88,7 @@ docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan-
 docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan.txt:19
 test/upstream-ledger.test.js:401
 
-Category counts (54 files):
+Category counts (55 files):
   absolute file URL: 0
   home-directory marker: 0
   secret-like token or private key: 0
@@ -99,12 +100,12 @@ Allowlist (grounded fixtures only):
   test/upstream-ledger.test.js:401
 
 Result: PASS. No absolute file URL, home-directory marker, or secret was found in
-the 54 files. The only email-pattern matches are the three grounded
+the 55 files. The only email-pattern matches are the three grounded
 fixtures above.
 
 Self-check:
-  After this block was appended, the scan re-read this file alone and applied
-  the same categories:
+  The scan re-read this file alone after the final write and applied the same
+  categories:
   absolute file URL: 0
   home-directory marker: 0
   secret-like token or private key: 0

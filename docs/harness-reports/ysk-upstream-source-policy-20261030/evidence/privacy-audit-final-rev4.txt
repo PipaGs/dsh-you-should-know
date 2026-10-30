@@ -1,12 +1,12 @@
 Final privacy audit - rev4 round
 
-Scanned all 55 existing PR files at the rev4 pre-commit working tree,
-including the task report, all evidence, the rev4 manifest, both tests, and the
-policy files.
+Scanned all 56 existing PR files at the rev4 final pre-commit working
+tree, including the task report, all evidence, the rev4 manifest, the tests, and
+the policy files.
 Base: 0419b70797a8d37db245d55817a7be273b5edcdb
-Scan base: rev4 pre-commit working tree at HEAD 16c08918333d6884d98d334d0141ee6a5820094f plus uncommitted rev4 files.
+Scan base: rev4 final pre-commit working tree. HEAD is commit C 07d728b35cc51380f4d11e623016773978df077e (parent 16c0891) plus uncommitted evidence-only commit D files.
 
-Coverage (55 files):
+Coverage (56 files):
   docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/artifacts-hashes-followup.txt
   docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/artifacts-hashes-privacy.txt
   docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/artifacts-hashes-rev4.txt
@@ -25,6 +25,7 @@ Coverage (55 files):
   docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/defect-repro.txt
   docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-followup.txt
   docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-range-final.txt
   docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-rev4.txt
   docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check.txt
   docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary-followup.txt
@@ -63,7 +64,7 @@ Coverage (55 files):
   test/task-evidence-paths.test.js
   test/upstream-ledger.test.js
 
-Result: 55/55 files scanned.
+Result: 56/56 files scanned.
   absolute file URL: 0
   home-directory marker: 0
   secret-like token or private key: 0
@@ -77,9 +78,9 @@ Allowlist (grounded fixtures only):
 This final-audit file is post-manifest and is written last. test/task-evidence-paths.test.js
 covers it for absolute paths in the 629-test suite, so no task artifact is left
 unscanned for absolute paths.
-Manifest: artifacts-hashes-rev4.txt records 54 artifacts with 0
+Manifest: artifacts-hashes-rev4.txt records 55 artifacts with 0
 mismatches at generation and re-hash.
 
-Result: PASS. All 55 existing PR files were scanned; no absolute file URL,
+Result: PASS. All 56 existing PR files were scanned; no absolute file URL,
 no home-directory marker, and no secret was found. The only email-pattern matches
 are the three grounded fixtures above.

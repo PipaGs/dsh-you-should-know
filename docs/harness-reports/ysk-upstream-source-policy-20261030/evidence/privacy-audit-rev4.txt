@@ -1,11 +1,11 @@
 Privacy audit - rev4 round
 
-Scope: every added or modified PR file at the rev4 pre-commit working tree,
+Scope: every added or modified PR file at the rev4 final pre-commit working tree,
 including the task report and all evidence.
 Base: 0419b70797a8d37db245d55817a7be273b5edcdb
-Scan base: rev4 pre-commit working tree at HEAD 16c08918333d6884d98d334d0141ee6a5820094f plus uncommitted rev4 files.
+Scan base: rev4 final pre-commit working tree. HEAD is commit C 07d728b35cc51380f4d11e623016773978df077e (parent 16c0891) plus uncommitted evidence-only commit D files.
 
-Coverage (54 files):
+Coverage (55 files):
   docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/artifacts-hashes-followup.txt
   docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/artifacts-hashes-privacy.txt
   docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/artifacts-hashes.txt
@@ -23,6 +23,7 @@ Coverage (54 files):
   docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/defect-repro.txt
   docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-followup.txt
   docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-range-final.txt
   docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-rev4.txt
   docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check.txt
   docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary-followup.txt
@@ -61,7 +62,7 @@ Coverage (54 files):
   test/task-evidence-paths.test.js
   test/upstream-ledger.test.js
 
-Direct scan: 54 of 54 in scope. This audit includes its
+Direct scan: 55 of 55 in scope. This audit includes its
 own bytes.
 
 Category counts:
@@ -79,7 +80,7 @@ Post-manifest final audit: privacy-audit-final-rev4.txt is written last and
 re-scans the final set, including artifacts-hashes-rev4.txt. It is post-manifest
 and is covered by test/task-evidence-paths.test.js for absolute paths.
 
-Manifest: artifacts-hashes-rev4.txt records 54 task artifacts
+Manifest: artifacts-hashes-rev4.txt records 55 task artifacts
 and excludes itself and the post-manifest final audit. Re-hash comparison after
 generation: 0 mismatches.
 

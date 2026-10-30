@@ -126,3 +126,8 @@ Range check:
 
 Old docs/upstream evidence: no diff against the base commit.
 Result: PASS.
+
+Evidence-only commit D:
+  adds evidence/diff-check-range-final.txt, one new file, and changes no code
+  and no test. Final PR file count: 57. Final manifest entries: 55.
+  The stat, list, and counts above are the rev4 pre-commit snapshot.
