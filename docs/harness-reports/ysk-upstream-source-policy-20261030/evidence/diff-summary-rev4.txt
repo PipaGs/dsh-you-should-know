@@ -1,0 +1,128 @@
+Diff summary - rev4 round
+
+Base: 0419b70797a8d37db245d55817a7be273b5edcdb
+HEAD: 16c08918333d6884d98d334d0141ee6a5820094f
+Branch: task/upstream-source-policy-20261030
+Product version: 0.4.6
+
+Scope:
+  tracked files changed by the PR (base to working tree): 41
+  new rev4 files in this round: 15
+    present at this capture: 13
+    written after this file: artifacts-hashes-rev4.txt and privacy-audit-final-rev4.txt
+  total PR files after this round: 56
+  product files under lib/, scripts/, package.json, or cordis.patch.yml: 0
+
+git diff --stat 0419b70797a8d37db245d55817a7be273b5edcdb:
+ .../evidence/artifacts-hashes-followup.txt         |  33 ++
+ .../evidence/artifacts-hashes-privacy.txt          |  42 ++
+ .../evidence/artifacts-hashes.txt                  |  20 +
+ .../evidence/baseline-meta.txt                     |   9 +
+ .../evidence/check-baseline.txt                    |   3 +
+ .../evidence/check-followup.txt                    |   5 +
+ .../evidence/check-privacy.txt                     |   5 +
+ .../evidence/check.txt                             |   5 +
+ .../evidence/content-scan-followup.txt             |  19 +
+ .../evidence/content-scan-privacy.txt              |  18 +
+ .../evidence/content-scan.txt                      |  19 +
+ .../evidence/defect-repro.txt                      |  56 ++
+ .../evidence/diff-check-followup.txt               |   2 +
+ .../evidence/diff-check-privacy.txt                |   2 +
+ .../evidence/diff-check.txt                        |   2 +
+ .../evidence/diff-summary-followup.txt             |  74 +++
+ .../evidence/diff-summary-privacy.txt              | 108 ++++
+ .../evidence/diff-summary.txt                      |  35 ++
+ .../evidence/invariants-followup.txt               |  61 ++
+ .../evidence/invariants-privacy.txt                |  60 ++
+ .../evidence/invariants.txt                        |  58 ++
+ .../evidence/privacy-audit-final.txt               |  62 ++
+ .../evidence/privacy-audit.txt                     |  66 +++
+ .../evidence/security-scan-followup.txt            |  38 ++
+ .../evidence/security-scan-privacy.txt             |  74 +++
+ .../evidence/security-scan.txt                     |  38 ++
+ .../evidence/test-run-baseline-full.txt            | 641 ++++++++++++++++++++
+ .../evidence/test-run-baseline-targeted.txt        |  23 +
+ .../evidence/test-run-failing-regression.txt       |  53 ++
+ .../evidence/test-run-full-followup.txt            | 653 ++++++++++++++++++++
+ .../evidence/test-run-full-privacy.txt             | 655 +++++++++++++++++++++
+ .../evidence/test-run-full.txt                     | 655 +++++++++++++++++++++
+ .../evidence/test-run-targeted-followup.txt        |  33 ++
+ .../evidence/test-run-targeted-privacy.txt         |  33 ++
+ .../evidence/test-run-targeted.txt                 |  32 +
+ .../final-report.md                                | 446 ++++++++++++++
+ docs/upstream/README.md                            |  59 +-
+ docs/upstream/ledger.json                          | 120 +++-
+ docs/upstream/workflow.md                          | 114 +++-
+ test/task-evidence-paths.test.js                   |  57 ++
+ test/upstream-ledger.test.js                       | 610 +++++++++++++++++--
+ 41 files changed, 5024 insertions(+), 74 deletions(-)
+
+git diff --name-only 0419b70797a8d37db245d55817a7be273b5edcdb:
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/artifacts-hashes-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/artifacts-hashes-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/artifacts-hashes.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/baseline-meta.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-baseline.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/content-scan-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/content-scan-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/content-scan.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/defect-repro.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/privacy-audit-final.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/privacy-audit.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-baseline-full.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-baseline-targeted.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-failing-regression.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-full-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-full-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-full.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-targeted-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-targeted-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-targeted.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/final-report.md
+  docs/upstream/README.md
+  docs/upstream/ledger.json
+  docs/upstream/workflow.md
+  test/task-evidence-paths.test.js
+  test/upstream-ledger.test.js
+
+New rev4 files (untracked until the rev4 commit):
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/artifacts-hashes-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-baseline-fix.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/content-scan-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/pr-diff-check-after.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/pr-diff-check-before.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/privacy-audit-final-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/privacy-audit-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-full-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-targeted-rev4.txt
+  test/pr-diff-check.test.js
+
+Range check:
+  git diff --check                        exit 0
+  git diff --check 0419b70797a8d37db245d55817a7be273b5edcdb   exit 0
+  git diff --check 0419b70797a8d37db245d55817a7be273b5edcdb..16c0891  exit 2, one hunk at
+    evidence/check-baseline.txt:4 (pre-fix old HEAD; not a pass)
+  The exact BASE..new_HEAD check is re-run after the rev4 commit and recorded.
+
+Old docs/upstream evidence: no diff against the base commit.
+Result: PASS.

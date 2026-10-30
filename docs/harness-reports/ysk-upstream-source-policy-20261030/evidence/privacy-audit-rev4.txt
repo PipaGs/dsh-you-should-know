@@ -1,0 +1,88 @@
+Privacy audit - rev4 round
+
+Scope: every added or modified PR file at the rev4 pre-commit working tree,
+including the task report and all evidence.
+Base: 0419b70797a8d37db245d55817a7be273b5edcdb
+Scan base: rev4 pre-commit working tree at HEAD 16c08918333d6884d98d334d0141ee6a5820094f plus uncommitted rev4 files.
+
+Coverage (54 files):
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/artifacts-hashes-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/artifacts-hashes-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/artifacts-hashes.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/baseline-meta.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-baseline-fix.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-baseline.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/content-scan-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/content-scan-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/content-scan-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/content-scan.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/defect-repro.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/pr-diff-check-after.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/pr-diff-check-before.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/privacy-audit-final.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/privacy-audit-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/privacy-audit.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-baseline-full.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-baseline-targeted.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-failing-regression.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-full-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-full-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-full-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-full.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-targeted-followup.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-targeted-privacy.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-targeted-rev4.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-targeted.txt
+  docs/harness-reports/ysk-upstream-source-policy-20261030/final-report.md
+  docs/upstream/README.md
+  docs/upstream/ledger.json
+  docs/upstream/workflow.md
+  test/pr-diff-check.test.js
+  test/task-evidence-paths.test.js
+  test/upstream-ledger.test.js
+
+Direct scan: 54 of 54 in scope. This audit includes its
+own bytes.
+
+Category counts:
+  absolute file URL: 0
+  home-directory marker: 0
+  secret-like token or private key: 0
+  email-pattern matches: 3
+
+Allowlist (grounded fixtures only):
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan-followup.txt:19
+  docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan.txt:19
+  test/upstream-ledger.test.js:401
+
+Post-manifest final audit: privacy-audit-final-rev4.txt is written last and
+re-scans the final set, including artifacts-hashes-rev4.txt. It is post-manifest
+and is covered by test/task-evidence-paths.test.js for absolute paths.
+
+Manifest: artifacts-hashes-rev4.txt records 54 task artifacts
+and excludes itself and the post-manifest final audit. Re-hash comparison after
+generation: 0 mismatches.
+
+Result: PASS. No absolute file URL, home-directory marker, or secret was found.
+The only email-pattern matches are the three grounded fixtures above. Manifest
+mismatches: 0.

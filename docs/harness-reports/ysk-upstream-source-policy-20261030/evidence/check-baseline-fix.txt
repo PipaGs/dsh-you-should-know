@@ -1,0 +1,28 @@
+# check-baseline.txt trailing newline fix
+# captured at: 2026-10-30T09:26:02Z
+# procedure: a Node script read the file, verified the 649-byte tail 0a 0a,
+# removed exactly the final byte at offset 648, wrote 648 bytes, and re-read them.
+#
+before bytes: 649
+before sha256: 83981642533d017d476edec19c7641f0117e1f4cec4f0f8d11c1d52b2debc9d6
+before last 8 bytes hex: 6e652e6d6a730a0a
+after bytes: 648
+after sha256: 0724714785ae32754f864a9e74086a317970de58ffd8e8d8f8e0be54ca40987e
+after last 8 bytes hex: 696e652e6d6a730a
+bytes removed: 1 (offset 648, value 0x0a)
+first 648 bytes before sha256: 0724714785ae32754f864a9e74086a317970de58ffd8e8d8f8e0be54ca40987e
+first 648 bytes after sha256:  0724714785ae32754f864a9e74086a317970de58ffd8e8d8f8e0be54ca40987e
+first 648 bytes identical: yes
+#
+# git diff --numstat -- docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-baseline.txt
+0	1	docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-baseline.txt
+#
+# git diff -U0 -- docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-baseline.txt
+# -U0 is used here so this evidence file itself introduces no trailing-space line;
+# a full-context diff would carry a one-space blank context line.
+diff --git a/docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-baseline.txt b/docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-baseline.txt
+index 6638e98..294b1d2 100644
+--- a/docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-baseline.txt
++++ b/docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-baseline.txt
+@@ -4 +3,0 @@
+-

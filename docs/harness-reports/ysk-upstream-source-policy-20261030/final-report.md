@@ -387,3 +387,61 @@ BLOCKER/HIGH/MEDIUM/LOW defect.
 
 Status: READY_FOR_CHATGPT_REVIEW. DSH did not merge. No tag, release, npm
 publish, or live model call.
+
+## PR-range diff-check correction - 2026-10-30
+
+Finding: `git diff --check 0419b70..16c0891` exits 2 with one hunk at
+`docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-baseline.txt:4`
+("new blank line at EOF"). The earlier gate ran `git diff --check` with no range.
+That command compares the index and the working tree. It passed because the tree
+was clean. It did not inspect the committed PR patch, so the committed trailing
+blank line reached the PR.
+
+Reproduction:
+- command: `git diff --check 0419b70797a8d37db245d55817a7be273b5edcdb..16c08918333d6884d98d334d0141ee6a5820094f`
+- exit code: 2
+- output: one hunk, `check-baseline.txt:4: new blank line at EOF.`
+- before: 649 bytes, last two bytes `0a 0a`
+- after: 648 bytes, last byte `0a`
+- first 648 bytes: identical, sha256 0724714785ae32754f864a9e74086a317970de58ffd8e8d8f8e0be54ca40987e
+- change: one newline removed at offset 648 (value 0x0a)
+Raw output: pr-diff-check-before.txt and pr-diff-check-after.txt.
+
+Fix: the whitespace fix removes only the final newline. The substantive command
+and exit metadata in check-baseline.txt are unchanged. `test/pr-diff-check.test.js`
+is added; it compares the PR base commit to the working tree. It failed before
+the fix with the hunk above and passes after it. The exact BASE..new_HEAD check is
+re-run after the rev4 commit and recorded; this block does not claim a committed
+range pass before that commit.
+
+Checks on the rev4 pre-commit working tree:
+- `node --test test/upstream-ledger.test.js`: 24 pass, 0 fail
+- `npm test`: 629 pass, 0 fail
+- `npm run check`: exit 0
+- `git diff --check`: exit 0
+- `git diff --check 0419b70` (base to working tree): exit 0
+- `git diff --check 0419b70..16c0891` (old HEAD): exit 2, one hunk; this is the
+  pre-fix state and is not a pass
+Evidence: test-run-targeted-rev4.txt, test-run-full-rev4.txt, check-rev4.txt,
+diff-check-rev4.txt, check-baseline-fix.txt.
+
+Scans: security-scan-rev4.txt and privacy-audit-rev4.txt scan every changed file
+and all evidence. privacy-audit-final-rev4.txt re-scans the final set.
+content-scan-rev4.txt checks quoted length. The scans report zero absolute file
+URLs, zero home-directory markers, and zero secrets. The only email-pattern
+matches are the three grounded fixtures at test/upstream-ledger.test.js:401,
+security-scan.txt:19, and security-scan-followup.txt:19. artifacts-hashes-rev4.txt
+records the rev4 manifest with zero mismatches.
+
+History: this rev4 commit is a new commit on top of approved 16c0891. It does not
+rewrite history. The old unmerged tip 98a05f4 remains not an ancestor. The final
+head is the rev4 commit. Residual risk remains: GitHub may keep the old commit in
+the PR timeline or caches, or in an existing review comment.
+
+Independent review: APPROVE. An independent DSH reviewer verified the
+base-to-working-tree range check, the one-newline fix, the guard test, 24/629, the
+56-file privacy scan, the manifest, and the report; one non-blocking count typo
+was corrected before commit. No BLOCKER/HIGH/MEDIUM/LOW defect.
+
+Status: READY_FOR_CHATGPT_REVIEW. DSH did not merge. No tag, release, npm
+publish, or live model call.

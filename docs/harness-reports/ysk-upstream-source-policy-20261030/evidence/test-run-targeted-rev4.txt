@@ -1,0 +1,37 @@
+# Targeted test run: node --test test/upstream-ledger.test.js
+# exit code: 0
+# captured at: 2026-10-30T09:25:00Z
+# note: this checkout's absolute root was replaced with <repo>
+
+✔ the upstream ledger cites pinned official Claude Code sources (2.431583ms)
+✔ a valid official docs page is accepted as a behavior source only (0.367ms)
+✔ the docs allowlist rejects every unaccepted URL shape and field (0.605208ms)
+✔ the docs allowlist rejects raw parent segments that normalize inside /docs (0.92875ms)
+✔ a release source must be immutable and carry its exact identity (0.26175ms)
+✔ a changelog source is pinned to a full commit and hashed (0.308958ms)
+✔ the ledger records the local baseline on a real named revision (40.507958ms)
+✔ the local baseline records v0.4.6 and the v0.4.3 predecessor without conflating them (0.3375ms)
+✔ every tracked upstream signal has its own item with evidence and a disposition (0.469875ms)
+✔ every item date comes from an immutable release and keeps its changelog trace (0.548ms)
+✔ the date provenance check rejects a fetch-day date and an unpinned release (1.356167ms)
+✔ the date provenance check rejects a behavior source and a docs lastModified date (0.286292ms)
+✔ the new provenance check rejects the historical 2026-10-14 ledger state (11.833334ms)
+✔ a gap or an adaptation is never dispositioned as applicable-with-nothing-to-do (0.231666ms)
+✔ an uncontested upstream unknown is recorded, not resolved by guessing (0.178417ms)
+✔ a source outage is recorded as unknown, never as no change (0.185875ms)
+✔ the outage and provenance policy keeps the previous verified baseline (0.967375ms)
+✔ the ledger carries no private or unrelated project data (0.442625ms)
+✔ the historical 2026-10-14 docs capture stays a recorded deviation (0.852917ms)
+✔ the addendum and the raw 2026-10-14 evidence stay byte-identical (1.227625ms)
+✔ the ledger source policy matches the exact allowlist and role limits (0.579167ms)
+✔ the coverage record is pinned to v2.1.312 and does not claim behavior stability (0.265541ms)
+✔ the committed coverage evidence supports the recorded release dates (0.642708ms)
+✔ the human-readable workflow and baseline documents exist and agree with the ledger (0.199458ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 240.202958
