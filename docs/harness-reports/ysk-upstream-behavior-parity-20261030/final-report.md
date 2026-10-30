@@ -8,7 +8,7 @@
 
 **Product head:** b63e56bdb0ac404e544ac2f11751cd6659f3693a
 
-**PR:** PENDING_PR
+**PR:** https://github.com/PipaGs/dsh-you-should-know/pull/26
 
 **Tool:** DeepSeek Harness, Stage 1C. A delegated implementation subagent wrote the
 test and ledger core. It stopped mid-task; the parent completed the remaining
