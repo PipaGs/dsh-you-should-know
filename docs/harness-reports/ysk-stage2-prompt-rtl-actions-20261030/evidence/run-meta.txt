@@ -25,12 +25,20 @@ GREEN_AFTER_FIX:
 - npm test: 642 tests, 642 pass, 0 fail, exit 0 (evidence/test-run-full.txt)
 - npm run check: exit 0 (evidence/check.txt)
 
+REVIEW_ROUND:
+The independent review asked for one missing regression assertion on the History
+explanation. The test now carries a Hebrew explanation and asserts dir=auto on
+both History text nodes. Product code did not change; targeted stays 98/98 and
+full stays 642/642. The captured red run predates that assertion, so the
+Explanation assertions are green coverage only.
+
 RAW_LOG_SHA256 (before sanitization):
 - red: d05d024ad1c159ea4e24fa8ff36c71a7c0a57f5104023005ac75e16e3ac653ad
-- targeted: 5a24dc9e0fa0b5d1035585b39f85908647e573ae0770b56961e19f8388fd7aba
-- full (final tree, includes this report and evidence): 5fbec509b29632f9e05cddfc8ae3bea9ad3c3574ad87a25ae52ebed63f5d0766
+- targeted (review-fix tree): 7ceaca7087798185e9c088075798eadfa3112bbccd3cadb31ad750ad20a97229
+- full (review-fix tree, includes this report and evidence): 5ea0d5ce774a98316f6d5a8a5826c4b034ed644f2c62be14e37d20c99dc790c1
 - check: 83981642533d017d476edec19c7641f0117e1f4cec4f0f8d11c1d52b2debc9d6
 - baseline: 3d4fe0b963ef959c692c4eb0822acc44bde9549bec4f7e10dccf13320612fe89
 
-The red log is committed with the worktree file-URL prefix replaced by <worktree>/.
-No test result, count, timestamp, or assertion text was edited.
+The red log is committed with the worktree file-URL prefix replaced by <worktree>/,
+and trailing spaces removed on the test runner's two-space formatting lines.
+No test name, count, timestamp, or assertion text was edited.

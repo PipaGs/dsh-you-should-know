@@ -2351,7 +2351,7 @@ test('an Arabic human note and its explanation declare their own base direction'
 })
 
 test('a Hebrew history entry declares its own base direction', async () => {
-  const entry = { id: 'n-he', note: HEBREW_NOTE, importance: 'high', createdAt: 1, resolved: true, resolution: 'thanks' }
+  const entry = { id: 'n-he', note: HEBREW_NOTE, importance: 'high', createdAt: 1, resolved: true, resolution: 'thanks', explanation: HEBREW_EXPLANATION }
   const env = await loadBundle({
     backend: historyBackend({ notes: [], history: [entry] }),
     allowIntervals: true,
@@ -2363,6 +2363,9 @@ test('a Hebrew history entry declares its own base direction', async () => {
   const note = findByExactText(view.output, HEBREW_NOTE)
   assert.ok(note, 'the history note renders in its own text element')
   assert.equal(note.props.dir, 'auto', 'the history note declares dir=auto')
+  const explanation = findByAria(view.output, 'Explanation')
+  assert.ok(explanation, 'the history explanation renders in its own text element')
+  assert.equal(explanation.props.dir, 'auto', 'the history explanation declares dir=auto')
   view.unmount()
 })
 

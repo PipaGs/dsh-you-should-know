@@ -1,8 +1,10 @@
 SECURITY, PRIVACY, AND SOURCE SCAN
 BASE: 697765379635e75e0c690db22f53aa1550b90a1f
 PRODUCT_HEAD: 9c93017
-TREE: final working tree with the task report and evidence staged
+TREE: final working tree after the review fixes
 DATE: 2026-10-30
+REVIEW_ROUND: re-scanned after the History explanation assertion and the
+report corrections. No new marker appeared.
 
 SCOPE:
 - the complete PR diff from the base commit, with this scan file excluded;

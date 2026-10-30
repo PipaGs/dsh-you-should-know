@@ -70,9 +70,10 @@ The Explain prompt is unaffected: it uses `languageSentenceFor` and its own
 single-key contract.
 
 Fix: add `kind` and `because` to the untranslatable key list. The parser,
-base policy, and Explanation prompt are unchanged. The new test is locked to
-the parser: it fails if the directive stops naming any key a valid verdict
-contains.
+base policy, and Explanation prompt are unchanged. The new test starts from a
+maximal valid verdict, so it fails if the directive stops naming any key in
+that verdict. It does not discover a future parser key by itself; the payload
+would have to be extended as well.
 
 ### 3.2 Confirmed defect: RTL note and explanation text inherited the host LTR base direction
 
@@ -93,10 +94,11 @@ last character of each note with a DOM Range (viewport 1000x440, host LTR):
 | Arabic, current | none | ltr | 53 | 283 |
 | Arabic, fixed | auto | rtl | 692 | 444 |
 
-The screenshot is `evidence/rtl-card-before-after.png`. The offline red tests
-assert the markup contract on the note, Explanation, and History text nodes;
-the node:test harness has no layout engine, so the rendered measurement is the
-visual evidence.
+The screenshot is `evidence/rtl-card-before-after.png`. The offline tests
+assert the markup contract on the note, Explanation, and History text nodes.
+In the captured red run the note assertion failed first, so the Explanation
+assertions are exercised green only. The node:test harness has no layout
+engine, so the rendered measurement is the visual evidence.
 
 Fix: add `dir="auto"` to the four human-language text nodes: the note body,
 the Explanation block, the History note, and the History explanation. The
@@ -149,8 +151,8 @@ change.
 | --- | --- |
 | `lib/language.js` | JSON-contract sentence names `kind` and `because` as well |
 | `lib/client.js` | `dir="auto"` on the note, Explanation, History note, and History explanation text nodes |
-| `test/language.test.js` | parser-locked directive-key test |
-| `test/client-ui.test.js` | Hebrew/Arabic note, Explanation, and History direction tests; composer no-change tests; human-only action regression |
+| `test/language.test.js` | directive-key test anchored to a maximal valid verdict |
+| `test/client-ui.test.js` | Hebrew/Arabic note and Explanation direction tests; History note and History explanation direction tests; composer no-change tests; human-only action regression |
 | `docs/reference.md` | one sentence documenting the automatic base direction and the plain-text draft |
 
 No other source, prompt, action label, parser, route, config, package manifest,
@@ -159,7 +161,8 @@ or `docs/upstream` file changed. Product version stays 0.4.6.
 ## 5. Verification
 
 Chronology (all commands were run in the task worktree; raw logs are kept, and
-the red log is committed with one documented path-prefix sanitization):
+the red log is committed with the documented sanitization: the worktree
+file-URL prefix and trailing spaces on the test runner's formatting lines):
 
 | Stage | Command | Result |
 | --- | --- | --- |
@@ -194,22 +197,46 @@ Evidence: `evidence/test-run-baseline.txt`, `test-run-red.txt`,
   session text, or private project data are committed; the RTL fixtures are
   synthetic.
 - The red log is the only log that contained absolute worktree file URLs. It is
-  committed with the repository worktree prefix replaced by
-  `<worktree>/`; the raw SHA-256 and the exact replacement rule are
-  recorded in `evidence/run-meta.txt`. Counts, timestamps, and assertion text
-  are unchanged.
+  committed with the repository worktree prefix replaced by `<worktree>/`, and
+  with trailing spaces removed on the test runner's two-space formatting lines.
+  The raw SHA-256 and both replacement rules are recorded in
+  `evidence/run-meta.txt`. Counts, timestamps, and assertion text are unchanged.
 - No telemetry, browser storage, file write, or new network path was added.
 - `docs/upstream` is unchanged; its byte identity is recorded in
   `evidence/upstream-provenance.txt`.
-- No live model call was made. The U-2.1.290 language row and the chat-in-main
-  session row keep their recorded status; the local UI/draft adaptation is not
-  reclassified.
+- No reviewer or paid live model call was made. The U-2.1.290 language row and
+  the chat-in-main session row keep their recorded status; the local UI/draft
+  adaptation is not reclassified.
 
 ## 7. Independent review
 
-A fresh DSH review subagent reviews the final branch after this report and the
-evidence are committed. Its findings, and their resolution, are appended here
-as a dated review block. DSH does not merge; ChatGPT performs the merge review.
+An independent DSH review subagent reviewed the branch at b174ff7 on
+2026-10-30. It did not edit the branch, commit, push, merge, or call a model.
+
+**Verdict: CHANGES_REQUIRED**, with one medium finding and three low wording
+findings. The reviewer found the product code correct.
+
+- **MEDIUM:** the History explanation node had `dir="auto"` but no regression
+test. The History fixture now carries the Hebrew explanation, and the test
+asserts `dir="auto"` on both the History note and the History explanation.
+- **LOW:** the report said "one documented path-prefix sanitization", while the
+red-log header and the security scan also record trailing-space removal. This
+report and `run-meta.txt` now state both.
+- **LOW:** "locked to the parser" overstated the directive test. The test is
+anchored to a maximal valid verdict and would not discover a new parser key by
+itself; the report now says so.
+- **LOW:** in the captured red run the note assertion failed first, so the
+Explanation assertions were not exercised red. The report now says they are
+green coverage only.
+
+The follow-up review commit applies these test and report changes; the product
+code did not change. The reviewer independently reproduced the pre-fix state in a temporary copy:
+98 tests, 94 pass, 4 fail, exit 1, with exactly the four claimed failures. It
+also ran the full suite (642 pass), `npm run check` (exit 0), and the base-range
+whitespace check (exit 0), and confirmed the four `dir="auto"` locations, the
+unchanged parser and Explain path, the human-only seam, the version, and the
+`docs/upstream` tree hash. DSH does not merge; ChatGPT performs the merge
+review.
 
 ## 8. Residual risks and follow-ups
 
