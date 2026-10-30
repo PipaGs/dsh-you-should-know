@@ -1,0 +1,7 @@
+base_commit=ff220a52a278a4b0b828fefa15a1f5184a9fc943
+baseline_worktree=isolated detached worktree at the base commit
+baseline_targeted_pass=24
+baseline_targeted_fail=0
+baseline_full_pass=629
+baseline_full_fail=0
+measured_at=2026-10-30T13:54:34Z

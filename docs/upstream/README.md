@@ -58,8 +58,8 @@ credential, or repository content to a public page or search. Never copy
 private Claude internals or closed-source code. Use short official excerpts
 only.
 
-Stage 1B adds no interactive-mode behavior findings; Stage 1C owns those. Stage
-1B adds no new docs page source and no new upstream item.
+Stage 1B added no interactive-mode behavior findings. Stage 1C records those
+findings in the section below, using the same behavior-only source class.
 
 ## Upstream baseline
 
@@ -93,7 +93,10 @@ sentences below and copies no upstream code.
 | 2.1.290 (2026-10-05) | Notes follow the language setting instead of always English | equivalent | applicable (parity present) |
 
 The exact quotes and the named local evidence for every row live in
-[ledger.json](./ledger.json). The 2.1.288 row is an instruction-level adaptation:
+[ledger.json](./ledger.json). Every source record also carries an explicit
+`sourceRole`: `release` for the canonical version and date sources,
+`behavior` for documentation pages, and `historical` for the one preserved
+2026-10-14 docs capture. The 2.1.288 row is an instruction-level adaptation:
 the trusted base reviewer policy carries the responsibility-attribution rule, but
 the reviewer model's live output is nondeterministic and is not asserted to match
 upstream behavior. Its scoped acceptance (prompt composition) is recorded and
@@ -122,6 +125,54 @@ positive, the joint scenario sits outside the policy's selection gate, and the
 unclear gate stays unproven. That review changed the offline adjudicator only;
 the historic run, its denominators, and this status are unchanged.
 
+## Documented behavior parity (Stage 1C)
+
+Stage 1C captured two official documentation pages on 2026-10-30 and added ten
+documented-behavior items. These items are a different class from the versioned
+release rows above: each one carries `evidenceClass: "documented-behavior"`, a
+`behaviorKey`, and `dedupeAgainst`, and none of them carries
+`upstreamVersion`, `upstreamDate`, `publishedAt`, or `changelogTrace`.
+A documentation page is behavior evidence only; it never establishes a version
+or a publication date.
+
+| Item | Documented behavior | Local status | Disposition |
+| --- | --- | --- | --- |
+| B-YSK-side-agent-cadence | A side agent rereads the conversation from time to time during a longer task | partial | deferred (turn-end only; mid-task cadence is a future task) |
+| B-YSK-side-agent-isolation | A separate same-model request with no tools cannot read files, run commands, or change the main agent | adapted | applicable (separate configured reviewer route; no tools) |
+| B-YSK-check-context | A check sends session context with tool results, the mod instructions, and recent notes | adapted | applicable (bounded visible-text excerpt and evidence capsule; no raw tool results) |
+| B-YSK-cost-and-prompt-cache | Checks reuse the session prompt cache and count toward usage or cost | not-applicable | rejected (provider cache and billing are outside the plugin seam) |
+| B-YSK-note-surface-and-choices | A short note above the prompt offers Learn more with Understood, Knew this already, and Dismiss | partial | deferred (Explain, Knew it, Thanks, Add to chat, Dismiss; no Understood sub-surface) |
+| B-YSK-keyboard-shortcuts | A choice is selected by typing its digit alone into an empty prompt | missing | deferred (pointer and focus controls only) |
+| B-YSK-chat-in-main-session | Chat in main session quotes the note into the prompt; the main agent sees it only after send | adapted | applicable (action-first draft; with an action present, the finding prose is not inserted; the note moves to History; the draft is never sent) |
+| B-YSK-note-memory | Recent notes and known topics persist across sessions and are listed to the side agent | partial | deferred (in-memory per-session state; no file or browser storage) |
+| B-YSK-debug-check-visibility | A debug environment variable shows checks as they happen | partial | deferred (bounded status counters and self-check only) |
+| B-YSK-post-dismiss-turn-off | A transient Turn off suggestions action appears after Dismiss and clears after 20 seconds | missing | deferred (Dismiss only resolves the note) |
+
+`B-YSK-chat-in-main-session` is an intentional action-first adaptation, not an
+exact note quote. Upstream Chat in main session puts the human-readable note
+into the prompt input. Local Add to chat prefers the agent-facing
+`note.action`, so, when an action is present, the draft omits the finding
+prose; the resolved note leaves
+the active card and remains in History. A `File:` line is added only when the
+action does not already name the source. A finding without an action falls back
+to an imperative wrapper around the note. The draft is written with
+`setDraft`, never sent, and reaches the main agent only if the human submits it
+(`lib/client.js`, `test/client-ui.test.js`).
+
+| Documentation source | Capture |
+| --- | --- |
+| [interactive-mode](https://code.claude.com/docs/en/interactive-mode) | sha256 `29f014fae4fad479919f23fc3cd9a8b6c58af1199272e42fe1695a7e75ca1452`, fetchedAt 2026-10-30T10:30:14Z, 595268 bytes |
+| [plugins/mods/overview](https://code.claude.com/docs/en/plugins/mods/overview) | sha256 `8685126f9b50f63d38333793a896158437191dba296966b4d47c6780ed7005d2`, fetchedAt 2026-10-30T10:30:21Z, 338853 bytes |
+
+The hashes cover the exact HTML response bytes for the URL without an anchor.
+The committed evidence keeps only short official excerpts and the provenance;
+it does not commit a full page. The item-level quotes, local evidence, unknowns,
+and testable acceptance live in [ledger.json](./ledger.json). The task report is
+[ysk-upstream-behavior-parity-20261030](../harness-reports/ysk-upstream-behavior-parity-20261030/final-report.md).
+
+Release coverage is separate: it remains through v2.1.312. Stage 1C did not check
+any release after v2.1.312 and does not extend that boundary.
+
 ## Coverage through v2.1.312
 
 The 2026-10-30 check read the published GitHub release bodies for 20 releases
@@ -134,6 +185,9 @@ This records only the absence of direct release notes. It does not claim that
 upstream behavior did not change: behavior can change without a named release
 note, and this check reads release bodies only. The sanitized extract is
 [github-releases-2.1.287-2.1.312.json](../harness-reports/ysk-upstream-ledger-correction-20261030/evidence/github-releases-2.1.287-2.1.312.json).
+
+Stage 1C did not check any release after v2.1.312. Its documentation behavior
+coverage is recorded separately above and does not extend this release boundary.
 
 ## Source-policy deviation
 
@@ -159,6 +213,12 @@ publication date.
   The official text does not describe the algorithm.
 - How the upstream mod handles session data under its telemetry gate. Assuming
   it matches this plugin's privacy model would be speculation.
+- How often the side agent rereads the conversation ("from time to time") and
+  what starts or stops a check. The page gives no interval or scheduler.
+- How the note store file is formatted, protected, and retained beyond the
+  documented `cleanupPeriodDays` behavior.
+- How the upstream side agent is prevented from using tools and how its request
+  is isolated. The page states the boundary; the implementation is closed.
 
 ## Keeping this current
 
@@ -167,6 +227,8 @@ official signal is verified against a pinned source, deduplicated against
 ledger.json, assessed against named local evidence, and dispositioned. Release
 signals stay canonical for version and date. Docs pages are re-fetched every
 cycle and serve as behavior evidence only; a changed sha256 is a new capture and
-an unchanged hash is not a new signal. An unreachable source is recorded as
-unknown, never as "no change", and the previous verified baseline stays in
-place.
+an unchanged hash is not a new signal. Every source record names its
+`sourceRole`, and a documented-behavior item names its `behaviorKey`, its
+`dedupeAgainst` items, and a testable acceptance when it is a gap. An
+unreachable source is recorded as unknown, never as "no change", and the
+previous verified baseline stays in place.

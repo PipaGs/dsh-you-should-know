@@ -1,0 +1,10 @@
+captured_at=2026-10-30T14:29:57Z
+base_commit=ff220a52a278a4b0b828fefa15a1f5184a9fc943
+product_commit=43a42fe75be9fa6386c9e2a8e49876011397dbc7
+branch=task/upstream-behavior-parity-20261030
+targeted_tests=30 pass, 0 fail
+full_tests=635 pass, 0 fail
+check_exit=0
+diff_check_exit=0
+test_command=node --test test/upstream-ledger.test.js
+full_command=npm test

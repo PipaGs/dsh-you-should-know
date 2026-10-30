@@ -1,0 +1,33 @@
+✔ the upstream ledger cites pinned official Claude Code sources (2.688958ms)
+✔ a valid official docs page is accepted as a behavior source only (0.346708ms)
+✔ the docs allowlist rejects every unaccepted URL shape and field (0.606875ms)
+✔ the docs allowlist rejects raw parent segments that normalize inside /docs (0.894ms)
+✔ a release source must be immutable and carry its exact identity (0.261291ms)
+✔ a changelog source is pinned to a full commit and hashed (0.191292ms)
+✔ the ledger records the local baseline on a real named revision (39.663375ms)
+✔ the local baseline records v0.4.6 and the v0.4.3 predecessor without conflating them (0.336125ms)
+✔ every tracked upstream signal has its own item with evidence and a disposition (0.453542ms)
+✔ every item date comes from an immutable release and keeps its changelog trace (0.525583ms)
+✔ the date provenance check rejects a fetch-day date and an unpinned release (0.824458ms)
+✔ the date provenance check rejects a behavior source and a docs lastModified date (0.24175ms)
+✔ the new provenance check rejects the historical 2026-10-14 ledger state (10.689167ms)
+✔ a gap or an adaptation is never dispositioned as applicable-with-nothing-to-do (0.348542ms)
+✔ an uncontested upstream unknown is recorded, not resolved by guessing (0.211542ms)
+✔ a source outage is recorded as unknown, never as no change (0.18825ms)
+✔ the outage and provenance policy keeps the previous verified baseline (0.63325ms)
+✔ the ledger carries no private or unrelated project data (0.308166ms)
+✔ the historical 2026-10-14 docs capture stays a recorded deviation (0.909042ms)
+✔ the addendum and the raw 2026-10-14 evidence stay byte-identical (1.708375ms)
+✔ the ledger source policy matches the exact allowlist and role limits (0.89175ms)
+✔ the coverage record is pinned to v2.1.312 and does not claim behavior stability (0.262875ms)
+✔ the committed coverage evidence supports the recorded release dates (0.561417ms)
+✔ the human-readable workflow and baseline documents exist and agree with the ledger (0.167792ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 232.642625
+targeted_exit=0
