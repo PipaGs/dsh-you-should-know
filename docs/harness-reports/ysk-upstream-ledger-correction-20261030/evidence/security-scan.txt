@@ -2,7 +2,7 @@
 # Scope: every modified tracked file and every file under the task evidence directory, excluding this scan output.
 
 ALLOWLISTED chatgpt docs/harness-reports/ysk-upstream-ledger-correction-20261030/final-report.md:3 (the required review-status word)
-ALLOWLISTED chatgpt test/upstream-ledger.test.js:287 (the test pattern literal itself)
+ALLOWLISTED chatgpt docs/harness-reports/ysk-upstream-ledger-correction-20261030/final-report.md:280 (the required review-status word)
 
 RESULT: PASS (no findings)
 # The scan checks the literal strings that the ledger test also forbids.

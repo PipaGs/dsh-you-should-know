@@ -263,7 +263,19 @@ addendum, this report, and the evidence directory.
 - upstream-tag-refs.txt
 - artifacts-hashes.txt
 
-## 13. Handoff
+## 13. Handoff - 2026-10-30
 
-The product commit, PR number, exact base and head, changed-file list, and the
-independent review verdict are appended here after the commit and PR steps.
+- Product commit: b627747e40a5ef47c4c359ee606fbaea108bcf2f
+- PR: https://github.com/PipaGs/dsh-you-should-know/pull/24
+- Base: 038dcdac90c4dbb32e18d21a21bfa56d83bbc6c2 (origin/main, tag v0.4.6)
+- Head at the product commit: b627747e40a5ef47c4c359ee606fbaea108bcf2f
+- Report-only handoff commit: the commit that contains this block. The final PR
+  head is that commit; GitHub records its SHA in the pull request.
+- Changed files: 21, as listed in the PR body and diff-summary.txt.
+- Verification at the product commit: targeted ledger test 15 pass / 0 fail;
+  npm test 618 pass / 0 fail; npm run check exit 0; git diff --check exit 0.
+- Independent review: APPROVE. The first round asked for changes only in the
+  evidence manifest and scans; the corrected state was approved. No product,
+  ledger, date, policy, or test defect was found.
+- Status: READY_FOR_CHATGPT_REVIEW. No merge, no tag, no release, no npm
+  publication. The product version stays 0.4.6.
