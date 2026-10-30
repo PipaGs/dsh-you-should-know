@@ -276,7 +276,7 @@ This correction responds to the ChatGPT review of PR #27. The review found that
 the earlier visual evidence, `evidence/rtl-card-before-after.png`, came from a
 standalone Blink page that reproduced the card markup. That page proves the CSS
 direction behavior, but it is not target-application evidence. It remains only
-supplementary. The sentences in sections 3.2 and 6 that treat the mock as the
+supplementary. The sentences in sections 3.2 and 8 that treat the mock as the
 rendering evidence are superseded by this section; the original text is kept as
 history.
 
@@ -285,9 +285,12 @@ history.
 - Target: DeepSeek Harness web host, `dsh 0.2.0-rc.2`.
 - Plugin: `dsh-you-should-know 0.4.6`, loaded from this task worktree.
 - Product head: `9c93017a8c1d863bc80a0bff809042e825ae493a`.
-- Branch head at capture: `8cc2853c39b780edef40797304ea78871da5c47e`.
-- `lib/` is identical to the product head; no product file changed after it.
-- Capture time: 2026-10-30, 15:09Z-15:18Z.
+- Branch head: `8cc2853c39b780edef40797304ea78871da5c47e` for the
+  screenshots and `ff1b61c9c071bad2dcc0e3dacef5028998a3c08a` for the action
+  capture.
+- `lib/` is identical to the product head in both; no product file changed after
+  it.
+- Capture time: 2026-10-30, 15:09Z-15:26Z.
 - Method: a temporary DSH profile created from the shipped web template, with
   the plugin package linked to this worktree, booted with
   `dsh --profile visualstage2 --no-open --port 0`. A local test proxy forwarded
@@ -295,9 +298,10 @@ history.
   `/api/dsh-you-should-know/notes` and `/history` responses with synthetic
   fixtures. The shell, plugin bundles, session, composer, and every interaction
   were served by the real host. The launch token is not recorded.
-- Fixtures: Hebrew, Arabic, mixed Hebrew/Latin, and a long Hebrew note with a
-  long Latin path, plus one resolved Hebrew History entry. No real session
-  text, user data, credentials, or tool output is present.
+- Fixtures: three active notes (Hebrew, Arabic, and one long mixed
+  Hebrew/Latin note with a long Latin path), plus one resolved Hebrew History
+  entry. No real session text, user data, credentials, or tool output is
+  present.
 
 ### Acceptance criteria matrix
 
@@ -305,23 +309,25 @@ history.
 | --- | --- | --- | --- | --- | --- |
 | V1 | A Hebrew note renders RTL: first character at the right edge, final period at the left, mixed Latin path intact | Actual DSH host, synthetic note payload | `actual-host-notes-1280.png`; DOM Range measurement 577 -> 313 at 700px | DSH capture; ChatGPT pending | PASS |
 | V2 | An Arabic note renders with the same RTL base direction | Same | Same screenshot; 582 -> 326 | DSH capture; ChatGPT pending | PASS |
-| V3 | Explain expands the cached Hebrew explanation inline, RTL, without a reviewer call | Actual DSH host | `actual-host-explanation-1280.png`; snapshot | DSH capture; ChatGPT pending | PASS |
+| V3 | Explain expands the cached Hebrew explanation inline, RTL, without a reviewer call | Actual DSH host | `actual-host-explanation-1280.png`; `actual-host-actions.json` (explainRequests 0 before/after); the cached path in `lib/client.js` | DSH capture; ChatGPT pending | PASS |
 | V4 | History shows the resolved Hebrew note and its Hebrew explanation, RTL | Actual DSH host | `actual-host-history-1280.png`; snapshot | DSH capture; ChatGPT pending | PASS |
-| V5 | Add to chat inserts the exact action text into the composer, keeps composer focus, resolves the card, and does not send | Actual DSH host, real composer | `actual-host-add-to-chat-1280.png`; interaction log in `actual-host-visual-evidence.txt` | DSH capture; ChatGPT pending | PASS |
-| V6 | Thanks, Knew it, and Dismiss do not write or send a draft; the draft stays empty or unchanged and send stays disabled or unchanged | Actual DSH host, real composer | Interaction log; three fresh reloads | DSH capture; ChatGPT pending | PASS |
+| V5 | Add to chat inserts the exact action text into the composer, keeps composer focus, resolves the card, and does not send | Actual DSH host, real composer | `actual-host-add-to-chat-1280.png`; `actual-host-actions.json` (draft exact, activeNotes 3 -> 2, activeIsComposer true) | DSH capture; ChatGPT pending | PASS |
+| V6 | Thanks, Knew it, and Dismiss do not write or send a draft; the draft stays empty, send stays disabled, and the active note count falls by one | Actual DSH host, real composer | `actual-host-actions.json` (three fresh reloads, each activeNotes 3 -> 2, draft "", sendDisabled true, no message) | DSH capture; ChatGPT pending | PASS |
 | V7 | At a 700px viewport the long RTL note wraps; cards and composer stay inside the viewport; scrollWidth equals innerWidth | Actual DSH host | `actual-host-narrow-700.png`; scrollWidth 700, card right 677, composer right 673 | DSH capture; ChatGPT pending | PASS |
 | V8 | A real reviewer-produced note reaches the card on the desktop app 0.2.1-rc.3 | Delivery path and desktop host | None | DSH | NOT VERIFIED |
 
 ### Scope and limitations
 
 The visual gate passes for the UI change on the actual DSH web host and for the
-real composer interactions. It does not prove the reviewer model's note
-delivery on the desktop app: the fixtures were injected at the notes route, and
+real composer interactions and local card actions. It does not prove the
+reviewer model's note delivery on the desktop app: the fixtures were injected
+at the notes route, and
 paid live model calls are out of scope. The desktop 0.2.1-rc.3 host was not
 captured; this evidence uses `dsh 0.2.0-rc.2`. Those two items stay
 `NOT VERIFIED`, not `PASS`.
 
 Full evidence: `evidence/actual-host-visual-evidence.txt`, the six actual-host
-PNGs, and `evidence/visual-fixture-proxy.mjs`. The earlier mock remains at
+PNGs, `evidence/actual-host-actions.json`, and `evidence/visual-fixture-proxy.mjs`.
+The earlier mock remains at
 `evidence/rtl-card-before-after.png` and `evidence/rtl-card-repro.html` as
 supplementary material only.

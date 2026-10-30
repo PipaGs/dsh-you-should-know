@@ -66,11 +66,17 @@ const server = http.createServer((req, res) => {
   }
   const upstream = http.request({ host: TARGET.host, port: TARGET.port, method: req.method, path: req.url, headers: rewriteHeaders(req.headers) }, (up) => {
     res.writeHead(up.statusCode || 502, up.headers);
+    up.on('error', () => { try { res.destroy(); } catch {} });
     up.pipe(res);
   });
-  upstream.on('error', () => { res.writeHead(502); res.end('proxy error'); });
+  res.on('error', () => { try { upstream.destroy(); } catch {} });
+  upstream.on('error', () => { try { res.writeHead(502); res.end('proxy error'); } catch {} });
+  req.on('error', () => { try { upstream.destroy(); } catch {} });
   req.pipe(upstream);
 });
+
+server.on('clientError', (error, socket) => { try { socket.destroy(); } catch {} });
+process.on('uncaughtException', (error) => { try { console.error('proxy uncaught: ' + error.message); } catch {} });
 
 server.on('upgrade', (req, socket, head) => {
   const upstream = net.connect(TARGET.port, TARGET.host, () => {
@@ -86,7 +92,9 @@ server.on('upgrade', (req, socket, head) => {
     upstream.pipe(socket);
     socket.pipe(upstream);
   });
-  upstream.on('error', () => socket.destroy());
+  socket.on('error', () => { try { upstream.destroy(); } catch {} });
+  upstream.on('error', () => { try { socket.destroy(); } catch {} });
+  socket.on('close', () => { try { upstream.destroy(); } catch {} });
 });
 
 server.listen(LISTEN_PORT, '127.0.0.1', () => {

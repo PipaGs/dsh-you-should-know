@@ -52,6 +52,7 @@ No test name, count, timestamp, or assertion text was edited.
 
 VISUAL_GATE_ROUND (2026-10-30):
 Actual DSH web host 0.2.0-rc.2, plugin from this worktree at product head
-9c93017. Six actual-host PNGs and one fixture proxy are recorded in
-actual-host-visual-evidence.txt. The earlier mock screenshot is supplementary.
+9c93017. Six actual-host PNGs, actual-host-actions.json, and one fixture proxy
+are recorded in actual-host-visual-evidence.txt. The earlier mock screenshot is
+supplementary.
 No reviewer or paid live model call; the notes/history payloads are synthetic.
