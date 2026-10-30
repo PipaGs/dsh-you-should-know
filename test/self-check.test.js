@@ -81,7 +81,9 @@ test('the capability view reports names, methods, and whether a handler is regis
 
 test('capability flags derive from the registered handlers and name every shipped feature', () => {
   const capabilities = buildCapabilities(ALL_HANDLERS)
-  assert.deepEqual(Object.keys(capabilities).sort(), ['adaptiveBudget', 'episodeTrigger', 'evidence', 'explain', 'feedback', 'updateChecker'])
+  assert.deepEqual(Object.keys(capabilities).sort(), ['adaptiveBudget', 'episodeTrigger', 'evidence', 'explain', 'feedback', 'recentCheckDiagnostics', 'updateChecker'])
+  assert.equal(capabilities.recentCheckDiagnostics, false, 'the opt-in defaults off')
+  assert.equal(buildCapabilities(ALL_HANDLERS, { recentCheckDiagnostics: true }).recentCheckDiagnostics, true)
   assert.equal(capabilities.feedback, true)
   assert.equal(capabilities.explain, true)
   assert.equal(capabilities.updateChecker, true)
