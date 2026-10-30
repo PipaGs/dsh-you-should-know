@@ -285,12 +285,14 @@ history.
 - Target: DeepSeek Harness web host, `dsh 0.2.0-rc.2`.
 - Plugin: `dsh-you-should-know 0.4.6`, loaded from this task worktree.
 - Product head: `9c93017a8c1d863bc80a0bff809042e825ae493a`.
-- Branch head: `8cc2853c39b780edef40797304ea78871da5c47e` for the
-  screenshots and `ff1b61c9c071bad2dcc0e3dacef5028998a3c08a` for the action
-  capture.
-- `lib/` is identical to the product head in both; no product file changed after
-  it.
-- Capture time: 2026-10-30, 15:09Z-15:26Z.
+- Branch head: `8cc2853c39b780edef40797304ea78871da5c47e` for five
+  screenshots (notes, explanation, history, long note, narrow);
+  `0f2acebe2a5e41912046ad8882f92ed88c19868c` for the re-captured add-to-chat
+  screenshot; `ff1b61c9c071bad2dcc0e3dacef5028998a3c08a` for the structured
+  action capture.
+- `lib/` is identical to the product head in all captures; no product file
+  changed after it.
+- Capture time: 2026-10-30, 15:09Z-15:38Z.
 - Method: a temporary DSH profile created from the shipped web template, with
   the plugin package linked to this worktree, booted with
   `dsh --profile visualstage2 --no-open --port 0`. A local test proxy forwarded

@@ -1,15 +1,17 @@
 ACTUAL DSH HOST VISUAL EVIDENCE - Stage 2 RTL note card
-DATE: 2026-10-30 (Europe/Moscow); captures between 15:09Z and 15:26Z
+DATE: 2026-10-30 (Europe/Moscow); captures between 15:09Z and 15:38Z
 CONTRACT: VISUAL_GATE: REQUIRED (project visual evidence contract)
 
 TARGET APP AND BUILD
 - Host: DeepSeek Harness web host, dsh 0.2.0-rc.2.
 - Plugin: dsh-you-should-know 0.4.6, loaded from the task worktree.
 - Product head: 9c93017a8c1d863bc80a0bff809042e825ae493a.
-- Branch head at capture: 8cc2853c39b780edef40797304ea78871da5c47e for the
-  screenshots; ff1b61c9c071bad2dcc0e3dacef5028998a3c08a for the action capture.
-  lib/ is identical to the product head in both: git diff --stat 9c93017 -- lib
-  is empty.
+- Branch head: 8cc2853c39b780edef40797304ea78871da5c47e for five
+  screenshots (notes, explanation, history, long note, narrow); 0f2acebe2a5e41912046ad8882f92ed88c19868c
+  for the re-captured add-to-chat screenshot; ff1b61c9c071bad2dcc0e3dacef5028998a3c08a
+  for the structured action capture.
+- lib/ is identical to the product head in all captures: git diff --stat 9c93017
+  -- lib is empty.
 - The worktree was exposed to the host through a temporary DSH profile created
   from the shipped web template. The plugin package in that profile is a
   symlink to the task worktree. No npm install, publish, tag, or release ran.
