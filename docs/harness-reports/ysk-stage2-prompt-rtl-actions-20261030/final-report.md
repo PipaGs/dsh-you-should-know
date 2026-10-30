@@ -333,3 +333,63 @@ PNGs, `evidence/actual-host-actions.json`, and `evidence/visual-fixture-proxy.mj
 The earlier mock remains at
 `evidence/rtl-card-before-after.png` and `evidence/rtl-card-repro.html` as
 supplementary material only.
+
+
+## 11. Dated correction - in-scope acceptance matrix (2026-10-30)
+
+**Status:** READY_FOR_CHATGPT_REVIEW. This section supersedes only the
+acceptance matrix in section 10; it does not rewrite that matrix or any other
+historical text.
+
+The project gate cited in the review (`09-acceptance-criteria.md`, external to
+this repository) requires every IN-SCOPE acceptance row to PASS before merge.
+It does not require an out-of-scope risk item to PASS. Section 10 is preserved exactly as history and
+is superseded by the corrected in-scope matrix below.
+
+### Why V8 is out of scope
+
+The Stage 2 request named three acceptance areas: localized JSON-key prompt
+consistency, the RTL note card and composer in the DSH human UI, and human-only
+action semantics (`final-report.md` section 1). The same section states that
+no live paid model call is in scope, and section 8 repeats that paid live model
+calls are out of scope. The visual target was the DSH web host; section 10
+records that the desktop app `0.2.1-rc.3` was not used and that the evidence
+uses `dsh 0.2.0-rc.2`.
+
+V8 combined two things outside that scope: a real reviewer-produced note
+(which requires a live model call) and desktop `0.2.1-rc.3` compatibility
+(which the Stage 2 request did not include). Adding V8 to the acceptance matrix
+was a reporting mistake. It is not waived: it stays NOT VERIFIED and is moved
+to the explicitly labeled out-of-scope section below, with the same facts,
+host versions, unknowns, and limitation. If desktop compatibility or live
+reviewer delivery later becomes a requirement, V8 becomes a new in-scope
+validation item for that task.
+
+### Corrected in-scope matrix
+
+ChatGPT independently inspected all six actual-host screenshots,
+`actual-host-actions.json`, the fixture proxy, the source, and the tests on
+2026-10-30 and found no visual defects for V1-V7. DSH captured the evidence.
+
+| ID | Observable outcome | Scope | Evidence/source | Verifier | Status |
+| --- | --- | --- | --- | --- | --- |
+| V1 | Hebrew note renders RTL: first character at the right edge, final period at the left, mixed Latin path intact | In scope: RTL DSH web note card | `actual-host-notes-1280.png`; 700px DOM measurement 577 -> 313 | ChatGPT inspection; DSH capture | PASS |
+| V2 | Arabic note renders with the same RTL base direction | In scope: RTL DSH web note card | `actual-host-notes-1280.png`; 582 -> 326 | ChatGPT inspection; DSH capture | PASS |
+| V3 | Explain expands the cached Hebrew explanation inline, RTL, with zero explain requests | In scope: human UI and human-only Explain | `actual-host-explanation-1280.png`; `actual-host-actions.json` explainRequests 0/0; cached path in `lib/client.js` | ChatGPT inspection; DSH capture | PASS |
+| V4 | History shows the resolved Hebrew note and its Hebrew explanation, RTL | In scope: RTL DSH web history | `actual-host-history-1280.png` | ChatGPT inspection; DSH capture | PASS |
+| V5 | Add to chat inserts the exact action draft, keeps composer focus, resolves the Hebrew card (3 -> 2), and sends nothing | In scope: human-only Add to chat | `actual-host-add-to-chat-1280.png`; `actual-host-actions.json` draft exact, activeNotes 3 -> 2, activeIsComposer true | ChatGPT inspection; DSH capture | PASS |
+| V6 | Thanks, Knew it, and Dismiss do not write or send a draft; active notes fall by one and send stays disabled | In scope: human-only local actions | `actual-host-actions.json` (each action activeNotes 3 -> 2, draft "", sendDisabled true, sentMessage false) | ChatGPT inspection; DSH capture | PASS |
+| V7 | At 700px the long RTL note wraps; cards and composer stay inside the viewport; scrollWidth equals innerWidth | In scope: RTL DSH web layout | `actual-host-narrow-700.png`; scrollWidth 700, card right 677, composer right 673 | ChatGPT inspection; DSH capture | PASS |
+
+### Out-of-scope NOT VERIFIED / future validation
+
+This is not an acceptance row and has no PASS. It records a real limitation
+without weakening any in-scope requirement.
+
+| ID | Item | Facts | Status |
+| --- | --- | --- | --- |
+| V8 | A real reviewer-produced note reaches the card on the desktop app 0.2.1-rc.3 | The desktop host was not captured; the evidence is `dsh 0.2.0-rc.2` with synthetic notes/history fixtures; no live reviewer model was called (paid live model calls are out of scope) | NOT VERIFIED (out of scope) |
+
+All in-scope V1-V7 rows PASS. The only NOT VERIFIED item is explicitly outside
+the Stage 2 acceptance scope, is not hidden, and is not counted as a PASS. The
+original eight-row matrix in section 10 remains in the file for audit.
