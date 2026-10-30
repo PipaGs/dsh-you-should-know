@@ -1,0 +1,6 @@
+# Upstream tag refs, captured 2026-10-30
+$ git ls-remote https://github.com/anthropics/claude-code.git 'refs/tags/v2.1.287*' 'refs/tags/v2.1.288*' 'refs/tags/v2.1.290*' 'refs/tags/v2.1.312*'
+816ec211a648f17a411f63a45cfd44ddf8db00d9	refs/tags/v2.1.287
+1c229fcd1e1e4e452e29a8f116b45fe4cfe2c528	refs/tags/v2.1.288
+e8ae451830fb8d1d8edf853c7830ff6c650d3ee3	refs/tags/v2.1.290
+0e1f4789406477380b267a01f3ddd50b0211e5b3	refs/tags/v2.1.312

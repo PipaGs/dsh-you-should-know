@@ -24,6 +24,14 @@ code, prompt, or config is edited.
 3. Each run reads the source, not a memory of it. Nothing is inferred from
    unofficial mirrors, blog posts, or the product's private behavior.
 
+## Known source-policy deviation
+
+On 2026-10-14 the cycle read https://code.claude.com/docs/en/changelog.md, which
+is outside the source policy in "Cadence and inputs". The deviation is recorded
+in [addendum-20261030-source-policy-deviation.md](./addendum-20261030-source-policy-deviation.md).
+This note does not authorize that page as an accepted source. The policy decision
+is deferred to Stage 1B.
+
 ## The triage pipeline
 
 Every upstream signal moves through the same states:

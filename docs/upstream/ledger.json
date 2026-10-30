@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "taskId": "ysk-note-voice-live-20261014",
-  "generatedAt": "2026-10-14T13:14:49Z",
+  "taskId": "ysk-upstream-ledger-correction-20261030",
+  "generatedAt": "2026-10-30T06:40:37Z",
   "upstream": {
     "project": "anthropics/claude-code",
     "feature": "You should know (built-in mod, cc-plugin-you-should-know@builtin)",
@@ -14,7 +14,47 @@
         "immutable": true,
         "publishedAt": "2026-10-01T18:00:22Z",
         "fetchedAt": "2026-10-14T09:43:02Z",
-        "sha256": "0fb6f5753ba768c5aec55e0c96fa0beae39342716535355a9baadcfbc4297b14"
+        "verifiedAt": "2026-10-30T06:40:37Z",
+        "tag": "v2.1.287",
+        "tagRefSha": "816ec211a648f17a411f63a45cfd44ddf8db00d9",
+        "tagObjectType": "commit",
+        "draft": false,
+        "prerelease": false,
+        "releaseBodySha256": "54729a449b821d8d4d58b1eaeae082e6427cc6a3a72871260c2fa366bd0fc8a5",
+        "sha256": "0fb6f5753ba768c5aec55e0c96fa0beae39342716535355a9baadcfbc4297b14",
+        "provenance": "Verified 2026-10-30 with the GitHub REST API. The release is immutable, not a draft, and not a prerelease. The tag ref refs/tags/v2.1.287 resolved to commit 816ec211a648f17a411f63a45cfd44ddf8db00d9. The releaseBodySha256 field covers the exact markdown body returned by the API. The sha256 field is retained from the 2026-10-14 capture and was not recomputed by this task."
+      },
+      {
+        "id": "claude-code-release-v2.1.288",
+        "kind": "github-release",
+        "url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.288",
+        "immutable": true,
+        "publishedAt": "2026-10-02T20:19:57Z",
+        "fetchedAt": "2026-10-30T06:40:37Z",
+        "verifiedAt": "2026-10-30T06:40:37Z",
+        "tag": "v2.1.288",
+        "tagRefSha": "1c229fcd1e1e4e452e29a8f116b45fe4cfe2c528",
+        "tagObjectType": "commit",
+        "draft": false,
+        "prerelease": false,
+        "releaseBodySha256": "a9bb9cf4a1a26b4766ed5dd2a1cbff01b9cbf34dbc523f29f83888c876b6cee1",
+        "provenance": "Verified 2026-10-30 with the GitHub REST API. The release is immutable, not a draft, and not a prerelease, and it was published at 2026-10-02T20:19:57Z. The tag ref refs/tags/v2.1.288 resolved to commit 1c229fcd1e1e4e452e29a8f116b45fe4cfe2c528. The releaseBodySha256 field covers the exact markdown body returned by the API."
+      },
+      {
+        "id": "claude-code-release-v2.1.290",
+        "kind": "github-release",
+        "url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.290",
+        "immutable": true,
+        "publishedAt": "2026-10-05T23:33:17Z",
+        "fetchedAt": "2026-10-30T06:40:37Z",
+        "verifiedAt": "2026-10-30T06:40:37Z",
+        "tag": "v2.1.290",
+        "tagRefSha": "e8ae451830fb8d1d8edf853c7830ff6c650d3ee3",
+        "tagObjectType": "commit",
+        "draft": false,
+        "prerelease": false,
+        "releaseBodySha256": "91c665a1614eeb707db9f206d4ba071530c15ab442a665c959b0e82e9a58ee9c",
+        "provenance": "Verified 2026-10-30 with the GitHub REST API. The release is immutable, not a draft, and not a prerelease, and it was published at 2026-10-05T23:33:17Z. The tag ref refs/tags/v2.1.290 resolved to commit e8ae451830fb8d1d8edf853c7830ff6c650d3ee3. The releaseBodySha256 field covers the exact markdown body returned by the API."
       },
       {
         "id": "claude-code-changelog-main",
@@ -33,6 +73,11 @@
         "immutable": false,
         "fetchedAt": "2026-10-14T09:54:42Z",
         "sha256": "dfc62da25a39339848ffedb7cf2beadf51f41458d7b681d79d25b22274550d5e",
+        "historicalOnly": true,
+        "policyDeviation": {
+          "recordedIn": "docs/upstream/addendum-20261030-source-policy-deviation.md",
+          "reason": "workflow.md accepted only GitHub tagged release notes and CHANGELOG.md. This official docs page was read on 2026-10-14 because the GitHub hosts were unreachable that day. The deviation is recorded, not retroactively authorized; the policy decision is deferred to Stage 1B."
+        },
         "matchedLines": [
           {
             "version": "2.1.290",
@@ -58,6 +103,11 @@
         "upstreamVersion": "2.1.287",
         "upstreamSourceId": "claude-code-release-v2.1.287",
         "upstreamDate": "2026-10-01",
+        "changelogTrace": {
+          "sourceId": "claude-code-changelog-page-20261014",
+          "line": 1005,
+          "note": "The same official sentence was captured from the served changelog page on 2026-10-14. That page is a recorded source-policy deviation, not an accepted source."
+        },
         "upstreamQuote": "Added You should know, a built-in mod where a side agent watches your back and flags things you or Claude might miss. Turn it on with /plugin enable cc-plugin-you-should-know@builtin (for first-party sessions with telemetry on)",
         "claim": "A built-in side agent reviews completed work and flags important things the human or the agent most likely missed.",
         "localStatus": "adapted",
@@ -76,6 +126,11 @@
         "upstreamVersion": "2.1.287",
         "upstreamSourceId": "claude-code-release-v2.1.287",
         "upstreamDate": "2026-10-01",
+        "changelogTrace": {
+          "sourceId": "claude-code-changelog-page-20261014",
+          "line": 1005,
+          "note": "The same official sentence was captured from the served changelog page on 2026-10-14. That page is a recorded source-policy deviation, not an accepted source."
+        },
         "upstreamQuote": "for first-party sessions with telemetry on",
         "claim": "The built-in mod is gated to first-party sessions that have telemetry enabled.",
         "localStatus": "not-applicable",
@@ -92,8 +147,13 @@
       {
         "id": "U-2.1.288-note-voice",
         "upstreamVersion": "2.1.288",
-        "upstreamSourceId": "claude-code-changelog-page-20261014",
-        "upstreamDate": "2026-10-14",
+        "upstreamSourceId": "claude-code-release-v2.1.288",
+        "upstreamDate": "2026-10-02",
+        "changelogTrace": {
+          "sourceId": "claude-code-changelog-page-20261014",
+          "line": 924,
+          "note": "The same official sentence was captured from the served changelog page on 2026-10-14. That page is a recorded source-policy deviation, not an accepted source."
+        },
         "upstreamQuote": "Improved \"You should know\" notes to say \"we\", \"the main agent\" or \"you\" depending on who was responsible for a decision",
         "claim": "A note picks its voice from who was responsible for the decision: we, the main agent, or you.",
         "localStatus": "adapted",
@@ -171,8 +231,13 @@
       {
         "id": "U-2.1.290-language-setting",
         "upstreamVersion": "2.1.290",
-        "upstreamSourceId": "claude-code-changelog-main",
-        "upstreamDate": "2026-10-14",
+        "upstreamSourceId": "claude-code-release-v2.1.290",
+        "upstreamDate": "2026-10-05",
+        "changelogTrace": {
+          "sourceId": "claude-code-changelog-page-20261014",
+          "line": 768,
+          "note": "The same official sentence was captured from the served changelog page on 2026-10-14. That page is a recorded source-policy deviation, not an accepted source."
+        },
         "upstreamQuote": "Fixed You should know writing its notes in English regardless of the language setting",
         "claim": "Notes follow the configured language setting instead of always being written in English.",
         "localStatus": "equivalent",
@@ -190,21 +255,99 @@
   },
   "local": {
     "repository": "PipaGs/dsh-you-should-know",
-    "version": "0.4.3",
-    "tag": "v0.4.3",
-    "head": "746d1caa2101b96c97f85b0a0e387b57e77fc436",
-    "branch": "main"
+    "version": "0.4.6",
+    "tag": "v0.4.6",
+    "head": "038dcdac90c4dbb32e18d21a21bfa56d83bbc6c2",
+    "branch": "main",
+    "verifiedAt": "2026-10-30T06:40:37Z",
+    "tagIdentity": {
+      "tagObject": "2dd722eb691493281aefa081ebfc722afb7d117f",
+      "tagObjectType": "tag",
+      "pointsAt": "038dcdac90c4dbb32e18d21a21bfa56d83bbc6c2",
+      "pointsAtType": "commit",
+      "taggerDate": "2026-10-24T07:43:12+03:00",
+      "provenance": "Verified 2026-10-30 with git for-each-ref, git cat-file, git rev-parse, and git ls-remote --tags origin. The annotated tag object 2dd722eb691493281aefa081ebfc722afb7d117f points at commit 038dcdac90c4dbb32e18d21a21bfa56d83bbc6c2, which is the recorded head."
+    },
+    "previousBaseline": {
+      "version": "0.4.3",
+      "tag": "v0.4.3",
+      "head": "746d1caa2101b96c97f85b0a0e387b57e77fc436",
+      "tagObject": "7d392bd65e07fdbd42530e56d32698a05edeba52",
+      "tagPointsAt": "b6a202d00e80e6069c07b03e65034b4280756f1d",
+      "note": "The previous ledger recorded head 746d1caa2101b96c97f85b0a0e387b57e77fc436 with version 0.4.3. The v0.4.3 annotated tag does not point at that head: it points at b6a202d00e80e6069c07b03e65034b4280756f1d, the v0.4.3 release merge. The head 746d1caa2101b96c97f85b0a0e387b57e77fc436 is a later untagged commit, five commits after v0.4.3, and is contained in v0.4.4. This record keeps that distinction explicit and does not claim the historical tag equals the previous ledger head."
+    }
+  },
+  "coverage": {
+    "checkedThrough": {
+      "version": "2.1.312",
+      "tag": "v2.1.312",
+      "url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.312",
+      "publishedAt": "2026-10-27T20:24:20Z",
+      "tagRefSha": "0e1f4789406477380b267a01f3ddd50b0211e5b3",
+      "tagObjectType": "commit",
+      "releaseBodySha256": "9d4b2e43c12591836e0b1cd65c302e58fbf5ad6bf589643414d7158be0c75eb7",
+      "provenance": "Verified 2026-10-30 with the GitHub REST API. The release is immutable and was published at 2026-10-27T20:24:20Z. The tag ref refs/tags/v2.1.312 resolved to commit 0e1f4789406477380b267a01f3ddd50b0211e5b3."
+    },
+    "lastDirectSignalVersion": "2.1.290",
+    "range": {
+      "after": "v2.1.290",
+      "through": "v2.1.312",
+      "releaseCount": 20,
+      "versions": [
+        "v2.1.291",
+        "v2.1.292",
+        "v2.1.293",
+        "v2.1.294",
+        "v2.1.295",
+        "v2.1.296",
+        "v2.1.299",
+        "v2.1.300",
+        "v2.1.301",
+        "v2.1.302",
+        "v2.1.303",
+        "v2.1.304",
+        "v2.1.305",
+        "v2.1.306",
+        "v2.1.307",
+        "v2.1.308",
+        "v2.1.309",
+        "v2.1.310",
+        "v2.1.311",
+        "v2.1.312"
+      ],
+      "missingTagNumbers": [
+        "v2.1.297",
+        "v2.1.298"
+      ]
+    },
+    "method": "Read the published GitHub release bodies for v2.1.291 through v2.1.312 with the GitHub REST API and searched each body for the case-insensitive phrase You should know. The sanitized extract is docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/github-releases-2.1.287-2.1.312.json. The check covers release bodies only; it does not read the code.claude.com behavioral documentation pages.",
+    "finding": "No direct You should know release note appears after v2.1.290 through v2.1.312.",
+    "doesNotClaim": "This records only the absence of direct You should know release notes in the checked range. It does not claim that upstream behavior did not change: behavior can change without a named release note, and this check reads release bodies only.",
+    "evidence": "docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/github-releases-2.1.287-2.1.312.json",
+    "verifiedAt": "2026-10-30T06:40:37Z"
   },
   "outagePolicy": {
-    "rule": "If any primary source is unreachable, moved, truncated, or otherwise unverifiable, the affected item is recorded as unknown for that cycle; it is never recorded as no change. The previous verified baseline stays in place, and the outage plus the attempted URLs are recorded in the next review update.",
+    "rule": "If any primary source is unreachable, moved, truncated, or otherwise unverifiable, the affected item is recorded as unknown for this cycle; it is never recorded as no change. The previous verified baseline stays in place, and the outage plus the attempted URLs are recorded in the next review update.",
     "appliesTo": "every verification step, including the source list itself",
     "lastOutage": {
       "observedAt": "2026-10-14T09:54:42Z",
       "what": "The GitHub-hosted endpoints (raw.githubusercontent.com, api.github.com) and the docs host resolved to non-public addresses in this environment, so this cycle re-read the served official changelog page instead.",
       "reachableFallback": "https://code.claude.com/docs/en/changelog.md",
-      "pinnedBaselineStays": "claude-code-changelog-main at commit db93774d73e8fdbaf315a6f4c175ae99ad3d515a"
+      "pinnedBaselineStays": "claude-code-changelog-main at commit db93774d73e8fdbaf315a6f4c175ae99ad3d515a",
+      "clearedAt": "2026-10-30T06:40:37Z",
+      "clearedNote": "The GitHub API and tag refs were reachable on 2026-10-30. This task re-verified the release sources directly and did not reuse the docs page as an accepted source."
     }
   },
+  "openPolicyDecisions": [
+    {
+      "id": "stage-1b-official-docs-source-policy",
+      "question": "Should official code.claude.com behavioral documentation be an accepted source, in addition to GitHub tagged release notes and CHANGELOG.md?",
+      "currentPolicy": "workflow.md accepts only official GitHub tagged release notes and CHANGELOG.md under https://github.com/anthropics/claude-code/.",
+      "status": "deferred-to-stage-1b",
+      "whyDeferred": "Task 1A records the historical 2026-10-14 deviation and corrects the dates. It does not change the source policy.",
+      "evidence": "docs/upstream/addendum-20261030-source-policy-deviation.md"
+    }
+  ],
   "openUnknowns": [
     {
       "id": "upstream-selection-algorithm",
