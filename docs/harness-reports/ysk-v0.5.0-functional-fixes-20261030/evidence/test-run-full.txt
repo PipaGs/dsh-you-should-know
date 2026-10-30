@@ -1,10 +1,10 @@
 FULL SUITE - fixed tree
-TREE: branch fix/v0.5.0-functional-defects-20261030, product head 611369c (after both review rounds)
+TREE: branch fix/v0.5.0-functional-defects-20261030, product head 212179b (after all review rounds)
 COMMAND: npm test
 EXIT: 0
-SUMMARY: tests 685, pass 685, fail 0, cancelled 0, skipped 0
+SUMMARY: tests 687, pass 687, fail 0, cancelled 0, skipped 0
 
-New regression tests (29):
+New regression tests (31):
 - a source must name a whole path token in the conversation excerpt
 - a source path is grounded in the conversation only, never in the capsule
 - a source line is kept only for an explicit marker on the exact path
@@ -34,3 +34,5 @@ New regression tests (29):
 - a line marker rejects a trailing continuation
 - a review aborted by a disable and settled after a quick re-enable adds no recent-check record
 - a spaced path and a line range never ground an end-to-end source
+- the card shows a bidi-hostile path as stripped plain text and never links it
+- the file-address seam fails closed for bidi-hostile paths but keeps safe RTL and ASCII paths

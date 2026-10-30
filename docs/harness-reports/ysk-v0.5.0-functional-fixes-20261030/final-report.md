@@ -6,7 +6,7 @@
 
 **Branch:** fix/v0.5.0-functional-defects-20261030
 
-**Product head:** 611369c2b39d99d2c181d315e94b9d964cdb66aa (product version 0.5.0, unchanged)
+**Product head:** 212179bb5e775119a7d81e91d781edad1f42c646 (product version 0.5.0, unchanged)
 
 **PR:** https://github.com/PipaGs/dsh-you-should-know/pull/30
 
@@ -43,7 +43,7 @@ untracked `.rollout-restart-verify.log` in the main worktree is untouched.
 | D3 | A never-settling discovery or capability lookup settles with a finite bounded outcome, clears `inFlight`, records a terminal outcome, and lets the next turn retry; no cache poisoning; no extra call | `test/route-deadline.test.js`; red on v0.5.0; green on the fix | PASS |
 | D4 | Disabling the reviewer hides and clears recent-check records; re-enabling starts empty even when an aborted review settles after a quick re-enable; notes, dedupe, and known fingerprints survive; records stay `{at,turn,outcome}` | `test/recent-check-disable.test.js` (including the disable -> re-enable -> settle epoch case), `test/recent-check-diagnostics.test.js`; red on v0.5.0; green on the fix | PASS |
 | D5 | Traversal, absolute POSIX, drive-absolute, UNC, and percent-encoded paths are rejected by the host parser and fail closed in the client; safe relative paths still work | `test/core.test.js`, `test/client-ui.test.js`; red on v0.5.0; actual-host traversal card has no link and its draft never contains the path | PASS |
-| D6 | Bidi controls in note, action, `because`, or source path are rejected by the host parser and stripped at render/draft time; natural Hebrew and Arabic stay intact | `test/core.test.js`, `test/client-ui.test.js`; red on v0.5.0; actual-host bidi card and draft contain no control | PASS |
+| D6 | Bidi controls in note, action, `because`, or source path are rejected by the host parser; the client validates the raw path before stripping, so a hostile source path never becomes a link, resource URL, or draft File line; displayed text and drafts are control-free; natural Hebrew and Arabic stay intact | `test/core.test.js`, `test/client-ui.test.js` (card, seam, and draft); red on v0.5.0; actual-host bidi card and draft contain no control | PASS |
 
 All six defects reproduced on the clean v0.5.0 product tree. No audit finding
 was rejected as non-reproducible.
@@ -54,7 +54,7 @@ The final regression files were copied onto a clean archive of tag `v0.5.0`
 and run without product changes:
 
 - command: `node --test --test-timeout=5000 test/core.test.js test/engine.test.js test/client-ui.test.js test/route-deadline.test.js test/recent-check-disable.test.js`
-- result: exit 1, tests 262, pass 231, fail 31
+- result: exit 1, tests 264, pass 231, fail 33
 - failures include invented source grounding, capsule-quoted `because`,
   traversal links, bidi controls, hung discovery, and retained diagnostics
 
@@ -91,11 +91,11 @@ Full names: `evidence/test-run-red.txt`.
 
 | Check | Result |
 | --- | --- |
-| `npm test` on the fixed tree | 685 tests, 685 pass, 0 fail, exit 0 |
+| `npm test` on the fixed tree | 687 tests, 687 pass, 0 fail, exit 0 |
 | `npm run check` | exit 0 |
 | `git diff --check` | exit 0 |
 | Product version | 0.5.0, unchanged |
-| New regression tests | 29 (14 for D1/D2/D5/D6, 10 for D3/D4, 5 review-round regressions) |
+| New regression tests | 31 (14 for D1/D2/D5/D6, 10 for D3/D4, 7 review-round regressions) |
 
 Raw summaries: `evidence/test-run-full.txt`, `evidence/check.txt`.
 
@@ -105,8 +105,9 @@ Raw summaries: `evidence/test-run-full.txt`, `evidence/check.txt`.
 `Info.plist` and `dsh --version`), web host booted from a temporary isolated
 `DSH_HOME` created from the shipped web template. The plugin package in that
 profile is a symlink to the task worktree at capture head `f6a9ac9`; the final
-product head `611369c` changes only host grounding code, so the client visuals
-are identical. Its `package.json` version is 0.5.0. No user profile, credential, session, or
+product head `212179b` changes host grounding code and client fail-closed path
+validation. The fixtures contain no bidi-control source path, so the client
+visuals are identical. Its `package.json` version is 0.5.0. No user profile, credential, session, or
 installed plugin file was modified; the desktop profile manifest was read only
 to confirm the installed dependency.
 
@@ -214,6 +215,14 @@ The evidence files now carry the capture head `f6a9ac9`, the final product head
 `611369c`, and the capture times `19:57Z-20:02Z`. The final head differs from
 the capture head only in host-side grounding code; client rendering is
 unchanged, so the screenshots remain valid for this UI.
+
+A third verification round found one D6/D5 client fail-closed gap: `noteSourceOf`
+and `sessionFileAddress` stripped bidi controls before validating, so a hostile
+raw source path could become an Open file link. `212179b` validates the raw path
+before stripping. A control-carrying path now renders as stripped plain text
+with no link, resource URL, or draft `File:` line; a safe Hebrew-letter path
+still links and addresses normally. The card, the seam, and the Add to chat
+draft each have a regression.
 
 ## 10. Process notes
 

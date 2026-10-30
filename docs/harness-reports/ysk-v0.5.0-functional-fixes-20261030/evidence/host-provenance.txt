@@ -4,8 +4,9 @@ HOST: DeepSeek Harness desktop app 0.2.1-rc.5 (CFBundleShortVersionString 0.2.1-
 CLI: dsh --version -> 0.2.1-rc.5
 PLUGIN: dsh-you-should-know 0.5.0 loaded from the task worktree at capture head
   f6a9ac9 via a node_modules symlink in a temporary profile. The final product
-  head 611369c changes only host-side grounding code; client rendering is
-  unchanged, so these captures remain valid for the UI.
+  head 212179b changes host grounding and client fail-closed path validation;
+  the fixtures contain no bidi-control source path, so client rendering is
+  unchanged for these captures.
 PROFILE: a temporary DSH_HOME under a private temp directory; the profile was
   created from the shipped web template. No user profile, desktop credential,
   cookie, session, or installed plugin file was modified. The desktop profile

@@ -4,14 +4,14 @@
     "desktopVersion": "0.2.1-rc.5",
     "cliVersion": "0.2.1-rc.5",
     "pluginVersion": "0.5.0",
-    "pluginSource": "worktree symlink at capture head f6a9ac9 (product version 0.5.0). The final product head 611369c changes only host-side grounding code; client rendering is unchanged.",
+    "pluginSource": "worktree symlink at capture head f6a9ac9 (product version 0.5.0). The final product head 212179b changes host grounding and client fail-closed path validation; the fixtures contain no bidi-control source path, so client visuals are identical.",
     "capturedAt": "2026-10-30T19:57Z-20:02Z",
     "isolation": "temporary DSH_HOME under a private temp directory; profile created from the shipped web template; no user profile, credential, session, or installed plugin file was modified (the desktop profile package.json was read only to confirm the installed 0.5.0 dependency)",
     "auth": "browser-authenticated connection through the real host (self-check authTransport host-authenticated-connection); the launch token is not recorded",
     "fixtureBoundary": "a local proxy forwarded HTTP/WS to the real host and replaced only the plugin notes and history responses with synthetic fixtures; the shell, plugin bundles, session, composer, cards, and actions were served by the real host",
     "noLiveCalls": "no API key or provider credential was configured; the global status route reported route=null; no reviewer or primary model call was made",
     "captureHead": "f6a9ac9",
-    "finalProductHead": "611369c"
+    "finalProductHead": "212179b"
   },
   "fixtures": {
     "activeNotes": [
