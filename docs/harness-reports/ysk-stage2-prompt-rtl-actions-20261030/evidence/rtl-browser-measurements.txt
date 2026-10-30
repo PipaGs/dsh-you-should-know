@@ -1,5 +1,8 @@
-RTL BROWSER REPRODUCTION - note card base direction
+RTL BROWSER REPRODUCTION - note card base direction (SUPPLEMENTARY ONLY)
 DATE: 2026-10-30
+This standalone-page measurement is not target-app evidence. The actual DSH
+host capture is in evidence/actual-host-visual-evidence.txt; this file is kept
+as supporting material for the CSS direction behavior.
 ENGINE: Chrome/Blink through the Chrome DevTools MCP page
 PAGE: evidence/rtl-card-repro.html
 PAGE_SHA256: ffff451ad8c68405ab51dc7765f833ae7726e3f05fd09b508450ccd8e1561e5f

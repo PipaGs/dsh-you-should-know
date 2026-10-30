@@ -39,6 +39,16 @@ package.json version: 0.4.6
 lib/index.js PLUGIN_VERSION: 0.4.6
 No tag, release, npm install, or npm publish was performed.
 
+RESULT 5 - actual host visual evidence (added in the visual-gate round):
+COMMAND: grep -RInE '<home-root, temp-path, file-URL, token, key, password markers>' actual-host-visual-evidence.txt visual-fixture-proxy.mjs final-report.md
+OUTPUT: empty
+EXIT: 1 (no match)
+COMMAND: strings actual-host-*.png | grep -E '<home-root, temp-path, file-URL, token markers>'
+OUTPUT: empty for all six PNGs
+EXIT: 1 (no match)
+The six PNGs contain only the DSH UI and the synthetic note fixtures. The test
+proxy contains no launch token, cookie, or user data.
+
 RAW LOGS:
 The red log is committed only in sanitized form. The sanitization replaces the
 absolute worktree prefix with <worktree>/ and removes trailing spaces on the

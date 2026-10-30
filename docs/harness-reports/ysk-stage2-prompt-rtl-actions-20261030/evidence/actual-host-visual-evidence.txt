@@ -1,0 +1,100 @@
+ACTUAL DSH HOST VISUAL EVIDENCE - Stage 2 RTL note card
+DATE: 2026-10-30 (Europe/Moscow); captures between 15:09Z and 15:18Z
+CONTRACT: VISUAL_GATE: REQUIRED (project visual evidence contract)
+
+TARGET APP AND BUILD
+- Host: DeepSeek Harness web host, dsh 0.2.0-rc.2.
+- Plugin: dsh-you-should-know 0.4.6, loaded from the task worktree.
+- Product head: 9c93017a8c1d863bc80a0bff809042e825ae493a.
+- Branch head at capture: 8cc2853c39b780edef40797304ea78871da5c47e.
+- lib/ is identical to the product head: git diff --stat 9c93017 -- lib is empty.
+- The worktree was exposed to the host through a temporary DSH profile created
+  from the shipped web template. The plugin package in that profile is a
+  symlink to the task worktree. No npm install, publish, tag, or release ran.
+- The desktop app 0.2.1-rc.3 was not used for this capture.
+
+CAPTURE PATH
+- The host ran on 127.0.0.1:51508 with a temporary DSH_HOME under a private
+  temp directory.
+- A local Node test proxy listened on 127.0.0.1:51509 and forwarded HTTP and
+  WebSocket traffic to 51508.
+- The proxy replaced exactly two responses with synthetic fixtures:
+  /api/dsh-you-should-know/notes and /api/dsh-you-should-know/history.
+  Every other request, the application shell, the plugin host and client
+  bundles, the session, the composer, and all UI interactions were served by
+  the real DSH host.
+- The launch token is not reproduced in this evidence.
+
+SYNTHETIC FIXTURES
+- Hebrew note: "הקובץ lib/runtime.js:42 לא נטען כי הבקשה נכשלה."
+- Arabic note: "الملف lib/language.js:30 لم يتم تحميله لأن الطلب فشل."
+- Long Hebrew note with a long Latin path and a mixed Latin token.
+- One resolved Hebrew History entry with a Hebrew explanation.
+- The fixtures contain no real session text, user data, credentials, or tool
+  output. They exist only in the test proxy.
+
+SCREENSHOTS (PNG, exact SHA-256)
+- actual-host-notes-1280.png            85bf042bcc1b85d4f16917895c4f478a7c94c17024614069422907072ce1f075
+- actual-host-explanation-1280.png      a3ccc54a499352b539bfd83d3ca9d56b90cfded747612ca395c7bd21bfe0866f
+- actual-host-history-1280.png          826c59410eb4495074bded6c4a809118daa998f720458373dacc9a3eaba32651
+- actual-host-add-to-chat-1280.png      d50f43cbf95569d2def3843bd78bc67411f7c20465ea9c395b36ff0cf1a6f800
+- actual-host-long-note-1280.png        8dbd053ad666afd59fd28929f15cdd96fd43d8c62a93649308b8c1dbf33bd8e4
+- actual-host-narrow-700.png            6d4a19f361620c04aeb500932b6d39f864864a6b0a4c05194cc65769373d716a
+- visual-fixture-proxy.mjs              5d8da8b86f2ea78faf4e58bcb978ccfa4961c3b12df539f72e8fbc0d196d97f4
+
+RENDERED MEASUREMENTS
+At a 700px viewport, every human note text node carries dir="auto". A DOM Range
+around the first and last character reports:
+
+| fixture | computed direction | first character x | last character x |
+| --- | --- | --- | --- |
+| Hebrew critical | rtl | 577 | 313 |
+| Arabic high | rtl | 582 | 326 |
+| Hebrew long | rtl | 577 | 174 |
+
+The first logical character sits at the right edge and the final period at the
+left, which is the required RTL reading order. The mixed Latin path remains one
+left-to-right run. At 1280px all three cards render in the actual host; at 700px
+the long note wraps, documentElement.scrollWidth = innerWidth = 700, every card
+right edge is 677, and the composer right edge is 673. No horizontal overflow.
+
+INTERACTION PROOF (actual host unless noted)
+1. Add to chat, clean session, composer focused first:
+   - Before: draft "", active notes 2, empty state present, send disabled.
+   - One click on Add to chat did not send a message.
+   - After: draft exactly "Fix the session restore path in lib/runtime.js and
+     add a regression test.", activeElement is the composer textbox, active
+     notes 2 -> 1, the empty state remains, send is enabled only because a
+     draft now exists, and no transcript entry exists.
+2. Thanks on the remaining Arabic note:
+   - Before: draft is the action text, active notes 1.
+   - After: draft is byte-identical, active notes 1 -> 0, empty state remains,
+     no message is sent.
+3. Knew it on a fresh reload:
+   - Before: active notes 2, draft cleared, send disabled.
+   - After: active notes 2 -> 1, draft contains one empty paragraph, send stays
+     disabled, no message is sent.
+4. Dismiss on a fresh reload:
+   - Before: active notes 2, draft "", send disabled.
+   - After: active notes 2 -> 1, draft "", send stays disabled, no message is
+     sent.
+5. Explain on the Hebrew note uses its cached Hebrew explanation and expands
+   inline in the actual card; no reviewer call and no draft write.
+6. History opens the resolved Hebrew entry and its Hebrew explanation in the
+   actual host.
+
+VERDICT
+VISUAL_GATE: PASS for the note card and history UI change and for the
+Add to chat / other-action interactions on the actual DSH host, with the
+fixture boundary stated above.
+
+NOT VERIFIED:
+- The desktop app 0.2.1-rc.3 host was not captured; this evidence uses the
+  dsh 0.2.0-rc.2 web host.
+- Note delivery by a real reviewer model was not exercised (paid live model
+  calls are out of scope); the notes/history payloads are synthetic fixtures.
+- Glyph positions are measured at 1280px and 700px; other fonts or zoom levels
+  were not covered.
+
+The earlier standalone rtl-card-repro.html Blink capture remains only
+supplementary evidence; it is not the target-app proof.
