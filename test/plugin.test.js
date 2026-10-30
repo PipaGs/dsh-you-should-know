@@ -551,7 +551,8 @@ test('the Fetch resolve route records an exact action and history keeps the note
   harness.runInjections()
 
   const listener = listenerOf(harness, 'session/event')
-  const session = sessionWith('s1', 1, 'done')
+  // D1: the source path and line marker must be grounded in the excerpt.
+  const session = sessionWith('s1', 1, 'The fix is in src/a.js:4.')
   listener(session, session.lastEvent)
   await settle()
 

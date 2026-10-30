@@ -111,7 +111,7 @@ test('the explanation prompt embeds the finding, the excerpt, and the bounded ev
 test('Explain makes one bounded call, caches the result, and never mutates the finding', async () => {
   const h = harness([REVIEW, EXPLAIN])
   const feed = feedSession('s1')
-  await observe(h.engine, feed.session, feed.turn('q1', 'a1'))
+  await observe(h.engine, feed.session, feed.turn('q1', 'The cache lives in src/cache.ts:12.'))
   const note = h.engine.notes('s1')[0]
   assert.ok(note)
   const first = await h.engine.explain('s1', note.id)
@@ -130,7 +130,7 @@ test('Explain makes one bounded call, caches the result, and never mutates the f
 test('concurrent Explain calls for one note share a single provider call', async () => {
   const h = harness([REVIEW, EXPLAIN])
   const feed = feedSession('s1')
-  await observe(h.engine, feed.session, feed.turn('q1', 'a1'))
+  await observe(h.engine, feed.session, feed.turn('q1', 'The cache lives in src/cache.ts:12.'))
   const note = h.engine.notes('s1')[0]
   const [a, b] = await Promise.all([h.engine.explain('s1', note.id), h.engine.explain('s1', note.id)])
   assert.equal(a.ok, true)
@@ -141,7 +141,7 @@ test('concurrent Explain calls for one note share a single provider call', async
 test('a failed Explain is fail-quiet, leaves the finding active, and can be retried', async () => {
   const h = harness([REVIEW, new Error('provider down'), EXPLAIN])
   const feed = feedSession('s1')
-  await observe(h.engine, feed.session, feed.turn('q1', 'a1'))
+  await observe(h.engine, feed.session, feed.turn('q1', 'The cache lives in src/cache.ts:12.'))
   const note = h.engine.notes('s1')[0]
   const failed = await h.engine.explain('s1', note.id)
   assert.equal(failed.ok, false)
@@ -156,7 +156,7 @@ test('a failed Explain is fail-quiet, leaves the finding active, and can be retr
 test('an unparsable Explain reply is a bounded failure and can be retried', async () => {
   const h = harness([REVIEW, 'not json at all', EXPLAIN])
   const feed = feedSession('s1')
-  await observe(h.engine, feed.session, feed.turn('q1', 'a1'))
+  await observe(h.engine, feed.session, feed.turn('q1', 'The cache lives in src/cache.ts:12.'))
   const note = h.engine.notes('s1')[0]
   assert.equal((await h.engine.explain('s1', note.id)).ok, false)
   assert.equal((await h.engine.explain('s1', note.id)).ok, true)
@@ -165,7 +165,7 @@ test('an unparsable Explain reply is a bounded failure and can be retried', asyn
 test('Explain rejects an unknown session or note without a provider call', async () => {
   const h = harness([REVIEW])
   const feed = feedSession('s1')
-  await observe(h.engine, feed.session, feed.turn('q1', 'a1'))
+  await observe(h.engine, feed.session, feed.turn('q1', 'The cache lives in src/cache.ts:12.'))
   assert.equal((await h.engine.explain('s1', 'nope')).ok, false)
   assert.equal((await h.engine.explain('missing', 'nope')).ok, false)
   assert.equal(h.calls.length, 1)
@@ -174,7 +174,7 @@ test('Explain rejects an unknown session or note without a provider call', async
 test('Explain makes only a bounded model call and leaves the session untouched', async () => {
   const h = harness([REVIEW, EXPLAIN])
   const feed = feedSession('s1')
-  await observe(h.engine, feed.session, feed.turn('q1', 'a1'))
+  await observe(h.engine, feed.session, feed.turn('q1', 'The cache lives in src/cache.ts:12.'))
   const note = h.engine.notes('s1')[0]
   const result = await h.engine.explain('s1', note.id)
   assert.equal(result.ok, true)
@@ -197,7 +197,7 @@ test('Explain makes only a bounded model call and leaves the session untouched',
 test('Explain attempts are charged against a separate bounded hourly budget', async () => {
   const h = harness([REVIEW, new Error('provider down')], { maxReviewerCallsPerHour: 1 })
   const feed = feedSession('s1')
-  await observe(h.engine, feed.session, feed.turn('q1', 'a1'))
+  await observe(h.engine, feed.session, feed.turn('q1', 'The cache lives in src/cache.ts:12.'))
   const note = h.engine.notes('s1')[0]
   assert.equal((await h.engine.explain('s1', note.id)).ok, false)
   const limited = await h.engine.explain('s1', note.id)

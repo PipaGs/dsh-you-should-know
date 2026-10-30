@@ -272,9 +272,11 @@ test('parseVerdict accepts a valid finding with an optional source object', () =
     parseVerdict('{"note":"Guard the write.","importance":"critical","source":{"path":"src/store.js","line":42}}'),
     { note: 'Guard the write.', importance: 'critical', source: { path: 'src/store.js', line: 42 } },
   )
-  assert.deepEqual(
+  // D5: the source path must be relative, so an absolute POSIX path is
+  // rejected instead of being accepted as a session resource path.
+  assert.equal(
     parseVerdict('{"note":"Absolute path.","importance":"high","source":{"path":"/Users/me/repo/a.ts"}}'),
-    { note: 'Absolute path.', importance: 'high', source: { path: '/Users/me/repo/a.ts' } },
+    null,
   )
   assert.deepEqual(
     parseVerdict('{"note":"Bounded line.","importance":"high","source":{"path":"a.js","line":1000000}}'),
@@ -287,10 +289,58 @@ test('parseVerdict trims an exact path and ignores harmless extra source keys', 
     parseVerdict('{"note":"Trimmed.","importance":"high","source":{"path":"  src/a.js  ","column":9}}'),
     { note: 'Trimmed.', importance: 'high', source: { path: 'src/a.js' } },
   )
+  // D5: a relative Windows-style path with backslashes stays valid; the
+  // drive-absolute form is rejected by the traversal test below.
   assert.deepEqual(
-    parseVerdict('{"note":"Windows.","importance":"high","source":{"path":"C:\\\\repo\\\\src\\\\a.ts"}}'),
-    { note: 'Windows.', importance: 'high', source: { path: 'C:\\repo\\src\\a.ts' } },
+    parseVerdict(JSON.stringify({ note: 'Windows.', importance: 'high', source: { path: 'src\\app\\a.ts' } })),
+    { note: 'Windows.', importance: 'high', source: { path: 'src\\app\\a.ts' } },
   )
+})
+
+test('parseVerdict rejects traversal, absolute, and percent-encoded source paths', () => {
+  const source = (path) => parseVerdict(JSON.stringify({ note: 'A', importance: 'high', source: { path } }))
+  for (const path of [
+    '..',
+    '../secret.txt',
+    'src/../../etc/passwd',
+    'src\\..\\secret.txt',
+    '/etc/passwd',
+    '/Users/me/repo/a.ts',
+    'C:\\repo\\a.ts',
+    'C:/repo/a.ts',
+    '\\\\server\\share\\a.ts',
+    'src/%2e%2e/secret.txt',
+    'src/%2E%2E/secret.txt',
+    'src/a%2ejs',
+  ]) {
+    assert.equal(source(path), null, 'expected null for ' + path)
+  }
+  // Only a segment that is exactly '..' is traversal, so dots inside a
+  // filename and an ordinary relative path stay valid.
+  for (const path of ['a..b.js', 'src/app/a.ts', 'src\\app\\a.ts', 'src/my file.js', '.hidden/.config']) {
+    assert.deepEqual(source(path), { note: 'A', importance: 'high', source: { path } })
+  }
+})
+
+test('parseVerdict rejects Unicode bidi formatting controls in every text field', () => {
+  const CONTROLS = ['\u061C', '\u200E', '\u200F', '\u202A', '\u202B', '\u202C', '\u202D', '\u202E', '\u2066', '\u2067', '\u2068', '\u2069']
+  for (const control of CONTROLS) {
+    const code = control.codePointAt(0).toString(16)
+    assert.equal(parseVerdict(JSON.stringify({ note: 'Note ' + control + ' text', importance: 'high' })), null, 'note ' + code)
+    assert.equal(parseVerdict(JSON.stringify({ note: 'N', importance: 'high', action: 'Fix ' + control + ' it' })), null, 'action ' + code)
+    assert.equal(parseVerdict(JSON.stringify({ note: 'N', importance: 'high', because: 'we ' + control + ' chose it' })), null, 'because ' + code)
+    assert.equal(parseVerdict(JSON.stringify({ note: 'N', importance: 'high', source: { path: 'src/' + control + 'a.js' } })), null, 'source ' + code)
+  }
+})
+
+test('parseVerdict keeps natural Hebrew and Arabic notes with Latin punctuation', () => {
+  const notes = [
+    'הסוכן מחק את הקובץ (בטעות), והנתונים אבדו.',
+    'حذف الوكيل الملف (عن طريق الخطأ), وضاعت البيانات.',
+  ]
+  for (const note of notes) {
+    assert.deepEqual(parseVerdict(JSON.stringify({ note, importance: 'high' })), { note, importance: 'high' })
+  }
 })
 
 test('parseVerdict rejects a malformed or unsafe source with the whole reply', () => {
@@ -494,8 +544,12 @@ test('the reviewer instruction states every usefulness and safety constraint', (
 
 test('the reviewer instruction sources a note only from a verbatim path and keeps the exact silence shape', () => {
   assert.match(REVIEW_INSTRUCTIONS, /"source"/)
-  assert.match(REVIEW_INSTRUCTIONS, /"path": "relative\/or\/absolute\/path"/)
-  assert.match(REVIEW_INSTRUCTIONS, /exact file path/i)
+  // D1/D5: the instruction now requires an exact relative path copied from the
+  // excerpt and forbids absolute paths and capsule-only paths.
+  assert.match(REVIEW_INSTRUCTIONS, /"path": "relative\/path\.js"/)
+  assert.match(REVIEW_INSTRUCTIONS, /exact relative path copied verbatim from the excerpt/i)
+  assert.match(REVIEW_INSTRUCTIONS, /Never use an absolute path/)
+  assert.match(REVIEW_INSTRUCTIONS, /appears only in the episode evidence/)
   assert.match(REVIEW_INSTRUCTIONS, /never (synthesize|invent|guess|normalize)/i)
   assert.match(REVIEW_INSTRUCTIONS, /omit the source/i)
   assert.ok(REVIEW_INSTRUCTIONS.includes('{"note": null, "importance": null}'), 'the documented silence shape stays byte-exact')
@@ -528,7 +582,10 @@ test('the reviewer instruction admits consequences of correct work', () => {
   assert.match(text, /"defect", "requirement_violation", "consequence", or "tradeoff"/)
   assert.match(text, /must also carry "because"/)
   assert.match(text, /at most 240 characters/)
-  assert.match(text, /either the conversation excerpt or the episode evidence/)
+  // D2: a because must quote the conversation excerpt; the capsule can
+  // corroborate but never supplies a quotation.
+  assert.match(text, /copied from the conversation excerpt/)
+  assert.match(text, /never supply a quotation/)
   assert.match(text, /discards the whole reply/)
   assert.equal(text.includes('what is wrong and why it matters'), false)
 })

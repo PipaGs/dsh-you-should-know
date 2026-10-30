@@ -975,7 +975,7 @@ test('the note card renders every undismissed note oldest-first and dismisses on
   view.unmount()
 })
 
-test('the note card renders a source row only when the note carries a valid one', async () => {
+test('the note card renders a source row for valid and unsafe paths without linking the unsafe one', async () => {
   const env = await loadBundle({
     backend: notesBackend([
       { id: 'n-1', note: 'With source.', importance: 'high', createdAt: 1, source: { path: 'src/a.js', line: 12 } },
@@ -991,7 +991,9 @@ test('the note card renders a source row only when the note carries a valid one'
   assert.equal(cards.length, 3)
   assert.match(textOf(cards[0]), /src\/a\.js:12/)
   assert.equal(textOf(cards[1]).includes('src/'), false, 'a note without a source renders no path')
-  assert.equal(findAll(cards[2], 'code').length, 0, 'an unsafe path renders nothing')
+  // D5: a stale or unsafe path stays visible as plain text and gets no link.
+  assert.equal(findAll(cards[2], 'code').length, 1, 'an unsafe path renders as plain text')
+  assert.equal(textOf(findAll(cards[2], 'code')[0]), 'javascript:alert(1)')
   view.unmount()
 })
 
@@ -1029,6 +1031,96 @@ test('Open file navigates through the sidebar resource API and never runs a comm
   assert.equal(opened.length, 1)
   assert.equal(opened[0].address, 'dsh-resource://file/session/s-1/src/a.js')
   assert.equal(opened[0].options.params.line, 12)
+  view.unmount()
+})
+
+test('an unsafe source path renders as plain text and never becomes a resource URL', async () => {
+  const opened = []
+  const unsafe = [
+    { path: 'src/../secret.txt' },
+    { path: '../secret.txt' },
+    { path: '/etc/passwd' },
+    { path: 'C:\\repo\\a.ts' },
+    { path: '\\\\server\\share\\a.ts' },
+    { path: 'src/%2e%2e/secret.txt' },
+  ]
+  const notes = unsafe.map((source, index) => ({ id: 'n-' + index, note: 'Unsafe source.', importance: 'high', createdAt: index, source }))
+  const env = await loadBundle({
+    backend: notesBackend(notes),
+    allowIntervals: true,
+    sidebarRight: { openResource: (address) => opened.push(address) },
+  })
+  const dock = env.dockComponent()
+  const face = dock.spec.inject('s-1')
+  const view = env.runtime.mount(dock.component, { ...face, inputActions: null, input: null })
+  await flushAsync()
+
+  const cards = findAll(view.output, 'section')
+  assert.equal(cards.length, notes.length)
+  for (const [index, card] of cards.entries()) {
+    assert.equal(buttonByText(card, 'Open file'), null, 'an unsafe path never gets a link')
+    const code = findAll(card, 'code')
+    assert.equal(code.length, 1, 'the unsafe path stays visible as plain text')
+    assert.equal(textOf(code[0]), unsafe[index].path)
+  }
+  assert.deepEqual(opened, [], 'no unsafe path reaches the navigation service')
+  view.unmount()
+})
+
+test('the file-address seam fails closed for unsafe paths', async () => {
+  const opened = []
+  const env = await loadBundle({
+    backend: notesBackend([]),
+    allowIntervals: true,
+    sidebarRight: { openResource: (address) => opened.push(address) },
+  })
+  const face = env.dockComponent().spec.inject('s-1')
+  for (const path of ['../secret.js', 'src/../secret.js', '/etc/passwd', 'C:\\repo\\a.ts', '\\\\server\\share\\a.ts', 'src/%2e%2e/a.js']) {
+    face.onOpenFile({ path })
+  }
+  assert.deepEqual(opened, [], 'an unsafe path never reaches the resource service')
+  face.onOpenFile({ path: 'src/a.js', line: 4 })
+  assert.deepEqual(opened, ['dsh-resource://file/session/s-1/src/a.js'])
+})
+
+const BIDI_CONTROLS = /[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/
+
+test('the card strips bidi controls from a hostile payload without corrupting natural RTL text', async () => {
+  const hebrew = 'הסוכן מחק את הקובץ (בטעות).'
+  const env = await loadBundle({
+    backend: notesBackend([
+      { id: 'n-1', note: 'The file \u202Eis safe.', importance: 'high', createdAt: 1, action: 'Fix \u202Ethe path.', source: { path: 'src/\u202Ea.js' } },
+      { id: 'n-2', note: hebrew, importance: 'high', createdAt: 2 },
+    ]),
+    allowIntervals: true,
+  })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1' })
+  await flushAsync()
+
+  const cards = findAll(view.output, 'section')
+  const hostileText = textOf(cards[0])
+  assert.equal(BIDI_CONTROLS.test(hostileText), false, 'no bidi control reaches the card')
+  assert.match(hostileText, /The file is safe\./)
+  assert.equal(textOf(findAll(cards[0], 'code')[0]), 'src/a.js')
+  assert.ok(textOf(cards[1]).includes(hebrew), 'natural Hebrew text is unchanged')
+  view.unmount()
+})
+
+test('Add to chat writes a draft with no bidi controls', async () => {
+  const composer = createComposer('s-1')
+  const hostile = {
+    id: 'n-bidi',
+    note: 'Note \u202Ehere.',
+    importance: 'high',
+    createdAt: 1,
+    action: 'Fix \u202Eit.',
+    source: { path: 'src/\u202Ea.js', line: 4 },
+  }
+  const { view } = await mountNotes([hostile], composer)
+  assert.equal(BIDI_CONTROLS.test(textOf(view.output)), false, 'the card never renders a control')
+  pressControl('Add to chat', buttonByText(view.output, 'Add to chat'), composer)
+  assert.equal(composer.draft, 'Fix it.\nFile: src/a.js:4')
+  assert.equal(BIDI_CONTROLS.test(composer.draft), false, 'the draft carries no control')
   view.unmount()
 })
 
@@ -2347,6 +2439,29 @@ test('an Arabic human note and its explanation declare their own base direction'
   const explanation = findByAria(view.output, 'Explanation')
   assert.ok(explanation, 'the cached Arabic explanation renders inline')
   assert.equal(explanation.props.dir, 'auto', 'the explanation declares dir=auto')
+  view.unmount()
+})
+
+test('an explanation strips bidi controls and keeps natural RTL text intact', async () => {
+  const env = await loadBundle({
+    backend: notesBackend([
+      { id: 'n-1', note: 'One thing.', importance: 'high', createdAt: 1, explanation: 'The cache \u202Estays stale.' },
+      { id: 'n-2', note: HEBREW_NOTE, importance: 'high', createdAt: 2, explanation: HEBREW_EXPLANATION },
+    ]),
+    allowIntervals: true,
+  })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1' })
+  await flushAsync()
+
+  buttonByText(findAll(view.output, 'section')[0], 'Explain').props.onClick()
+  await flushAsync()
+  const hostileText = textOf(findAll(view.output, 'section')[0])
+  assert.equal(BIDI_CONTROLS.test(hostileText), false, 'no bidi control reaches the explanation')
+  assert.match(hostileText, /The cache stays stale\./)
+
+  buttonByText(findAll(view.output, 'section')[1], 'Explain').props.onClick()
+  await flushAsync()
+  assert.ok(textOf(findAll(view.output, 'section')[1]).includes(HEBREW_EXPLANATION), 'natural Hebrew explanation text is unchanged')
   view.unmount()
 })
 
