@@ -1,0 +1,6 @@
+CHECK GATES - fixed tree
+COMMAND: npm run check
+EXIT: 0
+COMMAND: git diff --check
+EXIT: 0
+PRODUCT VERSION: 0.5.0 (unchanged)

@@ -1,0 +1,20 @@
+ACTUAL DSH HOST PROVENANCE
+DATE: 2026-10-30 (Europe/Moscow); capture 19:39Z-19:44Z
+HOST: DeepSeek Harness desktop app 0.2.1-rc.5 (CFBundleShortVersionString 0.2.1-rc.5)
+CLI: dsh --version -> 0.2.1-rc.5
+PLUGIN: dsh-you-should-know 0.5.0 loaded from the task worktree at product head
+  b572dbd via a node_modules symlink in a temporary profile
+PROFILE: a temporary DSH_HOME under a private temp directory; the profile was
+  created from the shipped web template. No user profile, desktop credential,
+  installed package, or session was read or modified.
+BOOT: dsh --profile visual --no-open --port 51508
+BOOT LOG (token redacted): dsh web: http://127.0.0.1:51508/?token=<redacted>
+AUTH: the browser used the host-issued HttpOnly auth cookie; self-check reported
+  authTransport=host-authenticated-connection. The ephemeral token is not
+  recorded in this evidence.
+SELF-CHECK (authenticated, through the real host):
+  healthy=true, configured=true, pluginVersion=0.5.0, runtimeVersion=0.5.0,
+  installedVersion=0.5.0, routes=9, all routes registered=true,
+  recentCheckDiagnostics toggled false -> true -> false (see actual-host-status.json)
+NO LIVE MODEL CALL: no API key or provider credential was configured, the
+  status route reported route=null, and no reviewer or primary model stream ran.

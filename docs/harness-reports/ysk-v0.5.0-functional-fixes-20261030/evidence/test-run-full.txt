@@ -1,0 +1,31 @@
+FULL SUITE - fixed tree
+TREE: branch fix/v0.5.0-functional-defects-20261030, product head b572dbd (before the report-only commit)
+COMMAND: npm test
+EXIT: 0
+SUMMARY: tests 680, pass 680, fail 0, cancelled 0, skipped 0
+
+New regression tests (24):
+- a source must name a whole path token in the conversation excerpt
+- a source path is grounded in the conversation only, never in the capsule
+- a source line is kept only for an explicit marker on the exact path
+- a Windows path is grounded verbatim without normalization
+- a because quoted from the evidence capsule is not grounded in the conversation
+- a because taken from the conversation keeps RTL text and punctuation intact
+- parseVerdict rejects traversal, absolute, and percent-encoded source paths
+- parseVerdict rejects Unicode bidi formatting controls in every text field
+- parseVerdict keeps natural Hebrew and Arabic notes with Latin punctuation
+- an unsafe source path renders as plain text and never becomes a resource URL
+- the file-address seam fails closed for unsafe paths
+- the card strips bidi controls from a hostile payload without corrupting natural RTL text
+- Add to chat writes a draft with no bidi controls
+- an explanation strips bidi controls and keeps natural RTL text intact
+- a hung route discovery settles unroutable, clears inFlight, and the next turn retries
+- a late route discovery cannot fill the cache or produce a note
+- the default discovery deadline is five seconds and a fast route clears its timer
+- a hung capability lookup is bounded and the stream still runs
+- a timed-out capability lookup is not cached and the next review retries it
+- dispose during a hung capability lookup settles the review as aborted
+- recent-check diagnostics are off by default and records keep the minimal shape
+- disabling the reviewer hides and clears recent checks and re-enabling starts empty
+- a review that settles after disabling adds no recent-check record
+- disabling the reviewer preserves notes, dedupe, and known fingerprints

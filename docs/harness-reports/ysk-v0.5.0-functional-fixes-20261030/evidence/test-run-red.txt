@@ -1,0 +1,38 @@
+ACTUAL-HOST / OFFLINE EVIDENCE - red run on product v0.5.0
+TREE: clean copy of tag v0.5.0 (6d5b770b9f595c0bc456c9096c23875dc7a412ec)
+TESTS: the final regression files copied onto the v0.5.0 product tree
+COMMAND: node --test --test-timeout=5000 test/core.test.js test/engine.test.js test/client-ui.test.js test/route-deadline.test.js test/recent-check-disable.test.js
+EXIT: 1
+SUMMARY: tests 257, pass 232, fail 25, cancelled 0, skipped 0
+
+FAILING TESTS (names are exact; stack frames and local paths removed):
+- the note card renders a source row for valid and unsafe paths without linking the unsafe one
+- an unsafe source path renders as plain text and never becomes a resource URL
+- the file-address seam fails closed for unsafe paths
+- the card strips bidi controls from a hostile payload without corrupting natural RTL text
+- Add to chat writes a draft with no bidi controls
+- an explanation strips bidi controls and keeps natural RTL text intact
+- parseVerdict accepts a valid finding with an optional source object
+- parseVerdict rejects traversal, absolute, and percent-encoded source paths
+- parseVerdict rejects Unicode bidi formatting controls in every text field
+- the reviewer instruction sources a note only from a verbatim path and keeps the exact silence shape
+- the reviewer instruction admits consequences of correct work
+- a source must name a whole path token in the conversation excerpt
+- a source path is grounded in the conversation only, never in the capsule
+- a source line is kept only for an explicit marker on the exact path
+- a Windows path is grounded verbatim without normalization
+- a because quoted from the evidence capsule is not grounded in the conversation
+- disabling the reviewer hides and clears recent checks and re-enabling starts empty
+- a review that settles after disabling adds no recent-check record
+- disabling the reviewer preserves notes, dedupe, and known fingerprints
+- a hung route discovery settles unroutable, clears inFlight, and the next turn retries
+- a late route discovery cannot fill the cache or produce a note
+- the default discovery deadline is five seconds and a fast route clears its timer
+- a hung capability lookup is bounded and the stream still runs
+- a timed-out capability lookup is not cached and the next review retries it
+- dispose during a hung capability lookup settles the review as aborted
+
+The same files pass on the fixed tree (see test-run-full.txt). The red run
+demonstrates the six installed-v0.5.0 defects: invented and capsule-grounded
+source/because values, unsafe path links, bidi controls, unbounded discovery and
+capability lookup, and retained recent-check history across a disable.
