@@ -4,12 +4,12 @@
     "desktopVersion": "0.2.1-rc.5",
     "cliVersion": "0.2.1-rc.5",
     "pluginVersion": "0.5.0",
-    "pluginSource": "worktree symlink at branch head b572dbd (product version 0.5.0)",
-    "capturedAt": "2026-10-30T19:39Z-19:44Z",
-    "isolation": "temporary DSH_HOME under a private temp directory; profile created from the shipped web template; no user profile, desktop credential, or installed package touched",
+    "pluginSource": "worktree symlink at branch head f6a9ac9 (product version 0.5.0)",
+    "capturedAt": "2026-10-30T19:57Z-20:02Z",
+    "isolation": "temporary DSH_HOME under a private temp directory; profile created from the shipped web template; no user profile, credential, session, or installed plugin file was modified (the desktop profile package.json was read only to confirm the installed 0.5.0 dependency)",
     "auth": "browser-authenticated connection through the real host (self-check authTransport host-authenticated-connection); the launch token is not recorded",
     "fixtureBoundary": "a local proxy forwarded HTTP/WS to the real host and replaced only the plugin notes and history responses with synthetic fixtures; the shell, plugin bundles, session, composer, cards, and actions were served by the real host",
-    "noLiveCalls": "no API key or provider credential was configured; no reviewer or primary model call was made; status route reported route null"
+    "noLiveCalls": "no API key or provider credential was configured; the global status route reported route=null; no reviewer or primary model call was made"
   },
   "fixtures": {
     "activeNotes": [
@@ -71,6 +71,10 @@
         "firstX": 1032,
         "lastX": 750
       }
+    },
+    "longNote": {
+      "wrapped": true,
+      "lines": 2
     },
     "traversal": {
       "codeText": "../../etc/passwd",
@@ -224,12 +228,12 @@
       }
     }
   ],
-  "hostRoutes": "see evidence/actual-host-status.json (authenticated self-check, config, and status reads; recentChecks opt-in toggled through the real config route)",
+  "hostRoutes": "evidence/actual-host-status.json (authenticated self-check, config, global status, and recentChecks opt-in toggles; browser origins only http://127.0.0.1:51509)",
   "screenshots": [
     {
       "file": "evidence/actual-host-add-to-chat-1280.png",
-      "bytes": 127981,
-      "sha256": "c433f6a9908cfc3addd5179ffbe2f1d23d9b3d49a5a60b7a67c94e1d7a80968b"
+      "bytes": 127995,
+      "sha256": "46779fc8c9e8f535ee3c2faeac9cbb59e9bd8f98ab087a35327e1f5473ea295b"
     },
     {
       "file": "evidence/actual-host-dismiss-1280.png",
@@ -238,8 +242,8 @@
     },
     {
       "file": "evidence/actual-host-explanation-1280.png",
-      "bytes": 147307,
-      "sha256": "dbbc093bf23a66a55bb621bef5fb84fc52a626b5a307f9708afb1b9a6c90edac"
+      "bytes": 147311,
+      "sha256": "5de0021eb986865db2120c64776fbab9a022c3198a9a6902721fae79f0998f37"
     },
     {
       "file": "evidence/actual-host-history-1280.png",
@@ -248,18 +252,18 @@
     },
     {
       "file": "evidence/actual-host-knew-it-1280.png",
-      "bytes": 117157,
-      "sha256": "bde88033e5a515e604ae3edf91d12f977eea090218f400f19e226ab1a7495127"
+      "bytes": 117170,
+      "sha256": "bcdf676839e3a2a170082e4116e3c0219a76f05e69d80584adf6e02f957d7b09"
     },
     {
       "file": "evidence/actual-host-narrow-700.png",
-      "bytes": 117378,
-      "sha256": "04a3875ac12f9e0216911564d84a50a6cfd258f623a52cdc0087fe0929a8623f"
+      "bytes": 117371,
+      "sha256": "53b04c23f77658679ae3ac893987ecb4147fd7b869c37945fe2e7c45bfd306f1"
     },
     {
       "file": "evidence/actual-host-notes-1280.png",
-      "bytes": 143185,
-      "sha256": "c6c4c46f93c2da0e928cd235d336813385e421a5e353f948d5fa7b01e760d903"
+      "bytes": 143205,
+      "sha256": "88d46d114a9486ef26b1fb986b0aa7afcb5fd067e5cbca893def14f5ffc7359e"
     },
     {
       "file": "evidence/actual-host-thanks-1280.png",

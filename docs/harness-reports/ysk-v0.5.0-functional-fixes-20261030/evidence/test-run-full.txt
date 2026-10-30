@@ -1,10 +1,10 @@
 FULL SUITE - fixed tree
-TREE: branch fix/v0.5.0-functional-defects-20261030, product head b572dbd (before the report-only commit)
+TREE: branch fix/v0.5.0-functional-defects-20261030, product head f6a9ac9 (after the review-round fixes)
 COMMAND: npm test
 EXIT: 0
-SUMMARY: tests 680, pass 680, fail 0, cancelled 0, skipped 0
+SUMMARY: tests 684, pass 684, fail 0, cancelled 0, skipped 0
 
-New regression tests (24):
+New regression tests (28):
 - a source must name a whole path token in the conversation excerpt
 - a source path is grounded in the conversation only, never in the capsule
 - a source line is kept only for an explicit marker on the exact path
@@ -29,3 +29,7 @@ New regression tests (24):
 - disabling the reviewer hides and clears recent checks and re-enabling starts empty
 - a review that settles after disabling adds no recent-check record
 - disabling the reviewer preserves notes, dedupe, and known fingerprints
+- a role label never grounds a source path or a quoted basis
+- a source path token respects percent and spaced continuations
+- a line marker rejects a trailing continuation
+- a review aborted by a disable and settled after a quick re-enable adds no recent-check record

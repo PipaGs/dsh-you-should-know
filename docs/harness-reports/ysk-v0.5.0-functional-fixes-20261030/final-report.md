@@ -6,7 +6,7 @@
 
 **Branch:** fix/v0.5.0-functional-defects-20261030
 
-**Product head:** b572dbdb6c728886a0c9c870adf0ffa6aad9a0a5 (product version 0.5.0, unchanged)
+**Product head:** f6a9ac9be212e46f8aa4b9eeafd41275d88035af (product version 0.5.0, unchanged)
 
 **PR:** added in the handoff commit that follows this report
 
@@ -41,7 +41,7 @@ untracked `.rollout-restart-verify.log` in the main worktree is untouched.
 | D1 | A source path must appear verbatim as a whole token in the real conversation excerpt; the capsule cannot ground it; an unmarked line is dropped; a fabricated path drops the reply | `test/core.test.js`, `test/engine.test.js`; red on v0.5.0; green on the fix | PASS |
 | D2 | A `because` must appear verbatim in the conversation excerpt only; the episode capsule/header never grounds it; valid RTL quotations stay valid | `test/engine.test.js`; red on v0.5.0; green on the fix | PASS |
 | D3 | A never-settling discovery or capability lookup settles with a finite bounded outcome, clears `inFlight`, records a terminal outcome, and lets the next turn retry; no cache poisoning; no extra call | `test/route-deadline.test.js`; red on v0.5.0; green on the fix | PASS |
-| D4 | Disabling the reviewer hides and clears recent-check records; re-enabling starts empty; notes, dedupe, and known fingerprints survive; records stay `{at,turn,outcome}` | `test/recent-check-disable.test.js`, `test/recent-check-diagnostics.test.js`; red on v0.5.0; green on the fix | PASS |
+| D4 | Disabling the reviewer hides and clears recent-check records; re-enabling starts empty even when an aborted review settles after a quick re-enable; notes, dedupe, and known fingerprints survive; records stay `{at,turn,outcome}` | `test/recent-check-disable.test.js` (including the disable -> re-enable -> settle epoch case), `test/recent-check-diagnostics.test.js`; red on v0.5.0; green on the fix | PASS |
 | D5 | Traversal, absolute POSIX, drive-absolute, UNC, and percent-encoded paths are rejected by the host parser and fail closed in the client; safe relative paths still work | `test/core.test.js`, `test/client-ui.test.js`; red on v0.5.0; actual-host traversal card has no link and its draft never contains the path | PASS |
 | D6 | Bidi controls in note, action, `because`, or source path are rejected by the host parser and stripped at render/draft time; natural Hebrew and Arabic stay intact | `test/core.test.js`, `test/client-ui.test.js`; red on v0.5.0; actual-host bidi card and draft contain no control | PASS |
 
@@ -54,7 +54,7 @@ The final regression files were copied onto a clean archive of tag `v0.5.0`
 and run without product changes:
 
 - command: `node --test --test-timeout=5000 test/core.test.js test/engine.test.js test/client-ui.test.js test/route-deadline.test.js test/recent-check-disable.test.js`
-- result: exit 1, tests 257, pass 232, fail 25
+- result: exit 1, tests 261, pass 231, fail 30
 - failures include invented source grounding, capsule-quoted `because`,
   traversal links, bidi controls, hung discovery, and retained diagnostics
 
@@ -62,21 +62,27 @@ Full names: `evidence/test-run-red.txt`.
 
 ## 4. Fix summary
 
-- `lib/core.js`: exact whole-token source grounding against the conversation
-  excerpt; excerpt-only `because`/source grounding; `path:42`/`path#L42`
-  line retention with line drop otherwise; rejection of traversal, absolute,
-  drive, UNC, and percent-encoded paths; bidi-control rejection in note, action,
-  `because`, and source path; `ROUTE_DEADLINE_MS = 5000` with an injectable
-  `routeDeadlineMs`; `boundedRoute()` settles a hung discovery as
-  `unroutable`, clears `inFlight`, and invalidates only the pending discovery;
-  disable clears `recentChecks`; the status snapshot and `recordRecentCheck`
+- `lib/core.js`: exact whole-token source grounding against the label-free
+  conversation text (the synthetic `[user]`/`[assistant]` prompt labels and the
+  evidence capsule never ground a value); excerpt-only `because`/source
+  grounding; `path:42`/`path#L42` line retention with line drop otherwise;
+  rejection of traversal, absolute, drive, UNC, and percent-encoded paths;
+  percent, spaced-filename, and line-marker continuation boundaries;
+  bidi-control rejection in note, action, `because`, and source path;
+  `ROUTE_DEADLINE_MS = 5000` with an injectable `routeDeadlineMs`;
+  `boundedRoute()` settles a hung discovery as `unroutable`, clears
+  `inFlight`, and invalidates only the pending discovery; a diagnostics epoch
+  makes a disable clear and suppress records even when an aborted review
+  settles after a quick re-enable; the status snapshot and `recordRecentCheck`
   stay quiet while disabled.
 - `lib/runtime.js`: `capabilityFor` is bounded by the whole-call deadline and
   by dispose/abort; a hung lookup omits `reasoningEffort`, caches nothing, and
   the stream still starts.
 - `lib/client.js`: fails closed on unsafe paths (plain text, no link, no
   resource URL); strips bidi controls from note, action, source label,
-  explanation, and draft; natural RTL text is unchanged.
+  explanation, and draft; natural RTL text is unchanged; the route-source
+  helper is renamed so the session header renders the effective source label
+  instead of an empty value.
 - `README.md`, `docs/reference.md`: the verdict, route-deadline, and
   recent-check contracts now describe the implemented behavior. The reviewer
   instruction hash is `9bf76d199ef8047a6b8b1a1a8586ee628ce9f53c1023646ade4218cd61b71034`.
@@ -85,11 +91,11 @@ Full names: `evidence/test-run-red.txt`.
 
 | Check | Result |
 | --- | --- |
-| `npm test` on the fixed tree | 680 tests, 680 pass, 0 fail, exit 0 |
+| `npm test` on the fixed tree | 684 tests, 684 pass, 0 fail, exit 0 |
 | `npm run check` | exit 0 |
 | `git diff --check` | exit 0 |
 | Product version | 0.5.0, unchanged |
-| New regression tests | 24 (14 for D1/D2/D5/D6, 10 for D3/D4) |
+| New regression tests | 28 (14 for D1/D2/D5/D6, 10 for D3/D4, 4 review-round regressions) |
 
 Raw summaries: `evidence/test-run-full.txt`, `evidence/check.txt`.
 
@@ -98,9 +104,10 @@ Raw summaries: `evidence/test-run-full.txt`, `evidence/check.txt`.
 **Target:** DeepSeek Harness desktop app `0.2.1-rc.5` (same version from
 `Info.plist` and `dsh --version`), web host booted from a temporary isolated
 `DSH_HOME` created from the shipped web template. The plugin package in that
-profile is a symlink to the task worktree at product head `b572dbd`; its
-`package.json` version is 0.5.0. No user profile, credential, installed package,
-or session was read or changed.
+profile is a symlink to the task worktree at product head `f6a9ac9`; its
+`package.json` version is 0.5.0. No user profile, credential, session, or
+installed plugin file was modified; the desktop profile manifest was read only
+to confirm the installed dependency.
 
 **Method:** the host served the real shell, plugin bundles, session, composer,
 cards, and interactions. A local proxy forwarded HTTP and WebSocket traffic and
@@ -152,19 +159,56 @@ Screenshot SHA-256 values and the structured interaction states are in
 
 - A temporary `DSH_HOME` under a private temp directory, a profile from the
   shipped template, and a plugin symlink to the task worktree.
-- No real profile, session, credential, cookie, or installed package was read
-  or copied. The ephemeral host token is not in the evidence.
+- No real profile, session, credential, cookie, or installed plugin file was
+  modified. During orientation the desktop profile `package.json` was read to
+  confirm the installed 0.5.0 dependency; no token, credential, cookie, or
+  session content was read. The ephemeral host token is not in the evidence.
 - Fixtures contain no real session text, user data, credentials, or tool output.
-- No telemetry, storage, or new network path was added. The only external
-  traffic was the host's own update-checker `git ls-remote` against the
-  documented public repository; no model provider was contacted.
+- No telemetry, storage, or new network path was added. The browser resource
+  log contained only the local host origin; the host's documented update
+  checker may have run its own `git ls-remote` against the public repository.
+  No host request log is committed, and no model provider was contacted by
+  this capture (no credential, no model route).
 
-## 9. Process notes
+## 9. Independent review round
+
+A fresh DSH reviewer inspected the range base..product head and returned
+BLOCKING with five findings. All were fixed in `f6a9ac9` with four new
+regression tests:
+
+1. HIGH: the synthetic `[user]`/`[assistant]` prompt labels could ground a
+   `source.path` (`assistant`, `user`) or a `because`. Grounding now uses only
+   the label-free message texts; the prompt keeps the labels.
+2. MEDIUM: an aborted review could refill `recentChecks` after a quick
+   disable -> re-enable. A diagnostics epoch captured at review start now
+   suppresses records from an older epoch.
+3. MEDIUM/LOW: path-token boundaries missed `%`, a spaced filename
+   continuation, and a trailing continuation after `:42`/`#L42`. The parser now
+   rejects those while keeping normal prose and the full spaced path valid.
+4. LOW: one test asserted a drive-absolute path could reach `groundVerdict`,
+   although `parseVerdict` rejects it. The test now does an honest
+   `parseVerdict` -> `groundVerdict` case and asserts the drive form is
+   rejected.
+5. LOW pre-existing: two `sourceLabel` declarations shadowed the session
+   header label. The route helper is renamed and the header renders its source.
+
+The reviewer's evidence concerns were also addressed: the global status route
+(`route: null`) and the browser request origins are now committed in
+`actual-host-status.json`, and the desktop long-note wrap flag is in
+`actual-host-actions.json`. Host-side network claims that have no committed
+request log are stated as limitations, not as proven facts.
+
+## 10. Process notes
 
 - Two implementation subagents worked in one isolated worktree; a third
   replacement subagent finished D3/D4 after the first stalled. DSH ran the
   final gates and the host capture.
 - All repository-facing prose is English. The product version and release
   artifacts are unchanged.
+- Process deviation recorded for honesty: one early CLI probe ran `dsh web
+  --help` without an isolated `DSH_HOME` and therefore attempted to write the
+  real `~/.dsh/profiles/web/cordis.yml`. The DSH file sandbox denied the write
+  with EPERM; no file changed, and every later host command used the temporary
+  `DSH_HOME`.
 - The original audit remains the historical record. This report adds the
   functional-fix outcome; it does not rewrite the audit.

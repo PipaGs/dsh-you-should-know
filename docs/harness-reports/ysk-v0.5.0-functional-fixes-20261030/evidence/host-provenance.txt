@@ -6,7 +6,9 @@ PLUGIN: dsh-you-should-know 0.5.0 loaded from the task worktree at product head
   b572dbd via a node_modules symlink in a temporary profile
 PROFILE: a temporary DSH_HOME under a private temp directory; the profile was
   created from the shipped web template. No user profile, desktop credential,
-  installed package, or session was read or modified.
+  cookie, session, or installed plugin file was modified. The desktop profile
+  package.json was read during orientation to confirm the installed 0.5.0
+  dependency; no secret or session content was read.
 BOOT: dsh --profile visual --no-open --port 51508
 BOOT LOG (token redacted): dsh web: http://127.0.0.1:51508/?token=<redacted>
 AUTH: the browser used the host-issued HttpOnly auth cookie; self-check reported
@@ -17,4 +19,8 @@ SELF-CHECK (authenticated, through the real host):
   installedVersion=0.5.0, routes=9, all routes registered=true,
   recentCheckDiagnostics toggled false -> true -> false (see actual-host-status.json)
 NO LIVE MODEL CALL: no API key or provider credential was configured, the
-  status route reported route=null, and no reviewer or primary model stream ran.
+  global status route reported route=null (actual-host-status.json globalStatus),
+  and no reviewer or primary model stream ran. The browser resource log
+  contained only origin http://127.0.0.1:51509 (250 entries); no host request
+  log is committed, and the host's documented update checker may have run its
+  own git ls-remote, which is not a model call.
