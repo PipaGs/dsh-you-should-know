@@ -1,0 +1,87 @@
+{
+  "contract": "VISUAL_GATE actual-host interaction capture",
+  "host": "dsh 0.2.0-rc.2",
+  "hostKind": "actual DSH web host; only notes/history fixture route substituted",
+  "productHead": "9c93017a8c1d863bc80a0bff809042e825ae493a",
+  "branchHeadAtCapture": "ff1b61c9c071bad2dcc0e3dacef5028998a3c08a",
+  "captureWindow": "2026-10-30T15:23Z-15:26Z",
+  "fixtureNotesAtStart": 3,
+  "note": "Each action ran on a fresh page with the committed visual-fixture-proxy.mjs, which serves three active notes. No message was sent in any action.",
+  "actions": {
+    "addToChat": {
+      "before": {
+        "draft": "",
+        "activeNotes": 3,
+        "emptyState": true,
+        "sendDisabled": true
+      },
+      "after": {
+        "draft": "Fix the session restore path in lib/runtime.js and add a regression test.",
+        "activeNotes": 2,
+        "emptyState": true,
+        "sendDisabled": false,
+        "activeIsComposer": true,
+        "activeTag": "DIV"
+      },
+      "sentMessage": false
+    },
+    "thanks": {
+      "before": {
+        "draft": "",
+        "activeNotes": 3,
+        "emptyState": true,
+        "sendDisabled": true
+      },
+      "after": {
+        "draft": "",
+        "activeNotes": 2,
+        "emptyState": true,
+        "sendDisabled": true
+      },
+      "sentMessage": false
+    },
+    "knewIt": {
+      "before": {
+        "draft": "",
+        "activeNotes": 3,
+        "emptyState": true,
+        "sendDisabled": true
+      },
+      "after": {
+        "draft": "",
+        "activeNotes": 2,
+        "emptyState": true,
+        "sendDisabled": true
+      },
+      "sentMessage": false
+    },
+    "dismiss": {
+      "before": {
+        "draft": "",
+        "activeNotes": 3,
+        "emptyState": true,
+        "sendDisabled": true
+      },
+      "after": {
+        "draft": "",
+        "activeNotes": 2,
+        "emptyState": true,
+        "sendDisabled": true
+      },
+      "sentMessage": false
+    },
+    "explainCached": {
+      "before": {
+        "explainRequests": 0,
+        "openExplanations": 0
+      },
+      "after": {
+        "explainRequests": 0,
+        "openExplanations": 1,
+        "explanationText": "הבקשה נכשלה לפני שהקובץ נטען, ולכן המסך נשאר ריק.",
+        "explanationDir": "rtl"
+      },
+      "sentMessage": false
+    }
+  }
+}

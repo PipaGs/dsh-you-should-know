@@ -1,0 +1,57 @@
+SECURITY, PRIVACY, AND SOURCE SCAN
+BASE: 697765379635e75e0c690db22f53aa1550b90a1f
+PRODUCT_HEAD: 9c93017
+TREE: final working tree after the review fixes
+DATE: 2026-10-30
+REVIEW_ROUND: re-scanned after the History explanation assertion and the
+report corrections. No new marker appeared.
+
+SCOPE:
+- the complete PR diff from the base commit, with this scan file excluded;
+- every text artifact under this task report directory;
+- version, manifest, and upstream ledger/provenance paths.
+
+MARKERS CHECKED (labels only; the scan patterns are not reproduced here):
+absolute home-root paths, file URL schemes, GitHub token prefixes, generic
+secret-key prefixes, AWS access-key prefixes, private-key banners, password
+assignments, and bearer tokens.
+
+RESULT 1 - PR diff marker scan:
+COMMAND: git diff 6977653 -- . ':(exclude).../security-scan.txt' | grep -nE '<marker set>'
+OUTPUT: empty
+EXIT: 1 (no match)
+
+RESULT 2 - task evidence absolute-path scan:
+COMMAND: grep -RInE '<home-root and file-URL markers>' docs/harness-reports/ysk-stage2-prompt-rtl-actions-20261030/evidence --include='*.txt' --include='*.md' --include='*.html'
+OUTPUT: empty
+EXIT: 1 (no match)
+
+RESULT 3 - non-Latin scan of authored prose:
+FILES: final-report.md, run-meta.txt, rtl-browser-measurements.txt, upstream-provenance.txt
+OUTPUT: authored files checked: 4, offenders: 0
+The synthetic RTL fixture page intentionally contains Hebrew and Arabic note
+text; it is data, not authored repository prose.
+
+RESULT 4 - version and provenance:
+COMMAND: git diff 6977653 -- package.json docs/upstream cordis.patch.yml
+OUTPUT: empty
+package.json version: 0.4.6
+lib/index.js PLUGIN_VERSION: 0.4.6
+No tag, release, npm install, or npm publish was performed.
+
+RESULT 5 - actual host visual evidence (added in the visual-gate round):
+COMMAND: grep -RInE '<home-root, temp-path, file-URL, token, key, password markers>' actual-host-visual-evidence.txt visual-fixture-proxy.mjs final-report.md
+OUTPUT: empty
+EXIT: 1 (no match)
+COMMAND: strings actual-host-*.png | grep -E '<home-root, temp-path, file-URL, token markers>'
+OUTPUT: empty for all six PNGs
+EXIT: 1 (no match)
+The six PNGs and actual-host-actions.json contain only the DSH UI and the
+synthetic note fixtures. The test proxy contains no launch token, cookie, or
+user data.
+
+RAW LOGS:
+The red log is committed only in sanitized form. The sanitization replaces the
+absolute worktree prefix with <worktree>/ and removes trailing spaces on the
+test runner's two-space diff padding; see the header of test-run-red.txt and
+run-meta.txt for the raw SHA-256. No assertion text or count changed.

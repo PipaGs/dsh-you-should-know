@@ -1,0 +1,44 @@
+RTL BROWSER REPRODUCTION - note card base direction (SUPPLEMENTARY ONLY)
+DATE: 2026-10-30
+This standalone-page measurement is not target-app evidence. The actual DSH
+host capture is in evidence/actual-host-visual-evidence.txt; this file is kept
+as supporting material for the CSS direction behavior.
+ENGINE: Chrome/Blink through the Chrome DevTools MCP page
+PAGE: evidence/rtl-card-repro.html
+PAGE_SHA256: ffff451ad8c68405ab51dc7765f833ae7726e3f05fd09b508450ccd8e1561e5f
+SCREENSHOT: evidence/rtl-card-before-after.png
+SCREENSHOT_SHA256: c82771675f3d54dfc2296def729f14314534929218ebc5ccdbaaa376f8366820
+VIEWPORT: 1000 x 440 (full-page capture 1000 x 540)
+HOST_DIRECTION: html=ltr, body=ltr, no direction attribute from the plugin
+
+The page reproduces the exact note-body inline style from lib/client.js:
+white-space: pre-wrap; word-break: break-word. The "current" rows have no dir
+attribute. The "fixed" rows add dir="auto" to the same element.
+
+TEXT:
+Hebrew: הקובץ lib/runtime.js:42 לא נטען כי הבקשה נכשלה.
+Arabic: الملف lib/runtime.js:42 لم يتم تحميله لأن الطلب فشل.
+
+METHOD:
+A DOM Range around the first and around the last character of the note text.
+The reported x is getBoundingClientRect().left in CSS pixels. The first logical
+character of an RTL sentence must sit at the right edge; the final period must
+sit at its left end.
+
+CASE                     DIR ATTR   COMPUTED   FIRST CHAR X   LAST CHAR X
+Hebrew current           none       ltr        61             318
+Hebrew with dir="auto"   auto       rtl        687            410
+Arabic current           none       ltr        53             283
+Arabic with dir="auto"   auto       rtl        692            444
+
+INTERPRETATION:
+Without a base direction the first Hebrew character renders at x=61 (the left
+edge) and the final period at x=318 (the right side of the run): the RTL
+sentence is laid out in the inherited LTR paragraph direction. With dir="auto"
+the first character moves to x=687 (the right edge) and the period to x=410
+(its correct left end). Arabic behaves the same way. The mixed Latin path stays
+a single left-to-right run inside the RTL paragraph.
+
+The offline tests assert the markup contract (the note, explanation, and history
+text nodes carry dir="auto"). They cannot assert glyph positions because the
+node:test harness has no layout engine; this page is the rendering evidence.

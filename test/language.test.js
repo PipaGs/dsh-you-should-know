@@ -8,7 +8,7 @@ import {
   normalizeHostLanguage,
   resolveOutputLanguage,
 } from '../lib/language.js'
-import { buildReviewerSystemPrompt, createEngine, normalizeConfig } from '../lib/core.js'
+import { buildReviewerSystemPrompt, createEngine, normalizeConfig, parseVerdict } from '../lib/core.js'
 import { buildReviewProfileSection } from '../lib/review-profile.js'
 
 function user(text) {
@@ -166,4 +166,26 @@ test('a throwing host-language resolver never breaks the review call', async () 
   assert.equal(calls.length, 1)
   assert.match(calls[0].system, /latest genuine human user message/)
   assert.equal(errors.length, 1)
+})
+
+test('the localization directive names every key the verdict parser reads', () => {
+  // A maximal valid verdict proves which keys parseVerdict actually reads. The
+  // directive must name each one, or a localized reviewer prompt would let the
+  // model translate a key the parser still consumes.
+  const payload = {
+    note: 'A note.',
+    importance: 'high',
+    kind: 'consequence',
+    because: 'the excerpt says so',
+    source: { path: 'src/a.js', line: 7 },
+    action: 'Fix src/a.js.',
+  }
+  assert.ok(parseVerdict(JSON.stringify(payload)), 'the maximal payload is a valid verdict')
+  const directive = languageDirectiveFor({ hostLanguage: 'he', messages: [user('שלום')] })
+  // Scope the assertion to the JSON-contract sentence: the language sentence
+  // must not be able to satisfy a key name by accident.
+  const contract = directive.slice(directive.indexOf('Keep the JSON object keys'))
+  assert.ok(contract.startsWith('Keep the JSON object keys'), 'the directive keeps the JSON-contract sentence')
+  const missing = Object.keys(payload).filter((key) => !new RegExp('\\b' + key + '\\b').test(contract))
+  assert.deepEqual(missing, [], 'the JSON-contract sentence must name every key the parser reads')
 })
