@@ -1,18 +1,21 @@
-// Guard for the task-owned upstream source-policy report and its evidence.
+// Guard for the task-owned upstream reports and their evidence.
 //
 // A committed harness report must stay portable: it may describe a failing
 // local run, but it must not embed an absolute workstation location. This test
-// walks the report directory and flags absolute file URLs and home-directory
-// markers. It scans only this task's report directory; the historical capture
-// under docs/upstream/evidence is intentionally left untouched.
+// walks both upstream task report directories and the committed raw upstream
+// evidence JSON, and flags absolute file URLs and home-directory markers.
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const reportDir = join(repoRoot, 'docs/harness-reports/ysk-upstream-source-policy-20261030')
+const REPORT_DIRS = [
+  join(repoRoot, 'docs/harness-reports/ysk-upstream-source-policy-20261030'),
+  join(repoRoot, 'docs/harness-reports/ysk-upstream-behavior-parity-20261030'),
+]
+const EVIDENCE_DIRS = [join(repoRoot, 'docs/upstream/evidence')]
 
 // Built at runtime so this test file itself carries no literal marker.
 const FORBIDDEN_MARKERS = [
@@ -35,9 +38,21 @@ function collectFiles(dir) {
   return files
 }
 
-test('task report and evidence contain no absolute workstation paths', () => {
-  const files = collectFiles(reportDir)
-  assert.ok(files.length > 0, 'the task report directory must contain artifacts')
+function collectJsonFiles(dir) {
+  return collectFiles(dir).filter((file) => file.endsWith('.json'))
+}
+
+test('task reports and upstream evidence contain no absolute workstation paths', () => {
+  const files = []
+  for (const dir of REPORT_DIRS) {
+    assert.ok(existsSync(dir), 'the task report directory must exist: ' + relative(repoRoot, dir))
+    files.push(...collectFiles(dir))
+  }
+  for (const dir of EVIDENCE_DIRS) {
+    assert.ok(existsSync(dir), 'the upstream evidence directory must exist: ' + relative(repoRoot, dir))
+    files.push(...collectJsonFiles(dir))
+  }
+  assert.ok(files.length > 0, 'the task report directories must contain artifacts')
 
   const offenders = new Set()
   for (const file of files) {

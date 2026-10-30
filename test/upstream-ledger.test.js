@@ -36,9 +36,18 @@ const baselinePath = join(repoRoot, 'docs/upstream/README.md')
 const addendumPath = join(repoRoot, 'docs/upstream/addendum-20261030-source-policy-deviation.md')
 const rawEvidencePath = join(repoRoot, 'docs/upstream/evidence/claude-code-upstream-20261014.json')
 const correctionEvidencePath = join(repoRoot, 'docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/github-releases-2.1.287-2.1.312.json')
+const docsCapturePath = join(repoRoot, 'docs/harness-reports/ysk-upstream-behavior-parity-20261030/evidence/docs-captures-20261030.json')
+const stage1bReportPath = join(repoRoot, 'docs/harness-reports/ysk-upstream-source-policy-20261030/final-report.md')
+const PR_BASE_COMMIT = 'ff220a52a278a4b0b828fefa15a1f5184a9fc943'
+const DOCS_PAGE_BYTES = new Map([
+  ['claude-code-docs-interactive-mode-20261030', 595268],
+  ['claude-code-docs-mods-overview-20261030', 338853],
+])
 
 const LOCAL_STATUSES = new Set(['equivalent', 'adapted', 'partial', 'missing', 'not-applicable', 'unknown'])
 const DISPOSITIONS = new Set(['applicable', 'deferred', 'rejected'])
+const SOURCE_ROLES = new Set(['release', 'behavior', 'historical'])
+const EVIDENCE_CLASSES = new Set(['release-versioned', 'documented-behavior'])
 const DOCS_ALLOWLIST = { scheme: 'https', host: 'code.claude.com', pathPrefix: '/docs/' }
 const RELEASE_URL_PREFIX = 'https://github.com/anthropics/claude-code/releases/tag/'
 const CHANGELOG_URL_PATTERN = /^https:\/\/github\.com\/anthropics\/claude-code\/blob\/([0-9a-f]{40})\/CHANGELOG\.md$/
@@ -189,6 +198,8 @@ function assertBehaviorSource(source) {
   if (!source || typeof source !== 'object') fail('behavior source is missing')
   const id = typeof source.id === 'string' && source.id.trim().length > 0 ? source.id : 'behavior source'
   if (typeof source.id !== 'string' || source.id.trim().length === 0) fail('behavior source has no id')
+  if (!SOURCE_ROLES.has(source.sourceRole)) fail(id + ' has no valid sourceRole')
+  if (source.sourceRole !== 'behavior') fail(id + ' must carry sourceRole behavior')
   if (source.kind !== 'official-docs-page') fail(id + ' is not an official-docs-page')
   const problem = docsUrlProblem(source.url)
   if (problem) fail(id + ' has an unaccepted URL: ' + problem)
@@ -213,6 +224,8 @@ function assertReleaseSource(source) {
   }
   if (!source || typeof source !== 'object') fail('release source is missing')
   const id = typeof source.id === 'string' && source.id.trim().length > 0 ? source.id : 'release source'
+  if (!SOURCE_ROLES.has(source.sourceRole)) fail(id + ' has no valid sourceRole')
+  if (source.sourceRole !== 'release') fail(id + ' must carry sourceRole release')
   if (source.kind !== 'github-release') fail(id + ' is not a github-release')
   if (typeof source.tag !== 'string' || !/^v\d+\.\d+\.\d+$/.test(source.tag)) fail(id + ' has no release tag')
   const expectedUrl = RELEASE_URL_PREFIX + source.tag
@@ -235,6 +248,8 @@ function assertChangelogSource(source) {
   }
   if (!source || typeof source !== 'object') fail('changelog source is missing')
   const id = typeof source.id === 'string' && source.id.trim().length > 0 ? source.id : 'changelog source'
+  if (!SOURCE_ROLES.has(source.sourceRole)) fail(id + ' has no valid sourceRole')
+  if (source.sourceRole !== 'release') fail(id + ' must carry sourceRole release')
   if (source.kind !== 'github-changelog') fail(id + ' is not a github-changelog')
   const match = CHANGELOG_URL_PATTERN.exec(source.url || '')
   if (!match) fail(id + ' URL is not a commit-pinned CHANGELOG.md URL')
@@ -249,6 +264,7 @@ function validDocsSource() {
   return {
     id: 'docs-fixture',
     kind: 'official-docs-page',
+    sourceRole: 'behavior',
     url: 'https://code.claude.com/docs/en/example',
     immutable: false,
     sha256: 'a'.repeat(64),
@@ -262,6 +278,7 @@ function validReleaseSource() {
   return {
     id: 'release-fixture',
     kind: 'github-release',
+    sourceRole: 'release',
     url: 'https://github.com/anthropics/claude-code/releases/tag/v2.1.288',
     tag: 'v2.1.288',
     immutable: true,
@@ -278,11 +295,83 @@ function validChangelogSource() {
   return {
     id: 'changelog-fixture',
     kind: 'github-changelog',
+    sourceRole: 'release',
     url: 'https://github.com/anthropics/claude-code/blob/' + 'a'.repeat(40) + '/CHANGELOG.md',
     commitSha: 'a'.repeat(40),
     commitDate: '2026-10-14T02:49:24Z',
     fetchedAt: '2026-10-14T09:43:02Z',
     sha256: 'b'.repeat(64),
+  }
+}
+
+/** A documented-behavior item is docs-backed and never carries a version or a date. */
+function assertBehaviorItem(item, sources) {
+  const fail = (message) => {
+    throw new Error(message)
+  }
+  if (!item || typeof item !== 'object') fail('behavior item is missing')
+  const id = typeof item.id === 'string' && item.id.trim().length > 0 ? item.id : 'behavior item'
+  if (item.evidenceClass !== 'documented-behavior') fail(id + ' is not a documented-behavior item')
+  const source = sources.get(item.upstreamSourceId)
+  if (!source) fail(id + ' names an unknown behavior source: ' + item.upstreamSourceId)
+  if (source.sourceRole !== 'behavior') fail(id + ' uses a non-behavior source: ' + source.sourceRole)
+  if (source.kind !== 'official-docs-page') fail(id + ' source is not an official-docs-page')
+  for (const field of ['upstreamVersion', 'upstreamDate', 'changelogTrace', 'publishedAt']) {
+    if (Object.hasOwn(item, field)) fail(id + ' must not carry ' + field)
+  }
+  const quote = typeof item.upstreamQuote === 'string' ? item.upstreamQuote.trim() : ''
+  if (quote.length === 0) fail(id + ' has no upstreamQuote')
+  if (quote.length > 400) fail(id + ' upstreamQuote is longer than 400 characters')
+  if (Object.hasOwn(item, 'supportingExcerpts')) {
+    if (!Array.isArray(item.supportingExcerpts)) fail(id + ' supportingExcerpts must be an array')
+    for (const excerpt of item.supportingExcerpts) {
+      if (typeof excerpt !== 'string' || excerpt.trim().length === 0) fail(id + ' has an empty supporting excerpt')
+      if (excerpt.length > 400) fail(id + ' has a supporting excerpt longer than 400 characters')
+    }
+  }
+  const ledger = readLedger()
+  const knownIds = new Set(ledger.upstream.items.map((candidate) => candidate.id))
+  if (!Array.isArray(item.dedupeAgainst) || item.dedupeAgainst.length === 0) {
+    fail(id + ' must name at least one item it was deduplicated against')
+  }
+  for (const dedupeId of item.dedupeAgainst) {
+    if (typeof dedupeId !== 'string' || !knownIds.has(dedupeId)) {
+      fail(id + ' dedupeAgainst names an unknown item: ' + dedupeId)
+    }
+    if (dedupeId === item.id) fail(id + ' must not dedupe against itself')
+  }
+  if (!Array.isArray(item.unknowns)) fail(id + ' must carry an unknowns array')
+  const unknownIds = new Set(ledger.openUnknowns.map((unknown) => unknown.id))
+  for (const unknownId of item.unknowns) {
+    if (typeof unknownId !== 'string' || !unknownIds.has(unknownId)) {
+      fail(id + ' unknowns names an unknown id: ' + unknownId)
+    }
+  }
+  if (typeof item.behaviorKey !== 'string' || !/^[a-z0-9-]+$/.test(item.behaviorKey)) {
+    fail(id + ' has no valid behaviorKey')
+  }
+  const duplicate = ledger.upstream.items.find(
+    (candidate) => candidate.id !== id && candidate.evidenceClass === 'documented-behavior' && candidate.behaviorKey === item.behaviorKey,
+  )
+  if (duplicate) fail(id + ' reuses behaviorKey ' + item.behaviorKey)
+}
+
+/** A release-versioned item keeps its version, date, and immutable release source. */
+function assertReleaseItem(item, sources) {
+  const fail = (message) => {
+    throw new Error(message)
+  }
+  if (!item || typeof item !== 'object') fail('release item is missing')
+  const id = typeof item.id === 'string' && item.id.trim().length > 0 ? item.id : 'release item'
+  if (item.evidenceClass !== 'release-versioned') fail(id + ' is not a release-versioned item')
+  const source = sources.get(item.upstreamSourceId)
+  if (!source) fail(id + ' names an unknown release source: ' + item.upstreamSourceId)
+  if (source.sourceRole !== 'release') fail(id + ' uses a non-release source: ' + source.sourceRole)
+  if (typeof item.upstreamVersion !== 'string' || item.upstreamVersion.trim().length === 0) {
+    fail(id + ' has no upstreamVersion')
+  }
+  if (typeof item.upstreamDate !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(item.upstreamDate)) {
+    fail(id + ' has no upstreamDate')
   }
 }
 
@@ -340,7 +429,7 @@ function assertChangelogTrace(item, sources) {
 
 test('the upstream ledger cites pinned official Claude Code sources', () => {
   const ledger = readLedger()
-  assert.equal(ledger.schemaVersion, 1, 'ledger schemaVersion is 1')
+  assert.equal(ledger.schemaVersion, 2, 'ledger schemaVersion is 2 after the source-role and behavior-class fields')
   assert.equal(typeof ledger.taskId, 'string', 'ledger carries the task id')
   assert.ok(ledger.taskId.trim().length > 0, 'the task id is nonempty')
   assert.match(ledger.generatedAt, ISO_TIMESTAMP, 'ledger records an ISO timestamp for when it was generated')
@@ -358,6 +447,7 @@ test('the upstream ledger cites pinned official Claude Code sources', () => {
       assertChangelogSource(source)
     } else {
       assert.equal(source.historicalOnly, true, source.id + ' is only accepted as the recorded historical deviation')
+      assert.equal(source.sourceRole, 'historical', source.id + ' carries the historical source role')
       assert.equal(source.id, 'claude-code-changelog-page-20261014')
       assert.equal(source.kind, 'official-docs-changelog')
       assert.equal(source.url, 'https://code.claude.com/docs/en/changelog.md')
@@ -562,6 +652,7 @@ test('every tracked upstream signal has its own item with evidence and a disposi
   for (const item of ledger.upstream.items) {
     assert.ok(item.id && !seen.has(item.id), 'item ids are unique: ' + item.id)
     seen.add(item.id)
+    assert.ok(EVIDENCE_CLASSES.has(item.evidenceClass), item.id + ' has a valid evidenceClass')
     assert.ok(sources.has(item.upstreamSourceId), item.id + ' names a known source')
     assert.ok(item.upstreamQuote && item.upstreamQuote.trim().length > 0, item.id + ' quotes the official text')
     assert.ok(item.claim && item.claim.trim().length > 0, item.id + ' states its claim')
@@ -571,17 +662,35 @@ test('every tracked upstream signal has its own item with evidence and a disposi
     for (const path of item.localEvidence) {
       assert.ok(existsSync(join(repoRoot, path)), item.id + ' evidence path exists: ' + path)
     }
+    for (const sourceId of item.supportingBehaviorSourceIds || []) {
+      const supporting = sources.get(sourceId)
+      assert.ok(supporting, item.id + ' names a known supporting source: ' + sourceId)
+      assert.equal(supporting.sourceRole, 'behavior', item.id + ' supporting source is behavior: ' + sourceId)
+    }
+    if (item.evidenceClass === 'release-versioned') {
+      assertReleaseItem(item, sources)
+    } else {
+      assertBehaviorItem(item, sources)
+    }
   }
-  const versions = new Set(ledger.upstream.items.map((item) => item.upstreamVersion))
+  const releaseItems = ledger.upstream.items.filter((item) => item.evidenceClass === 'release-versioned')
+  const behaviorItems = ledger.upstream.items.filter((item) => item.evidenceClass === 'documented-behavior')
+  assert.ok(releaseItems.length >= 4, 'the seeded release baseline keeps its four items')
+  assert.ok(behaviorItems.length > 0, 'the ledger records at least one documented behavior item')
+  const behaviorKeys = new Set(behaviorItems.map((item) => item.behaviorKey))
+  assert.equal(behaviorKeys.size, behaviorItems.length, 'behaviorKey is unique across behavior items')
+  const versions = new Set(releaseItems.map((item) => item.upstreamVersion))
   for (const version of ['2.1.287', '2.1.288', '2.1.290']) {
     assert.ok(versions.has(version), 'the seeded baseline covers upstream version ' + version)
   }
 })
 
-test('every item date comes from an immutable release and keeps its changelog trace', () => {
+test('every release item date comes from an immutable release and keeps its changelog trace', () => {
   const ledger = readLedger()
   const sources = sourceMap(ledger)
-  for (const item of ledger.upstream.items) {
+  const releaseItems = ledger.upstream.items.filter((item) => item.evidenceClass === 'release-versioned')
+  assert.ok(releaseItems.length >= 4, 'the release baseline keeps its four dated items')
+  for (const item of releaseItems) {
     assertItemDateProvenance(item, sources)
     assertChangelogTrace(item, sources)
   }
@@ -649,6 +758,163 @@ test('the new provenance check rejects the historical 2026-10-14 ledger state', 
     /non-release source/,
     'the new check rejects the historical docs-page source as a date source',
   )
+})
+
+test('docs sources never establish a version or a publication date', () => {
+  const ledger = readLedger()
+  const sources = sourceMap(ledger)
+  const behaviorItems = ledger.upstream.items.filter((item) => item.evidenceClass === 'documented-behavior')
+  assert.ok(behaviorItems.length > 0, 'the ledger has a documented behavior item to check')
+  for (const item of behaviorItems) {
+    for (const field of ['upstreamVersion', 'upstreamDate', 'changelogTrace', 'publishedAt']) {
+      assert.equal(Object.hasOwn(item, field), false, item.id + ' must not carry ' + field)
+    }
+  }
+
+  const base = structuredClone(behaviorItems[0])
+  assert.doesNotThrow(() => assertBehaviorItem(base, sources))
+
+  const withVersion = structuredClone(base)
+  withVersion.upstreamVersion = '2.1.287'
+  assert.throws(() => assertBehaviorItem(withVersion, sources), /must not carry upstreamVersion/, 'a docs item cannot take a version')
+
+  const withDate = structuredClone(base)
+  withDate.upstreamDate = '2026-10-01'
+  assert.throws(() => assertBehaviorItem(withDate, sources), /must not carry upstreamDate/, 'a docs item cannot take a publication date')
+
+  const releaseSource = ledger.upstream.sources.find((candidate) => candidate.sourceRole === 'release')
+  assert.ok(releaseSource, 'the ledger has a release source to cross over')
+  const withReleaseSource = structuredClone(base)
+  withReleaseSource.upstreamSourceId = releaseSource.id
+  assert.throws(() => assertBehaviorItem(withReleaseSource, sources), /non-behavior source/, 'a docs item cannot use a release source')
+
+  const wrongClass = structuredClone(base)
+  wrongClass.evidenceClass = 'release-versioned'
+  assert.throws(() => assertBehaviorItem(wrongClass, sources), /not a documented-behavior item/, 'a docs item stays documented-behavior')
+
+  const docsSources = ledger.upstream.sources.filter(
+    (candidate) => candidate.kind === 'official-docs-page' || candidate.kind === 'official-docs-changelog',
+  )
+  assert.ok(docsSources.length > 0, 'the ledger has docs sources')
+  for (const docsSource of docsSources) {
+    for (const field of ['publishedAt', 'upstreamVersion', 'upstreamDate', 'version']) {
+      assert.equal(Object.hasOwn(docsSource, field), false, docsSource.id + ' must not carry ' + field)
+    }
+  }
+})
+
+test('documented behavior items stay deduplicated and structurally accepted', () => {
+  const ledger = readLedger()
+  const sources = sourceMap(ledger)
+  const behaviorItems = ledger.upstream.items.filter((item) => item.evidenceClass === 'documented-behavior')
+  assert.ok(behaviorItems.length >= 10, 'the ten documented behavior items are recorded')
+  const behaviorKeys = new Set()
+  const quotes = new Set()
+  for (const item of behaviorItems) {
+    assertBehaviorItem(item, sources)
+    assert.equal(behaviorKeys.has(item.behaviorKey), false, item.id + ' has a unique behaviorKey')
+    behaviorKeys.add(item.behaviorKey)
+    const normalized = normalizeQuote(item.upstreamQuote)
+    assert.equal(quotes.has(normalized), false, item.id + ' repeats another item quote')
+    quotes.add(normalized)
+    const gap = item.localStatus === 'partial' || item.localStatus === 'missing'
+    if (gap || item.disposition === 'deferred') {
+      assert.ok(item.acceptance, item.id + ' is a gap and must carry an acceptance')
+      assert.ok(item.acceptance.summary, item.id + ' acceptance has a summary')
+      assert.ok(item.acceptance.testableAs, item.id + ' acceptance is testable')
+      assert.ok(item.acceptance.scope, item.id + ' acceptance names its future scope')
+    }
+    assert.ok(item.parityNotes && item.parityNotes.trim().length > 0, item.id + ' carries grounded parityNotes')
+    if (item.disposition === 'rejected') {
+      assert.ok(item.rejectionReason && item.rejectionReason.trim().length > 0, item.id + ' rejected item says why')
+      assert.equal(item.acceptance, null, item.id + ' rejected item carries no acceptance')
+    }
+    if (item.disposition === 'applicable' && !gap) {
+      assert.equal(item.acceptance, null, item.id + ' applicable adaptation needs no future acceptance')
+    }
+  }
+  assert.equal(behaviorKeys.size, behaviorItems.length, 'behaviorKey stays unique')
+})
+
+test('the committed docs capture evidence matches the ledger provenance', () => {
+  assert.ok(existsSync(docsCapturePath), 'the docs capture evidence exists')
+  const capture = JSON.parse(readFileSync(docsCapturePath, 'utf8'))
+  assert.equal(capture.taskId, 'ysk-upstream-behavior-parity-20261030')
+  assert.match(capture.capturedAt, ISO_TIMESTAMP)
+  assert.ok(Array.isArray(capture.pages) && capture.pages.length >= 2, 'both docs pages are captured')
+  const pages = new Map(capture.pages.map((page) => [page.sourceId, page]))
+  const ledger = readLedger()
+  const behaviorSources = ledger.upstream.sources.filter((source) => source.sourceRole === 'behavior')
+  assert.equal(behaviorSources.length, 2, 'the ledger records two behavior sources')
+  const excerptTexts = []
+  for (const source of behaviorSources) {
+    const page = pages.get(source.id)
+    assert.ok(page, source.id + ' has a capture page')
+    assert.equal(page.url, source.url, source.id + ' capture URL matches the ledger')
+    assert.equal(page.sha256, source.sha256, source.id + ' capture hash matches the ledger')
+    assert.equal(page.fetchedAt, source.fetchedAt, source.id + ' capture date matches the ledger')
+    assert.equal(page.httpStatus, 200, source.id + ' capture returned HTTP 200')
+    assert.equal(page.bytes, DOCS_PAGE_BYTES.get(source.id), source.id + ' capture keeps its exact byte size')
+    for (const forbidden of ['body', 'html', 'content', 'fullText']) {
+      assert.equal(Object.hasOwn(page, forbidden), false, source.id + ' must not commit a full page: ' + forbidden)
+    }
+    assert.ok(Array.isArray(page.excerpts) && page.excerpts.length > 0, source.id + ' capture keeps short excerpts')
+    for (const excerpt of page.excerpts) {
+      assert.equal(typeof excerpt.section, 'string', source.id + ' excerpt names a section')
+      assert.equal(typeof excerpt.text, 'string', source.id + ' excerpt has text')
+      assert.ok(excerpt.text.trim().length > 0, source.id + ' excerpt is nonempty')
+      assert.ok(excerpt.text.length <= 400, source.id + ' excerpt stays under 400 characters')
+      excerptTexts.push(normalizeQuote(excerpt.text))
+    }
+  }
+  const pool = excerptTexts.join('\n')
+  for (const item of ledger.upstream.items.filter((candidate) => candidate.evidenceClass === 'documented-behavior')) {
+    assert.ok(pool.includes(normalizeQuote(item.upstreamQuote)), item.id + ' quote is traceable to a capture excerpt')
+    for (const supporting of item.supportingExcerpts || []) {
+      assert.ok(pool.includes(normalizeQuote(supporting)), item.id + ' supporting excerpt is traceable to the capture')
+    }
+  }
+})
+
+test('historical 2026-10-14 evidence and previous task reports are unchanged', () => {
+  assert.equal(sha256File(addendumPath), '1355c524b48e01a6d870fd010ccdcc4456c5070991f8ded2b2ff9035776eedc7')
+  assert.equal(sha256File(rawEvidencePath), 'c5fac2b1502d8a221ec4a7e229012c645f84be0d9310791173af84031e809d7a')
+  assert.equal(sha256File(correctionEvidencePath), '951b2f172b4ce8e374c6f6e815725bea4531bd807ab2bc0c80bbcf27ba26de86')
+  assert.equal(sha256File(stage1bReportPath), '7d26a06eac88ea3ec9e87a87c4b045720280b6a8a420bdf56fbd67b46c0f5fb2')
+  const unchanged = execFileSync(
+    'git',
+    [
+      'diff',
+      '--name-only',
+      PR_BASE_COMMIT,
+      '--',
+      'docs/upstream/evidence',
+      'docs/upstream/addendum-20261030-source-policy-deviation.md',
+      'docs/harness-reports/ysk-note-voice-attribution-20261014',
+      'docs/harness-reports/ysk-note-voice-eval-20261014',
+      'docs/harness-reports/ysk-note-voice-live-20261014',
+      'docs/harness-reports/ysk-note-voice-semantic-20261014',
+      'docs/harness-reports/ysk-upstream-ledger-correction-20261030',
+      'docs/harness-reports/ysk-upstream-source-policy-20261030',
+    ],
+    { cwd: repoRoot, encoding: 'utf8' },
+  ).trim()
+  assert.equal(unchanged, '', 'historical evidence and previous reports stay byte-identical to the base')
+})
+
+test('the ledger uses the six required local statuses', () => {
+  const ledger = readLedger()
+  const expected = ['adapted', 'equivalent', 'missing', 'not-applicable', 'partial', 'unknown']
+  assert.deepEqual([...LOCAL_STATUSES].sort(), expected, 'the local status vocabulary is exactly the six workflow statuses')
+  const used = new Set(ledger.upstream.items.map((item) => item.localStatus))
+  for (const status of used) {
+    assert.ok(LOCAL_STATUSES.has(status), 'the ledger uses an allowed status: ' + status)
+  }
+  assert.ok(used.size >= 4, 'the ledger exercises several statuses, not a single label')
+  const workflow = readFileSync(workflowPath, 'utf8')
+  for (const status of expected) {
+    assert.ok(workflow.includes(status), 'the workflow documents the status: ' + status)
+  }
 })
 
 test('a gap or an adaptation is never dispositioned as applicable-with-nothing-to-do', () => {
@@ -720,7 +986,7 @@ test('the outage and provenance policy keeps the previous verified baseline', ()
 
 test('the ledger carries no private or unrelated project data', () => {
   const raw = readFileSync(ledgerPath, 'utf8')
-  const forbidden = [/\bozon\b/i, /\/Users\//, /http:\/\//, /api[-_]?key/i, /bearer\s/i, /chatgpt/i]
+  const forbidden = [/\bozon\b/i, /\/Users\//, /\/home\//, /file:\/\//, /http:\/\//, /api[-_]?key/i, /bearer\s/i, /chatgpt/i]
   for (const pattern of forbidden) {
     assert.equal(pattern.test(raw), false, 'ledger avoids ' + pattern)
   }
@@ -764,7 +1030,9 @@ test('the ledger source policy matches the exact allowlist and role limits', () 
   assert.equal(policy.policyDocument, 'docs/upstream/workflow.md')
   assert.deepEqual(policy.behaviorSources.allowlist, DOCS_ALLOWLIST)
   assert.equal(policy.releaseSources.role, 'canonical-release-version-date')
+  assert.equal(policy.releaseSources.sourceRole, 'release')
   assert.equal(policy.behaviorSources.role, 'behavior-evidence-only')
+  assert.equal(policy.behaviorSources.sourceRole, 'behavior')
   assert.equal(policy.behaviorSources.kind, 'official-docs-page')
   assert.equal(policy.behaviorSources.allowedForVersionDate, false)
   assert.equal(policy.behaviorSources.allowedForPublicationDate, false)
@@ -772,16 +1040,36 @@ test('the ledger source policy matches the exact allowlist and role limits', () 
   assert.equal(policy.behaviorSources.changeDetection, 'sha256')
   assert.equal(policy.behaviorSources.lastModifiedIsPublicationProof, false)
   assert.equal(policy.behaviorSources.immutable, false)
-  assert.deepEqual(policy.behaviorSources.required, ['id', 'kind', 'url', 'immutable', 'sha256', 'fetchedAt'])
+  assert.deepEqual(policy.behaviorSources.required, ['id', 'kind', 'url', 'immutable', 'sha256', 'fetchedAt', 'sourceRole'])
   assert.deepEqual(policy.behaviorSources.optionalMetadata, ['lastModified'])
   assert.equal(policy.behaviorSources.excerptPolicy, 'short-official-sentences-only')
+  assert.deepEqual(policy.behaviorItemRules, {
+    evidenceClass: 'documented-behavior',
+    requiresSourceRole: 'behavior',
+    forbiddenFields: ['upstreamVersion', 'upstreamDate', 'changelogTrace', 'publishedAt'],
+    requiresFields: [
+      'id',
+      'evidenceClass',
+      'behaviorKey',
+      'upstreamSourceId',
+      'upstreamQuote',
+      'claim',
+      'localStatus',
+      'localEvidence',
+      'disposition',
+      'parityNotes',
+      'dedupeAgainst',
+    ],
+    requiredDedupe: true,
+    acceptanceForGaps: true,
+  })
   assert.deepEqual(policy.releaseSources.githubRelease, {
     kind: 'github-release',
     scheme: 'https',
     host: 'github.com',
     pathPrefix: '/anthropics/claude-code/releases/tag/',
     immutable: true,
-    required: ['tag', 'tagRefSha', 'publishedAt', 'releaseBodySha256', 'provenance'],
+    required: ['tag', 'tagRefSha', 'publishedAt', 'releaseBodySha256', 'provenance', 'sourceRole'],
   })
   assert.deepEqual(policy.releaseSources.githubChangelog, {
     kind: 'github-changelog',
@@ -789,7 +1077,7 @@ test('the ledger source policy matches the exact allowlist and role limits', () 
     host: 'github.com',
     pathPrefix: '/anthropics/claude-code/blob/',
     pin: 'commitSha',
-    required: ['commitSha', 'commitDate', 'fetchedAt', 'sha256'],
+    required: ['commitSha', 'commitDate', 'fetchedAt', 'sha256', 'sourceRole'],
   })
   assert.deepEqual(policy.provenance, {
     verifiedOnlyWithExactBytes: true,
@@ -805,6 +1093,7 @@ test('the ledger source policy matches the exact allowlist and role limits', () 
     copyClosedSourceCode: 'forbidden',
   })
   assert.equal(policy.historicalDeviation.retroactivelyAuthorized, false)
+  assert.equal(policy.historicalDeviation.sourceRole, 'historical')
   assert.ok(existsSync(join(repoRoot, policy.historicalDeviation.recordedIn)), 'the historical deviation names an existing record')
   assert.deepEqual(ledger.openPolicyDecisions, [], 'the open policy decision list stays present and empty')
   assert.equal(ledger.resolvedPolicyDecisions.length, 1)
@@ -840,6 +1129,9 @@ test('the ledger source policy matches the exact allowlist and role limits', () 
     'previous verified baseline',
     'private',
     'closed-source',
+    'sourceRole',
+    'documented-behavior',
+    'behaviorKey',
   ]) {
     assert.ok(workflow.includes(phrase), 'workflow records: ' + phrase)
   }
@@ -924,5 +1216,21 @@ test('the human-readable workflow and baseline documents exist and agree with th
   for (const version of ['2.1.287', '2.1.288', '2.1.290']) {
     assert.ok(baseline.includes(version), 'baseline names upstream version ' + version)
   }
+  for (const behaviorId of [
+    'B-YSK-side-agent-cadence',
+    'B-YSK-side-agent-isolation',
+    'B-YSK-check-context',
+    'B-YSK-cost-and-prompt-cache',
+    'B-YSK-note-surface-and-choices',
+    'B-YSK-keyboard-shortcuts',
+    'B-YSK-chat-in-main-session',
+    'B-YSK-note-memory',
+    'B-YSK-debug-check-visibility',
+    'B-YSK-post-dismiss-turn-off',
+  ]) {
+    assert.ok(baseline.includes(behaviorId), 'baseline names behavior item ' + behaviorId)
+  }
+  assert.ok(baseline.includes('Documented behavior parity'), 'baseline documents the Stage 1C behavior section')
+  assert.ok(baseline.includes('sourceRole'), 'baseline documents the encoded sourceRole')
   assert.ok(baseline.includes('ledger.json'), 'baseline points at the machine-readable ledger')
 })

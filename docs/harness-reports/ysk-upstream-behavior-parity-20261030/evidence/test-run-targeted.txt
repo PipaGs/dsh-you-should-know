@@ -1,0 +1,38 @@
+✔ the upstream ledger cites pinned official Claude Code sources (2.024834ms)
+✔ a valid official docs page is accepted as a behavior source only (0.188875ms)
+✔ the docs allowlist rejects every unaccepted URL shape and field (0.561542ms)
+✔ the docs allowlist rejects raw parent segments that normalize inside /docs (0.862833ms)
+✔ a release source must be immutable and carry its exact identity (0.232334ms)
+✔ a changelog source is pinned to a full commit and hashed (0.188ms)
+✔ the ledger records the local baseline on a real named revision (34.720459ms)
+✔ the local baseline records v0.4.6 and the v0.4.3 predecessor without conflating them (0.406459ms)
+✔ every tracked upstream signal has its own item with evidence and a disposition (2.878916ms)
+✔ every release item date comes from an immutable release and keeps its changelog trace (0.519708ms)
+✔ the date provenance check rejects a fetch-day date and an unpinned release (0.857625ms)
+✔ the date provenance check rejects a behavior source and a docs lastModified date (0.30775ms)
+✔ the new provenance check rejects the historical 2026-10-14 ledger state (8.942583ms)
+✔ docs sources never establish a version or a publication date (0.684667ms)
+✔ documented behavior items stay deduplicated and structurally accepted (1.641125ms)
+✔ the committed docs capture evidence matches the ledger provenance (0.467708ms)
+✔ historical 2026-10-14 evidence and previous task reports are unchanged (10.586916ms)
+✔ the ledger uses the six required local statuses (0.756125ms)
+✔ a gap or an adaptation is never dispositioned as applicable-with-nothing-to-do (0.22675ms)
+✔ an uncontested upstream unknown is recorded, not resolved by guessing (0.167375ms)
+✔ a source outage is recorded as unknown, never as no change (0.190834ms)
+✔ the outage and provenance policy keeps the previous verified baseline (0.2775ms)
+✔ the ledger carries no private or unrelated project data (0.4085ms)
+✔ the historical 2026-10-14 docs capture stays a recorded deviation (0.247709ms)
+✔ the addendum and the raw 2026-10-14 evidence stay byte-identical (0.124583ms)
+✔ the ledger source policy matches the exact allowlist and role limits (0.72ms)
+✔ the coverage record is pinned to v2.1.312 and does not claim behavior stability (0.293083ms)
+✔ the committed coverage evidence supports the recorded release dates (0.406417ms)
+✔ the human-readable workflow and baseline documents exist and agree with the ledger (0.19275ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 29
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 234.247208
+targeted_exit=0

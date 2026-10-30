@@ -1,0 +1,184 @@
+$ node --test test/upstream-ledger.test.js
+# captured 2026-10-30T10:36:44Z before the ledger and docs changes
+✖ the upstream ledger cites pinned official Claude Code sources (1.13575ms)
+✔ a valid official docs page is accepted as a behavior source only (1.118417ms)
+✔ the docs allowlist rejects every unaccepted URL shape and field (0.653292ms)
+✔ the docs allowlist rejects raw parent segments that normalize inside /docs (0.76875ms)
+✔ a release source must be immutable and carry its exact identity (0.269708ms)
+✔ a changelog source is pinned to a full commit and hashed (0.239167ms)
+✔ the ledger records the local baseline on a real named revision (32.512125ms)
+✔ the local baseline records v0.4.6 and the v0.4.3 predecessor without conflating them (0.241709ms)
+✖ every tracked upstream signal has its own item with evidence and a disposition (0.602833ms)
+✖ every release item date comes from an immutable release and keeps its changelog trace (0.227208ms)
+✔ the date provenance check rejects a fetch-day date and an unpinned release (0.727ms)
+✔ the date provenance check rejects a behavior source and a docs lastModified date (0.207792ms)
+✔ the new provenance check rejects the historical 2026-10-14 ledger state (9.539583ms)
+✖ docs sources never establish a version or a publication date (0.346709ms)
+✖ documented behavior items stay deduplicated and structurally accepted (0.221917ms)
+✖ the committed docs capture evidence matches the ledger provenance (0.15175ms)
+✔ historical 2026-10-14 evidence and previous task reports are unchanged (10.2225ms)
+✔ the ledger uses the six required local statuses (0.713958ms)
+✔ a gap or an adaptation is never dispositioned as applicable-with-nothing-to-do (0.287459ms)
+✔ an uncontested upstream unknown is recorded, not resolved by guessing (0.152959ms)
+✔ a source outage is recorded as unknown, never as no change (0.285292ms)
+✔ the outage and provenance policy keeps the previous verified baseline (0.237583ms)
+✔ the ledger carries no private or unrelated project data (0.279167ms)
+✔ the historical 2026-10-14 docs capture stays a recorded deviation (0.193584ms)
+✔ the addendum and the raw 2026-10-14 evidence stay byte-identical (0.127458ms)
+✖ the ledger source policy matches the exact allowlist and role limits (0.467958ms)
+✔ the coverage record is pinned to v2.1.312 and does not claim behavior stability (0.195209ms)
+✔ the committed coverage evidence supports the recorded release dates (0.298542ms)
+✖ the human-readable workflow and baseline documents exist and agree with the ledger (0.182917ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 21
+ℹ fail 8
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 210.608041
+
+✖ failing tests:
+
+test at test/upstream-ledger.test.js:431:1
+✖ the upstream ledger cites pinned official Claude Code sources (1.13575ms)
+  Error: claude-code-release-v2.1.287 has no valid sourceRole
+      at fail (test/upstream-ledger.test.js:224:11)
+      at assertReleaseSource (test/upstream-ledger.test.js:228:45)
+      at TestContext.<anonymous> (test/upstream-ledger.test.js:446:7)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)
+
+test at test/upstream-ledger.test.js:649:1
+✖ every tracked upstream signal has its own item with evidence and a disposition (0.602833ms)
+  AssertionError [ERR_ASSERTION]: U-2.1.287-builtin-side-agent has a valid evidenceClass
+      at TestContext.<anonymous> (test/upstream-ledger.test.js:656:12)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test/upstream-ledger.test.js:684:1
+✖ every release item date comes from an immutable release and keeps its changelog trace (0.227208ms)
+  AssertionError [ERR_ASSERTION]: the release baseline keeps its four dated items
+      at TestContext.<anonymous> (test/upstream-ledger.test.js:688:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test/upstream-ledger.test.js:759:1
+✖ docs sources never establish a version or a publication date (0.346709ms)
+  AssertionError [ERR_ASSERTION]: the ledger has a documented behavior item to check
+      at TestContext.<anonymous> (test/upstream-ledger.test.js:763:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test/upstream-ledger.test.js:802:1
+✖ documented behavior items stay deduplicated and structurally accepted (0.221917ms)
+  AssertionError [ERR_ASSERTION]: the ten documented behavior items are recorded
+      at TestContext.<anonymous> (test/upstream-ledger.test.js:806:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test/upstream-ledger.test.js:835:1
+✖ the committed docs capture evidence matches the ledger provenance (0.15175ms)
+  AssertionError [ERR_ASSERTION]: the docs capture evidence exists
+      at TestContext.<anonymous> (test/upstream-ledger.test.js:836:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test/upstream-ledger.test.js:1014:1
+✖ the ledger source policy matches the exact allowlist and role limits (0.467958ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + undefined
+  - 'release'
+
+      at TestContext.<anonymous> (test/upstream-ledger.test.js:1022:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: 'release',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/upstream-ledger.test.js:1197:1
+✖ the human-readable workflow and baseline documents exist and agree with the ledger (0.182917ms)
+  AssertionError [ERR_ASSERTION]: baseline names behavior item B-YSK-side-agent-cadence
+      at TestContext.<anonymous> (test/upstream-ledger.test.js:1220:12)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+exit=1

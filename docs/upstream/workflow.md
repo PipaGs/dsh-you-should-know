@@ -57,9 +57,13 @@ documentation page under https://code.claude.com/docs/. The exact allowlist is:
 
 A docs source record has these fields:
 
-- required: id, kind "official-docs-page", url, immutable false, sha256 (64
-  lowercase hex of the exact retrieved page bytes), fetchedAt (ISO UTC
-  timestamp of this capture).
+- required: id, kind "official-docs-page", sourceRole "behavior", url,
+  immutable false, sha256 (64 lowercase hex of the exact retrieved page bytes),
+  fetchedAt (ISO UTC timestamp of this capture).
+- `sourceRole` is required on every source record and is one of `release`,
+  `behavior`, or `historical`. The role must match the kind: a GitHub release
+  or commit-pinned changelog is `release`; an official documentation page is
+  `behavior`; the one preserved 2026-10-14 docs capture is `historical`.
 - optional: lastModified (ISO timestamp). It is metadata only. If present, the
   record must carry lastModifiedIsPublicationProof: false. It never becomes
   publishedAt or upstreamDate.
@@ -126,6 +130,9 @@ Before adding an item, compare it with the ledger:
 - A later upstream rewrite of a line the ledger already has updates that item;
   record the new quote and re-verify the local status. It is not a new item.
 - Distinct behavior in the same release is a distinct item with a distinct id.
+- A documented behavior is deduplicated by `behaviorKey` and by comparison
+  with the release items in `dedupeAgainst`. The same behavior is not added
+  twice under two ids.
 
 ## Assessment and evidence
 
@@ -143,6 +150,34 @@ Before adding an item, compare it with the ledger:
   an evidence path is missing, so a claim of parity can never be an assertion.
 - unknown is a first-class status. It is used when the official text does not
   describe the behavior and the local code does not settle it.
+
+### Documented behavior items
+
+A behavior item records one documented behavior and its local parity. It is a
+distinct class from a versioned release item:
+
+- It carries `evidenceClass: "documented-behavior"` and a unique
+  `behaviorKey`.
+- It cites a `behavior` source. It must not carry `upstreamVersion`,
+  `upstreamDate`, `publishedAt`, or `changelogTrace`. A docs page never
+  establishes a version or a publication date.
+- It names the release items it was deduplicated against in `dedupeAgainst`.
+  Distinct behavior gets a distinct item; repeated wording does not.
+- A `partial` or `missing` item, or any `deferred` item, names a testable
+  `acceptance` and its own future task. An `adapted` or `not-applicable`
+  item gives a grounded reason instead of inventing parity.
+- It cites short official excerpts only. The exact URL, sha256, and fetchedAt
+  stay on the source record; the committed evidence does not include the full
+  page.
+- A release item may link captured behavior pages in
+  `supportingBehaviorSourceIds`. Every named id must resolve to a `behavior`
+  source; a missing or non-behavior id is a structural error.
+
+The ledger schemaVersion is 2: every source carries `sourceRole`, and items
+carry either `release-versioned` or `documented-behavior` evidence.
+
+A release item carries `evidenceClass: "release-versioned"` and keeps its
+version, date, and changelog trace.
 
 ## Source outage and provenance
 
@@ -167,7 +202,7 @@ lands, the ledger item moves to applicable or equivalent with the new evidence.
 
 - docs/upstream/ledger.json is the machine-readable record. It carries the
   machine-readable sourcePolicy block and, for each docs capture, the url,
-  sha256, fetchedAt, and the optional lastModified metadata with
+  sha256, fetchedAt, the sourceRole, and the optional lastModified metadata with
   lastModifiedIsPublicationProof false.
 - docs/upstream/README.md is the human-readable baseline.
 - docs/upstream/evidence/ holds the raw captured source and its hashes.

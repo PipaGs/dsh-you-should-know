@@ -1,8 +1,8 @@
 {
-  "schemaVersion": 1,
-  "taskId": "ysk-upstream-source-policy-20261030",
-  "previousTaskId": "ysk-upstream-ledger-correction-20261030",
-  "generatedAt": "2026-10-30T07:14:50Z",
+  "schemaVersion": 2,
+  "taskId": "ysk-upstream-behavior-parity-20261030",
+  "previousTaskId": "ysk-upstream-source-policy-20261030",
+  "generatedAt": "2026-10-30T10:36:55Z",
   "upstream": {
     "project": "anthropics/claude-code",
     "feature": "You should know (built-in mod, cc-plugin-you-should-know@builtin)",
@@ -11,6 +11,7 @@
       {
         "id": "claude-code-release-v2.1.287",
         "kind": "github-release",
+        "sourceRole": "release",
         "url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.287",
         "immutable": true,
         "publishedAt": "2026-10-01T18:00:22Z",
@@ -28,6 +29,7 @@
       {
         "id": "claude-code-release-v2.1.288",
         "kind": "github-release",
+        "sourceRole": "release",
         "url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.288",
         "immutable": true,
         "publishedAt": "2026-10-02T20:19:57Z",
@@ -44,6 +46,7 @@
       {
         "id": "claude-code-release-v2.1.290",
         "kind": "github-release",
+        "sourceRole": "release",
         "url": "https://github.com/anthropics/claude-code/releases/tag/v2.1.290",
         "immutable": true,
         "publishedAt": "2026-10-05T23:33:17Z",
@@ -60,6 +63,7 @@
       {
         "id": "claude-code-changelog-main",
         "kind": "github-changelog",
+        "sourceRole": "release",
         "url": "https://github.com/anthropics/claude-code/blob/db93774d73e8fdbaf315a6f4c175ae99ad3d515a/CHANGELOG.md",
         "immutable": false,
         "commitSha": "db93774d73e8fdbaf315a6f4c175ae99ad3d515a",
@@ -70,6 +74,7 @@
       {
         "id": "claude-code-changelog-page-20261014",
         "kind": "official-docs-changelog",
+        "sourceRole": "historical",
         "url": "https://code.claude.com/docs/en/changelog.md",
         "immutable": false,
         "fetchedAt": "2026-10-14T09:54:42Z",
@@ -96,11 +101,30 @@
             "text": "Added You should know, a built-in mod where a side agent watches your back and flags things you or Claude might miss. Turn it on with `/plugin enable cc-plugin-you-should-know@builtin` (for first-party sessions with telemetry on)"
           }
         ]
+      },
+      {
+        "id": "claude-code-docs-interactive-mode-20261030",
+        "kind": "official-docs-page",
+        "sourceRole": "behavior",
+        "url": "https://code.claude.com/docs/en/interactive-mode",
+        "immutable": false,
+        "sha256": "29f014fae4fad479919f23fc3cd9a8b6c58af1199272e42fe1695a7e75ca1452",
+        "fetchedAt": "2026-10-30T10:30:14Z"
+      },
+      {
+        "id": "claude-code-docs-mods-overview-20261030",
+        "kind": "official-docs-page",
+        "sourceRole": "behavior",
+        "url": "https://code.claude.com/docs/en/plugins/mods/overview",
+        "immutable": false,
+        "sha256": "8685126f9b50f63d38333793a896158437191dba296966b4d47c6780ed7005d2",
+        "fetchedAt": "2026-10-30T10:30:21Z"
       }
     ],
     "items": [
       {
         "id": "U-2.1.287-builtin-side-agent",
+        "evidenceClass": "release-versioned",
         "upstreamVersion": "2.1.287",
         "upstreamSourceId": "claude-code-release-v2.1.287",
         "upstreamDate": "2026-10-01",
@@ -115,15 +139,21 @@
         "localEvidence": [
           "lib/index.js",
           "lib/core.js",
+          "lib/client.js",
           "test/invariant.test.js",
           "README.md"
         ],
         "disposition": "applicable",
-        "parityNotes": "Implemented as an out-of-tree DeepSeek Harness plugin with a separately configured reviewer model. The user-visible capability matches; the platform, the enable path, and the human-only isolation differ by design and were verified on the shipped v0.4.3 code.",
+        "parityNotes": "Implemented as an out-of-tree DeepSeek Harness plugin with a separately configured reviewer model. The user-visible capability matches; the platform, the enable path, and the human-only isolation differ by design and were re-verified on the shipped v0.4.6 code on 2026-10-30.",
+        "supportingBehaviorSourceIds": [
+          "claude-code-docs-interactive-mode-20261030",
+          "claude-code-docs-mods-overview-20261030"
+        ],
         "acceptance": null
       },
       {
         "id": "U-2.1.287-telemetry-gate",
+        "evidenceClass": "release-versioned",
         "upstreamVersion": "2.1.287",
         "upstreamSourceId": "claude-code-release-v2.1.287",
         "upstreamDate": "2026-10-01",
@@ -141,12 +171,16 @@
           "lib/index.js"
         ],
         "disposition": "rejected",
-        "parityNotes": "This plugin has no telemetry and no first-party session concept.",
+        "parityNotes": "This plugin has no telemetry and no first-party session concept. The official behavior page captured on 2026-10-30 details the gate: a direct Claude API connection plus feature-flag and telemetry availability, with LLM-gateway, apps-gateway, and helper-key sessions excluded.",
+        "supportingBehaviorSourceIds": [
+          "claude-code-docs-interactive-mode-20261030"
+        ],
         "rejectionReason": "Platform-specific upstream gating. Adopting it would require adding telemetry and a first-party session notion, which would weaken the documented privacy posture and is not part of this plugin's model.",
         "acceptance": null
       },
       {
         "id": "U-2.1.288-note-voice",
+        "evidenceClass": "release-versioned",
         "upstreamVersion": "2.1.288",
         "upstreamSourceId": "claude-code-release-v2.1.288",
         "upstreamDate": "2026-10-02",
@@ -231,6 +265,7 @@
       },
       {
         "id": "U-2.1.290-language-setting",
+        "evidenceClass": "release-versioned",
         "upstreamVersion": "2.1.290",
         "upstreamSourceId": "claude-code-release-v2.1.290",
         "upstreamDate": "2026-10-05",
@@ -251,6 +286,269 @@
         "disposition": "applicable",
         "parityNotes": "lib/language.js resolves the output language with priority: explicit host user-language setting, then the latest genuine human message, then English. Covered by test/language.test.js and present before this baseline.",
         "acceptance": null
+      },
+      {
+        "id": "B-YSK-side-agent-cadence",
+        "evidenceClass": "documented-behavior",
+        "behaviorKey": "side-agent-cadence",
+        "upstreamSourceId": "claude-code-docs-interactive-mode-20261030",
+        "upstreamQuote": "While it's on, a side agent rereads the conversation from time to time as Claude works through a longer task.",
+        "claim": "A side agent re-reads the conversation periodically while a longer task is still running.",
+        "localStatus": "partial",
+        "localEvidence": [
+          "lib/index.js",
+          "lib/core.js",
+          "test/engine.test.js",
+          "README.md"
+        ],
+        "disposition": "deferred",
+        "parityNotes": "Local reviews start only on a completed `turn/end` event: lib/core.js gates the observer on `turn/end` with a `completed` reason and then runs one review, so there is no mid-task cadence. lib/index.js wires the engine into the host turn lifecycle; test/engine.test.js asserts the gated statuses, and README.md documents one review per qualifying turn. The documented periodic reread is a real gap, deferred to a future mid-task cadence task. No interval is invented: the page says only 'from time to time'.",
+        "dedupeAgainst": [
+          "U-2.1.287-builtin-side-agent"
+        ],
+        "unknowns": [
+          "upstream-check-cadence"
+        ],
+        "acceptance": {
+          "summary": "A future mid-task cadence task adds an opt-in periodic check during a long turn, with turn-end only as the default.",
+          "testableAs": "A test advances an injected scheduler during a running turn and asserts a check starts mid-task only when the opt-in is enabled; a second test asserts no check starts by default and no note reaches the main agent.",
+          "scope": "future-mid-task-cadence"
+        }
+      },
+      {
+        "id": "B-YSK-side-agent-isolation",
+        "evidenceClass": "documented-behavior",
+        "behaviorKey": "side-agent-isolation",
+        "upstreamSourceId": "claude-code-docs-interactive-mode-20261030",
+        "upstreamQuote": "The side agent is a separate request to the same model and has no tools, so it can't read files, run commands, or change what Claude does.",
+        "claim": "The side agent is an isolated, tool-free model request that cannot read files, run commands, or change the main agent.",
+        "localStatus": "adapted",
+        "localEvidence": [
+          "lib/core.js",
+          "lib/runtime.js",
+          "lib/index.js",
+          "test/engine.test.js",
+          "test/invariant.test.js",
+          "README.md"
+        ],
+        "disposition": "applicable",
+        "parityNotes": "Local parity is structural. lib/runtime.js builds one reviewer request with `maxTokens`, `temperature: 0`, and no tool definitions; lib/core.js composes a system instruction plus one untrusted user message; lib/index.js routes the call through the host LLM seam with a separately configured provider and model. test/engine.test.js asserts the reviewer call carries no tools, and test/invariant.test.js scans the shipped sources for delivery paths to the primary agent. README.md states the human-only isolation. The page says the upstream agent has no tools; the exact upstream tool internals stay unknown.",
+        "dedupeAgainst": [
+          "U-2.1.287-builtin-side-agent"
+        ],
+        "unknowns": [
+          "upstream-side-agent-tool-internals"
+        ],
+        "acceptance": null
+      },
+      {
+        "id": "B-YSK-check-context",
+        "evidenceClass": "documented-behavior",
+        "behaviorKey": "check-context",
+        "upstreamSourceId": "claude-code-docs-interactive-mode-20261030",
+        "upstreamQuote": "Each check sends what's already in Claude's context, meaning the conversation so far with its tool results, followed by the mod's own instructions and the text of your recent notes.",
+        "claim": "A check sends the session context with tool results, plus the mod instructions and recent notes.",
+        "localStatus": "adapted",
+        "localEvidence": [
+          "lib/core.js",
+          "test/core.test.js",
+          "test/evidence.test.js",
+          "README.md"
+        ],
+        "disposition": "applicable",
+        "parityNotes": "Local checks do not send raw tool results. lib/core.js collects a bounded visible-text excerpt and appends one bounded evidence capsule with explicit markers (tool names, failure identity, turn reason, paths), never raw arguments or output, and it adds no recent-note text. test/core.test.js covers prompt composition and test/evidence.test.js covers the capsule; README.md describes the bounded excerpt. This is a deliberate privacy adaptation of the documented context-plus-tool-results request, not a byte-for-byte match.",
+        "dedupeAgainst": [
+          "U-2.1.287-builtin-side-agent"
+        ],
+        "unknowns": [],
+        "acceptance": null
+      },
+      {
+        "id": "B-YSK-cost-and-prompt-cache",
+        "evidenceClass": "documented-behavior",
+        "behaviorKey": "cost-and-prompt-cache",
+        "upstreamSourceId": "claude-code-docs-interactive-mode-20261030",
+        "upstreamQuote": "The conversation part is read from the session's prompt cache on the same terms as Claude's own next request.",
+        "claim": "Checks reuse the session prompt cache and count toward plan usage limits or API cost.",
+        "localStatus": "not-applicable",
+        "localEvidence": [
+          "lib/core.js",
+          "lib/runtime.js",
+          "README.md"
+        ],
+        "disposition": "rejected",
+        "parityNotes": "The plugin cannot observe or control provider prompt-cache reuse or billing. lib/runtime.js passes one bounded request to the host LLM seam with `maxTokens`; lib/core.js checks an hourly call budget before provider work and increments it per attempt. README.md documents the hard token cap and the per-session budget. Provider cache and cost semantics belong to the route, so a cross-provider parity claim would be speculation.",
+        "rejectionReason": "Provider-specific prompt-cache and billing semantics are not observable or controllable through the DeepSeek Harness LLM seam. A cross-provider cache or cost parity claim would be speculation, so the item stays not-applicable rather than adapted.",
+        "dedupeAgainst": [
+          "U-2.1.287-builtin-side-agent"
+        ],
+        "unknowns": [],
+        "acceptance": null
+      },
+      {
+        "id": "B-YSK-note-surface-and-choices",
+        "evidenceClass": "documented-behavior",
+        "behaviorKey": "note-surface-and-choices",
+        "upstreamSourceId": "claude-code-docs-interactive-mode-20261030",
+        "upstreamQuote": "Learn more: opens a short explanation under the note, with its own choices:",
+        "supportingExcerpts": [
+          "When it finds one, it shows a short note above the prompt input:",
+          "Knew this already: closes the note and marks the topic as known.",
+          "Dismiss: closes the note.",
+          "Understood: closes it and marks the topic as known"
+        ],
+        "claim": "A short note above the prompt offers Learn more with Understood, plus Knew this already and Dismiss.",
+        "localStatus": "partial",
+        "localEvidence": [
+          "lib/client.js",
+          "test/client-ui.test.js",
+          "README.md"
+        ],
+        "disposition": "deferred",
+        "parityNotes": "The local card sits above the composer (`conversation.input.dock`) and offers Explain, Knew it, Thanks, Add to chat, and Dismiss: lib/client.js renders the card and its buttons around lines 587, 683, and 699. test/client-ui.test.js exercises the controls, and README.md documents the same surface. The documented Learn more sub-surface with its own choices, including an Understood choice, is absent, so the item is partial and deferred to a future note-choices task.",
+        "dedupeAgainst": [
+          "U-2.1.287-builtin-side-agent"
+        ],
+        "unknowns": [],
+        "acceptance": {
+          "summary": "A future UI parity task adds the documented note choices and an Understood subchoice without changing the draft-only rule.",
+          "testableAs": "A client test asserts the documented choices render and each resolves the note with its documented effect, and that no choice submits the composer.",
+          "scope": "future-note-choices"
+        }
+      },
+      {
+        "id": "B-YSK-keyboard-shortcuts",
+        "evidenceClass": "documented-behavior",
+        "behaviorKey": "keyboard-shortcuts",
+        "upstreamSourceId": "claude-code-docs-interactive-mode-20261030",
+        "upstreamQuote": "Type the choice's digit on its own into an empty prompt input.",
+        "claim": "A note choice is selected by typing its digit alone into an empty prompt input.",
+        "localStatus": "missing",
+        "localEvidence": [
+          "lib/client.js",
+          "test/client-ui.test.js"
+        ],
+        "disposition": "deferred",
+        "parityNotes": "There is no digit shortcut. lib/client.js renders the note choices as buttons that take pointer or keyboard focus and handles no bare digit input; test/client-ui.test.js drives them as buttons only. The documented empty-composer digit selection is therefore missing and deferred to a future keyboard-accessibility task, which will add 1/2/0 handling without changing the draft-only rule.",
+        "dedupeAgainst": [
+          "U-2.1.287-builtin-side-agent"
+        ],
+        "unknowns": [],
+        "acceptance": {
+          "summary": "A future keyboard-accessibility task adds 1/2/0 digit shortcuts for the note choices when the prompt input is empty.",
+          "testableAs": "A client test presses 1, 2, and 0 on an empty composer and asserts Learn more, Knew this already, and Dismiss; the same keys do nothing when the draft is non-empty.",
+          "scope": "future-keyboard-shortcuts"
+        }
+      },
+      {
+        "id": "B-YSK-chat-in-main-session",
+        "evidenceClass": "documented-behavior",
+        "behaviorKey": "chat-in-main-session",
+        "upstreamSourceId": "claude-code-docs-interactive-mode-20261030",
+        "upstreamQuote": "Chat in main session: quotes the note into your prompt input so you can add a question and send it to Claude",
+        "supportingExcerpts": [
+          "The main agent doesn't see a note unless you send it with Chat in main session."
+        ],
+        "claim": "Chat in main session quotes the note into the prompt input, and the main agent sees it only after the human sends.",
+        "localStatus": "adapted",
+        "localEvidence": [
+          "lib/client.js",
+          "test/client-ui.test.js",
+          "test/invariant.test.js",
+          "README.md"
+        ],
+        "disposition": "applicable",
+        "parityNotes": "lib/client.js 'Add to chat' writes an agent-facing draft through `inputActions.setDraft` and never sends (lines 466-470); test/client-ui.test.js asserts one draft write and no send, and test/invariant.test.js asserts no delivery path to the primary agent. README.md documents the draft-only rule. The local label is Add to chat rather than Chat in main session, and the main agent sees the text only after the human sends, which matches the documented handoff.",
+        "dedupeAgainst": [
+          "U-2.1.287-builtin-side-agent"
+        ],
+        "unknowns": [],
+        "acceptance": null
+      },
+      {
+        "id": "B-YSK-note-memory",
+        "evidenceClass": "documented-behavior",
+        "behaviorKey": "note-memory",
+        "upstreamSourceId": "claude-code-docs-interactive-mode-20261030",
+        "upstreamQuote": "Claude Code keeps your recent notes and the topics you marked as known in a file whose name starts with cc-plugin-you-should-know under ~/.claude/plugins/store/.",
+        "supportingExcerpts": [
+          "Each check, in this session and later ones, lists them to the side agent as ones not to repeat."
+        ],
+        "claim": "Recent notes and known topics persist across sessions in a file, and each check lists them to the side agent as ones not to repeat.",
+        "localStatus": "partial",
+        "localEvidence": [
+          "lib/core.js",
+          "lib/index.js",
+          "test/engine.test.js",
+          "test/invariant.test.js",
+          "README.md"
+        ],
+        "disposition": "deferred",
+        "parityNotes": "Local note state is in-memory and per session. lib/core.js keeps notes and a bounded known-fingerprint set; lib/index.js disposes them on dispose, and no file or browser storage is written. test/engine.test.js covers dispose and test/invariant.test.js asserts no localStorage. README.md states notes are lost on restart. The documented cross-session file store and cleanupPeriodDays behavior are absent, so the item is partial and deferred; storage privacy stays unknown.",
+        "dedupeAgainst": [
+          "U-2.1.287-builtin-side-agent"
+        ],
+        "unknowns": [
+          "upstream-note-storage-privacy"
+        ],
+        "acceptance": {
+          "summary": "A future persistence task decides whether to keep recent notes and known topics across sessions behind an explicit opt-in, without writing conversation text.",
+          "testableAs": "A test asserts the default stays in-memory and that an enabled store persists only note fingerprints and topics across a restart, then expires them after the configured cleanup period.",
+          "scope": "future-note-persistence"
+        }
+      },
+      {
+        "id": "B-YSK-debug-check-visibility",
+        "evidenceClass": "documented-behavior",
+        "behaviorKey": "debug-check-visibility",
+        "upstreamSourceId": "claude-code-docs-interactive-mode-20261030",
+        "upstreamQuote": "To watch the checks happen, set CLAUDE_CODE_YOU_SHOULD_KNOW_DEBUG=1 in your shell before you start Claude Code.",
+        "claim": "A debug environment variable lets a human watch checks as they happen.",
+        "localStatus": "partial",
+        "localEvidence": [
+          "lib/core.js",
+          "lib/self-check.js",
+          "README.md",
+          "docs/reference.md",
+          "test/self-check.test.js"
+        ],
+        "disposition": "deferred",
+        "parityNotes": "The plugin exposes bounded status counters and a self-check route, not a debug environment variable or a recent-check trace. lib/core.js builds the session snapshot with counters, timestamps, and outcome names only; lib/self-check.js assembles the diagnostic view; test/self-check.test.js covers it, and README.md and docs/reference.md document the diagnostics. The documented `CLAUDE_CODE_YOU_SHOULD_KNOW_DEBUG` switch is absent, so the item is partial and deferred to a diagnostics task.",
+        "dedupeAgainst": [
+          "U-2.1.287-builtin-side-agent"
+        ],
+        "unknowns": [],
+        "acceptance": {
+          "summary": "A future diagnostics task adds a bounded recent-check view with timestamps and outcomes.",
+          "testableAs": "A status/self-check test asserts the recent-check list exposes only counters, timestamps, and outcome names, never note, prompt, or conversation text.",
+          "scope": "future-check-diagnostics"
+        }
+      },
+      {
+        "id": "B-YSK-post-dismiss-turn-off",
+        "evidenceClass": "documented-behavior",
+        "behaviorKey": "post-dismiss-turn-off",
+        "upstreamSourceId": "claude-code-docs-interactive-mode-20261030",
+        "upstreamQuote": "After you choose Dismiss on a note without opening Learn more first, choose Turn off suggestions on the Dismissed. line, which clears after 20 seconds",
+        "claim": "After a plain Dismiss, a transient Turn off suggestions action appears for 20 seconds.",
+        "localStatus": "missing",
+        "localEvidence": [
+          "lib/client.js",
+          "lib/core.js",
+          "test/client-ui.test.js",
+          "test/engine.test.js"
+        ],
+        "disposition": "deferred",
+        "parityNotes": "Dismiss resolves the note only: lib/client.js `dismissNote` marks it resolved and posts the dismissed resolution, and lib/core.js records the resolution. test/client-ui.test.js covers dismiss and test/engine.test.js covers the host resolution. A persistent disable exists in settings, but no transient Turn off suggestions action appears after a plain Dismiss, so the item is missing and deferred to a future UI task.",
+        "dedupeAgainst": [
+          "U-2.1.287-builtin-side-agent"
+        ],
+        "unknowns": [],
+        "acceptance": {
+          "summary": "A future UI task adds a transient post-dismiss turn-off action that expires after a fixed interval.",
+          "testableAs": "A client test dismisses a note, asserts a turn-off control appears, and asserts it disappears after the fixed interval or after the user opens the explanation.",
+          "scope": "future-post-dismiss-turn-off"
+        }
       }
     ]
   },
@@ -325,7 +623,18 @@
     "finding": "No direct You should know release note appears after v2.1.290 through v2.1.312.",
     "doesNotClaim": "This records only the absence of direct You should know release notes in the checked range. It does not claim that upstream behavior did not change: behavior can change without a named release note, and this check reads release bodies only.",
     "evidence": "docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/github-releases-2.1.287-2.1.312.json",
-    "verifiedAt": "2026-10-30T06:40:37Z"
+    "verifiedAt": "2026-10-30T06:40:37Z",
+    "docsBehaviorCoverage": {
+      "capturedAt": "2026-10-30T10:30:21Z",
+      "sources": [
+        "claude-code-docs-interactive-mode-20261030",
+        "claude-code-docs-mods-overview-20261030"
+      ],
+      "scope": "Documented behavior only: cadence, isolation, check context, cost and prompt cache, note surface and choices, keyboard input, chat handoff, note memory, debug visibility, and post-dismiss turn-off.",
+      "releaseCoverageRemains": "coverage.checkedThrough (v2.1.312)",
+      "newerReleasesChecked": false,
+      "note": "This cycle adds documentation behavior coverage only. It does not re-check any release after v2.1.312 and does not extend the release coverage boundary."
+    }
   },
   "sourcePolicy": {
     "acceptedIn": "Stage 1B",
@@ -344,7 +653,8 @@
           "tagRefSha",
           "publishedAt",
           "releaseBodySha256",
-          "provenance"
+          "provenance",
+          "sourceRole"
         ]
       },
       "githubChangelog": {
@@ -357,9 +667,11 @@
           "commitSha",
           "commitDate",
           "fetchedAt",
-          "sha256"
+          "sha256",
+          "sourceRole"
         ]
-      }
+      },
+      "sourceRole": "release"
     },
     "behaviorSources": {
       "role": "behavior-evidence-only",
@@ -376,7 +688,8 @@
         "url",
         "immutable",
         "sha256",
-        "fetchedAt"
+        "fetchedAt",
+        "sourceRole"
       ],
       "optionalMetadata": [
         "lastModified"
@@ -386,7 +699,8 @@
       "allowedForPublicationDate": false,
       "reFetchEveryCycle": true,
       "changeDetection": "sha256",
-      "excerptPolicy": "short-official-sentences-only"
+      "excerptPolicy": "short-official-sentences-only",
+      "sourceRole": "behavior"
     },
     "provenance": {
       "verifiedOnlyWithExactBytes": true,
@@ -399,12 +713,38 @@
     "historicalDeviation": {
       "sourceId": "claude-code-changelog-page-20261014",
       "recordedIn": "docs/upstream/addendum-20261030-source-policy-deviation.md",
-      "retroactivelyAuthorized": false
+      "retroactivelyAuthorized": false,
+      "sourceRole": "historical"
     },
     "security": {
       "privateProjectOrSessionDataToPublicPages": "forbidden",
       "copyPrivateClaudeInternals": "forbidden",
       "copyClosedSourceCode": "forbidden"
+    },
+    "behaviorItemRules": {
+      "evidenceClass": "documented-behavior",
+      "requiresSourceRole": "behavior",
+      "forbiddenFields": [
+        "upstreamVersion",
+        "upstreamDate",
+        "changelogTrace",
+        "publishedAt"
+      ],
+      "requiresFields": [
+        "id",
+        "evidenceClass",
+        "behaviorKey",
+        "upstreamSourceId",
+        "upstreamQuote",
+        "claim",
+        "localStatus",
+        "localEvidence",
+        "disposition",
+        "parityNotes",
+        "dedupeAgainst"
+      ],
+      "requiredDedupe": true,
+      "acceptanceForGaps": true
     }
   },
   "outagePolicy": {
@@ -464,6 +804,27 @@
       "whyUnknown": "The official text does not describe data handling. Assuming it matches this plugin's privacy model would be speculation.",
       "policy": "unknown-not-no-change",
       "reassessWhen": "An official Anthropic privacy or data-flow statement covers the mod."
+    },
+    {
+      "id": "upstream-check-cadence",
+      "question": "How often the side agent re-reads the conversation ('from time to time') and what starts or stops a check.",
+      "whyUnknown": "The behavior page gives no interval or scheduling algorithm, and this repository does not reverse engineer undisclosed internals.",
+      "policy": "unknown-not-no-change",
+      "reassessWhen": "An official Anthropic source documents the check cadence or its scheduler."
+    },
+    {
+      "id": "upstream-note-storage-privacy",
+      "question": "How the note store file is formatted, protected, and retained beyond the documented cleanupPeriodDays behavior.",
+      "whyUnknown": "The behavior page describes the file location and cleanup only.",
+      "policy": "unknown-not-no-change",
+      "reassessWhen": "An official Anthropic source documents the note store format, protection, or retention."
+    },
+    {
+      "id": "upstream-side-agent-tool-internals",
+      "question": "How the upstream side agent is prevented from using tools and how its request is isolated.",
+      "whyUnknown": "The behavior page states that the side agent has no tools; the implementation is closed-source.",
+      "policy": "unknown-not-no-change",
+      "reassessWhen": "An official Anthropic source documents the side-agent request isolation."
     }
   ]
 }
