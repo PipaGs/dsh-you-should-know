@@ -6,7 +6,7 @@
 
 **Branch:** task/upstream-behavior-parity-20261030
 
-**Product head:** b63e56bdb0ac404e544ac2f11751cd6659f3693a
+**Product head:** 43a42fe75be9fa6386c9e2a8e49876011397dbc7
 
 **PR:** https://github.com/PipaGs/dsh-you-should-know/pull/26
 
@@ -219,7 +219,7 @@ Raw output is in the evidence directory.
 
 ## 11. Independent review
 
-APPROVE from a separate read-only review subagent that did not write the
+APPROVE from separate read-only review subagents that did not write the
 changes.
 
 The first review of the pre-fix tree found no BLOCKER, HIGH, or MEDIUM issue.
@@ -245,6 +245,18 @@ risk: quote traceability is anchored to the committed capture, so a fabricated
 excerpt plus a matching quote would pass; the independent reviewer verified the
 excerpts against the live pages, and the pinned sha256 is the anchor for a
 future re-capture.
+
+ChatGPT's independent PR review then returned CHANGES_REQUIRED on head
+de37f8e. It found that `B-YSK-chat-in-main-session` omitted a material content
+difference: upstream Chat in main session quotes the human-readable note, while
+local Add to chat prefers the agent-facing `note.action`. The fix updates the
+ledger parity note, the README matrix, and this report to state the action-first
+draft, the finding prose that is not inserted when an action is present, the
+no-action fallback, the note moving to History, and the human-only send. It adds
+a targeted ledger test that rejects the old note-quote wording and requires the
+three client assertions. A second DSH review approved the fix after one MEDIUM
+finding (an invented "stays on the card" clause) and one LOW finding (a
+keyword-only test) were corrected.
 
 ## 12. Limitations
 
@@ -275,3 +287,4 @@ future re-capture.
 - docs/harness-reports/ysk-upstream-behavior-parity-20261030/evidence/diff-check.txt
 - docs/harness-reports/ysk-upstream-behavior-parity-20261030/evidence/security-scan.txt
 - docs/harness-reports/ysk-upstream-behavior-parity-20261030/evidence/content-scan.txt
+- docs/harness-reports/ysk-upstream-behavior-parity-20261030/evidence/run-meta.txt
