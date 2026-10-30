@@ -181,6 +181,7 @@ How to read each value:
 | `session.reviewerBudgetRemaining` | Calls still allowed in the window under `maxReviewerCallsPerHour`. |
 | `session.explainCallsLastHour` | Explain attempts in the same sliding window; bounded by the same cap on its own counter. |
 | `session.knownFingerprintCount` | Findings the human marked **Knew it** for this session; bounded to 32. |
+| `session.recentChecks` | Present only when `recentCheckDiagnostics` is enabled: a newest-first array of at most 12 terminal checks. Each record has exactly `at`, `turn`, and `outcome`. |
 | `session.runtime` | The runtime's bounded counters: pending queue, completed reviews, empty and unparsed replies, transport drops, queue drops, backlog flushes, and the last outcome/timestamp. No conversation, prompt, note, credential, or tool text is ever included. |
 
 An unknown or missing `sessionId` returns `"session": null` with the global route state only. `HEAD` returns the same status line with no body, and a non-`GET`/`HEAD` request is rejected with `405`. The route is read-only, applies the same session-id bound as `/notes` and `/dismiss`, relies on the connection's Host/Origin fence and browser authentication, and never includes conversation text, prompt text, note text, source paths, credentials, or tool data.
@@ -191,6 +192,16 @@ Typical readings:
 - `route: null` with a growing `routeResolutions`: the first qualifying turn ran before the profile mounted a usable DeepSeek route. Since `0.2.2` the engine retries discovery at each later qualifying turn, so the route can appear without a host restart; the next noted review shows the resolved pair.
 - `route` present but `session.reviewStarts: 0`: no turn has passed the output, cooldown, and delta gates for that session yet.
 - `lastOutcome: "noted"` with `noteCount >= 1`: the reviewer produced at least one note for this session.
+
+### Recent-check diagnostics
+
+`recentCheckDiagnostics` is an opt-in boolean that adds a small recent-check history to the status route. It defaults to `false`.
+
+| Key | Default | Validation | Meaning |
+|---|---|---|---|
+| `recentCheckDiagnostics` | `false` | boolean | Keep a bounded in-memory recent-check history on the status route. |
+
+When it is off, `session.recentChecks` is absent; the key is never an empty array. When it is on, every review that reaches a terminal outcome while the opt-in is on when it settles adds one record, and the array keeps at most 12, newest first. Turning it off clears the retained history, and re-enabling starts empty. Each record has exactly `at` (host timestamp in milliseconds, or `null` when the clock is unusable), `turn` (the reviewed turn's engine ordinal, captured when that review started and never a value from event data), and `outcome` (one of `noted`, `silent`, `duplicate`, `suppressed`, `budget`, `unroutable`, `error`, `aborted`, `quota_exhausted`, `halted`, `queue_full`, `disposed`, or `other`). Gate skips that never start a review add no record. The history is per-session and in-memory only: forgetting, disposing, or evicting a session drops it, a restart drops it, and nothing is persisted. Records never carry note, prompt, event, or conversation text.
 
 ### Self-check route
 
@@ -212,7 +223,7 @@ The self-check route answers only from in-process state and returns bounded JSON
   "runtimeStatus": "idle",
   "reviewerMode": "balanced",
   "routes": [{ "name": "self-check", "methods": ["GET", "HEAD"], "registered": true }],
-  "capabilities": { "feedback": true, "explain": true, "evidence": true, "episodeTrigger": true, "adaptiveBudget": true, "updateChecker": true },
+  "capabilities": { "feedback": true, "explain": true, "evidence": true, "episodeTrigger": true, "adaptiveBudget": true, "updateChecker": true, "recentCheckDiagnostics": false },
   "update": { "currentVersion": "0.4.6", "latestVersion": "", "latestTag": "", "installSpec": "", "source": "git-tags", "updateAvailable": false, "dismissed": false, "autoCheckUpdates": true, "updateBehavior": "ask-before-update", "automaticSupported": false, "lastAutoCheckDate": "", "lastCheckedAt": null, "lastResult": null }
 }
 ```
@@ -227,7 +238,7 @@ The self-check route answers only from in-process state and returns bounded JSON
 | `runtimeStatus` | The aggregate scheduler state across live sessions: `idle`, `reviewing`, `degraded`, `quota_exhausted`, `halted`, or `disposed`, most severe first, or `unknown`. |
 | `reviewerMode` | The effective global strictness mode id, or `null`. |
 | `routes` | One entry per registered route with its name, HTTP methods, and whether a handler is actually present. The list is the same compile-time table the host registers from, so it cannot drift. |
-| `capabilities` | The feature flags `feedback`, `explain`, `evidence`, `episodeTrigger`, `adaptiveBudget`, and `updateChecker`. |
+| `capabilities` | The feature flags `feedback`, `explain`, `evidence`, `episodeTrigger`, `adaptiveBudget`, `updateChecker`, and `recentCheckDiagnostics` (the live opt-in value). |
 | `update` | The bounded update-checker state: version tags, the Git discovery source, the exact pinned target address, the install capability, the behavior enum, the local check date, and the last result. An `installSpec` that is not the exact pinned Git shape, and every unknown field, are dropped. |
 
 ### No public CLI path for external verification

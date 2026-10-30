@@ -219,6 +219,12 @@ test('the config schema accepts a bounded hourly reviewer-call budget', () => {
   assert.throws(() => Config({ maxReviewerCallsPerHour: 61 }))
 })
 
+test('the config schema carries the opt-in recent-check diagnostics flag', () => {
+  assert.equal(Config({}).recentCheckDiagnostics.get(), false)
+  assert.equal(Config({ recentCheckDiagnostics: true }).recentCheckDiagnostics.get(), true)
+  assert.throws(() => Config({ recentCheckDiagnostics: 'yes' }))
+})
+
 test('a missing or v0.3.6 config migrates to Balanced with empty instructions', () => {
   const absent = normalizeConfig(undefined).config
   assert.equal(absent.reviewerMode, 'balanced')

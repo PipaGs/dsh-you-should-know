@@ -99,6 +99,7 @@ test('GET config returns the live config, a sorted deduped catalog, and writabil
     maxContextMessages: 12,
     maxTokens: 768,
     maxReviewerCallsPerHour: 12,
+    recentCheckDiagnostics: false,
   })
   assert.deepEqual(body.catalog, {
     providers: [
@@ -174,6 +175,7 @@ test('POST automatic clears the pinned route, persists the row patch, and update
     maxContextMessages: 6,
     maxTokens: 256,
     maxReviewerCallsPerHour: 12,
+    recentCheckDiagnostics: false,
   })
 })
 
@@ -201,6 +203,7 @@ test('POST pinned validates through resolveModelInfo before persistence and upda
     maxContextMessages: 12,
     maxTokens: 300,
     maxReviewerCallsPerHour: 12,
+    recentCheckDiagnostics: false,
   })
 })
 

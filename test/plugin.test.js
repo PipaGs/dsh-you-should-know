@@ -404,7 +404,8 @@ test('the authenticated self-check route reports only the bounded running plugin
   assert.equal(body.healthy, true)
   assert.deepEqual(body.routes.map((entry) => entry.name), ['notes', 'history', 'dismiss', 'status', 'session', 'explain', 'config', 'update', 'self-check'])
   assert.equal(body.routes.every((entry) => entry.registered === true), true)
-  assert.deepEqual(Object.keys(body.capabilities).sort(), ['adaptiveBudget', 'episodeTrigger', 'evidence', 'explain', 'feedback', 'updateChecker'])
+  assert.deepEqual(Object.keys(body.capabilities).sort(), ['adaptiveBudget', 'episodeTrigger', 'evidence', 'explain', 'feedback', 'recentCheckDiagnostics', 'updateChecker'])
+  assert.equal(body.capabilities.recentCheckDiagnostics, false)
   assert.equal(body.capabilities.feedback, true)
   assert.equal(body.capabilities.explain, true)
   assert.equal(body.capabilities.updateChecker, true)
@@ -926,7 +927,19 @@ test('the config route is writable and persists the row through the settings ser
   const savedBody = await saved.json()
   assert.equal(savedBody.config.mode, 'pinned')
   assert.equal(savedBody.config.provider, 'deepseek-official')
-  assert.deepEqual(updates, [{ key: 'you-should-know', patch: { provider: 'deepseek-official', model: 'deepseek-flash' } }])
+  assert.deepEqual(updates, [{
+    key: 'you-should-know',
+    patch: {
+      autoCheckUpdates: true,
+      updateBehavior: 'ask-before-update',
+      lastAutoCheckDate: '',
+      lastSeenLatestVersion: '',
+      dismissedUpdateVersion: '',
+      recentCheckDiagnostics: false,
+      provider: 'deepseek-official',
+      model: 'deepseek-flash',
+    },
+  }])
   harness.disposeAll()
 })
 

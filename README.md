@@ -97,6 +97,7 @@ Setting **both** keys is an exact override for any registered route — no allow
     maxContextMessages: 12
     maxTokens: 768
     maxReviewerCallsPerHour: 12
+    recentCheckDiagnostics: false
 ```
 
 A patch replaces the **whole** config of the row it matches, so restate every key you want to keep. Put one `- id: you-should-know` entry in `$DSH_HOME/profiles/<profile>/cordis.patch.yml` (or a `--patch` overlay); do not add a second `insert` for the same id. Only availability in the profile matters: a missing route or unconfigured credential fails quietly, and declaring a model does not make it available.
@@ -113,8 +114,11 @@ A patch replaces the **whole** config of the row it matches, so restate every ke
 | `reviewerMode` | `balanced` | `relaxed`, `balanced`, `strict`, `paranoid`, `custom` | Strictness mode; also sets the notification threshold. |
 | `additionalInstructions` | empty | string, at most 2000 characters | Extra reviewer instructions for every mode, appended after the strictness profile. |
 | `customReviewerPrompt` | empty | string, at most 4000 characters | Custom-mode profile; blank falls back to Balanced. |
+| `recentCheckDiagnostics` | `false` | boolean | Opt-in bounded in-memory recent-check history on the status route. |
 
 Invalid values never fail the load: each falls back to its conservative default and the host logs one warning. Every field is volatile, so a patch edit or a settings save applies to the running fiber immediately.
+
+`recentCheckDiagnostics` is off by default. While it is off, the status route has no `recentChecks` field at all. When it is on, each session keeps at most 12 terminal reviewer-check records in memory, newest first, recorded when a review settles while the opt-in is on; each record has exactly `at`, `turn`, and `outcome`, and the outcome is always one of the documented names. Turning it off clears the retained history, and re-enabling starts empty. The history is per-session and in-memory only: forgetting, disposing, or evicting a session drops it, a restart drops it, and nothing is persisted. The records never carry note, prompt, event, or conversation text.
 
 ## Web UI
 

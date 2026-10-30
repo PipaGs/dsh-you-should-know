@@ -1,0 +1,15 @@
+# product tree: 08d3ea2f5dc21c294f2ce30b3390e53db50e3d0d
+$ npm test 2>&1 | tail -12
+✔ the ledger source policy matches the exact allowlist and role limits (0.560458ms)
+✔ the coverage record is pinned to v2.1.312 and does not claim behavior stability (0.277542ms)
+✔ the committed coverage evidence supports the recorded release dates (0.5935ms)
+✔ the human-readable workflow and baseline documents exist and agree with the ledger (0.232291ms)
+ℹ tests 656
+ℹ suites 0
+ℹ pass 656
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1258.229959
+exit code: 0

@@ -1223,7 +1223,7 @@ test('aggregateRuntimeStatus reports the most severe live runtime state', () => 
 
 test('engine.diagnostics reports the effective mode and a bounded runtime status', () => {
   const engine = createEngine({ config: normalizeConfig({ provider: 'p', model: 'm' }).config, getLlm: () => undefined })
-  assert.deepEqual(engine.diagnostics(), { configured: true, reviewerMode: 'balanced', runtimeStatus: 'idle' })
+  assert.deepEqual(engine.diagnostics(), { configured: true, reviewerMode: 'balanced', runtimeStatus: 'idle', recentCheckDiagnostics: false })
   engine.dispose()
   assert.equal(engine.diagnostics().runtimeStatus, 'disposed')
 })

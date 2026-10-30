@@ -222,7 +222,7 @@ test('an automatic reviewer save preserves the live update state across the repl
   }])
 })
 
-test('a pinned reviewer save merges, so the settings service preserves the update state itself', async () => {
+test('a pinned reviewer save carries the preserved fields into the live patch', async () => {
   const llm = {
     resolveModelInfo: async (provider, model) => ({ provider, id: model }),
   }
@@ -231,7 +231,7 @@ test('a pinned reviewer save merges, so the settings service preserves the updat
   const handlers = createConfigHandlers(engine, { getLlm: () => llm, settings, preserveFields: () => ({ ...PRESERVED }) })
   const response = await configPost(handlers, { mode: 'pinned', provider: 'alpha', model: 'a-model' })
   assert.equal(response.status, 200)
-  assert.deepEqual(settings.updates[0].patch, { provider: 'alpha', model: 'a-model' })
+  assert.deepEqual(settings.updates[0].patch, { ...PRESERVED, provider: 'alpha', model: 'a-model' })
 })
 
 test('the config GET carries the bounded update status only when the host wires one', async () => {
