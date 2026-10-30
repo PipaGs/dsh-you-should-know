@@ -1,0 +1,18 @@
+COMMAND: git diff --check 992de15cd4c32b3f8c625a7cdb97ec2daa8dbe09
+DATE_UTC: 2026-10-30T18:16:08Z
+DATE_LOCAL: 2026-10-30T21:16:08+0300 (MSK)
+HEAD: 992de15cd4c32b3f8c625a7cdb97ec2daa8dbe09
+GIT STATUS --short:
+   M README.md
+   M docs/reference.md
+   M lib/index.js
+   M package.json
+   M test/invariant.test.js
+   M test/plugin.test.js
+   M test/recent-check-diagnostics.test.js
+   M test/release-consistency.test.js
+   M test/update-route.test.js
+  ?? .rollout-restart-verify.log
+  ?? docs/harness-reports/ysk-version-bump-0.5.0-20261030/
+--- OUTPUT ---
+--- EXIT CODE: 0 ---

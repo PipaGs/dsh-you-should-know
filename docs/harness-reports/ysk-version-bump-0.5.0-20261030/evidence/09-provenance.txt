@@ -1,0 +1,61 @@
+PROVENANCE: docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/09-provenance.txt
+TASK: version bump 0.4.6 -> 0.5.0 for dsh-you-should-know
+DATE_UTC: 2026-10-30T18:29:21Z
+DATE_LOCAL: 2026-10-30T21:29:21+0300 (MSK)
+BASE_SHA: 992de15cd4c32b3f8c625a7cdb97ec2daa8dbe09
+BASE_SUBJECT: Merge pull request #28 from PipaGs/task/stage4c-recent-check-diagnostics-20261030
+PRODUCT_COMMIT_A: fe7bdef008983443c647a7fa8234930a8da52ccc
+PRODUCT_COMMIT_A_SUBJECT: chore: raise the version to 0.5.0 after the validated stage merges
+DOCS_COMMIT: the commit that carries this report directory. It was amended during preparation, so its SHA is recorded in the review handoff, not here.
+BRANCH: task/release-0.5.0-version-20261030
+NODE: v26.12.1
+NPM: 11.20.0
+
+### evidence file SHA256 (paths relative to the evidence directory)
+701d8e11bbbb05b03e388f8f3916fcd013d3f809b5b4b022a4b991cf4a71de5a  01-baseline-targeted.txt
+aa67cbf8f27487c43316b3c9bd327e98e377696939dcb93d96b2b3527685ac5a  02-red-patch-only-gate.txt
+b7fdfc45814df85e4a328346955f3eab69438a06d135eea85d7758d56c4cc511  03-green-targeted.txt
+7b8ee73970d248a4e6a2c83c2e2bcf45ebf68895565b9d0a3697e05a224aaebf  03b-targeted-committed.txt
+3e56889a0a629e202c67a24dc5d889d067985aefc096b80dab7899662ccf7adc  04-npm-test-full-dirty-tree.txt
+9cc7284233c665908ba0324740c600abb61ba913fb778cdc6d0e9aae948df7b8  04b-npm-test-full-committed.txt
+89683239288080d11cffd1660f748c1ee0791ea7c3d5055310796351184e7285  05-npm-check.txt
+71d1cd77487bee12710a7eeb046b305752a1d260b3453215ee7038b0ee269218  06-diff-check.txt
+2673b714f369860c57b89aab056f7711f7c726c245c6b203379be118310db308  06b-diff-check-committed.txt
+b2f1053f92560c2dcbaf819aa40ffb86d01e25590ea0bbfea3f94b60eefaaa7d  07-version-scan.txt
+266c6faaec0ec3e893958228f5b883790e7a619c90b41aa1ee8809532250eac0  08-diff-stat-and-security.txt
+209fbe733d12d586f889c851142756d214be58483b81cbb761d346c7fd975082  10-gate-negative-probe.txt
+959c4a130d1c0c2e34dae93aa084272d8a38c8b4ac069b7b8fd1bba489759d7b  11-final-verification.txt
+c1ae1351a494d8cda20e692a60bac471193f301553d51268550e1e8feada7ea8  12-publication-check.txt
+a7f5368f06d85aa39153f22d6b5f4e74216ebd78374abef2ba17a3c0fd5dbd63  13-final-npm-test.txt
+
+### this file (09) SHA256
+09-provenance.txt is not listed above because a file cannot carry its own hash. Its hash is recorded in the review handoff instead.
+
+### final report SHA256 (path relative to the report directory)
+e9010a4d7540fed0e6e10d9ad9bc004b113216fac49622d5d27ab06721971500  final-report.md
+
+### capture method
+Each run wrote stdout and stderr into one temporary file, then prepended a header with COMMIT A, COMMAND, DATE (UTC and local), HEAD, GIT STATUS --short, and appended the real exit code after '--- OUTPUT ---'. Output was not truncated, and every exit code and test count is exactly what the run reported.
+
+### post-capture edits, all disclosed
+Three artifacts were changed after their runs, and only in ways that remove no result: 02 lost trailing spaces at the end of eight lines so the repository PR whitespace gate passes (the whitespace-insensitive diff of 02 against its committed bytes is empty); 11 lost one blank line at EOF for the same gate; 13 keeps its run output but its header no longer names the pre-amend docs commit, because that commit was amended. No exit code, test count, or failure message changed.
+
+### scan coverage
+08 was captured after the final report and 13 existed. Its scan covers 01-07, 10-13, 03b, 04b, 06b, and final-report.md. 08 excludes itself because it quotes the pattern inventory, and it excludes this file because the redaction expression below contains the searched path prefix.
+
+### redaction note
+
+All captured logs were filtered on capture through exactly this expression:
+
+  sed -E 's#file:///Users/[^/ ]+#file://<worktree>#g; s#/Users/[^/ ]+#/<home>#g'
+
+The expression rewrites the home SEGMENT, not the whole worktree prefix: an absolute
+file URL such as file:///Users/<account>/work/<repo>/test/x.js becomes
+file://<worktree>/work/<repo>/test/x.js. For example, the 02 stack traces read
+file://<worktree>/work/dsh-you-should-know/test/release-consistency.test.js. Any other
+home-anchored path becomes /<home>/ followed by the remaining segments.
+
+This is an on-capture redaction of evidence. No path was rewritten after the run, and no
+exit code, test count, or failure message was altered. Files 01-07, 10-13, 03b, 04b, 06b,
+and the final report contain no absolute workstation path; the scan in 08 confirms that
+over exactly those files.

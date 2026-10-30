@@ -1,0 +1,120 @@
+PURPOSE: demonstrate that the old patch-only gate rejects a deliberate minor bump 0.4.6 -> 0.5.0.
+COMMAND: node --test test/release-consistency.test.js
+DATE_UTC: 2026-10-30T18:15:11Z
+DATE_LOCAL: 2026-10-30T21:15:11+0300 (MSK)
+HEAD: 992de15cd4c32b3f8c625a7cdb97ec2daa8dbe09
+GIT STATUS --short:
+  ?? .rollout-restart-verify.log
+  ?? docs/harness-reports/ysk-version-bump-0.5.0-20261030/
+--- TEMPORARY CONSTANT DIFF (old gate still in place) ---
+diff --git a/test/release-consistency.test.js b/test/release-consistency.test.js
+index 08afc6a..f7d9ca4 100644
+--- a/test/release-consistency.test.js
++++ b/test/release-consistency.test.js
+@@ -25,8 +25,8 @@ import { fileURLToPath } from 'node:url'
+ import { PLUGIN_VERSION } from '../lib/index.js'
+
+ const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+-const CURRENT = '0.4.6'
+-const PREVIOUS = '0.4.5'
++const CURRENT = '0.5.0'
++const PREVIOUS = '0.4.6'
+
+ function read(path) {
+   return readFileSync(join(repoRoot, path), 'utf8')
+NOTE: only the two constants in test/release-consistency.test.js were changed for this run. The diff above records that edit. The edit was removed immediately after the capture, and the file matched HEAD again afterwards (verified with git diff). Eight trailing spaces at line ends in the command output were removed after capture so the repository whitespace gate passes; see the post-capture edits section of 09. No test name, test count, exit code, or non-whitespace character changed.
+--- OUTPUT ---
+✖ the release version is a patch increment over the previous release (1.005042ms)
+✖ package.json, PLUGIN_VERSION, and the README install address agree (0.304291ms)
+✖ every README self-check sample version is the released version (0.24475ms)
+✖ no released artifact still documents the previous version (0.168375ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 0
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 166.616917
+
+✖ failing tests:
+
+test at test/release-consistency.test.js:35:1
+✖ the release version is a patch increment over the previous release (1.005042ms)
+  AssertionError [ERR_ASSERTION]: the minor version does not change on this release
+
+  5 !== 4
+
+      at TestContext.<anonymous> (file://<worktree>/work/dsh-you-should-know/test/release-consistency.test.js:39:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 5,
+    expected: 4,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/release-consistency.test.js:43:1
+✖ package.json, PLUGIN_VERSION, and the README install address agree (0.304291ms)
+  AssertionError [ERR_ASSERTION]: package.json carries the release version
+
+  '0.4.6' !== '0.5.0'
+
+      at TestContext.<anonymous> (file://<worktree>/work/dsh-you-should-know/test/release-consistency.test.js:45:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '0.4.6',
+    expected: '0.5.0',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/release-consistency.test.js:57:1
+✖ every README self-check sample version is the released version (0.24475ms)
+  AssertionError [ERR_ASSERTION]: pluginVersion names the release version
+      at TestContext.<anonymous> (file://<worktree>/work/dsh-you-should-know/test/release-consistency.test.js:61:12)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '## Operational verification\n\nThe supported check is **Run self-check** in **Settings -> Plugins -> You Should Know -> Diagnostics**. It calls the read-only `GET`/`HEAD /api/dsh-you-should-know/self-check` route over the same authenticated connection as every other plugin route and reports versions, runtime status, mode, registered routes, capabilities, and the bounded update state. Abridged sample:\n\n```json\n{\n  "ok": true,\n  "authTransport": "host-authenticated-connection",\n  "healthy": true,\n  "configured": true,\n  "pluginVersion": "0.4.6",\n  "runtimeVersion": "0.4.6",\n  "installedVersion": "0.4.6",\n  "runtimeStatus": "idle",\n  "reviewerMode": "balanced",\n  "update": { "currentVersion": "0.4.6", "updateAvailable": false, "automaticSupported": false }\n}\n```\n\nA healthy result shows the running and installed versions and the enabled capabilities. When the installed package version differs from the running module version, the card shows **Restart required**. When either version cannot be read, it says the comparison is unavailable instead of guessing.\n\nA bare `curl` to any `/api/*` route returns `401` before the plugin handler is reached: the connection\'s Host/Origin fence and browser-session authentication run first. That is expected host behavior, not a plugin failure, and it is why external verification needs the authenticated page. Do not bypass authentication or paste a session cookie into a command. For the same reason, read the read-only status route from the page\'s console:\n\n```js\nawait (await fetch(\'api/dsh-you-should-know/status?sessionId=<session-id>\')).json()\n```\n\nField-by-field schemas for both routes: [status and self-check](./docs/reference.md#status-and-self-check-routes).\n\n## Development\n\n```sh\nnpm test\n```\n\nThe suite covers route discovery and recovery, the verdict contract and silence handling, every gate, dedupe, strictness thresholds, language detection, the human-only invariant, the note card and history, runtime queue, retry, and resume, live config, persistence, the update checker, and release consistency. Full coverage list: [test coverage](./docs/reference.md#test-coverage).\n\n### Offline note voice baseline\n\n```sh\nnpm run eval:note-voice:baseline\n```\n\nThe command scores the hand-authored fixtures in `scripts/fixtures/note-voice-baseline/cases.json` with the same parse, mode gate, and verbatim grounding checks the runtime applies. It is offline and deterministic: it never calls a model, opens a network connection, or reads an environment variable. Each case receives one status:\n\n- `SPEAK_OK`: a note was admitted for a case that expects one;\n- `SPEAK_UNWARRANTED`: a note was admitted for a case that expects silence;\n- `SILENT_OK`: no admitted note for a case that expects silence, whether the reply was absent, silent, or dropped by grounding;\n- `SILENT_MISSED`: no note was admitted for a case that expects one;\n- `RUNTIME_ERROR`: the reviewer call failed; never counted as silence in either direction;\n- `INVALID`: a structurally broken or contradictory case;\n- `NOT_RUN`: reserved for a future live runner.\n\nThe output is a per-class count table, the `gated`, `invalid`, and `runtime errors` totals, and a NOT VERIFIED statement about semantic quality. The `summarize` helper also returns the `semantics.notVerified` count for programmatic use. The baseline measures structural admission only. Semantic quality (entailment, voice attribution) is NOT VERIFIED: an `entail` label is the fixture author\'s label, voice attribution is not checked, and no accuracy or precision is computed. The baseline stays unvalidated until the owner sets a threshold.\n\n## Repository rules\n\nRepository-facing prose follows the project\'s [repository rules](./AGENTS.md), including the English-only requirement for new pull request descriptions, commit messages, review comments, reports, and documentation. Human chat language is separate.\n\n## Related work\n\n[omdsh-dev/dsh-advisor](https://github.com/omdsh-dev/dsh-advisor) pairs a second model that passively reviews each turn and **injects its notes into the primary agent**, so the agent sees the advice and can act on it inside the same turn.\n\nThis plugin is the deliberate opposite. Its notes are **human-only**: the primary agent is never steered, injected, woken, or written to, and the advice never enters the transcript or the model context. The value here is an independent opinion for the person, not another instruction for the agent.\n\n## License\n\nMIT. See [LICENSE](./LICENSE).\n',
+    expected: /"pluginVersion": "0.5.0"/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at test/release-consistency.test.js:66:1
+✖ no released artifact still documents the previous version (0.168375ms)
+  AssertionError [ERR_ASSERTION]: package.json still names 0.4.6
+
+  true !== false
+
+      at TestContext.<anonymous> (file://<worktree>/work/dsh-you-should-know/test/release-consistency.test.js:69:12)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+--- EXIT CODE: 1 ---

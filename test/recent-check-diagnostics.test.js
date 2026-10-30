@@ -158,8 +158,8 @@ function statusRequest(sessionId) {
 
 function selfCheckPayload(diagnostics) {
   return buildSelfCheckPayload({
-    pluginVersion: '0.4.6',
-    installedVersion: '0.4.6',
+    pluginVersion: '0.5.0',
+    installedVersion: '0.5.0',
     diagnostics,
     handlers: ALL_HANDLERS,
     update: null,

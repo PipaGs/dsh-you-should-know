@@ -1,0 +1,50 @@
+PURPOSE: show that the redesigned gate still rejects an arbitrary jump and a major change, and still rejects a same-minor jump. Only CURRENT is changed per run; PREVIOUS stays 0.4.6.
+COMMAND: node --test test/release-consistency.test.js, run three times with a temporary CURRENT constant
+DATE_UTC: 2026-10-30T18:18:00Z
+DATE_LOCAL: 2026-10-30T21:18:00+0300 (MSK)
+HEAD: 992de15cd4c32b3f8c625a7cdb97ec2daa8dbe09 (the working tree is intentionally dirty: the gate rewrite is not committed yet)
+PRE-PROBE SHA256 of test/release-consistency.test.js: 234323602268fb4d596e02ae76505c3fda7fd44a46705e7b40da6f35db594e7e
+NOTE: the file was restored to that exact pre-probe state after every run; the post-probe SHA256 is printed at the end. Only authored prose here is this header; the runs below are raw.
+
+=== TEMPORARY CURRENT = 0.5.2 (PREVIOUS = 0.4.6) ===
+✖ the release version is one patch or one minor step over the previous release (0.903833ms)
+✖ package.json, PLUGIN_VERSION, and the README install address agree (0.443709ms)
+✖ every README and docs/reference self-check sample version is the released version (0.276ms)
+✔ no released artifact still documents the previous version (0.317583ms)
+ℹ tests 4
+ℹ pass 1
+ℹ fail 3
+✖ failing tests:
+✖ the release version is one patch or one minor step over the previous release (0.903833ms)
+  AssertionError [ERR_ASSERTION]: the release is exactly one step over the previous release: one patch step (0.4.7) or one minor step (0.5.0), not 0.5.2
+exit code: 1
+
+=== TEMPORARY CURRENT = 0.6.0 (PREVIOUS = 0.4.6) ===
+✖ the release version is one patch or one minor step over the previous release (0.904833ms)
+✖ package.json, PLUGIN_VERSION, and the README install address agree (0.431083ms)
+✖ every README and docs/reference self-check sample version is the released version (0.285208ms)
+✔ no released artifact still documents the previous version (0.292375ms)
+ℹ tests 4
+ℹ pass 1
+ℹ fail 3
+✖ failing tests:
+✖ the release version is one patch or one minor step over the previous release (0.904833ms)
+  AssertionError [ERR_ASSERTION]: the release is exactly one step over the previous release: one patch step (0.4.7) or one minor step (0.5.0), not 0.6.0
+exit code: 1
+
+=== TEMPORARY CURRENT = 1.0.0 (PREVIOUS = 0.4.6) ===
+✖ the release version is one patch or one minor step over the previous release (1.028042ms)
+✖ package.json, PLUGIN_VERSION, and the README install address agree (0.307125ms)
+✖ every README and docs/reference self-check sample version is the released version (0.2675ms)
+✔ no released artifact still documents the previous version (0.357667ms)
+ℹ tests 4
+ℹ pass 1
+ℹ fail 3
+✖ failing tests:
+✖ the release version is one patch or one minor step over the previous release (1.028042ms)
+  AssertionError [ERR_ASSERTION]: the major version does not change on this release
+exit code: 1
+
+=== restore check ===
+POST-PROBE SHA256 of test/release-consistency.test.js: 234323602268fb4d596e02ae76505c3fda7fd44a46705e7b40da6f35db594e7e
+the file is byte-identical to the pre-probe state

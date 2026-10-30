@@ -1,0 +1,162 @@
+COMMAND GROUP: version literal scan of the working tree at HEAD 992de15cd4c32b3f8c625a7cdb97ec2daa8dbe09
+DATE_UTC: 2026-10-30T18:16:24Z
+DATE_LOCAL: 2026-10-30T21:16:24+0300 (MSK)
+NOTE: git grep reads tracked files only. The new evidence directory is untracked, so it is not listed here; its own logs record the runs that produced it.
+
+### 1. git grep -nF 0.4.6 (tracked files, historical report directory excluded from this listing)
+docs/upstream/README.md:18:| Product version | 0.4.6 |
+docs/upstream/README.md:19:| Reference tag | v0.4.6 |
+docs/upstream/README.md:20:| Baseline head | 038dcdac90c4dbb32e18d21a21bfa56d83bbc6c2 (the main commit this ledger was verified against; it is the v0.4.6 release commit) |
+docs/upstream/README.md:21:| Release tag | annotated tag v0.4.6 (object 2dd722eb691493281aefa081ebfc722afb7d117f) points at 038dcdac90c4dbb32e18d21a21bfa56d83bbc6c2, verified 2026-10-30 with `git for-each-ref`, `git cat-file`, and `git ls-remote --tags`; it points at the baseline head |
+docs/upstream/README.md:23:| Shipped artifact | the v0.4.6 host and browser halves |
+docs/upstream/addendum-20261030-source-policy-deviation.md:86:- The product version stays 0.4.6. No product source, prompt, config, or
+docs/upstream/ledger.json:147:        "parityNotes": "Implemented as an out-of-tree DeepSeek Harness plugin with a separately configured reviewer model. The user-visible capability matches; the platform, the enable path, and the human-only isolation differ by design and were re-verified on the shipped v0.4.6 code on 2026-10-30.",
+docs/upstream/ledger.json:557:    "version": "0.4.6",
+docs/upstream/ledger.json:558:    "tag": "v0.4.6",
+test/release-consistency.test.js:38:const PREVIOUS = '0.4.6'
+test/upstream-ledger.test.js:631:test('the local baseline records v0.4.6 and the v0.4.3 predecessor without conflating them', () => {
+test/upstream-ledger.test.js:633:  assert.equal(ledger.local.version, '0.4.6')
+test/upstream-ledger.test.js:634:  assert.equal(ledger.local.tag, 'v0.4.6')
+
+### 2. git grep -cF 0.4.6 per tracked file, historical report directory included
+docs/harness-reports/stage4c-recent-check-diagnostics-20261030/evidence/check.txt:1
+docs/harness-reports/stage4c-recent-check-diagnostics-20261030/final-report.md:4
+docs/harness-reports/ysk-release-0.4.6-20261024/release-notes-v0.4.6.md:4
+docs/harness-reports/ysk-stage2-prompt-rtl-actions-20261030/evidence/actual-host-visual-evidence.txt:1
+docs/harness-reports/ysk-stage2-prompt-rtl-actions-20261030/evidence/check.txt:1
+docs/harness-reports/ysk-stage2-prompt-rtl-actions-20261030/evidence/run-meta.txt:1
+docs/harness-reports/ysk-stage2-prompt-rtl-actions-20261030/evidence/security-scan.txt:2
+docs/harness-reports/ysk-stage2-prompt-rtl-actions-20261030/evidence/test-run-baseline.txt:2
+docs/harness-reports/ysk-stage2-prompt-rtl-actions-20261030/evidence/test-run-full.txt:2
+docs/harness-reports/ysk-stage2-prompt-rtl-actions-20261030/evidence/upstream-provenance.txt:2
+docs/harness-reports/ysk-stage2-prompt-rtl-actions-20261030/final-report.md:5
+docs/harness-reports/ysk-upstream-behavior-parity-20261030/evidence/check-baseline.txt:1
+docs/harness-reports/ysk-upstream-behavior-parity-20261030/evidence/check.txt:1
+docs/harness-reports/ysk-upstream-behavior-parity-20261030/evidence/test-run-baseline-full.txt:2
+docs/harness-reports/ysk-upstream-behavior-parity-20261030/evidence/test-run-baseline-targeted.txt:1
+docs/harness-reports/ysk-upstream-behavior-parity-20261030/evidence/test-run-full.txt:2
+docs/harness-reports/ysk-upstream-behavior-parity-20261030/evidence/test-run-red.txt:1
+docs/harness-reports/ysk-upstream-behavior-parity-20261030/evidence/test-run-targeted.txt:1
+docs/harness-reports/ysk-upstream-behavior-parity-20261030/final-report.md:8
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/check.txt:1
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/invariants.txt:3
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/local-tag-identity.txt:9
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/test-run-baseline-full.txt:1
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/test-run-full.txt:2
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/test-run-targeted.txt:1
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/final-report.md:17
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/baseline-meta.txt:1
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-baseline.txt:1
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-followup.txt:1
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-privacy.txt:1
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-rev4.txt:1
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check.txt:1
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary-rev4.txt:1
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants-followup.txt:2
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants-privacy.txt:2
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants-rev4.txt:2
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants.txt:3
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-baseline-full.txt:2
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-baseline-targeted.txt:1
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-failing-regression.txt:1
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-full-followup.txt:2
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-full-privacy.txt:2
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-full-rev4.txt:2
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-full.txt:2
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-targeted-followup.txt:1
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-targeted-privacy.txt:1
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-targeted-rev4.txt:1
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-targeted.txt:1
+docs/harness-reports/ysk-upstream-source-policy-20261030/final-report.md:3
+docs/harness-reports/ysk-version-bump-0.4.6-20261023/evidence/01-baseline-npm-test.txt:2
+docs/harness-reports/ysk-version-bump-0.4.6-20261023/evidence/02-red-version.txt:10
+docs/harness-reports/ysk-version-bump-0.4.6-20261023/evidence/02b-red-version-filtered.txt:9
+docs/harness-reports/ysk-version-bump-0.4.6-20261023/evidence/03-green-version.txt:1
+docs/harness-reports/ysk-version-bump-0.4.6-20261023/evidence/04-npm-test-full.txt:2
+docs/harness-reports/ysk-version-bump-0.4.6-20261023/evidence/04b-npm-test-full-committed.txt:2
+docs/harness-reports/ysk-version-bump-0.4.6-20261023/evidence/05-npm-check.txt:2
+docs/harness-reports/ysk-version-bump-0.4.6-20261023/evidence/06-diff-check.txt:1
+docs/harness-reports/ysk-version-bump-0.4.6-20261023/evidence/07-version-scan.txt:31
+docs/harness-reports/ysk-version-bump-0.4.6-20261023/evidence/09-provenance.txt:6
+docs/harness-reports/ysk-version-bump-0.4.6-20261023/evidence/10-review-followups.txt:2
+docs/harness-reports/ysk-version-bump-0.4.6-20261023/evidence/11-security-scan.txt:2
+docs/harness-reports/ysk-version-bump-0.4.6-20261023/evidence/12-final-security-scan.txt:18
+docs/harness-reports/ysk-version-bump-0.4.6-20261023/final-report.md:22
+docs/upstream/README.md:5
+docs/upstream/addendum-20261030-source-policy-deviation.md:1
+docs/upstream/ledger.json:3
+test/release-consistency.test.js:1
+test/upstream-ledger.test.js:3
+
+### 3. git grep -nF 0.5.0 (tracked files, historical report directory excluded)
+README.md:11:Version `0.5.0`, MIT. Host and browser halves ship as plain JavaScript, so a `github:` install needs no build. The scope is intentionally small: a composer-adjacent note card with a bounded in-memory history, a Plugins settings card (strictness mode, additional instructions, custom prompt, update controls), a session-header mode and model override, one reviewer call per qualifying turn, and a per-session runtime that retries one transient failure, bounds the queue, and pauses on quota without losing the turn.
+README.md:76:dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.5.0
+README.md:194:  "pluginVersion": "0.5.0",
+README.md:195:  "runtimeVersion": "0.5.0",
+README.md:196:  "installedVersion": "0.5.0",
+README.md:199:  "update": { "currentVersion": "0.5.0", "updateAvailable": false, "automaticSupported": false }
+docs/reference.md:220:  "pluginVersion": "0.5.0",
+docs/reference.md:221:  "runtimeVersion": "0.5.0",
+docs/reference.md:222:  "installedVersion": "0.5.0",
+docs/reference.md:227:  "update": { "currentVersion": "0.5.0", "latestVersion": "", "latestTag": "", "installSpec": "", "source": "git-tags", "updateAvailable": false, "dismissed": false, "autoCheckUpdates": true, "updateBehavior": "ask-before-update", "automaticSupported": false, "lastAutoCheckDate": "", "lastCheckedAt": null, "lastResult": null }
+lib/index.js:36:export const PLUGIN_VERSION = '0.5.0'
+package.json:3:  "version": "0.5.0",
+test/client-ui.test.js:1961:  const newer = updateBackend({ latestTag: 'v0.5.0', latestVersion: '0.5.0', installSpec: 'github:PipaGs/dsh-you-should-know#v0.5.0', dismissed: false, dismissedVersion: 'v0.4.0' })
+test/invariant.test.js:189:  assert.equal(manifest.version, '0.5.0')
+test/plugin.test.js:399:  assert.equal(body.pluginVersion, '0.5.0')
+test/plugin.test.js:400:  assert.equal(body.runtimeVersion, '0.5.0')
+test/plugin.test.js:401:  assert.equal(body.installedVersion, '0.5.0')
+test/recent-check-diagnostics.test.js:161:    pluginVersion: '0.5.0',
+test/recent-check-diagnostics.test.js:162:    installedVersion: '0.5.0',
+test/release-consistency.test.js:37:const CURRENT = '0.5.0'
+test/update-route.test.js:257:  assert.equal(manifest.version, '0.5.0')
+test/update.test.js:139:  assert.equal(parseRemoteTags(tagListing(['v0.4.0', 'v0.4.1', 'v0.5.0']), { maxTagLines: 2 }), null)
+test/update.test.js:336:  const tooManyLines = checkerHarness({ shellExec: async () => shellResult(tagListing(['v0.4.0', 'v0.4.1', 'v0.5.0'])), maxTagLines: 2 })
+test/update.test.js:535:    lastSeenLatestVersion: 'v0.5.0',
+test/update.test.js:538:  assert.equal(fresh.lastSeenLatestVersion, 'v0.5.0')
+
+### 4. git grep -cF 0.5.0 per tracked file
+README.md:6
+docs/harness-reports/ysk-release-prep-0.4.4/final-report.md:2
+docs/harness-reports/ysk-stage2-prompt-rtl-actions-20261030/final-report.md:1
+docs/harness-reports/ysk-upstream-ledger-correction-20261030/final-report.md:1
+docs/reference.md:4
+lib/index.js:1
+package.json:1
+test/client-ui.test.js:1
+test/invariant.test.js:1
+test/plugin.test.js:3
+test/recent-check-diagnostics.test.js:2
+test/release-consistency.test.js:1
+test/update-route.test.js:1
+test/update.test.js:4
+
+### 5. git tag --list | tail -6
+v0.4.0
+v0.4.1
+v0.4.2
+v0.4.3
+v0.4.4
+v0.4.6
+
+### 6. explicit v0.5.0 tag check
+refs/tags/v0.5.0 absent
+git tag --list 'v0.5.0' output: []
+count of v0.5.0 tags: 0
+
+### 7. remaining 0.4.6 occurrences outside the current release surfaces
+(none)
+
+### 8. expected historical holders
+docs/upstream/README.md:5
+docs/upstream/addendum-20261030-source-policy-deviation.md:1
+docs/upstream/ledger.json:3
+test/release-consistency.test.js:1
+test/upstream-ledger.test.js:3
+
+### 9. interpretation
+- package.json, lib/index.js, README.md, docs/reference.md, test/invariant.test.js, test/plugin.test.js, test/update-route.test.js, and test/recent-check-diagnostics.test.js carry 0.5.0 only.
+- test/release-consistency.test.js names 0.4.6 once as PREVIOUS, which is the gate baseline, not a released artifact.
+- test/upstream-ledger.test.js and docs/upstream keep 0.4.6 as the recorded upstream baseline; those files are historical and unchanged.
+- docs/harness-reports keeps every earlier version literal in its historical reports; those files are unchanged.
+- No v0.5.0 tag exists, and this task created none.
