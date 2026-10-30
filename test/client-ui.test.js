@@ -2291,3 +2291,118 @@ test('an unavailable installed version is not guessed into a restart notice', as
   assert.equal(textOf(view.output).includes('Restart required'), false)
   view.unmount()
 })
+
+// --- RTL human text and the deliberate plain-text fallback --------------------
+// The card and history text carry dir="auto" so a human RTL note starts at the
+// correct edge. The composer draft deliberately stays plain text: invisible bidi
+// isolates would be submitted to the primary agent on Enter, and the host
+// composer rendering is outside this repository.
+
+const HEBREW_NOTE = 'הקובץ lib/runtime.js:42 לא נטען כי הבקשה נכשלה.'
+const HEBREW_EXPLANATION = 'הבקשה נכשלה לפני שהקובץ נטען, ולכן המסך נשאר ריק.'
+const ARABIC_NOTE = 'الملف lib/runtime.js:42 لم يتم تحميله لأن الطلب فشل.'
+const ARABIC_EXPLANATION = 'فشل الطلب قبل تحميل الملف، لذلك بقيت الشاشة فارغة.'
+
+/** The first div whose exact rendered text equals one human string. */
+function findByExactText(node, text) {
+  let found = null
+  walk(node, (entry) => {
+    if (found !== null || typeof entry !== 'object') return
+    if (entry.type !== 'div') return
+    if (textOf(entry) === text) found = entry
+  })
+  return found
+}
+
+test('a Hebrew human note and its explanation declare their own base direction', async () => {
+  const env = await loadBundle({
+    backend: notesBackend([{ id: 'n-he', note: HEBREW_NOTE, importance: 'high', createdAt: 1, explanation: HEBREW_EXPLANATION }]),
+    allowIntervals: true,
+  })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1' })
+  await flushAsync()
+  const note = findByExactText(view.output, HEBREW_NOTE)
+  assert.ok(note, 'the Hebrew note renders in its own text element')
+  assert.equal(note.props.dir, 'auto', 'the human note declares dir=auto')
+  buttonByText(view.output, 'Explain').props.onClick()
+  await flushAsync()
+  const explanation = findByAria(view.output, 'Explanation')
+  assert.ok(explanation, 'the cached Hebrew explanation renders inline')
+  assert.equal(explanation.props.dir, 'auto', 'the explanation declares dir=auto')
+  view.unmount()
+})
+
+test('an Arabic human note and its explanation declare their own base direction', async () => {
+  const env = await loadBundle({
+    backend: notesBackend([{ id: 'n-ar', note: ARABIC_NOTE, importance: 'high', createdAt: 1, explanation: ARABIC_EXPLANATION }]),
+    allowIntervals: true,
+  })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1' })
+  await flushAsync()
+  const note = findByExactText(view.output, ARABIC_NOTE)
+  assert.ok(note, 'the Arabic note renders in its own text element')
+  assert.equal(note.props.dir, 'auto', 'the human note declares dir=auto')
+  buttonByText(view.output, 'Explain').props.onClick()
+  await flushAsync()
+  const explanation = findByAria(view.output, 'Explanation')
+  assert.ok(explanation, 'the cached Arabic explanation renders inline')
+  assert.equal(explanation.props.dir, 'auto', 'the explanation declares dir=auto')
+  view.unmount()
+})
+
+test('a Hebrew history entry declares its own base direction', async () => {
+  const entry = { id: 'n-he', note: HEBREW_NOTE, importance: 'high', createdAt: 1, resolved: true, resolution: 'thanks' }
+  const env = await loadBundle({
+    backend: historyBackend({ notes: [], history: [entry] }),
+    allowIntervals: true,
+  })
+  const view = env.runtime.mount(env.dockComponent().component, { sessionId: 's-1' })
+  await flushAsync()
+  buttonByText(view.output, 'History').props.onClick()
+  await flushAsync()
+  const note = findByExactText(view.output, HEBREW_NOTE)
+  assert.ok(note, 'the history note renders in its own text element')
+  assert.equal(note.props.dir, 'auto', 'the history note declares dir=auto')
+  view.unmount()
+})
+
+test('an actionless RTL note keeps the deliberate plain-text fallback draft', async () => {
+  for (const entry of [
+    { sessionId: 's-he', note: HEBREW_NOTE },
+    { sessionId: 's-ar', note: ARABIC_NOTE },
+  ]) {
+    const composer = createComposer(entry.sessionId)
+    const actionless = { id: entry.sessionId, note: entry.note, importance: 'high', createdAt: 1 }
+    const { view } = await mountNotes([actionless], composer)
+    pressControl('Add to chat', buttonByText(view.output, 'Add to chat'), composer)
+    assert.equal(composer.draft, 'Fix this reviewer finding: ' + entry.note, 'the fallback wrapper stays byte-identical')
+    assert.equal(/[\u2068\u2069]/.test(composer.draft), false, 'the draft carries no bidi isolate controls')
+    assert.deepEqual(composer.sent, [], 'Add to chat never sends')
+    view.unmount()
+  }
+})
+
+test('an action-carrying RTL note still inserts exactly its action', async () => {
+  const composer = createComposer('s-he-action')
+  const note = { id: 'n-he-action', note: HEBREW_NOTE, importance: 'high', createdAt: 1, action: NOTE_ACTION.action }
+  const { view } = await mountNotes([note], composer)
+  pressControl('Add to chat', buttonByText(view.output, 'Add to chat'), composer)
+  assert.equal(composer.draft, NOTE_ACTION.action, 'the action is the whole draft')
+  assert.equal(/[\u2068\u2069]/.test(composer.draft), false, 'the action carries no bidi isolate controls')
+  assert.equal(composer.draft.includes(HEBREW_NOTE), false, 'the human note is never inserted')
+  assert.deepEqual(composer.sent, [])
+  view.unmount()
+})
+
+test('the human-only card actions never write or send a composer draft', async () => {
+  const note = { id: 'n-human', note: 'One important thing.', importance: 'high', createdAt: 1, explanation: 'Cached reasoning.' }
+  for (const label of ['Knew it', 'Thanks', 'Explain', 'Dismiss']) {
+    const composer = createComposer('s-1')
+    const { view } = await mountNotes([note], composer)
+    pressControl(label, buttonByText(view.output, label), composer)
+    await flushAsync()
+    assert.equal(composer.draft, '', label + ' must not write a composer draft')
+    assert.deepEqual(composer.sent, [], label + ' must not send')
+    view.unmount()
+  }
+})

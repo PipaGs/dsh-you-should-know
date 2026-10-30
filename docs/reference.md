@@ -111,6 +111,8 @@ The completed turn is the episode boundary. The plugin reads only the allowliste
 
 Internal trusted prompts, JSON keys, and importance values are always English regardless.
 
+The note card and history set `dir="auto"` on human note and explanation text, so a right-to-left note reads from its correct edge; the English labels, actions, source paths, and the plain-text composer draft inherit the host direction.
+
 ## Status and self-check routes
 
 ### Status route
