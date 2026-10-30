@@ -6,7 +6,7 @@
 
 **Branch:** fix/v0.5.0-functional-defects-20261030
 
-**Product head:** f6a9ac9be212e46f8aa4b9eeafd41275d88035af (product version 0.5.0, unchanged)
+**Product head:** 611369c2b39d99d2c181d315e94b9d964cdb66aa (product version 0.5.0, unchanged)
 
 **PR:** added in the handoff commit that follows this report
 
@@ -38,7 +38,7 @@ untracked `.rollout-restart-verify.log` in the main worktree is untouched.
 
 | ID | Required outcome | Evidence | Status |
 | --- | --- | --- | --- |
-| D1 | A source path must appear verbatim as a whole token in the real conversation excerpt; the capsule cannot ground it; an unmarked line is dropped; a fabricated path drops the reply | `test/core.test.js`, `test/engine.test.js`; red on v0.5.0; green on the fix | PASS |
+| D1 | A source path must appear verbatim as a whole token in the real conversation excerpt; the capsule cannot ground it; role labels cannot ground it; a spaced-path prefix/suffix, a line range, or an unmarked line never counts; a fabricated path drops the reply | `test/core.test.js`, `test/engine.test.js`; red on v0.5.0; green on the fix | PASS |
 | D2 | A `because` must appear verbatim in the conversation excerpt only; the episode capsule/header never grounds it; valid RTL quotations stay valid | `test/engine.test.js`; red on v0.5.0; green on the fix | PASS |
 | D3 | A never-settling discovery or capability lookup settles with a finite bounded outcome, clears `inFlight`, records a terminal outcome, and lets the next turn retry; no cache poisoning; no extra call | `test/route-deadline.test.js`; red on v0.5.0; green on the fix | PASS |
 | D4 | Disabling the reviewer hides and clears recent-check records; re-enabling starts empty even when an aborted review settles after a quick re-enable; notes, dedupe, and known fingerprints survive; records stay `{at,turn,outcome}` | `test/recent-check-disable.test.js` (including the disable -> re-enable -> settle epoch case), `test/recent-check-diagnostics.test.js`; red on v0.5.0; green on the fix | PASS |
@@ -54,7 +54,7 @@ The final regression files were copied onto a clean archive of tag `v0.5.0`
 and run without product changes:
 
 - command: `node --test --test-timeout=5000 test/core.test.js test/engine.test.js test/client-ui.test.js test/route-deadline.test.js test/recent-check-disable.test.js`
-- result: exit 1, tests 261, pass 231, fail 30
+- result: exit 1, tests 262, pass 231, fail 31
 - failures include invented source grounding, capsule-quoted `because`,
   traversal links, bidi controls, hung discovery, and retained diagnostics
 
@@ -91,11 +91,11 @@ Full names: `evidence/test-run-red.txt`.
 
 | Check | Result |
 | --- | --- |
-| `npm test` on the fixed tree | 684 tests, 684 pass, 0 fail, exit 0 |
+| `npm test` on the fixed tree | 685 tests, 685 pass, 0 fail, exit 0 |
 | `npm run check` | exit 0 |
 | `git diff --check` | exit 0 |
 | Product version | 0.5.0, unchanged |
-| New regression tests | 28 (14 for D1/D2/D5/D6, 10 for D3/D4, 4 review-round regressions) |
+| New regression tests | 29 (14 for D1/D2/D5/D6, 10 for D3/D4, 5 review-round regressions) |
 
 Raw summaries: `evidence/test-run-full.txt`, `evidence/check.txt`.
 
@@ -104,8 +104,9 @@ Raw summaries: `evidence/test-run-full.txt`, `evidence/check.txt`.
 **Target:** DeepSeek Harness desktop app `0.2.1-rc.5` (same version from
 `Info.plist` and `dsh --version`), web host booted from a temporary isolated
 `DSH_HOME` created from the shipped web template. The plugin package in that
-profile is a symlink to the task worktree at product head `f6a9ac9`; its
-`package.json` version is 0.5.0. No user profile, credential, session, or
+profile is a symlink to the task worktree at capture head `f6a9ac9`; the final
+product head `611369c` changes only host grounding code, so the client visuals
+are identical. Its `package.json` version is 0.5.0. No user profile, credential, session, or
 installed plugin file was modified; the desktop profile manifest was read only
 to confirm the installed dependency.
 
@@ -173,8 +174,8 @@ Screenshot SHA-256 values and the structured interaction states are in
 ## 9. Independent review round
 
 A fresh DSH reviewer inspected the range base..product head and returned
-BLOCKING with five findings. All were fixed in `f6a9ac9` with four new
-regression tests:
+BLOCKING with five findings. These landed in `f6a9ac9` with four new
+regression tests; the route-label fix extends an existing test:
 
 1. HIGH: the synthetic `[user]`/`[assistant]` prompt labels could ground a
    `source.path` (`assistant`, `user`) or a `because`. Grounding now uses only
@@ -197,6 +198,17 @@ The reviewer's evidence concerns were also addressed: the global status route
 `actual-host-status.json`, and the desktop long-note wrap flag is in
 `actual-host-actions.json`. Host-side network claims that have no committed
 request log are stated as limitations, not as proven facts.
+
+A second verification round confirmed the label-free grounding, the
+recent-check epoch, the route label, the Windows test, and the `%`/line-marker
+boundaries. It found two remaining spaced-path cases and three evidence
+mismatches. `611369c` makes the spaced rule symmetric (a spaced prefix or
+suffix never grounds a shorter path), treats a line range as a continuation of
+the marker, and keeps a path followed by a version or punctuation grounded.
+The evidence files now carry the capture head `f6a9ac9`, the final product head
+`611369c`, and the capture times `19:57Z-20:02Z`. The final head differs from
+the capture head only in host-side grounding code; client rendering is
+unchanged, so the screenshots remain valid for this UI.
 
 ## 10. Process notes
 

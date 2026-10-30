@@ -1,9 +1,11 @@
 ACTUAL DSH HOST PROVENANCE
-DATE: 2026-10-30 (Europe/Moscow); capture 19:39Z-19:44Z
+DATE: 2026-10-30 (Europe/Moscow); capture 19:57Z-20:02Z
 HOST: DeepSeek Harness desktop app 0.2.1-rc.5 (CFBundleShortVersionString 0.2.1-rc.5)
 CLI: dsh --version -> 0.2.1-rc.5
-PLUGIN: dsh-you-should-know 0.5.0 loaded from the task worktree at product head
-  b572dbd via a node_modules symlink in a temporary profile
+PLUGIN: dsh-you-should-know 0.5.0 loaded from the task worktree at capture head
+  f6a9ac9 via a node_modules symlink in a temporary profile. The final product
+  head 611369c changes only host-side grounding code; client rendering is
+  unchanged, so these captures remain valid for the UI.
 PROFILE: a temporary DSH_HOME under a private temp directory; the profile was
   created from the shipped web template. No user profile, desktop credential,
   cookie, session, or installed plugin file was modified. The desktop profile
@@ -21,6 +23,6 @@ SELF-CHECK (authenticated, through the real host):
 NO LIVE MODEL CALL: no API key or provider credential was configured, the
   global status route reported route=null (actual-host-status.json globalStatus),
   and no reviewer or primary model stream ran. The browser resource log
-  contained only origin http://127.0.0.1:51509 (250 entries); no host request
+  contained only origin http://127.0.0.1:51509; no host request
   log is committed, and the host's documented update checker may have run its
   own git ls-remote, which is not a model call.
