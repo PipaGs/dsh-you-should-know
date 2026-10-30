@@ -1441,6 +1441,12 @@ test('a source must name a whole path token in the conversation excerpt', () => 
   assert.equal(groundVerdict(withSource('a.js'), 'data.js'), null, 'a suffix of a longer filename is not an exact path')
   assert.equal(groundVerdict(withSource('a.js'), 'a.jsx'), null, 'a longer token after the path is rejected')
   assert.equal(groundVerdict(withSource('src/a.js'), ''), null, 'a source without an excerpt is never grounded')
+  assert.equal(groundVerdict(withSource('file.js'), 'The fix is in src/my file.js and then.'), null, 'a spaced path suffix is not a standalone token')
+  assert.equal(groundVerdict(withSource('src/my'), 'The fix is in src/my dir/file.js and then.'), null, 'a spaced directory continuation is not the exact path')
+  assert.equal(groundVerdict(withSource('dir/file.js'), 'src/my dir/file.js'), null, 'a spaced path suffix is not a standalone token')
+  assert.deepEqual(groundVerdict(withSource('src/my file.js'), 'The fix is in src/my file.js and then.'), withSource('src/my file.js'), 'the full spaced path still grounds in a sentence')
+  assert.deepEqual(groundVerdict(withSource('src/a.js'), 'see src/a.js v2.0'), withSource('src/a.js'), 'a version word after a path is not a continuation')
+  assert.deepEqual(groundVerdict(withSource('src/a.js'), 'see src/a.js!'), withSource('src/a.js'), 'punctuation after a path is a boundary')
 })
 
 test('a role label never grounds a source path or a quoted basis', async () => {
@@ -1482,8 +1488,24 @@ test('a line marker rejects a trailing continuation', () => {
   assert.deepEqual(groundVerdict(sourceAt('src/a.js', 42), 'src/a.js:42x'), pathOnly('src/a.js'), ':42x is not a line marker')
   assert.deepEqual(groundVerdict(sourceAt('src/a.js', 42), 'src/a.js#L42x'), pathOnly('src/a.js'), '#L42x is not a line marker')
   assert.deepEqual(groundVerdict(sourceAt('src/a.js', 42), 'src/a.js:42_'), pathOnly('src/a.js'), ':42_ is not a line marker')
+  assert.deepEqual(groundVerdict(sourceAt('src/a.js', 42), 'src/a.js:42-3'), pathOnly('src/a.js'), ':42-3 is a line range, not a marker')
+  assert.deepEqual(groundVerdict(sourceAt('src/a.js', 42), 'src/a.js:42/3'), pathOnly('src/a.js'), ':42/3 is not a line marker')
   assert.deepEqual(groundVerdict(sourceAt('src/a.js', 42), 'src/a.js:42.'), sourceAt('src/a.js', 42), 'a sentence period still ends the marker')
   assert.deepEqual(groundVerdict(sourceAt('src/a.js', 42), 'src/a.js#L42.'), sourceAt('src/a.js', 42), 'a sentence period still ends the marker')
+})
+
+test('a spaced path and a line range never ground an end-to-end source', async () => {
+  const forged = JSON.stringify({ note: 'N', importance: 'high', source: { path: 'file.js', line: 42 } })
+  const { engine } = engineWith([forged], { minDeltaChars: 0, cooldownTurns: 1 })
+  const dropped = await observeAndSettle(engine, sessionWith('d1-spaced-forged', [{ turn: 1, answer: 'The fix is in src/my file.js:42 and then.' }]))
+  assert.equal(dropped.status, 'silent', 'a spaced path suffix cannot ground a source')
+  assert.equal(engine.notes('d1-spaced-forged').length, 0)
+
+  const range = JSON.stringify({ note: 'N', importance: 'high', source: { path: 'src/a.js', line: 42 } })
+  const { engine: rangeEngine } = engineWith([range], { minDeltaChars: 0, cooldownTurns: 1 })
+  const noted = await observeAndSettle(rangeEngine, sessionWith('d1-line-range', [{ turn: 1, answer: 'The fix is in src/a.js:42-3.' }]))
+  assert.equal(noted.status, 'noted')
+  assert.deepEqual(rangeEngine.notes('d1-line-range')[0].source, { path: 'src/a.js' }, 'a line range drops only the line')
 })
 
 test('a source path is grounded in the conversation only, never in the capsule', async () => {
