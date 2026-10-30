@@ -222,7 +222,10 @@ raw source path could become an Open file link. `212179b` validates the raw path
 before stripping. A control-carrying path now renders as stripped plain text
 with no link, resource URL, or draft `File:` line; a safe Hebrew-letter path
 still links and addresses normally. The card, the seam, and the Add to chat
-draft each have a regression.
+draft each have a regression. The third verification round returned CLEAR. The
+host fixture has a bidi note and action but no bidi source path, so the new
+source-path fail-closed behavior is unit-tested rather than host-captured; the
+report states this explicitly.
 
 ## 10. Process notes
 
