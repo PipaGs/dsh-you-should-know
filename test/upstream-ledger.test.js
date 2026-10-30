@@ -876,6 +876,42 @@ test('the committed docs capture evidence matches the ledger provenance', () => 
   }
 })
 
+test('the chat handoff parity note records the action-first content difference', () => {
+  const ledger = readLedger()
+  const item = ledger.upstream.items.find((candidate) => candidate.id === 'B-YSK-chat-in-main-session')
+  assert.ok(item, 'the chat handoff item exists')
+  assert.equal(item.localStatus, 'adapted', 'the chat handoff stays a deliberate adaptation')
+  assert.match(item.upstreamQuote, /quotes the note/i, 'the documented behavior quotes the note')
+  assert.match(item.parityNotes, /note\.action/, 'the local action-first draft is named')
+  assert.match(item.parityNotes, /draft omits the finding prose/, 'the note content difference is named')
+  assert.match(item.parityNotes, /leaves the active card and remains in History/, 'the note lifecycle is named')
+  assert.match(item.parityNotes, /never sends/, 'the draft-only rule is named')
+  assert.match(item.parityNotes, /human submits it/, 'the human-only submission is named')
+  assert.doesNotMatch(item.parityNotes, /keeps the human note on the card/i, 'the note does not stay on the active card')
+  assert.doesNotMatch(item.parityNotes, /human note stays on the card/i, 'the note does not stay on the active card')
+  assert.doesNotMatch(
+    item.parityNotes,
+    /quotes the human(?:-readable)? note into the (?:composer|draft)/i,
+    'the local draft is not a note quote',
+  )
+  const clientTest = readFileSync(join(repoRoot, 'test/client-ui.test.js'), 'utf8')
+  assert.match(
+    clientTest,
+    /assert\.equal\(composer\.draft,\s*NOTE_ACTION_DRAFT/,
+    'the client test asserts the action is the draft',
+  )
+  assert.match(
+    clientTest,
+    /assert\.equal\(composer\.draft\.includes\(NOTE_ACTION\.note\),\s*false/,
+    'the client test asserts the note is not inserted',
+  )
+  assert.match(
+    clientTest,
+    /assert\.deepEqual\(composer\.sent,\s*\[\]/,
+    'the client test asserts the draft is not sent',
+  )
+})
+
 test('historical 2026-10-14 evidence and previous task reports are unchanged', () => {
   assert.equal(sha256File(addendumPath), '1355c524b48e01a6d870fd010ccdcc4456c5070991f8ded2b2ff9035776eedc7')
   assert.equal(sha256File(rawEvidencePath), 'c5fac2b1502d8a221ec4a7e229012c645f84be0d9310791173af84031e809d7a')

@@ -1,6 +1,3 @@
 pages=2
 evidence_bytes=11064
-page=claude-code-docs-interactive-mode-20261030 bytes=595268 excerpts=16 max_excerpt=181 full_page_fields=[]
-page=claude-code-docs-mods-overview-20261030 bytes=338853 excerpts=3 max_excerpt=98 full_page_fields=[]
-capture_method=curl -sS -L against the exact page URL without an anchor; sha256 over the exact HTML response bytes; no response body is committed.
 result=PASS

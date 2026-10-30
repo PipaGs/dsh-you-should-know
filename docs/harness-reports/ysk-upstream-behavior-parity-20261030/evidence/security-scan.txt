@@ -18,5 +18,4 @@ file=docs/upstream/workflow.md
 file=test/task-evidence-paths.test.js
 file=test/upstream-ledger.test.js
 offender_count=0
-note=test fixtures allow the synthetic userinfo URL and pattern literals; they are not credentials
 result=PASS

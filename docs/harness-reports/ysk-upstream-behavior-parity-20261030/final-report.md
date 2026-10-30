@@ -91,7 +91,7 @@ The docs pages never supply a release version, a publication date, or a
 | B-YSK-cost-and-prompt-cache | Reuses the session prompt cache; checks count toward usage or cost | not-applicable | rejected | provider cache and billing are outside the plugin seam; local budget and token cap |
 | B-YSK-note-surface-and-choices | Short note above the prompt with Learn more, Knew this already, and Dismiss | partial | deferred to a future note-choices task | card with Explain, Knew it, Thanks, Add to chat, Dismiss; no Understood sub-surface |
 | B-YSK-keyboard-shortcuts | Digit alone in an empty prompt selects a choice | missing | deferred to a future keyboard-accessibility task | pointer and focus buttons only |
-| B-YSK-chat-in-main-session | Quotes the note into the prompt; the main agent sees it only after send | adapted | applicable | Add to chat writes an action draft and never sends |
+| B-YSK-chat-in-main-session | Quotes the note into the prompt; the main agent sees it only after send | adapted | applicable | action-first draft; with an action present, the finding prose is not inserted; the note moves to History; the draft is never sent |
 | B-YSK-note-memory | Recent notes and known topics persist across sessions and are listed to the side agent | partial | deferred to a future persistence task | in-memory per-session state; no file or browser storage |
 | B-YSK-debug-check-visibility | A debug variable shows checks as they happen | partial | deferred to a future diagnostics task | bounded status counters and self-check only |
 | B-YSK-post-dismiss-turn-off | A transient Turn off suggestions action after Dismiss, clearing after 20 seconds | missing | deferred to a future UI task | Dismiss only resolves the note |
@@ -107,6 +107,20 @@ Every `partial` or `missing` item, and every `deferred` item, carries a
 testable acceptance and its own future scope. `adapted` and
 `not-applicable` items carry a grounded reason. No behavior is forced into the
 implementation.
+
+`B-YSK-chat-in-main-session` is an intentional action-first adaptation, not an
+exact note quote. Upstream Chat in main session puts the human-readable note
+into the prompt input. Local Add to chat prefers the agent-facing
+`note.action`, so, when an action is present, the draft omits the finding
+prose; the resolved note leaves
+the active card and remains in History. A `File:` line is added only when the
+action does not already name the source, and only a finding without an action
+falls back to an imperative wrapper around the note. The draft is written with
+`setDraft`, never sent, and reaches the main agent only if the human submits
+it. `test/client-ui.test.js` asserts that the action is the draft, the finding
+prose is not inserted, and no message is sent. The adapted status is therefore
+justified by a deliberate action-first deviation, not by claiming an exact note
+quote.
 
 ## 5. Existing item updates
 
@@ -153,8 +167,8 @@ The two earlier unknowns (selection algorithm and data handling) are preserved.
 
 | Check | Baseline | Final | Exit |
 | --- | --- | --- | --- |
-| node --test test/upstream-ledger.test.js | 24 pass, 0 fail | 29 pass, 0 fail | 0 |
-| npm test | 629 pass, 0 fail | 634 pass, 0 fail | 0 |
+| node --test test/upstream-ledger.test.js | 24 pass, 0 fail | 30 pass, 0 fail | 0 |
+| npm test | 629 pass, 0 fail | 635 pass, 0 fail | 0 |
 | node --test test/task-evidence-paths.test.js | 1 pass, 0 fail | 1 pass, 0 fail | 0 |
 | npm run check | exit 0 | exit 0 | 0 |
 | git diff --check | exit 0 | exit 0 | 0 |
@@ -173,7 +187,10 @@ The new tests prove that:
   `dedupeAgainst`;
 - the six allowed statuses and the acceptance rules still hold;
 - the docs capture evidence matches the ledger provenance and the item quotes
-  are traceable to short captured excerpts.
+  are traceable to short captured excerpts;
+- the chat handoff parity note records the action-first draft, the finding
+  prose that is not inserted, the note moving to History, and the human-only
+  send; the cited client test asserts those facts.
 
 Raw output is in the evidence directory.
 

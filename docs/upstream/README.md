@@ -143,10 +143,21 @@ or a publication date.
 | B-YSK-cost-and-prompt-cache | Checks reuse the session prompt cache and count toward usage or cost | not-applicable | rejected (provider cache and billing are outside the plugin seam) |
 | B-YSK-note-surface-and-choices | A short note above the prompt offers Learn more with Understood, Knew this already, and Dismiss | partial | deferred (Explain, Knew it, Thanks, Add to chat, Dismiss; no Understood sub-surface) |
 | B-YSK-keyboard-shortcuts | A choice is selected by typing its digit alone into an empty prompt | missing | deferred (pointer and focus controls only) |
-| B-YSK-chat-in-main-session | Chat in main session quotes the note into the prompt; the main agent sees it only after send | adapted | applicable (Add to chat writes an action draft and never sends) |
+| B-YSK-chat-in-main-session | Chat in main session quotes the note into the prompt; the main agent sees it only after send | adapted | applicable (action-first draft; with an action present, the finding prose is not inserted; the note moves to History; the draft is never sent) |
 | B-YSK-note-memory | Recent notes and known topics persist across sessions and are listed to the side agent | partial | deferred (in-memory per-session state; no file or browser storage) |
 | B-YSK-debug-check-visibility | A debug environment variable shows checks as they happen | partial | deferred (bounded status counters and self-check only) |
 | B-YSK-post-dismiss-turn-off | A transient Turn off suggestions action appears after Dismiss and clears after 20 seconds | missing | deferred (Dismiss only resolves the note) |
+
+`B-YSK-chat-in-main-session` is an intentional action-first adaptation, not an
+exact note quote. Upstream Chat in main session puts the human-readable note
+into the prompt input. Local Add to chat prefers the agent-facing
+`note.action`, so, when an action is present, the draft omits the finding
+prose; the resolved note leaves
+the active card and remains in History. A `File:` line is added only when the
+action does not already name the source. A finding without an action falls back
+to an imperative wrapper around the note. The draft is written with
+`setDraft`, never sent, and reaches the main agent only if the human submits it
+(`lib/client.js`, `test/client-ui.test.js`).
 
 | Documentation source | Capture |
 | --- | --- |

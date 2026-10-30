@@ -458,7 +458,7 @@
           "README.md"
         ],
         "disposition": "applicable",
-        "parityNotes": "lib/client.js 'Add to chat' writes an agent-facing draft through `inputActions.setDraft` and never sends (lines 466-470); test/client-ui.test.js asserts one draft write and no send, and test/invariant.test.js asserts no delivery path to the primary agent. README.md documents the draft-only rule. The local label is Add to chat rather than Chat in main session, and the main agent sees the text only after the human sends, which matches the documented handoff.",
+        "parityNotes": "Upstream 'Chat in main session' quotes the human-readable note into the prompt input. Local 'Add to chat' is action-first, not a note quote: lib/client.js `noteDraft` prefers the agent-facing `note.action` when present, so, when an action is present, the draft omits the finding prose; the resolved note leaves the active card and remains in History. A `File:` line is appended only when the action does not already name the source, and only a finding without an action falls back to an imperative wrapper around `note.note`. `addNoteToDraft` writes the result through `inputActions.setDraft` and never sends it; test/client-ui.test.js asserts that the action is the draft, the finding prose is not inserted, and no message is sent. This is an intentional action-first adaptation for a human-in-the-loop repair draft, not an exact quote of the note. The local label is Add to chat rather than Chat in main session, and the main agent sees the draft only if the human submits it.",
         "dedupeAgainst": [
           "U-2.1.287-builtin-side-agent"
         ],
