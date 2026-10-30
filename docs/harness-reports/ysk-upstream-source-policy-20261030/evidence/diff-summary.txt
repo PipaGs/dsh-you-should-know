@@ -1,0 +1,35 @@
+$ git diff --stat
+ docs/upstream/README.md      |  59 +++++-
+ docs/upstream/ledger.json    | 120 ++++++++++-
+ docs/upstream/workflow.md    | 113 ++++++++--
+ test/upstream-ledger.test.js | 481 +++++++++++++++++++++++++++++++++++++++----
+ 4 files changed, 699 insertions(+), 74 deletions(-)
+
+$ git diff --numstat
+53	6	docs/upstream/README.md
+111	9	docs/upstream/ledger.json
+98	15	docs/upstream/workflow.md
+437	44	test/upstream-ledger.test.js
+
+$ git diff --name-only
+docs/upstream/README.md
+docs/upstream/ledger.json
+docs/upstream/workflow.md
+test/upstream-ledger.test.js
+
+$ git ls-files --others --exclude-standard
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/artifacts-hashes.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/baseline-meta.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check-baseline.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/check.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/content-scan.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-check.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/diff-summary.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/invariants.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/security-scan.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-baseline-full.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-baseline-targeted.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-full.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/evidence/test-run-targeted.txt
+docs/harness-reports/ysk-upstream-source-policy-20261030/final-report.md
+exit=0

@@ -14,6 +14,8 @@
 //   * sources must be official and pinned, and an outage is "unknown", never
 //     "no change";
 //   * an item date must come from an immutable release, not from the fetch day;
+//   * official code.claude.com docs pages are behavior evidence only: no date,
+//     no version, no publishedAt, and a documented lastModified is not proof;
 //   * the one 2026-10-14 docs-page source stays a recorded historical deviation
 //     and is not reused as an active source;
 //   * the coverage boundary is pinned and does not claim behavior stability.
@@ -23,6 +25,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync, existsSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
+import { createHash } from 'node:crypto'
 import { fileURLToPath } from 'node:url'
 import { dirname, join, resolve } from 'node:path'
 
@@ -31,13 +34,17 @@ const ledgerPath = join(repoRoot, 'docs/upstream/ledger.json')
 const workflowPath = join(repoRoot, 'docs/upstream/workflow.md')
 const baselinePath = join(repoRoot, 'docs/upstream/README.md')
 const addendumPath = join(repoRoot, 'docs/upstream/addendum-20261030-source-policy-deviation.md')
+const rawEvidencePath = join(repoRoot, 'docs/upstream/evidence/claude-code-upstream-20261014.json')
 const correctionEvidencePath = join(repoRoot, 'docs/harness-reports/ysk-upstream-ledger-correction-20261030/evidence/github-releases-2.1.287-2.1.312.json')
 
 const LOCAL_STATUSES = new Set(['equivalent', 'adapted', 'partial', 'missing', 'not-applicable', 'unknown'])
 const DISPOSITIONS = new Set(['applicable', 'deferred', 'rejected'])
-const GITHUB_SOURCE_HOST = 'https://github.com/anthropics/claude-code/'
-const HISTORICAL_DOCS_HOST = 'https://code.claude.com/docs/'
+const DOCS_ALLOWLIST = { scheme: 'https', host: 'code.claude.com', pathPrefix: '/docs/' }
+const RELEASE_URL_PREFIX = 'https://github.com/anthropics/claude-code/releases/tag/'
+const CHANGELOG_URL_PATTERN = /^https:\/\/github\.com\/anthropics\/claude-code\/blob\/([0-9a-f]{40})\/CHANGELOG\.md$/
 const ISO_TIMESTAMP = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/
+const SHA256_HEX = /^[0-9a-f]{64}$/
+const SHA1_HEX = /^[0-9a-f]{40}$/
 
 function readLedger() {
   assert.ok(existsSync(ledgerPath), 'docs/upstream/ledger.json must exist')
@@ -48,9 +55,155 @@ function sourceMap(ledger) {
   return new Map(ledger.upstream.sources.map((source) => [source.id, source]))
 }
 
+function sha256File(path) {
+  return createHash('sha256').update(readFileSync(path)).digest('hex')
+}
+
 /** Remove formatting that differs between the release body and the docs capture. */
 function normalizeQuote(text) {
-  return text.replace(/`/g, '').replace(/\s+/g, ' ').trim()
+  return text.replace(/\x60/g, '').replace(/\s+/g, ' ').trim()
+}
+
+/**
+ * The exact behavior-source allowlist: https only, host exactly
+ * code.claude.com, path under /docs/, no userinfo, no non-default port, no
+ * query, no fragment, no parent segment (including encoded %2e%2e).
+ * Returns null when the URL is accepted, otherwise a short reason.
+ */
+function docsUrlProblem(raw) {
+  if (typeof raw !== 'string' || raw.trim().length === 0) return 'url is missing'
+  const text = raw.trim()
+  if (text.includes('?') || text.includes('#')) return 'query strings and fragments are not part of the source identity'
+  let url
+  try {
+    url = new URL(raw)
+  } catch {
+    return 'url is not absolute'
+  }
+  if (url.protocol !== DOCS_ALLOWLIST.scheme + ':') return 'scheme must be https'
+  if (url.hostname.toLowerCase() !== DOCS_ALLOWLIST.host) return 'host must be code.claude.com'
+  if (url.username !== '' || url.password !== '') return 'userinfo is not allowed'
+  if (url.port !== '') return 'non-default port is not allowed'
+  if (url.search !== '') return 'query strings are not part of the source identity'
+  if (url.hash !== '') return 'fragments are not part of the source identity'
+  const path = url.pathname
+  if (!path.startsWith(DOCS_ALLOWLIST.pathPrefix)) return 'path must start with /docs/'
+  if (/%2e/i.test(path)) return 'encoded dot segments are not allowed'
+  let decoded
+  try {
+    decoded = decodeURIComponent(path)
+  } catch {
+    return 'path is not valid percent-encoding'
+  }
+  if (decoded.split('/').some((segment) => segment === '..' || segment === '.')) {
+    return 'parent path segments are not allowed'
+  }
+  return null
+}
+
+/** A behavior source is mutable, hashed, dated, and never a date source. */
+function assertBehaviorSource(source) {
+  const fail = (message) => {
+    throw new Error(message)
+  }
+  if (!source || typeof source !== 'object') fail('behavior source is missing')
+  const id = typeof source.id === 'string' && source.id.trim().length > 0 ? source.id : 'behavior source'
+  if (typeof source.id !== 'string' || source.id.trim().length === 0) fail('behavior source has no id')
+  if (source.kind !== 'official-docs-page') fail(id + ' is not an official-docs-page')
+  const problem = docsUrlProblem(source.url)
+  if (problem) fail(id + ' has an unaccepted URL: ' + problem)
+  if (source.immutable !== false) fail(id + ' must carry immutable false')
+  if (!SHA256_HEX.test(source.sha256 || '')) fail(id + ' has no 64 lowercase hex sha256')
+  if (!ISO_TIMESTAMP.test(source.fetchedAt || '')) fail(id + ' has no ISO UTC fetchedAt')
+  if (Object.hasOwn(source, 'publishedAt')) fail(id + ' must not carry publishedAt')
+  if (source.historicalOnly === true) fail(id + ' must not be a historical-only record')
+  if (Object.hasOwn(source, 'lastModified')) {
+    if (!ISO_TIMESTAMP.test(source.lastModified || '')) fail(id + ' lastModified is not an ISO UTC timestamp')
+    if (source.lastModifiedIsPublicationProof !== false) {
+      fail(id + ' lastModified requires lastModifiedIsPublicationProof false')
+    }
+  }
+  if (source.lastModifiedIsPublicationProof === true) fail(id + ' lastModifiedIsPublicationProof must never be true')
+}
+
+/** A release source is immutable and carries the exact release identity. */
+function assertReleaseSource(source) {
+  const fail = (message) => {
+    throw new Error(message)
+  }
+  if (!source || typeof source !== 'object') fail('release source is missing')
+  const id = typeof source.id === 'string' && source.id.trim().length > 0 ? source.id : 'release source'
+  if (source.kind !== 'github-release') fail(id + ' is not a github-release')
+  if (typeof source.tag !== 'string' || !/^v\d+\.\d+\.\d+$/.test(source.tag)) fail(id + ' has no release tag')
+  const expectedUrl = RELEASE_URL_PREFIX + source.tag
+  if (source.url !== expectedUrl) fail(id + ' URL must be exactly ' + expectedUrl)
+  if (source.immutable !== true) fail(id + ' must be immutable')
+  if (source.draft !== false) fail(id + ' must not be a draft')
+  if (source.prerelease !== false) fail(id + ' must not be a prerelease')
+  if (!ISO_TIMESTAMP.test(source.publishedAt || '')) fail(id + ' has no ISO UTC publishedAt')
+  if (!SHA1_HEX.test(source.tagRefSha || '')) fail(id + ' tag ref is not a full commit SHA')
+  if (!SHA256_HEX.test(source.releaseBodySha256 || '')) fail(id + ' release body hash is missing')
+  if (typeof source.provenance !== 'string' || source.provenance.trim().length === 0) {
+    fail(id + ' has no provenance')
+  }
+}
+
+/** A changelog source is pinned to a full commit and hashed. */
+function assertChangelogSource(source) {
+  const fail = (message) => {
+    throw new Error(message)
+  }
+  if (!source || typeof source !== 'object') fail('changelog source is missing')
+  const id = typeof source.id === 'string' && source.id.trim().length > 0 ? source.id : 'changelog source'
+  if (source.kind !== 'github-changelog') fail(id + ' is not a github-changelog')
+  const match = CHANGELOG_URL_PATTERN.exec(source.url || '')
+  if (!match) fail(id + ' URL is not a commit-pinned CHANGELOG.md URL')
+  if (!SHA1_HEX.test(source.commitSha || '')) fail(id + ' commitSha is not a full commit SHA')
+  if (match[1] !== source.commitSha) fail(id + ' URL commit does not match commitSha')
+  if (!ISO_TIMESTAMP.test(source.commitDate || '')) fail(id + ' has no ISO UTC commitDate')
+  if (!ISO_TIMESTAMP.test(source.fetchedAt || '')) fail(id + ' has no ISO UTC fetchedAt')
+  if (!SHA256_HEX.test(source.sha256 || '')) fail(id + ' has no 64 lowercase hex sha256')
+}
+
+function validDocsSource() {
+  return {
+    id: 'docs-fixture',
+    kind: 'official-docs-page',
+    url: 'https://code.claude.com/docs/en/example',
+    immutable: false,
+    sha256: 'a'.repeat(64),
+    fetchedAt: '2026-10-30T07:00:00Z',
+    lastModified: '2026-10-29T12:00:00Z',
+    lastModifiedIsPublicationProof: false,
+  }
+}
+
+function validReleaseSource() {
+  return {
+    id: 'release-fixture',
+    kind: 'github-release',
+    url: 'https://github.com/anthropics/claude-code/releases/tag/v2.1.288',
+    tag: 'v2.1.288',
+    immutable: true,
+    draft: false,
+    prerelease: false,
+    publishedAt: '2026-10-02T20:19:57Z',
+    tagRefSha: '1'.repeat(40),
+    releaseBodySha256: '2'.repeat(64),
+    provenance: 'Fixture provenance recorded for the structural test.',
+  }
+}
+
+function validChangelogSource() {
+  return {
+    id: 'changelog-fixture',
+    kind: 'github-changelog',
+    url: 'https://github.com/anthropics/claude-code/blob/' + 'a'.repeat(40) + '/CHANGELOG.md',
+    commitSha: 'a'.repeat(40),
+    commitDate: '2026-10-14T02:49:24Z',
+    fetchedAt: '2026-10-14T09:43:02Z',
+    sha256: 'b'.repeat(64),
+  }
 }
 
 /**
@@ -77,8 +230,8 @@ function assertItemDateProvenance(item, sources) {
     fail(item.id + ' source URL does not name its release')
   }
   if (source.tagObjectType !== 'commit') fail(item.id + ' tag ref is not a commit')
-  if (!/^[0-9a-f]{40}$/.test(source.tagRefSha || '')) fail(item.id + ' tag ref is not a full commit SHA')
-  if (!/^[0-9a-f]{64}$/.test(source.releaseBodySha256 || '')) fail(item.id + ' release body hash is missing')
+  if (!SHA1_HEX.test(source.tagRefSha || '')) fail(item.id + ' tag ref is not a full commit SHA')
+  if (!SHA256_HEX.test(source.releaseBodySha256 || '')) fail(item.id + ' release body hash is missing')
   if (typeof source.provenance !== 'string' || source.provenance.trim().length === 0) {
     fail(item.id + ' source has no provenance')
   }
@@ -110,19 +263,125 @@ test('the upstream ledger cites pinned official Claude Code sources', () => {
   assert.equal(ledger.schemaVersion, 1, 'ledger schemaVersion is 1')
   assert.equal(typeof ledger.taskId, 'string', 'ledger carries the task id')
   assert.ok(ledger.taskId.trim().length > 0, 'the task id is nonempty')
-  assert.match(ledger.generatedAt, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/, 'ledger records an ISO timestamp for when it was generated')
+  assert.match(ledger.generatedAt, ISO_TIMESTAMP, 'ledger records an ISO timestamp for when it was generated')
   assert.equal(ledger.upstream.project, 'anthropics/claude-code', 'upstream project is official')
   assert.equal(ledger.upstream.algorithmDisclosed, false, 'the upstream algorithm stays undisclosed')
   assert.ok(Array.isArray(ledger.upstream.sources) && ledger.upstream.sources.length >= 2, 'at least two official sources')
   for (const source of ledger.upstream.sources) {
     assert.ok(source.id, 'every source has an id')
     assert.ok(source.kind, source.id + ' has a kind')
-    const accepted = source.url.startsWith(GITHUB_SOURCE_HOST)
-    const historicalDeviation = source.url.startsWith(HISTORICAL_DOCS_HOST) && source.historicalOnly === true
-    assert.ok(accepted || historicalDeviation, source.id + ' uses an accepted GitHub source or the recorded historical deviation')
+    if (source.kind === 'official-docs-page') {
+      assertBehaviorSource(source)
+    } else if (source.kind === 'github-release') {
+      assertReleaseSource(source)
+    } else if (source.kind === 'github-changelog') {
+      assertChangelogSource(source)
+    } else {
+      assert.equal(source.historicalOnly, true, source.id + ' is only accepted as the recorded historical deviation')
+      assert.equal(source.id, 'claude-code-changelog-page-20261014')
+      assert.equal(source.kind, 'official-docs-changelog')
+      assert.equal(source.url, 'https://code.claude.com/docs/en/changelog.md')
+    }
     assert.ok(source.fetchedAt, source.id + ' records when it was fetched')
-    const pinned = source.immutable === true || /^[0-9a-f]{40}$/.test(source.commitSha || '') || /^[0-9a-f]{64}$/.test(source.sha256 || '')
+    const pinned = source.immutable === true || SHA1_HEX.test(source.commitSha || '') || SHA256_HEX.test(source.sha256 || '')
     assert.ok(pinned, source.id + ' is immutable, pinned to a full commit SHA, or carries a content hash')
+  }
+  // An unapproved host never passes any class-specific validator.
+  assert.throws(() => assertBehaviorSource({ ...validDocsSource(), url: 'https://example.com/docs/en/x' }), /unaccepted URL/)
+  assert.throws(() => assertReleaseSource({ ...validReleaseSource(), url: 'https://example.com/anthropics/claude-code/releases/tag/v2.1.288' }), /URL must be exactly/)
+  assert.throws(() => assertChangelogSource({ ...validChangelogSource(), url: 'https://example.com/anthropics/claude-code/blob/' + 'a'.repeat(40) + '/CHANGELOG.md' }), /commit-pinned CHANGELOG/)
+})
+
+test('a valid official docs page is accepted as a behavior source only', () => {
+  const source = validDocsSource()
+  assert.doesNotThrow(() => assertBehaviorSource(source))
+  assert.equal(docsUrlProblem(source.url), null)
+  assert.equal(docsUrlProblem('https://CODE.CLAUDE.COM/docs/en/x'), null, 'the host is case-insensitive after URL parsing')
+  assert.equal(docsUrlProblem('https://code.claude.com:443/docs/en/x'), null, 'the default https port is accepted')
+  const withoutLastModified = { ...source }
+  delete withoutLastModified.lastModified
+  delete withoutLastModified.lastModifiedIsPublicationProof
+  assert.doesNotThrow(() => assertBehaviorSource(withoutLastModified))
+})
+
+test('the docs allowlist rejects every unaccepted URL shape and field', () => {
+  const cases = [
+    ['http scheme', () => ({ url: 'http://code.claude.com/docs/en/x' })],
+    ['docs.claude.com host', () => ({ url: 'https://docs.claude.com/docs/en/x' })],
+    ['host suffix attack', () => ({ url: 'https://code.claude.com.evil.example/docs/en/x' })],
+    ['example.com host', () => ({ url: 'https://example.com/docs/en/x' })],
+    ['path outside /docs/', () => ({ url: 'https://code.claude.com/en/docs/x' })],
+    ['path /docs without a trailing slash', () => ({ url: 'https://code.claude.com/docs' })],
+    ['plain parent segment', () => ({ url: 'https://code.claude.com/docs/../admin' })],
+    ['encoded parent segment', () => ({ url: 'https://code.claude.com/docs/%2e%2e/admin' })],
+    ['query string', () => ({ url: 'https://code.claude.com/docs/en/x?ref=1' })],
+    ['empty query', () => ({ url: 'https://code.claude.com/docs/en/x?' })],
+    ['fragment', () => ({ url: 'https://code.claude.com/docs/en/x#section' })],
+    ['empty fragment', () => ({ url: 'https://code.claude.com/docs/en/x#' })],
+    ['userinfo', () => ({ url: 'https://user:secret@code.claude.com/docs/en/x' })],
+    ['non-default port', () => ({ url: 'https://code.claude.com:8443/docs/en/x' })],
+    ['missing sha256', () => ({ removeSha256: true })],
+    ['short sha256', () => ({ sha256: 'abc123' })],
+    ['missing fetchedAt', () => ({ removeFetchedAt: true })],
+    ['non-ISO fetchedAt', () => ({ fetchedAt: '2026-10-30' })],
+    ['immutable true', () => ({ immutable: true })],
+    ['historicalOnly true', () => ({ historicalOnly: true })],
+    ['kind official-docs-changelog', () => ({ kind: 'official-docs-changelog' })],
+    ['publishedAt present', () => ({ publishedAt: '2026-10-14T09:54:42Z' })],
+    ['lastModified without the publication-proof flag', () => ({ removeLastModifiedFlag: true })],
+    ['lastModifiedIsPublicationProof true', () => ({ lastModifiedIsPublicationProof: true })],
+    ['GitHub release URL', () => ({ url: 'https://github.com/anthropics/claude-code/releases/tag/v2.1.288' })],
+  ]
+  for (const [name, mutate] of cases) {
+    const source = validDocsSource()
+    const patch = mutate()
+    if (patch.removeSha256) delete source.sha256
+    if (patch.removeFetchedAt) delete source.fetchedAt
+    if (patch.removeLastModifiedFlag) delete source.lastModifiedIsPublicationProof
+    delete patch.removeSha256
+    delete patch.removeFetchedAt
+    delete patch.removeLastModifiedFlag
+    Object.assign(source, patch)
+    assert.throws(() => assertBehaviorSource(source), Error, name)
+  }
+})
+
+test('a release source must be immutable and carry its exact identity', () => {
+  assert.doesNotThrow(() => assertReleaseSource(validReleaseSource()))
+  const cases = [
+    ['immutable false', (s) => { s.immutable = false }],
+    ['draft true', (s) => { s.draft = true }],
+    ['prerelease true', (s) => { s.prerelease = true }],
+    ['missing publishedAt', (s) => { delete s.publishedAt }],
+    ['short tagRefSha', (s) => { s.tagRefSha = 'abc123' }],
+    ['missing releaseBodySha256', (s) => { delete s.releaseBodySha256 }],
+    ['empty provenance', (s) => { s.provenance = '   ' }],
+    ['docs URL', (s) => { s.url = 'https://code.claude.com/docs/en/interactive-mode' }],
+    ['URL with query', (s) => { s.url += '?ref=1' }],
+    ['kind official-docs-page', (s) => { s.kind = 'official-docs-page' }],
+  ]
+  for (const [name, mutate] of cases) {
+    const source = validReleaseSource()
+    mutate(source)
+    assert.throws(() => assertReleaseSource(source), Error, name)
+  }
+})
+
+test('a changelog source is pinned to a full commit and hashed', () => {
+  assert.doesNotThrow(() => assertChangelogSource(validChangelogSource()))
+  const cases = [
+    ['unpinned URL', (s) => { s.url = 'https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md' }],
+    ['commit mismatch', (s) => { s.commitSha = 'c'.repeat(40) }],
+    ['short sha256', (s) => { s.sha256 = 'abc123' }],
+    ['missing commitDate', (s) => { delete s.commitDate }],
+    ['non-ISO commitDate', (s) => { s.commitDate = '2026-10-14' }],
+    ['missing fetchedAt', (s) => { delete s.fetchedAt }],
+    ['wrong kind', (s) => { s.kind = 'github-release' }],
+  ]
+  for (const [name, mutate] of cases) {
+    const source = validChangelogSource()
+    mutate(source)
+    assert.throws(() => assertChangelogSource(source), Error, name)
   }
 })
 
@@ -221,6 +480,32 @@ test('the date provenance check rejects a fetch-day date and an unpinned release
   }
 })
 
+test('the date provenance check rejects a behavior source and a docs lastModified date', () => {
+  const docs = validDocsSource()
+  const docsSources = new Map([[docs.id, docs]])
+  const docsItem = {
+    id: 'docs-as-date-source',
+    upstreamSourceId: docs.id,
+    upstreamVersion: '2.1.288',
+    upstreamDate: docs.lastModified.slice(0, 10),
+  }
+  assert.throws(
+    () => assertItemDateProvenance(docsItem, docsSources),
+    /non-release source/,
+    'a behavior source never provides an item date',
+  )
+
+  const ledger = readLedger()
+  const releaseSources = sourceMap(ledger)
+  const releaseItem = structuredClone(ledger.upstream.items.find((item) => item.id === 'U-2.1.288-note-voice'))
+  releaseItem.upstreamDate = docs.lastModified.slice(0, 10)
+  assert.throws(
+    () => assertItemDateProvenance(releaseItem, releaseSources),
+    /does not match publishedAt/,
+    'the docs lastModified date never becomes upstreamDate',
+  )
+})
+
 test('the new provenance check rejects the historical 2026-10-14 ledger state', () => {
   const baseCommit = '038dcdac90c4dbb32e18d21a21bfa56d83bbc6c2'
   const historical = JSON.parse(execFileSync('git', ['show', baseCommit + ':docs/upstream/ledger.json'], {
@@ -282,6 +567,28 @@ test('a source outage is recorded as unknown, never as no change', () => {
   assert.match(ledger.outagePolicy.rule, /no change/i, 'the outage rule explicitly forbids "no change"')
 })
 
+test('the outage and provenance policy keeps the previous verified baseline', () => {
+  const ledger = readLedger()
+  const outage = ledger.outagePolicy
+  assert.match(outage.rule, /unknown/i)
+  assert.match(outage.rule, /no change/i)
+  assert.match(outage.rule, /previous verified baseline/i)
+  assert.match(outage.rule, /unreachable|unverifiable/i)
+  assert.match(outage.provenanceRule, /exact bytes/i)
+  assert.match(outage.provenanceRule, /hashed/i)
+  assert.match(outage.offlineCopyRule, /not a fresh verification/i)
+  assert.equal(outage.silentFallback, false)
+  const provenance = ledger.sourcePolicy.provenance
+  assert.deepEqual(provenance, {
+    verifiedOnlyWithExactBytes: true,
+    requireContentHash: true,
+    requireFetchedAt: true,
+    retainPreviousVerifiedBaselineOnFailure: true,
+    unreachableState: 'unknown',
+    silentNoChangeFallback: false,
+  })
+})
+
 test('the ledger carries no private or unrelated project data', () => {
   const raw = readFileSync(ledgerPath, 'utf8')
   const forbidden = [/\bozon\b/i, /\/Users\//, /http:\/\//, /api[-_]?key/i, /bearer\s/i, /chatgpt/i]
@@ -290,42 +597,128 @@ test('the ledger carries no private or unrelated project data', () => {
   }
 })
 
-test('the source policy keeps only the 2026-10-14 docs page as a recorded deviation', () => {
+test('the historical 2026-10-14 docs capture stays a recorded deviation', () => {
   const ledger = readLedger()
-  const docsSources = ledger.upstream.sources.filter((source) => source.url.startsWith(HISTORICAL_DOCS_HOST))
-  assert.equal(docsSources.length, 1, 'exactly one historical docs source is recorded')
-  for (const source of docsSources) {
-    assert.equal(source.historicalOnly, true, source.id + ' is marked historicalOnly')
-    assert.ok(source.policyDeviation, source.id + ' carries a policyDeviation record')
-    assert.ok(existsSync(join(repoRoot, source.policyDeviation.recordedIn)), source.id + ' names an existing addendum')
-    assert.equal(
-      ledger.upstream.items.some((item) => item.upstreamSourceId === source.id),
-      false,
-      'the historical docs source is not used as an active item source',
-    )
-  }
-  for (const source of ledger.upstream.sources) {
-    if (source.url.startsWith(HISTORICAL_DOCS_HOST)) continue
-    assert.ok(source.url.startsWith(GITHUB_SOURCE_HOST), source.id + ' uses an accepted GitHub source')
-  }
-  const decisions = ledger.openPolicyDecisions
-  assert.ok(Array.isArray(decisions) && decisions.length === 1, 'one open source-policy decision is recorded')
-  assert.equal(decisions[0].id, 'stage-1b-official-docs-source-policy')
-  assert.equal(decisions[0].status, 'deferred-to-stage-1b')
-  assert.ok(existsSync(join(repoRoot, decisions[0].evidence)), 'the open decision names its evidence')
-  const workflow = readFileSync(workflowPath, 'utf8')
-  assert.match(workflow, /tagged release notes/i, 'the workflow still names tagged release notes')
-  assert.match(workflow, /CHANGELOG\.md/, 'the workflow still names CHANGELOG.md')
-  assert.match(workflow, /addendum-20261030-source-policy-deviation\.md/, 'the workflow points at the deviation addendum')
+  const historical = ledger.upstream.sources.filter((source) => source.historicalOnly === true)
+  assert.equal(historical.length, 1, 'exactly one historical docs source is recorded')
+  const source = historical[0]
+  assert.equal(source.id, 'claude-code-changelog-page-20261014')
+  assert.equal(source.kind, 'official-docs-changelog')
+  assert.equal(source.url, 'https://code.claude.com/docs/en/changelog.md')
+  assert.equal(source.sha256, 'dfc62da25a39339848ffedb7cf2beadf51f41458d7b681d79d25b22274550d5e')
+  assert.equal(source.fetchedAt, '2026-10-14T09:54:42Z')
+  assert.ok(source.policyDeviation && source.policyDeviation.recordedIn, source.id + ' carries a policyDeviation record')
+  assert.ok(existsSync(join(repoRoot, source.policyDeviation.recordedIn)), source.id + ' names an existing addendum')
+  assert.match(source.policyDeviation.reason, /not retroactively authorized/)
+  assert.equal(
+    ledger.upstream.items.some((item) => item.upstreamSourceId === source.id),
+    false,
+    'the historical docs source is not used as an active item source',
+  )
+  assert.equal(ledger.sourcePolicy.historicalDeviation.sourceId, source.id)
+  assert.equal(ledger.sourcePolicy.historicalDeviation.retroactivelyAuthorized, false)
   const addendum = readFileSync(addendumPath, 'utf8')
+  assert.ok(addendum.includes('does not retroactively authorize'), 'the addendum keeps the non-retroactive statement')
+  assert.ok(addendum.includes('Stage 1B'), 'the addendum keeps the Stage 1B deferral history')
+})
+
+test('the addendum and the raw 2026-10-14 evidence stay byte-identical', () => {
+  assert.equal(sha256File(addendumPath), '1355c524b48e01a6d870fd010ccdcc4456c5070991f8ded2b2ff9035776eedc7')
+  assert.equal(sha256File(rawEvidencePath), 'c5fac2b1502d8a221ec4a7e229012c645f84be0d9310791173af84031e809d7a')
+})
+
+test('the ledger source policy matches the exact allowlist and role limits', () => {
+  const ledger = readLedger()
+  const policy = ledger.sourcePolicy
+  assert.equal(policy.acceptedIn, 'Stage 1B')
+  assert.match(policy.acceptedAt, ISO_TIMESTAMP)
+  assert.equal(policy.policyDocument, 'docs/upstream/workflow.md')
+  assert.deepEqual(policy.behaviorSources.allowlist, DOCS_ALLOWLIST)
+  assert.equal(policy.releaseSources.role, 'canonical-release-version-date')
+  assert.equal(policy.behaviorSources.role, 'behavior-evidence-only')
+  assert.equal(policy.behaviorSources.kind, 'official-docs-page')
+  assert.equal(policy.behaviorSources.allowedForVersionDate, false)
+  assert.equal(policy.behaviorSources.allowedForPublicationDate, false)
+  assert.equal(policy.behaviorSources.reFetchEveryCycle, true)
+  assert.equal(policy.behaviorSources.changeDetection, 'sha256')
+  assert.equal(policy.behaviorSources.lastModifiedIsPublicationProof, false)
+  assert.equal(policy.behaviorSources.immutable, false)
+  assert.deepEqual(policy.behaviorSources.required, ['id', 'kind', 'url', 'immutable', 'sha256', 'fetchedAt'])
+  assert.deepEqual(policy.behaviorSources.optionalMetadata, ['lastModified'])
+  assert.equal(policy.behaviorSources.excerptPolicy, 'short-official-sentences-only')
+  assert.deepEqual(policy.releaseSources.githubRelease, {
+    kind: 'github-release',
+    scheme: 'https',
+    host: 'github.com',
+    pathPrefix: '/anthropics/claude-code/releases/tag/',
+    immutable: true,
+    required: ['tag', 'tagRefSha', 'publishedAt', 'releaseBodySha256', 'provenance'],
+  })
+  assert.deepEqual(policy.releaseSources.githubChangelog, {
+    kind: 'github-changelog',
+    scheme: 'https',
+    host: 'github.com',
+    pathPrefix: '/anthropics/claude-code/blob/',
+    pin: 'commitSha',
+    required: ['commitSha', 'commitDate', 'fetchedAt', 'sha256'],
+  })
+  assert.deepEqual(policy.provenance, {
+    verifiedOnlyWithExactBytes: true,
+    requireContentHash: true,
+    requireFetchedAt: true,
+    retainPreviousVerifiedBaselineOnFailure: true,
+    unreachableState: 'unknown',
+    silentNoChangeFallback: false,
+  })
+  assert.deepEqual(policy.security, {
+    privateProjectOrSessionDataToPublicPages: 'forbidden',
+    copyPrivateClaudeInternals: 'forbidden',
+    copyClosedSourceCode: 'forbidden',
+  })
+  assert.equal(policy.historicalDeviation.retroactivelyAuthorized, false)
+  assert.ok(existsSync(join(repoRoot, policy.historicalDeviation.recordedIn)), 'the historical deviation names an existing record')
+  assert.deepEqual(ledger.openPolicyDecisions, [], 'the open policy decision list stays present and empty')
+  assert.equal(ledger.resolvedPolicyDecisions.length, 1)
+  const decision = ledger.resolvedPolicyDecisions[0]
+  assert.equal(decision.id, 'stage-1b-official-docs-source-policy')
+  assert.equal(decision.status, 'accepted')
+  assert.equal(decision.acceptedIn, 'Stage 1B')
+  assert.match(decision.acceptedAt, ISO_TIMESTAMP)
+  assert.equal(decision.decision, 'Official Anthropic Claude Code documentation under HTTPS https://code.claude.com/docs/ is accepted as behavior evidence only, for documented feature behavior, availability, cost, and UI contract. It is never a versioned release signal and never establishes a version or a publication date. GitHub tagged releases and CHANGELOG.md remain canonical for version, date, and release content.')
+  assert.deepEqual(decision.scope, ['feature behavior', 'availability', 'cost', 'UI contract'])
+  assert.deepEqual(decision.outOfScope, ['version', 'publication date', 'release note', 'changelog line'])
+  assert.equal(decision.notRetroactive, 'The 2026-10-14 docs-page capture remains a recorded deviation and is not retroactively authorized.')
+  assert.ok(Array.isArray(decision.evidence) && decision.evidence.length > 0, 'the accepted decision names its evidence')
+  for (const path of decision.evidence) {
+    assert.ok(existsSync(join(repoRoot, path)), 'the accepted decision evidence path exists: ' + path)
+  }
+
+  const workflow = readFileSync(workflowPath, 'utf8')
   for (const phrase of [
-    '2026-10-14',
-    'process deviation',
-    'does not retroactively authorize',
-    'Stage 1B',
-    'c5fac2b1502d8a221ec4a7e229012c645f84be0d9310791173af84031e809d7a',
+    'https://code.claude.com/docs/',
+    'code.claude.com',
+    '/docs/',
+    'behavior',
+    'versioned release signal',
+    'canonical',
+    'SHA-256',
+    'sha256',
+    'fetchedAt',
+    'lastModified',
+    're-fetch',
+    'unknown',
+    'no change',
+    'previous verified baseline',
+    'private',
+    'closed-source',
   ]) {
-    assert.ok(addendum.includes(phrase), 'the addendum records: ' + phrase)
+    assert.ok(workflow.includes(phrase), 'workflow records: ' + phrase)
+  }
+
+  const baseline = readFileSync(baselinePath, 'utf8')
+  assert.match(baseline, /accepted in Stage 1B/i)
+  for (const phrase of ['behavior evidence', 'code.claude.com/docs', 'canonical', 'sha256', 'fetchedAt', 'not retroactively authorized']) {
+    assert.ok(baseline.includes(phrase), 'baseline records: ' + phrase)
   }
 })
 
@@ -336,9 +729,9 @@ test('the coverage record is pinned to v2.1.312 and does not claim behavior stab
   assert.equal(coverage.checkedThrough.tag, 'v2.1.312')
   assert.equal(coverage.checkedThrough.url, 'https://github.com/anthropics/claude-code/releases/tag/v2.1.312')
   assert.equal(coverage.checkedThrough.publishedAt, '2026-10-27T20:24:20Z')
-  assert.match(coverage.checkedThrough.tagRefSha, /^[0-9a-f]{40}$/)
+  assert.match(coverage.checkedThrough.tagRefSha, SHA1_HEX)
   assert.equal(coverage.checkedThrough.tagObjectType, 'commit')
-  assert.match(coverage.checkedThrough.releaseBodySha256, /^[0-9a-f]{64}$/)
+  assert.match(coverage.checkedThrough.releaseBodySha256, SHA256_HEX)
   assert.equal(coverage.lastDirectSignalVersion, '2.1.290')
   assert.equal(coverage.range.after, 'v2.1.290')
   assert.equal(coverage.range.through, 'v2.1.312')
@@ -371,7 +764,7 @@ test('the committed coverage evidence supports the recorded release dates', () =
     assert.equal(release.publishedAt, publishedAt, tag + ' keeps its published date')
     assert.equal(release.immutable, true, tag + ' is immutable')
     assert.equal(release.tagRefSha, tagRefSha, tag + ' keeps its tag ref')
-    assert.match(release.bodySha256, /^[0-9a-f]{64}$/, tag + ' carries a body hash')
+    assert.match(release.bodySha256, SHA256_HEX, tag + ' carries a body hash')
   }
   const after = evidence.releases.filter((release) => release.tag > 'v2.1.290' && release.tag <= 'v2.1.312')
   assert.equal(after.length, 20, 'twenty release bodies were checked after 2.1.290')

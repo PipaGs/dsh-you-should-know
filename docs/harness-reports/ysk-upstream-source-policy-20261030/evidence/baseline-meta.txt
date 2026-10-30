@@ -1,0 +1,9 @@
+capturedAt: 2026-10-30T07:12:11Z
+base: 0419b70797a8d37db245d55817a7be273b5edcdb
+branch: task/upstream-source-policy-20261030
+version: 0.4.6
+worktreeStatus:
+?? docs/harness-reports/ysk-upstream-source-policy-20261030/
+targeted_exit=0
+full_exit=0
+check_exit=0
