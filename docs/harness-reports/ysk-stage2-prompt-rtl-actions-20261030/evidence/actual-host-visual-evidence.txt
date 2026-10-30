@@ -39,10 +39,11 @@ SCREENSHOTS AND ACTION CAPTURE (exact SHA-256)
 - actual-host-notes-1280.png            85bf042bcc1b85d4f16917895c4f478a7c94c17024614069422907072ce1f075
 - actual-host-explanation-1280.png      a3ccc54a499352b539bfd83d3ca9d56b90cfded747612ca395c7bd21bfe0866f
 - actual-host-history-1280.png          826c59410eb4495074bded6c4a809118daa998f720458373dacc9a3eaba32651
-- actual-host-add-to-chat-1280.png      d50f43cbf95569d2def3843bd78bc67411f7c20465ea9c395b36ff0cf1a6f800
+- actual-host-add-to-chat-1280.png      a3671c86394eaed530cab11212b93e7ea0e552bdf4725e4b25a7b5ff8005b89f
 - actual-host-long-note-1280.png        8dbd053ad666afd59fd28929f15cdd96fd43d8c62a93649308b8c1dbf33bd8e4
 - actual-host-narrow-700.png            6d4a19f361620c04aeb500932b6d39f864864a6b0a4c05194cc65769373d716a
 - actual-host-actions.json             becdab5664c3d52ee0e7220351db6fa8da39b320076e85af4ba2e41d204bd4d1
+  (structured state capture, not a raw tool transcript)
 - visual-fixture-proxy.mjs              9f1c9808f589726d7c1ff8f625ebb3c00d62d725506ac12e8ef5e7ab128831da
 
 RENDERED MEASUREMENTS
@@ -62,7 +63,7 @@ actual-host-notes-1280.png shows the first two. At 700px the long note wraps,
 documentElement.scrollWidth = innerWidth = 700, every card right edge is 677,
 and the composer right edge is 673. No horizontal overflow.
 
-INTERACTION PROOF (actual host; exact before/after in actual-host-actions.json)
+INTERACTION PROOF (actual host; structured before/after in actual-host-actions.json)
 All actions ran on a fresh page with the committed proxy, which serves three
 active notes. The empty state and the absence of any transcript entry were
 true before and after every action. No message was sent.
