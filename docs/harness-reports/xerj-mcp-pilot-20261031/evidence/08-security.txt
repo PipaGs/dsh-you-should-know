@@ -1,5 +1,5 @@
 # listener sockets (expect 127.0.0.1 only)
-COMMAND NAME 
+COMMAND NAME
 xerj 127.0.0.1:19200 (LISTEN)
 xerj 127.0.0.1:18080 (LISTEN)
 xerj 127.0.0.1:18081 (LISTEN)

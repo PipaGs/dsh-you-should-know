@@ -11,21 +11,21 @@ xerj search: these hits are lexical; this command does not consult the embedding
 
 ─── README.md:127  (score 26.33)
      is persisted. The records never carry note, prompt, event, or conversation text.
-    
+
     ## Web UI
-    
+
     The browser half registers three surfaces.
-    
+
     **Note card** (`conversation.input.dock`, above the composer):
-    
+
     - No note and no history: the dock ren
     … (--full 480 to see more)
 
 ─── README.md:5  (score 25.86)
     # dsh-you-should-know
-    
+
     A quiet, **human-only** second-opinion watcher for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness).
-    
+
     A separately configured reviewer model — DeepSeek out of the box, any registered route by config
     … (--full 480 to see more)
 
