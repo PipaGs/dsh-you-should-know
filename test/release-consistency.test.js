@@ -37,8 +37,8 @@ import { PLUGIN_VERSION } from '../lib/index.js'
 import { compareVersions, parseStableTag } from '../lib/update.js'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const CURRENT = '0.5.1'
-const PREVIOUS = '0.5.0'
+const CURRENT = '0.5.2'
+const PREVIOUS = '0.5.1'
 
 // A literal dot in a version must not act as a RegExp wildcard.
 const CURRENT_PATTERN = CURRENT.replace(/\./g, '\\.')
