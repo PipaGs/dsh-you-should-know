@@ -1,0 +1,137 @@
+# Redaction note: the absolute checkout path in the captured commands was replaced with <repo>, the temporary baseline worktree path with <tmp>/ysk-base, and the temporary probe prefix with <tmp> before this file was written. No hash, timestamp, exit code, or test count was altered by that redaction.
+PROVENANCE: docs/harness-reports/ysk-version-bump-0.5.2-20261031/evidence/09-provenance.txt
+TASK: version bump 0.5.1 -> 0.5.2 for dsh-you-should-know
+DATE_UTC: 2026-10-31T06:05:38Z
+DATE_LOCAL: 2026-10-31T09:05:38+0300 (MSK)
+BASE_SHA: c9ce22fb8bff2cba285e486500e4f0a7d7b767dd
+BASE_SUBJECT: Merge pull request #32 from PipaGs/fix/aud-1-control-char-validation-20261031
+PRODUCT_SHA: 263577ff1a922b11614ca0af564f64f31d766be4
+PRODUCT_SUBJECT: chore: raise the version to 0.5.2 for the merged AUD-1 fix
+PRODUCT_SHAPE: 8 files changed, 19 insertions(+), 19 deletions(-)
+BRANCH: task/release-0.5.2-version-20261031
+NODE: v26.12.1
+NPM: 11.20.0
+
+### scope of this file
+
+This file hashes, in this order: the eight changed files at 263577f, evidence 01-07
+and 10-14, and final-report.md.
+
+Two files are excluded from this digest list on purpose:
+
+- evidence/09 is this file, and a file cannot carry its own hash.
+- evidence/08 is the secret and privacy scan. It is generated after this file and
+  scans the bytes of this file, so this file does not hash evidence/08.
+
+evidence/08 excludes only itself from its scan. It therefore covers this file and
+the final report, in addition to the changed product files and the other evidence
+files.
+
+This file was regenerated after three review fixes: trailing whitespace was removed
+from two blank lines of evidence/02-red-old-gate.txt so git diff --check passes, two
+final-report.md sentences were reworded as report-time snapshots about the push, and
+one final-report.md sentence now states that round 2 was a closure pass by the same
+reviewer. Both files are hashed below in their fixed form; the product files did not
+change.
+
+### commands run for this listing
+
+All commands ran on macOS with shasum -a 256 from the checkout directory, which is
+shown below as <repo>. The block lists the exact commands in the form they ran; a
+leading cd is shown once.
+
+  cd <repo>
+  git rev-parse HEAD
+  git rev-parse c9ce22fb8bff2cba285e486500e4f0a7d7b767dd
+  git log -1 --format='%H %s' c9ce22fb8bff2cba285e486500e4f0a7d7b767dd
+  git log -1 --format='%H %s' 263577ff1a922b11614ca0af564f64f31d766be4
+  git show --stat --format='%H %s' 263577ff1a922b11614ca0af564f64f31d766be4
+  git status --porcelain=v1 --untracked-files=no
+  git branch --show-current
+  git rev-parse main origin/main
+  git rev-parse --verify origin/task/release-0.5.2-version-20261031
+  node -v
+  npm -v
+
+  # 1. changed files at the product commit, hashed from the committed blob
+  cd <repo> && for f in README.md docs/reference.md lib/index.js package.json test/invariant.test.js test/plugin.test.js test/release-consistency.test.js test/update-route.test.js; do printf '%s  %s\n' "$(git show 263577f:$f | shasum -a 256 | cut -d' ' -f1)" "$f"; done
+
+  # 2. the same eight files in the worktree, to prove the tree matches the commit
+  shasum -a 256 README.md docs/reference.md lib/index.js package.json test/invariant.test.js test/plugin.test.js test/release-consistency.test.js test/update-route.test.js
+
+  # 3. evidence 01-07 and 10-14, and the final report
+  shasum -a 256 docs/harness-reports/ysk-version-bump-0.5.2-20261031/evidence/01-baseline-targeted-0.5.1.txt docs/harness-reports/ysk-version-bump-0.5.2-20261031/evidence/01b-baseline-full-suite.txt docs/harness-reports/ysk-version-bump-0.5.2-20261031/evidence/02-red-old-gate.txt docs/harness-reports/ysk-version-bump-0.5.2-20261031/evidence/03-green-targeted.txt docs/harness-reports/ysk-version-bump-0.5.2-20261031/evidence/04-full-npm-test.txt docs/harness-reports/ysk-version-bump-0.5.2-20261031/evidence/05-npm-run-check.txt docs/harness-reports/ysk-version-bump-0.5.2-20261031/evidence/06-git-diff-check.txt docs/harness-reports/ysk-version-bump-0.5.2-20261031/evidence/07-version-surface-scan.txt docs/harness-reports/ysk-version-bump-0.5.2-20261031/evidence/10-publication-state.txt docs/harness-reports/ysk-version-bump-0.5.2-20261031/evidence/11-post-commit-verification.txt docs/harness-reports/ysk-version-bump-0.5.2-20261031/evidence/12-user-environment-unchanged.txt docs/harness-reports/ysk-version-bump-0.5.2-20261031/evidence/13-red-probe-with-hash.txt docs/harness-reports/ysk-version-bump-0.5.2-20261031/evidence/14-final-tree-verification.txt docs/harness-reports/ysk-version-bump-0.5.2-20261031/final-report.md
+
+  # 4. the timestamp of this capture
+  date -u +%Y-%m-%dT%H:%M:%SZ && date +%Y-%m-%dT%H:%M:%S%z
+
+Observed state from those commands: HEAD is
+263577ff1a922b11614ca0af564f64f31d766be4 on branch
+task/release-0.5.2-version-20261031, the parent of that commit is
+c9ce22fb8bff2cba285e486500e4f0a7d7b767dd, git status --porcelain with untracked files
+excluded is empty because the docs revision is already tracked in the unpushed docs
+commit 1bc8463a19fa515c09f363b560678d02bd7eaf58, which is amended after this capture
+to carry the final bytes. Local main is 038dcdac90c4dbb32e18d21a21bfa56d83bbc6c2,
+origin/main is c9ce22fb8bff2cba285e486500e4f0a7d7b767dd, and no remote-tracking ref
+for the task branch exists (git rev-parse --verify prints "fatal: Needed a single
+revision"). Node is v26.12.1 and npm is 11.20.0.
+
+### SHA256 of the eight changed files at 263577f
+Each value below equals the hash of both the committed blob and the worktree copy of that
+path, because the tracked product tree at capture time matched the commit.
+
+46de0c2cfb8c43c11e68f64f39bdfb83e4874cd71f414c150b5dcb88b8124ce2  README.md
+2f3027c24ac3c41d85e83f91fdde917addae8bb1419ab8fb22f1241610b09590  docs/reference.md
+5d35d02c42ed1b5058739f4783c2143d8d5d8746d0497dd02b3acc62e06f210d  lib/index.js
+cf38ad2c28bf78539172af156af9b478c58af175e04cbd2f5d44b99148d85410  package.json
+92c2b6cb76a8d877ce9bc049e0f6886676e389909ea94e38b07a18397223b345  test/invariant.test.js
+99f81726585932db42bb39b38cba8036cf26e41bee561e9891719fe980f300a0  test/plugin.test.js
+eee4c4bd18ac19074513d09daf04eaddd7bd8a03257565d3a86e9fd986d96623  test/release-consistency.test.js
+21b83d40db737840dce6a2a0b8fa2e3a3475201074ecd79c5072d849cf796342  test/update-route.test.js
+
+### SHA256 of evidence 01-07 and 10-14
+Paths are relative to the repository root. evidence/08 and evidence/09 are absent from this
+list for the reasons given in the scope section.
+
+abaf45ab82d6dac0477056db13595ccbed33424d0a19915da3d499859ea95d47  docs/harness-reports/ysk-version-bump-0.5.2-20261031/evidence/01-baseline-targeted-0.5.1.txt
+bc5e9ab71db8870adfdaaa794470a4cd5f6d71573fb7ab6b928acdd3cfdaa2d8  docs/harness-reports/ysk-version-bump-0.5.2-20261031/evidence/01b-baseline-full-suite.txt
+03667c636d935a03b7f341eee59173a6428c417e05a39e69ef8db11fad75af4e  docs/harness-reports/ysk-version-bump-0.5.2-20261031/evidence/02-red-old-gate.txt
+bc7a835b2712145c00aa3a80cdbc2b966fffd55cb7bed2964a7a6d2ce4253eaf  docs/harness-reports/ysk-version-bump-0.5.2-20261031/evidence/03-green-targeted.txt
+f6511ba187419adf59cc36868e6d1bd86602fc14193907435a657c8ca0ceb8a7  docs/harness-reports/ysk-version-bump-0.5.2-20261031/evidence/04-full-npm-test.txt
+9f1972897795e587784334e1c400f425abb422bf69413f68e6f1521b919ab268  docs/harness-reports/ysk-version-bump-0.5.2-20261031/evidence/05-npm-run-check.txt
+e65ed376cd9998b11a5e1358897175dfe96956eb3d69d5f37a8e15a3de9c76f6  docs/harness-reports/ysk-version-bump-0.5.2-20261031/evidence/06-git-diff-check.txt
+47718ca9fb58d4c248f9771f092a044198ddb83e623a784b6dbfbb547daa69bf  docs/harness-reports/ysk-version-bump-0.5.2-20261031/evidence/07-version-surface-scan.txt
+ef5a38fc0d13f3afbe1866322084232977bcf96d6ea5476f3019daf000ad12f0  docs/harness-reports/ysk-version-bump-0.5.2-20261031/evidence/10-publication-state.txt
+7c84419a3ca0aa05390d9a7c3103411e5e1f8414b6afa99b63b4ad070f372107  docs/harness-reports/ysk-version-bump-0.5.2-20261031/evidence/11-post-commit-verification.txt
+b03674d2313c96aa5729b66e3a0176df40aa6b149839615df4984f7963d4a535  docs/harness-reports/ysk-version-bump-0.5.2-20261031/evidence/12-user-environment-unchanged.txt
+4c1fa599789e5ec0d8bd9720359d3f056e11657141f4fc93a337badbc5bdcb78  docs/harness-reports/ysk-version-bump-0.5.2-20261031/evidence/13-red-probe-with-hash.txt
+87251b05d82cb2f0c24a5d9a5966b64673690e6b461871eb729f1716b30a8301  docs/harness-reports/ysk-version-bump-0.5.2-20261031/evidence/14-final-tree-verification.txt
+
+### SHA256 of the final report
+
+039d096fac29606d4d850833f2ca9c0e616cefe2528b0e373fabad84e3573b4c  docs/harness-reports/ysk-version-bump-0.5.2-20261031/final-report.md
+
+### capture notes
+
+- All hashes come from shasum -a 256 on macOS against the real files, not from a re-encode.
+- The eight changed-file values were produced twice, once through
+  "git show 263577f:<path> | shasum -a 256" over the committed blobs and once through
+  "shasum -a 256" over the worktree files. The two runs printed identical values, and
+  git status --porcelain --untracked-files=no printed nothing, so the worktree matches the
+  product commit for every tracked file.
+- evidence/02 starts with a redaction note and a review-fix note. Local absolute repository
+  paths in its captured output were replaced with <repo>, and two whitespace-only lines
+  were emptied so git diff --check passes. No exit code, test count, timestamp, or assertion
+  text was altered.
+- evidence/13 also starts with a redaction note; temporary paths there were replaced with
+  <tmp> before commit.
+- evidence/07 and evidence/11 carry round-2 notes for the two optional nit fixes; the
+  counts, commands, exit codes, and captured output they describe are unchanged.
+- The report hash covers final-report.md exactly as written to this directory, including
+  the "Independent review" section, the report-time push wording, and the statement that
+  round 2 was a closure pass by the same reviewer.
+- evidence/08 is generated after this file. This file does not hash it, and evidence/08
+  excludes only itself from its scan.
+- The docs text is tracked in the unpushed docs commit
+  1bc8463a19fa515c09f363b560678d02bd7eaf58 at capture time. This revision is committed by
+  amending that docs commit with the same message, so the product commit stays 263577f.

@@ -1,0 +1,57 @@
+# Redaction note: the absolute checkout path was replaced with <repo>, the file URL prefix in stack frames was removed, and the temporary prefix /tmp was replaced with <tmp> before commit. The two captures keep distinct basenames, red13-before.patch and red13-after.patch. No hash, exit code, count, or test result was altered.
+# RED probe re-run with restore-integrity hashes
+# UTC: 2026-10-31T05:47:57Z  Local: 2026-10-31T08:47:57+0300
+# HEAD: 263577ff1a922b11614ca0af564f64f31d766be4  chore: raise the version to 0.5.2 for the merged AUD-1 fix
+# tracked diff before probe: 0 files
+#
+## Step 1: record the tracked diff before the probe
+# tracked modified files before probe: 0
+# command: shasum -a 256 <tmp>/red13-before.patch
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  <tmp>/red13-before.patch
+## Step 2: temporarily set PREVIOUS back to 0.5.0
+# command: sed -i '' "s/^const PREVIOUS = '0.5.1'$/const PREVIOUS = '0.5.0'/" test/release-consistency.test.js
+# command: grep -n '^const PREVIOUS' test/release-consistency.test.js
+41:const PREVIOUS = '0.5.0'
+## Step 3: run the gate and capture its real exit code
+# command: node --test test/release-consistency.test.js
+✖ the release version is one patch or one minor step over the previous release (0.99375ms)
+✔ package.json, PLUGIN_VERSION, and the README install address agree (0.702334ms)
+✔ every README and docs/reference self-check sample version is the released version (0.279833ms)
+✔ no released artifact still documents the previous version (0.255042ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 3
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 178.667166
+
+✖ failing tests:
+
+test at test/release-consistency.test.js:50:1
+✖ the release version is one patch or one minor step over the previous release (0.99375ms)
+  AssertionError [ERR_ASSERTION]: the release is exactly one step over the previous release: one patch step (0.5.1) or one minor step (0.6.0), not 0.5.2
+      at TestContext.<anonymous> (<repo>/test/release-consistency.test.js:57:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+# exit code: 1
+## Step 4: restore the file and prove the worktree matches HEAD again
+# command: git checkout -- test/release-consistency.test.js
+# command: grep -n '^const PREVIOUS' test/release-consistency.test.js
+41:const PREVIOUS = '0.5.1'
+# command: git status --porcelain --untracked-files=no
+# tracked modified files after restore: 0
+# command: shasum -a 256 <tmp>/red13-after.patch
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  <tmp>/red13-after.patch
+# command: cmp <tmp>/red13-before.patch <tmp>/red13-after.patch
+# identical

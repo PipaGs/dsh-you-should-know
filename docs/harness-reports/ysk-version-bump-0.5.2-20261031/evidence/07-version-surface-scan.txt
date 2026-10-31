@@ -1,0 +1,76 @@
+# Round 2 note: the count parenthetical was corrected on 2026-10-31T06:01:05Z; the value 13, the command, and the exit code are unchanged.
+# Review fixes: regenerated after review round 1 on 2026-10-31T05:56:27Z. The docs/harness-reports count now shows the exact pipeline that produced it and the real exit codes of every command; the 0.5.2 surface scan and the stale-surface check carry the same content as the first capture (original capture: 2026-10-31T05:47:14Z / 08:47:14+0300).
+# Version surface scan on this change
+# UTC: 2026-10-31T05:56:27Z  Local: 2026-10-31T08:56:27+0300
+# HEAD: 263577ff1a922b11614ca0af564f64f31d766be4 (the product commit; the scan result is identical to the dirty pre-commit capture at 2026-10-31T05:47:14Z)
+# The new task directory is untracked, so git grep does not scan it.
+
+## 0.5.2 surface (every hit expected: README 6, docs/reference 4, lib 1, package 1, invariant 1, plugin 3, release-consistency CURRENT 1, update-route 1)
+# command: git grep -n '0\.5\.2' -- package.json lib README.md docs/reference.md test
+README.md:11:Version `0.5.2`, MIT. Host and browser halves ship as plain JavaScript, so a `github:` install needs no build. The scope is intentionally small: a composer-adjacent note card with a bounded in-memory history, a Plugins settings card (strictness mode, additional instructions, custom prompt, update controls), a session-header mode and model override, one reviewer call per qualifying turn, and a per-session runtime that retries one transient failure, bounds the queue, and pauses on quota without losing the turn.
+README.md:76:dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.5.2
+README.md:194:  "pluginVersion": "0.5.2",
+README.md:195:  "runtimeVersion": "0.5.2",
+README.md:196:  "installedVersion": "0.5.2",
+README.md:199:  "update": { "currentVersion": "0.5.2", "updateAvailable": false, "automaticSupported": false }
+docs/reference.md:220:  "pluginVersion": "0.5.2",
+docs/reference.md:221:  "runtimeVersion": "0.5.2",
+docs/reference.md:222:  "installedVersion": "0.5.2",
+docs/reference.md:227:  "update": { "currentVersion": "0.5.2", "latestVersion": "", "latestTag": "", "installSpec": "", "source": "git-tags", "updateAvailable": false, "dismissed": false, "autoCheckUpdates": true, "updateBehavior": "ask-before-update", "automaticSupported": false, "lastAutoCheckDate": "", "lastCheckedAt": null, "lastResult": null }
+lib/index.js:36:export const PLUGIN_VERSION = '0.5.2'
+package.json:3:  "version": "0.5.2",
+test/invariant.test.js:189:  assert.equal(manifest.version, '0.5.2')
+test/plugin.test.js:399:  assert.equal(body.pluginVersion, '0.5.2')
+test/plugin.test.js:400:  assert.equal(body.runtimeVersion, '0.5.2')
+test/plugin.test.js:401:  assert.equal(body.installedVersion, '0.5.2')
+test/release-consistency.test.js:40:const CURRENT = '0.5.2'
+test/update-route.test.js:257:  assert.equal(manifest.version, '0.5.2')
+# exit code: 0
+# command: git grep -n '0\.5\.2' -- package.json lib README.md docs/reference.md test | wc -l
+      18
+# exit code: 0
+
+## Remaining 0.5.1 hits by area
+# command: git grep -c '0\.5\.1' -- .
+docs/harness-reports/ysk-version-bump-0.5.1-20261031/evidence/01-baseline-targeted-0.5.0.txt:1
+docs/harness-reports/ysk-version-bump-0.5.1-20261031/evidence/02-red-stale-previous.txt:2
+docs/harness-reports/ysk-version-bump-0.5.1-20261031/evidence/03-green-targeted.txt:1
+docs/harness-reports/ysk-version-bump-0.5.1-20261031/evidence/04-full-npm-test.txt:1
+docs/harness-reports/ysk-version-bump-0.5.1-20261031/evidence/05-npm-run-check.txt:1
+docs/harness-reports/ysk-version-bump-0.5.1-20261031/evidence/06-git-diff-check.txt:1
+docs/harness-reports/ysk-version-bump-0.5.1-20261031/evidence/07-version-surface-scan.txt:19
+docs/harness-reports/ysk-version-bump-0.5.1-20261031/evidence/08-secret-privacy-scan.txt:14
+docs/harness-reports/ysk-version-bump-0.5.1-20261031/evidence/09-provenance.txt:19
+docs/harness-reports/ysk-version-bump-0.5.1-20261031/evidence/10-publication-state.txt:4
+docs/harness-reports/ysk-version-bump-0.5.1-20261031/evidence/11-post-commit-verification.txt:4
+docs/harness-reports/ysk-version-bump-0.5.1-20261031/evidence/13-red-probe-with-hash.txt:1
+docs/harness-reports/ysk-version-bump-0.5.1-20261031/final-report.md:28
+test/release-consistency.test.js:1
+# exit code: 0
+# command: git grep -n '0\.5\.1' -- . | grep -v '^docs/harness-reports/'
+test/release-consistency.test.js:41:const PREVIOUS = '0.5.1'
+# exit code: 0
+# command: git grep -c '0\.5\.1' -- docs/harness-reports | wc -l
+      13
+# exit code: 0
+# 13 matching files (each docs/harness-reports file above contributes one line to this count)
+
+## No released surface names 0.5.1
+# command: git grep -n '0\.5\.1' -- package.json README.md docs/reference.md lib/index.js
+# exit code: 1
+# none (0 hits; exit code 1 is the normal git grep no-match result)
+
+## Historical 0.5.0 fixture literals outside docs/harness-reports (section added after review round 1 at 2026-10-31T05:57:38Z)
+# These are test fixtures and tag listings, not released surfaces. This bump does not change them.
+# command: git grep -n '0\.5\.0' -- . ':!docs/harness-reports'
+test/client-ui.test.js:2232:  const newer = updateBackend({ latestTag: 'v0.5.0', latestVersion: '0.5.0', installSpec: 'github:PipaGs/dsh-you-should-know#v0.5.0', dismissed: false, dismissedVersion: 'v0.4.0' })
+test/recent-check-diagnostics.test.js:161:    pluginVersion: '0.5.0',
+test/recent-check-diagnostics.test.js:162:    installedVersion: '0.5.0',
+test/update.test.js:139:  assert.equal(parseRemoteTags(tagListing(['v0.4.0', 'v0.4.1', 'v0.5.0']), { maxTagLines: 2 }), null)
+test/update.test.js:336:  const tooManyLines = checkerHarness({ shellExec: async () => shellResult(tagListing(['v0.4.0', 'v0.4.1', 'v0.5.0'])), maxTagLines: 2 })
+test/update.test.js:535:    lastSeenLatestVersion: 'v0.5.0',
+test/update.test.js:538:  assert.equal(fresh.lastSeenLatestVersion, 'v0.5.0')
+# exit code: 0
+# command: git grep -n '0\.5\.0' -- package.json README.md docs/reference.md lib/index.js
+# exit code: 1
+# none (0 hits; exit code 1 is the normal git grep no-match result)

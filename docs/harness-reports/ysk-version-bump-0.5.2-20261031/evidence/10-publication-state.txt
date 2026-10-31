@@ -1,0 +1,45 @@
+# Redaction note: the tagger email address in the annotated-tag dump was replaced with <redacted-email> before commit. No hash, ref, exit code, or command output text other than that address was altered.
+# Publication state at preparation time
+# UTC: 2026-10-31T05:47:24Z  Local: 2026-10-31T08:47:24+0300
+# HEAD: c9ce22fb8bff2cba285e486500e4f0a7d7b767dd
+
+# command: git tag --list 'v0.5*'
+v0.5.0
+v0.5.1
+# command: git ls-remote --tags origin 'v0.5*'
+4f65cff661dc7b79ae0b1dc9929e82b5febadc8f	refs/tags/v0.5.0
+6d5b770b9f595c0bc456c9096c23875dc7a412ec	refs/tags/v0.5.0^{}
+af8c7f87d5ed723384055d00fd4d66fd6ae0020f	refs/tags/v0.5.1
+c1b14fe0e9f01cb2c712ebcdc183c00ae7124470	refs/tags/v0.5.1^{}
+# command: git rev-parse v0.5.1
+af8c7f87d5ed723384055d00fd4d66fd6ae0020f
+# command: git rev-parse v0.5.1^{commit}
+c1b14fe0e9f01cb2c712ebcdc183c00ae7124470
+# command: git cat-file -t v0.5.1
+tag
+# command: git cat-file -p v0.5.1
+object c1b14fe0e9f01cb2c712ebcdc183c00ae7124470
+type commit
+tag v0.5.1
+tagger Marat Sharipov <redacted-email> 1793422687 +0300
+
+dsh-you-should-know v0.5.1
+# command: git rev-parse v0.5.2
+fatal: ambiguous argument 'v0.5.2': unknown revision or path not in the working tree.
+Use '--' to separate paths from revisions, like this:
+'git <command> [<revision>...] -- [<file>...]'
+v0.5.2
+# command: git ls-remote --tags origin 'v0.5.2*'
+# command: gh release list --limit 6
+v0.4.6	Latest	v0.4.6	2026-10-24T04:45:54Z
+v0.4.4		v0.4.4	2026-10-14T15:22:30Z
+v0.4.3		v0.4.3	2026-10-13T14:51:22Z
+v0.4.2		v0.4.2	2026-10-10T13:13:38Z
+v0.4.1 - authenticated in-product self-check		v0.4.1	2026-10-10T09:34:36Z
+v0.4.0		v0.4.0	2026-10-10T08:32:28Z
+# command: gh release view v0.5.2
+release not found
+# command: gh release view v0.5.1
+release not found
+
+# The final gh release view v0.5.1 command exits non-zero because the release does not exist; that is the expected result.

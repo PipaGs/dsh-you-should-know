@@ -1,0 +1,33 @@
+# Review fixes: regenerated after review round 1 on 2026-10-31T05:56:36Z. Every command now carries its real exit code, and the earliest captured task command is corrected to 2026-10-31T05:45:56Z / 08:45:56+0300 (evidence 01). The profile facts are unchanged (original capture: 2026-10-31T05:47:36Z / 08:47:36+0300).
+# Redaction note: any absolute user home prefix would appear as <home>; this capture used ~ paths, so no home path appears. No mtime, line number, or file content was altered.
+# User environment preservation check
+# This task did not install, upgrade, or remove the plugin, and did not edit any profile file. Every command below is read-only.
+# UTC: 2026-10-31T05:56:36Z  Local: 2026-10-31T08:56:36+0300
+
+# command: grep -n -A2 'dsh-you-should-know:' ~/.dsh/profiles/desktop/pnpm-lock.yaml | head -6
+26:      dsh-you-should-know:
+27-        specifier: github:PipaGs/dsh-you-should-know#v0.5.1
+28-        version: https://codeload.github.com/PipaGs/dsh-you-should-know/tar.gz/c1b14fe0e9f01cb2c712ebcdc183c00ae7124470(@deepseek-ai/schemastery@3.18.5)
+# exit code: 0
+# command: grep -n -B1 -A3 'name: dsh-you-should-know' ~/.dsh/profiles/desktop/cordis.patch.yml
+29-- id: you-should-know
+30:  name: dsh-you-should-know
+31-  config:
+32-    reviewerMode: strict
+33-    additionalInstructions: ""
+# exit code: 0
+# command: stat -f '%Sm' -t '%Y-%m-%dT%H:%M:%S%z' ~/.dsh/profiles/desktop/pnpm-lock.yaml ~/.dsh/profiles/desktop/cordis.patch.yml
+2026-10-31T08:01:09+0300
+2026-10-31T08:44:05+0300
+# exit code: 0
+# command: date -u +%Y-%m-%dT%H:%M:%SZ; date +%Y-%m-%dT%H:%M:%S%z
+2026-10-31T05:56:36Z
+2026-10-31T08:56:36+0300
+# exit code: 0
+# command: git rev-parse HEAD
+263577ff1a922b11614ca0af564f64f31d766be4
+# exit code: 0
+
+# Both profile mtimes predate the earliest captured command of this task (2026-10-31T05:45:56Z / 08:45:56+0300).
+# The lock still pins github:PipaGs/dsh-you-should-know#v0.5.1 and resolves to c1b14fe0e9f01cb2c712ebcdc183c00ae7124470, the v0.5.1 tag target.
+# Therefore the desktop profile was not modified by this task and no install, upgrade, or removal happened.

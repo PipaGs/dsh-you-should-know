@@ -1,0 +1,28 @@
+# Whitespace check for this PR range
+# UTC: 2026-10-31T05:47:02Z  Local: 2026-10-31T08:47:02+0300
+# HEAD: c9ce22fb8bff2cba285e486500e4f0a7d7b767dd
+# base: c9ce22fb8bff2cba285e486500e4f0a7d7b767dd
+# command: git diff --check c9ce22fb8bff2cba285e486500e4f0a7d7b767dd
+# exit code: 0
+# command: git diff --check (worktree)
+# exit code: 0
+# command: git status --short
+ M README.md
+ M docs/reference.md
+ M lib/index.js
+ M package.json
+ M test/invariant.test.js
+ M test/plugin.test.js
+ M test/release-consistency.test.js
+ M test/update-route.test.js
+?? docs/harness-reports/ysk-version-bump-0.5.2-20261031/
+# command: git diff --stat
+ README.md                        | 12 ++++++------
+ docs/reference.md                |  8 ++++----
+ lib/index.js                     |  2 +-
+ package.json                     |  2 +-
+ test/invariant.test.js           |  2 +-
+ test/plugin.test.js              |  6 +++---
+ test/release-consistency.test.js |  4 ++--
+ test/update-route.test.js        |  2 +-
+ 8 files changed, 19 insertions(+), 19 deletions(-)

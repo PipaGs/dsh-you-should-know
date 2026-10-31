@@ -1,0 +1,10 @@
+# Syntax check on the dirty pre-commit tree after the 0.5.2 edit
+# UTC: 2026-10-31T05:47:00Z  Local: 2026-10-31T08:47:00+0300
+# HEAD: c9ce22fb8bff2cba285e486500e4f0a7d7b767dd
+# command: npm run check
+
+> dsh-you-should-know@0.5.2 check
+> node --check lib/core.js && node --check lib/self-check.js && node --check lib/runtime.js && node --check lib/review-profile.js && node --check lib/review-strictness.js && node --check lib/language.js && node --check lib/feedback.js && node --check lib/adaptive.js && node --check lib/evidence.js && node --check lib/explain.js && node --check lib/update.js && node --check lib/index.js && node --check lib/client.js && node --check scripts/note-voice-eval.mjs && node --check scripts/note-voice-eval-deepseek.mjs && node --check scripts/note-voice-eval-live.mjs && node --check scripts/note-voice-baseline.mjs
+
+
+# exit code: 0

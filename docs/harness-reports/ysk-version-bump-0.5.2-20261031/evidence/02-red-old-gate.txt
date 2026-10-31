@@ -1,0 +1,60 @@
+# Redaction note: local absolute repository paths in the captured output were replaced with <repo> before commit, including the file URL prefix in stack frames. No exit code, count, or assertion text was altered.
+# Review fix: 2026-10-31T06:03:50Z (2026-10-31T09:03:50+0300) trailing spaces on blank captured lines 24 and 26 were removed so git diff --check passes; no word, number, timestamp, test count, or exit code changed.
+# RED probe: the product surfaces carry 0.5.2 while the unchanged gate still has CURRENT='0.5.1' and PREVIOUS='0.5.0'
+# UTC: 2026-10-31T05:46:22Z  Local: 2026-10-31T08:46:22+0300
+# HEAD: c9ce22fb8bff2cba285e486500e4f0a7d7b767dd (dirty pre-commit tree: 7 product files changed, gate test unchanged)
+# command: node --test test/release-consistency.test.js
+✔ the release version is one patch or one minor step over the previous release (0.748375ms)
+✖ package.json, PLUGIN_VERSION, and the README install address agree (0.821625ms)
+✖ every README and docs/reference self-check sample version is the released version (0.268459ms)
+✔ no released artifact still documents the previous version (0.279375ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 2
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 174.752458
+
+✖ failing tests:
+
+test at test/release-consistency.test.js:71:1
+✖ package.json, PLUGIN_VERSION, and the README install address agree (0.821625ms)
+  AssertionError [ERR_ASSERTION]: package.json carries the release version
+
+  '0.5.2' !== '0.5.1'
+
+      at TestContext.<anonymous> (<repo>/test/release-consistency.test.js:73:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '0.5.2',
+    expected: '0.5.1',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/release-consistency.test.js:85:1
+✖ every README and docs/reference self-check sample version is the released version (0.268459ms)
+  AssertionError [ERR_ASSERTION]: README.md pluginVersion names the release version
+      at TestContext.<anonymous> (<repo>/test/release-consistency.test.js:96:14)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '## Operational verification\n\nThe supported check is **Run self-check** in **Settings -> Plugins -> You Should Know -> Diagnostics**. It calls the read-only `GET`/`HEAD /api/dsh-you-should-know/self-check` route over the same authenticated connection as every other plugin route and reports versions, runtime status, mode, registered routes, capabilities, and the bounded update state. Abridged sample:\n\n```json\n{\n  "ok": true,\n  "authTransport": "host-authenticated-connection",\n  "healthy": true,\n  "configured": true,\n  "pluginVersion": "0.5.2",\n  "runtimeVersion": "0.5.2",\n  "installedVersion": "0.5.2",\n  "runtimeStatus": "idle",\n  "reviewerMode": "balanced",\n  "update": { "currentVersion": "0.5.2", "updateAvailable": false, "automaticSupported": false }\n}\n```\n\nA healthy result shows the running and installed versions and the enabled capabilities. When the installed package version differs from the running module version, the card shows **Restart required**. When either version cannot be read, it says the comparison is unavailable instead of guessing.\n\nA bare `curl` to any `/api/*` route returns `401` before the plugin handler is reached: the connection\'s Host/Origin fence and browser-session authentication run first. That is expected host behavior, not a plugin failure, and it is why external verification needs the authenticated page. Do not bypass authentication or paste a session cookie into a command. For the same reason, read the read-only status route from the page\'s console:\n\n```js\nawait (await fetch(\'api/dsh-you-should-know/status?sessionId=<session-id>\')).json()\n```\n\nField-by-field schemas for both routes: [status and self-check](./docs/reference.md#status-and-self-check-routes).\n\n## Development\n\n```sh\nnpm test\n```\n\nThe suite covers route discovery and recovery, the verdict contract and silence handling, every gate, dedupe, strictness thresholds, language detection, the human-only invariant, the note card and... (line truncated to 2000 chars)
+    expected: /"pluginVersion": "0\.5\.1"/,
+    operator: 'match',
+    diff: 'simple'
+  }
+# exit code: 1
