@@ -1,0 +1,71 @@
+# Version surface scan on this change
+# UTC: 2026-10-31T04:10:58Z  Local: 2026-10-31T07:10:58+0300
+
+## 0.5.1 surface (every hit expected)
+# command: git grep -n '0\.5\.1' -- package.json lib README.md docs/reference.md test
+README.md:11:Version `0.5.1`, MIT. Host and browser halves ship as plain JavaScript, so a `github:` install needs no build. The scope is intentionally small: a composer-adjacent note card with a bounded in-memory history, a Plugins settings card (strictness mode, additional instructions, custom prompt, update controls), a session-header mode and model override, one reviewer call per qualifying turn, and a per-session runtime that retries one transient failure, bounds the queue, and pauses on quota without losing the turn.
+README.md:76:dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.5.1
+README.md:194:  "pluginVersion": "0.5.1",
+README.md:195:  "runtimeVersion": "0.5.1",
+README.md:196:  "installedVersion": "0.5.1",
+README.md:199:  "update": { "currentVersion": "0.5.1", "updateAvailable": false, "automaticSupported": false }
+docs/reference.md:220:  "pluginVersion": "0.5.1",
+docs/reference.md:221:  "runtimeVersion": "0.5.1",
+docs/reference.md:222:  "installedVersion": "0.5.1",
+docs/reference.md:227:  "update": { "currentVersion": "0.5.1", "latestVersion": "", "latestTag": "", "installSpec": "", "source": "git-tags", "updateAvailable": false, "dismissed": false, "autoCheckUpdates": true, "updateBehavior": "ask-before-update", "automaticSupported": false, "lastAutoCheckDate": "", "lastCheckedAt": null, "lastResult": null }
+lib/index.js:36:export const PLUGIN_VERSION = '0.5.1'
+package.json:3:  "version": "0.5.1",
+test/invariant.test.js:189:  assert.equal(manifest.version, '0.5.1')
+test/plugin.test.js:399:  assert.equal(body.pluginVersion, '0.5.1')
+test/plugin.test.js:400:  assert.equal(body.runtimeVersion, '0.5.1')
+test/plugin.test.js:401:  assert.equal(body.installedVersion, '0.5.1')
+test/release-consistency.test.js:40:const CURRENT = '0.5.1'
+test/update-route.test.js:257:  assert.equal(manifest.version, '0.5.1')
+
+## Remaining 0.5.0 hits by area
+# command: git grep -c '0\.5\.0' -- .
+COUNT docs/harness-reports/ysk-release-prep-0.4.4/final-report.md:2
+COUNT docs/harness-reports/ysk-stage2-prompt-rtl-actions-20261030/final-report.md:1
+COUNT docs/harness-reports/ysk-upstream-ledger-correction-20261030/final-report.md:1
+COUNT docs/harness-reports/ysk-v0.5.0-functional-fixes-20261030/evidence/actual-host-actions.json:3
+COUNT docs/harness-reports/ysk-v0.5.0-functional-fixes-20261030/evidence/actual-host-status.json:1
+COUNT docs/harness-reports/ysk-v0.5.0-functional-fixes-20261030/evidence/check.txt:1
+COUNT docs/harness-reports/ysk-v0.5.0-functional-fixes-20261030/evidence/host-provenance.txt:4
+COUNT docs/harness-reports/ysk-v0.5.0-functional-fixes-20261030/evidence/test-run-full.txt:1
+COUNT docs/harness-reports/ysk-v0.5.0-functional-fixes-20261030/evidence/test-run-red.txt:4
+COUNT docs/harness-reports/ysk-v0.5.0-functional-fixes-20261030/final-report.md:18
+COUNT docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/01-baseline-targeted.txt:1
+COUNT docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/02-red-patch-only-gate.txt:6
+COUNT docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/03-green-targeted.txt:1
+COUNT docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/03b-targeted-committed.txt:2
+COUNT docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/04-npm-test-full-dirty-tree.txt:2
+COUNT docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/04b-npm-test-full-committed.txt:3
+COUNT docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/05-npm-check.txt:2
+COUNT docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/06-diff-check.txt:1
+COUNT docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/06b-diff-check-committed.txt:2
+COUNT docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/07-version-scan.txt:33
+COUNT docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/08-diff-stat-and-security.txt:21
+COUNT docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/09-provenance.txt:4
+COUNT docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/10-gate-negative-probe.txt:2
+COUNT docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/11-final-verification.txt:3
+COUNT docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/12-publication-check.txt:8
+COUNT docs/harness-reports/ysk-version-bump-0.5.0-20261030/evidence/13-final-npm-test.txt:4
+COUNT docs/harness-reports/ysk-version-bump-0.5.0-20261030/final-report.md:17
+COUNT test/client-ui.test.js:1
+COUNT test/recent-check-diagnostics.test.js:2
+COUNT test/release-consistency.test.js:1
+COUNT test/update.test.js:4
+
+## 0.5.0 hits outside docs/harness-reports (must be fixtures or PREVIOUS only)
+test/client-ui.test.js:2120:  const newer = updateBackend({ latestTag: 'v0.5.0', latestVersion: '0.5.0', installSpec: 'github:PipaGs/dsh-you-should-know#v0.5.0', dismissed: false, dismissedVersion: 'v0.4.0' })
+test/recent-check-diagnostics.test.js:161:    pluginVersion: '0.5.0',
+test/recent-check-diagnostics.test.js:162:    installedVersion: '0.5.0',
+test/release-consistency.test.js:41:const PREVIOUS = '0.5.0'
+test/update.test.js:139:  assert.equal(parseRemoteTags(tagListing(['v0.4.0', 'v0.4.1', 'v0.5.0']), { maxTagLines: 2 }), null)
+test/update.test.js:336:  const tooManyLines = checkerHarness({ shellExec: async () => shellResult(tagListing(['v0.4.0', 'v0.4.1', 'v0.5.0'])), maxTagLines: 2 })
+test/update.test.js:535:    lastSeenLatestVersion: 'v0.5.0',
+test/update.test.js:538:  assert.equal(fresh.lastSeenLatestVersion, 'v0.5.0')
+
+## No released artifact names the previous version
+# command: git grep -n '0\.5\.0' -- package.json README.md docs/reference.md lib/index.js
+# none (0 hits)

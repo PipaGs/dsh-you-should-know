@@ -1,0 +1,24 @@
+# Publication state at preparation time
+# UTC: 2026-10-31T04:10:38Z  Local: 2026-10-31T07:10:38+0300
+# command: git tag --list 'v0.5*'
+v0.5.0
+# command: git ls-remote --tags origin 'v0.5*'
+4f65cff661dc7b79ae0b1dc9929e82b5febadc8f	refs/tags/v0.5.0
+6d5b770b9f595c0bc456c9096c23875dc7a412ec	refs/tags/v0.5.0^{}
+# command: git rev-parse v0.5.0
+4f65cff661dc7b79ae0b1dc9929e82b5febadc8f
+# command: git rev-parse v0.5.0^{commit}
+6d5b770b9f595c0bc456c9096c23875dc7a412ec
+# command: git rev-parse v0.5.1
+fatal: ambiguous argument 'v0.5.1': unknown revision or path not in the working tree.
+Use '--' to separate paths from revisions, like this:
+'git <command> [<revision>...] -- [<file>...]'
+v0.5.1
+# command: gh release view v0.5.1
+release not found
+# command: gh release list --limit 5
+v0.4.6	Latest	v0.4.6	2026-10-24T04:45:54Z
+v0.4.4		v0.4.4	2026-10-14T15:22:30Z
+v0.4.3		v0.4.3	2026-10-13T14:51:22Z
+v0.4.2		v0.4.2	2026-10-10T13:13:38Z
+v0.4.1 - authenticated in-product self-check		v0.4.1	2026-10-10T09:34:36Z
