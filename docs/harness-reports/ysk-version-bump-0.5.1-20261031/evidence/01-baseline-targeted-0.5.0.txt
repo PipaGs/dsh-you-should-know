@@ -1,0 +1,89 @@
+# Baseline targeted run before the 0.5.1 edit (tree restored to origin/main content by git stash)
+# UTC: 2026-10-31T04:10:09Z  Local: 2026-10-31T07:10:09+0300
+# HEAD: b6025cc640990294110796e12eb3df3c24f2d476
+# package.json version: 0.5.0
+# command: node --test test/release-consistency.test.js test/invariant.test.js test/plugin.test.js test/update-route.test.js
+✔ shipped sources contain no path that could deliver advice to the primary agent (8.812375ms)
+✔ the plugin uses only the sanctioned seams (0.999084ms)
+✔ the auth boundary stays host-owned: no no-auth route registration exists (0.951458ms)
+✔ no shipped source reads, stores, or forwards a cookie, token, or auth header (3.459625ms)
+✔ no shipped source can install, upgrade, or self-modify the plugin (4.117375ms)
+✔ the browser half reaches files and the composer only through their public seams (1.011ms)
+✔ Add to chat can only compose the draft and never hands the action to the agent (0.975667ms)
+✔ the English-only scan rejects Cyrillic, Greek, and CJK text (0.146666ms)
+✔ public-facing text stays English-only and free of unrelated project references (4.58225ms)
+✔ the bundled row leaves the reviewer route to adaptive discovery (0.474916ms)
+✔ the manifest declares the bundle, the client half, and no build step (0.295708ms)
+✔ the plugin exports the package name (0.70025ms)
+✔ an explicitly blank provider or model registers nothing at all (0.480666ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+✔ the built-in default discovers the DeepSeek route a current DSH build registers (6.989291ms)
+✔ an automatic row with no DeepSeek provider stays quiet and never calls the model (0.810125ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+✔ a provider and model override reaches the reviewer channel (0.854417ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+✔ a live config change moves from the automatic route to an explicit override (1.681125ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+✔ a changed volatile provider/model ref updates the live reviewer route (1.432458ms)
+[dsh-you-should-know] live config update failed; keeping the previous config: Cannot read properties of null (reading 'provider')
+✔ a changed volatile gate ref is applied to the live turn gates (0.679042ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+[dsh-you-should-know] already composed in this process; this duplicate row stays inert
+✔ a throwing volatile ref keeps the prior live config and never escapes the listener (0.849416ms)
+✔ an inert row does not consume the single-reviewer slot (0.19225ms)
+✔ composing the plugin twice keeps exactly one reviewer, until the first is disposed (0.158833ms)
+✔ the plugin registers its browser routes on the connection Fetch carrier (0.768625ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+✔ the authenticated self-check route reports only the bounded running plugin state (19.966ms)
+✔ every declared Fetch route crosses the connection bridge for each of its methods (1.930667ms)
+✔ a configured plugin observes a turn, serves the note, and dismisses it over Fetch (2.0645ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+✔ the notes and history routes expose the stored kind and quoted basis (1.200209ms)
+✔ the Fetch resolve route records an exact action and history keeps the note (1.581791ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+[dsh-you-should-know] observation failed: hostile session
+✔ the status route reports activity without exposing conversation or note text (0.968667ms)
+✔ a listener failure is contained instead of escaping into the host (0.279958ms)
+✔ the session route is registered with GET, HEAD, and POST on the Fetch carrier (0.124583ms)
+✔ the session route serves the effective route and its source without leaking text (0.713333ms)
+[dsh-you-should-know] update check failed: no public shell service is mounted
+✔ the session route POST set-model and reset-model change the reviewer route (1.106208ms)
+✔ the session route POST resume reports whether a paused runtime resumed (0.232792ms)
+✔ the session route bounds and rejects invalid POSTs without throwing (0.756375ms)
+[dsh-you-should-know] session cleanup failed: hostile session
+[dsh-you-should-know] already composed in this process; this duplicate row stays inert
+✔ session/disposed forgets the session notes and its override (0.865958ms)
+✔ the session route turns an unexpected engine failure into a bounded 500 (0.267958ms)
+✔ ownership is a process-global token across fresh module imports and releases on disposal (2.299209ms)
+✔ the plugin registers the config route on the connection Fetch carrier (0.108708ms)
+✔ the config route is writable and persists the row through the settings service (1.109166ms)
+✔ the config route reports read-only and refuses to persist without a settings service (0.3295ms)
+✔ the session route POST set-mode and reset-mode isolate the strictness mode (0.847292ms)
+✔ the plugin runs the day-first automatic update check through the shell and settings seams (2.199417ms)
+✔ a volatile config edit reaches the update state without a remount (0.593625ms)
+✔ the release version is one patch or one minor step over the previous release (0.813916ms)
+✔ package.json, PLUGIN_VERSION, and the README install address agree (0.659416ms)
+✔ every README and docs/reference self-check sample version is the released version (0.261708ms)
+✔ no released artifact still documents the previous version (0.249458ms)
+✔ GET update returns the bounded update status and writability (20.167583ms)
+✔ GET update reports a read-only host and HEAD stays bodyless (0.629458ms)
+✔ an update POST with a malformed body or unknown action is rejected (0.791667ms)
+✔ a manual check reports up to date, update available, or failed (1.480792ms)
+✔ set-preferences persists valid values and rejects invalid ones (0.628041ms)
+✔ dismiss persists a stable version and refuses anything else (0.374334ms)
+✔ the update response carries only bounded update fields, never prompt or note text (0.208541ms)
+✔ an automatic reviewer save preserves the live update state across the replace (1.008875ms)
+✔ a pinned reviewer save carries the preserved fields into the live patch (0.451459ms)
+✔ the config GET carries the bounded update status only when the host wires one (0.982208ms)
+✔ without a preserve hook the reviewer patch is unchanged (0.262584ms)
+✔ the exported plugin version mirrors package.json (3.14425ms)
+✔ the Config schema declares the update fields with conservative defaults (1.483875ms)
+ℹ tests 61
+ℹ suites 0
+ℹ pass 61
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 230.297583
+# exit code: 0

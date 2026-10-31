@@ -1,0 +1,35 @@
+# Redaction note: local absolute repository paths in the captured output were replaced with <repo> before commit, including the file URL prefix in stack frames.
+# RED probe: CURRENT=0.5.1 with PREVIOUS temporarily reverted to '0.4.6'
+# UTC: 2026-10-31T04:10:15Z  Local: 2026-10-31T07:10:15+0300
+# command: node --test test/release-consistency.test.js
+✖ the release version is one patch or one minor step over the previous release (0.912166ms)
+✔ package.json, PLUGIN_VERSION, and the README install address agree (0.731958ms)
+✔ every README and docs/reference self-check sample version is the released version (0.277208ms)
+✔ no released artifact still documents the previous version (0.240042ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 3
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 170.41825
+
+✖ failing tests:
+
+test at test/release-consistency.test.js:50:1
+✖ the release version is one patch or one minor step over the previous release (0.912166ms)
+  AssertionError [ERR_ASSERTION]: the release is exactly one step over the previous release: one patch step (0.4.7) or one minor step (0.5.0), not 0.5.1
+      at TestContext.<anonymous> (<repo>/test/release-consistency.test.js:57:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+# probe note: the assertion output above is the expected RED state for a stale PREVIOUS
