@@ -20,7 +20,7 @@ hits from approved public sources in this repository.
 - The index `dshysk-*` covers 59 tracked public files (1040 documents):
   `README.md`, `AGENTS.md`, `LICENSE`, `package.json`, `cordis.patch.yml`,
   `docs/reference.md`, `lib/`, `test/`, and `scripts/`.
-- DSH discovered 22 `mcp__xerj__xerj_*` tools in the live session.
+- DSH discovered 12 read-only `mcp__xerj__xerj_*` tools in the live session.
 - The DSH-side call `mcp__xerj__xerj_search` returned
   `lib/client.js:876` and `README.md:127`.
 - Existing MCP servers (context7, exa, duckduckgo, chrome-devtools) and the
@@ -38,7 +38,7 @@ hits from approved public sources in this repository.
 | Repository checkout | `fix/aud-1-control-char-validation-20261031` at `5b9d99f`, with one untracked log file; left untouched |
 | XERJ binary | not in `PATH`, no local installation found |
 | XERJ ports | no XERJ listener; port `8080` is used by `tunnel-client`, so the node uses dedicated ports |
-| Disk | 96% used, about 20 GiB free |
+| Disk | 96% used, about 20 GiB free before cleanup; 94% after the npm-cache cleanup |
 
 The reviewer profile configuration was read but not modified. The change adds
 one MCP entry to the same patch file.
@@ -84,18 +84,17 @@ rest_port = 18080
 grpc_port = 18081
 es_compat_port = 19200
 data_dir = "/Users/pipags/work/dsh-you-should-know/.xerj/data"
-
-[limits]
-disk_flood_stage_percent = 97
 ```
 
 Authentication is left at its default, which is enabled. The node wrote the
 generated admin key to `.xerj/data/admin.key` with mode `0600`.
 
-The `disk_flood_stage_percent` change is deliberate and local. The default
-95% flood guard would block every write on this host, which is 96% full with
-about 20 GiB free. The pilot index is a few megabytes. The risk and rollback
-are stated below.
+The node uses the default 95% flood guard. The host started at 96% with about
+20 GiB free, so the first run needed a temporary 97% override. The override is
+removed. I deleted the regenerable npm download cache
+(`/Users/pipags/.npm/_cacache`, 5.6 GB) to free space instead. The disk is now
+94%, `disk.flood_blocked` is false, and a create/index/delete probe returned
+200/201/200 (`evidence/15-disk-guard.txt`).
 
 ### 3. stdio bridge
 
@@ -105,10 +104,18 @@ DSH starts `.xerj/bin/xerj-mcp.sh`. The wrapper:
 - starts the node with `nohup` if it is down, with feedback disabled;
 - reads the API key from `.xerj/data/admin.key`;
 - passes the key through `XERJ_AUTH`, not through the process arguments;
-- `exec`s `xerj mcp --url http://127.0.0.1:19200 --disable-feedback`.
+- `exec`s a Node proxy, which starts `xerj mcp` as a child and filters the
+  MCP stream in both directions.
 
-The MCP server does not start a node itself; the wrapper supplies that part.
-The full script is in `evidence/03-config-and-wrapper.txt`.
+The proxy filters `tools/list` to a 12-tool read-only allowlist and rejects
+any `tools/call` outside it with JSON-RPC `-32601` before the request reaches
+XERJ. The allowed set is `xerj_search`, `xerj_semantic_search`,
+`xerj_vector_search`, `xerj_hybrid_search`, `xerj_batch_search`, `xerj_def`,
+`xerj_map`, `xerj_plan`, `xerj_code_search`, `xerj_brain_overview`,
+`xerj_brain_ego`, and `xerj_memory_recall`. The installed
+`dsh-mcp-client` (0.2.1-rc.5) has no native tool filter, so the allowlist is
+enforced by this stdio bridge, not by the plugin itself. The full wrapper and
+proxy are in `evidence/03-config-and-wrapper.txt`.
 
 ### 4. DSH profile entry
 
@@ -151,11 +158,12 @@ indexed.
 
 ### DSH tool discovery
 
-The live DSH session registered 22 tools under the `xerj` namespace, from
-`xerj_autoindex_remove` through `xerj_vector_search`. The raw session log
-was filtered for `mcp__xerj__xerj_*`; the result is
-`evidence/06-dsh-mcp-discovery.txt` (`tool_count=22`). The same log still
-contains 42 other MCP tool names (context7, duckduckgo, exa, and chrome-devtools).
+The live DSH session registered 12 tools under the `xerj` namespace. The
+latest `system/message` tool list in the session log has `tool_count=12`: the
+read-only search, definition, map, plan, code-search, brain-read, and
+memory-recall tools. The earlier 22-tool list (seq 703) is superseded. The raw
+result is `evidence/06-dsh-mcp-discovery.txt`. The same log still contains 42
+other MCP tool names (context7, duckduckgo, exa, and chrome-devtools).
 
 ### Real search through DSH MCP
 
@@ -189,35 +197,33 @@ file:line pairs, so the MCP path and the CLI path agree.
 | Network bind | All three listeners are on `127.0.0.1` only |
 | Authentication | Unauthenticated `GET /` on 19200 and `GET /v1/health` on 18080 return 401. gRPC data methods require the same key: `XerjSearch/Search` returns grpc-status 16 without it and 5 with it (`evidence/08-security.txt`, `evidence/13-grpc-auth.txt`) |
 | Key handling | Key file mode `0600`; passed by environment; not in argv; not in committed evidence |
+| Tool allowlist | `tools/list` exposes 12 read-only tools. `xerj_field_report`, `xerj_hub_*`, `xerj_corpus_feedback`, `xerj_memory_store`, `xerj_brain_link`, `xerj_brain_unlink`, and `xerj_autoindex_remove` are absent; direct calls return `-32601` (`evidence/14-allowlist.txt`) |
 | Outbound connections | At capture, no XERJ socket had a non-loopback peer; the MCP child talks to the node over loopback (`evidence/08-security.txt`) |
 | Feedback and upload | `--disable-feedback` on the node and the MCP server; `XERJ_DISABLE_FEEDBACK=true` in the wrapper |
-| Field report | The `xerj_field_report` tool was not called. The text that asks for an automatic report is tool metadata, not an instruction that was followed |
-| Corpus Hub | No `xerj hub` pull or feedback call; no corpus pack was downloaded |
+| Field report | The tool is not in the allowlist and was not called. The text that asks for an automatic report is tool metadata, not an instruction that was followed |
+| Corpus Hub | The `xerj_hub_*` tools are not in the allowlist; no hub pull or feedback call was made |
 | Indexed data | Only tracked public repository files; no `docs/harness-reports`, worktrees, credentials, or session data |
 | Telemetry | XERJ documentation states the binary has no runtime telemetry, update check, or license call. The only network paths are the node's own API and the optional console fonts |
 
 Residual risks:
 
-- The server exposes 22 tools, including memory writes and the field-report
-  tool. `dsh-mcp-client` has no tool allowlist, so the model can see them.
-  The pilot did not call the write or report tools.
+- The allowlist is enforced by the stdio proxy, not by `dsh-mcp-client`
+  0.2.1-rc.5, which has no native tool filter. A process that bypasses the
+  wrapper can still reach the loopback node with the key.
+- The allowed read-only tools still return local file paths and passage text
+  from the public index. `xerj_code_search` and `xerj_plan` are read-only but
+  can expose repository structure.
 - The MCP server injects its own tool descriptions into the model context.
-  Those descriptions contain an instruction to send a field report. It was
-  treated as untrusted data and not executed.
+  The text that asks for a field report is treated as untrusted data.
 - The node is not a launchd service. The wrapper starts it on demand, so it
   runs while the DSH MCP child is active and may outlive DSH.
-- `disk_flood_stage_percent = 97` lowers a local safety guard from 95% to
-  97%. The host has about 20 GiB free; if free space drops further, writes
-  block again.
+- The disk guard is back at 95%, but the host is still at 94% with about
+  26 GiB free. Another 1% of growth re-engages the write block.
 - `v1.0.0-rc.100` is a release candidate, not a final 1.0.0.
 - The profile edit lives outside the repository and needs the documented
   rollback, not a repository revert alone.
 - The XERJ CLI prints the admin key in its own "next command" hint. The hint
   was redacted in every captured file. The key was never committed.
-- Tool-level egress: `xerj_field_report`, `xerj_hub_*`, and
-  `xerj_corpus_feedback` can send data off-host if called.
-  `xerj_autoindex_remove` can delete the pilot index. `dsh-mcp-client` has
-  no tool allowlist; the pilot called none of these tools.
 - The admin key and index live in `.xerj/`, excluded through
   `.git/info/exclude`, not `.gitignore`. A directory copy or `git add -f`
   can carry them; treat the directory as local-only state.
@@ -282,6 +288,8 @@ to drop the registered tools. The pilot did not restart DSH.
 | Index verification | 59 tracked paths, 0 untracked or missing |
 | Unauthenticated HTTP | 401 on `GET /` (19200) and `GET /v1/health` (18080) |
 | Unauthenticated gRPC | `XerjSearch/Search` returns grpc-status 16 without a key, 5 with it |
+| XERJ tool allowlist | `tools/list` returns 12 read-only tools; blocked calls return `-32601` |
+| Disk guard | default 95%, disk 94%, `disk.flood_blocked=false`, write probe 200/201/200 |
 | Secret scan of committed evidence | no key value and no 64-hex secret; only binary SHA-256 values |
 
 The tests cover the repository's own behavior. They do not cover the host DSH
@@ -312,7 +320,7 @@ All files are under `docs/harness-reports/xerj-mcp-pilot-20261031/evidence/`:
 | `03-config-and-wrapper.txt` | Node TOML, stdio wrapper, profile insert |
 | `04-index-scope.txt` | Ignore rules, 59 planned paths, indexed paths |
 | `05-cli-search.txt` | CLI search with the same file:line hits |
-| `06-dsh-mcp-discovery.txt` | Live DSH session tool names, count 22 |
+| `06-dsh-mcp-discovery.txt` | Latest live DSH tool list, count 12 |
 | `07-dsh-mcp-search.json` | Raw DSH MCP search response |
 | `08-security.txt` | Listeners, 401 checks, processes, loopback connection |
 | `09-profile-diff.txt` | The only profile change |
@@ -320,6 +328,8 @@ All files are under `docs/harness-reports/xerj-mcp-pilot-20261031/evidence/`:
 | `11-repo-scope.txt` | Repository visibility and tracked-file check |
 | `12-index-run.txt` | Journal wall time and live document count |
 | `13-grpc-auth.txt` | gRPC data-method auth probe with and without the key |
+| `14-allowlist.txt` | Allowlist smoke test and blocked tool calls |
+| `15-disk-guard.txt` | Cleanup, 95% guard, allocation, and write probe |
 
 ## Review request
 

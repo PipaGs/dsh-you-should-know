@@ -1,0 +1,24 @@
+# Allowlist smoke test (standalone stdio client through the same bridge)
+[stderr] xerj-mcp v1.0.0-rc.100 — MCP stdio server, proxying to http://127.0.0.1:19200
+TOOLS 12 xerj_def,xerj_batch_search,xerj_search,xerj_semantic_search,xerj_vector_search,xerj_hybrid_search,xerj_memory_recall,xerj_brain_ego,xerj_brain_overview,xerj_map,xerj_code_search,xerj_plan
+SEARCH_PATHS lib/client.js:876,README.md:127
+BLOCKED xerj_field_report {"code":-32601,"message":"tool blocked by DSH read-only XERJ allowlist: xerj_field_report"}
+BLOCKED xerj_hub_ask {"code":-32601,"message":"tool blocked by DSH read-only XERJ allowlist: xerj_hub_ask"}
+BLOCKED xerj_autoindex_remove {"code":-32601,"message":"tool blocked by DSH read-only XERJ allowlist: xerj_autoindex_remove"}
+BLOCKED xerj_memory_store {"code":-32601,"message":"tool blocked by DSH read-only XERJ allowlist: xerj_memory_store"}
+
+# Allowed set source (.xerj/bin/mcp-allowlist-proxy.mjs)
+const ALLOWED = new Set([
+  'xerj_search',
+  'xerj_semantic_search',
+  'xerj_vector_search',
+  'xerj_hybrid_search',
+  'xerj_batch_search',
+  'xerj_def',
+  'xerj_map',
+  'xerj_plan',
+  'xerj_code_search',
+  'xerj_brain_overview',
+  'xerj_brain_ego',
+  'xerj_memory_recall',
+]);

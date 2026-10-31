@@ -1,0 +1,19 @@
+# Disk guard restoration (2026-10-31T19:25:05Z)
+## before cleanup (raw, from evidence/01-versions.txt): 20 GiB free, 96% capacity
+## action: rm -rf /Users/pipags/.npm/_cacache (regenerable npm download cache, 5.6 GB)
+## after cleanup
+/dev/disk3s5   460Gi   408Gi    26Gi    95%    7.0M  270M    3%   /System/Volumes/Data
+
+## node allocation
+[{"shards":"17","disk.indices":"1661155b","disk.used":"466751934464b","disk.avail":"27632861184b","disk.total":"494384795648b","disk.percent":"94","host":"127.0.0.1","ip":"127.0.0.1","node":"xerj-node-1","path.data":"/Users/pipags/work/dsh-you-should-know/.xerj/data","disk.flood_stage":"95","disk.threshold_enabled":"true","disk.flood_blocked":"false"}]
+## write probe
+create_index=200
+index_doc=201
+delete_index=200
+
+## config threshold override count (0 means default 95%)
+0
+
+## log lines at/after restart (old pre-cleanup warning is historical)
+2026-10-31T19:22:51.036131Z  WARN xerj_engine::governor: disk flood-stage watermark crossed — engaging read_only_allow_delete write block used_pct=95 flood_pct=95 free=20.1gb
+2026-10-31T19:23:55.286332Z  INFO xerj_engine::governor: resource governor initialised (parent circuit breaker) memtable_budget_mb=2048 memory_release_pct=85 memory_min_engaged_ms=2000 memory_limit_mb=8192 memory_limit_source=Auto memory_watermark_mb=7782 memory_watermark_pct=95 max_query_memory_mb=512 max_concurrent_searches=64 max_concurrent_bulks=8 disk_flood_pct=95 segment_hydration_cache_mb=1638 segment_hydration_cache_source=Auto

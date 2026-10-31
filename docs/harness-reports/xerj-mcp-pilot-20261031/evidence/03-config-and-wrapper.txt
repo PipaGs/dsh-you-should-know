@@ -1,4 +1,4 @@
-# XERJ node config (.xerj/xerj.toml)
+# XERJ node config (.xerj/xerj.toml, threshold reverted to default)
 [server]
 bind_address = "127.0.0.1"
 rest_port = 18080
@@ -6,13 +6,8 @@ grpc_port = 18081
 es_compat_port = 19200
 data_dir = "/Users/pipags/work/dsh-you-should-know/.xerj/data"
 
-# Local dev machine sits at 96% used with ~20 GiB free. The default 95%
-# flood-stage guard would block all writes for a few-MB pilot index.
-# Raise only this local node's threshold; rollback = remove this section.
-[limits]
-disk_flood_stage_percent = 97
 
-# stdio wrapper (.xerj/bin/xerj-mcp.sh)
+# stdio wrapper (.xerj/bin/xerj-mcp.sh) — now execs the allowlist proxy
 #!/bin/sh
 # Local XERJ stdio MCP bridge for DeepSeek Harness.
 # Starts the loopback-only node if it is down, then execs the MCP server.
@@ -23,6 +18,7 @@ CFG="$ROOT/.xerj/xerj.toml"
 KEYFILE="$ROOT/.xerj/data/admin.key"
 URL="http://127.0.0.1:19200"
 LOG="$ROOT/.xerj/logs/node.log"
+NODE="/opt/homebrew/bin/node"
 
 status=$(curl -s -o /dev/null -w '%{http_code}' --max-time 2 "$URL/" 2>/dev/null || true)
 if [ "$status" != "401" ] && [ "$status" != "200" ]; then
@@ -41,9 +37,82 @@ if [ "$status" != "401" ] && [ "$status" != "200" ]; then
   fi
 fi
 
-XERJ_AUTH="ApiKey $(cat "$KEYFILE")" XERJ_DISABLE_FEEDBACK=true   exec "$BIN" mcp --url "$URL" --disable-feedback
+# Read-only allowlist proxy: filters tools/list and rejects write/egress
+# tools/call before they reach the XERJ MCP server.
+XERJ_AUTH="ApiKey $(cat "$KEYFILE")" XERJ_DISABLE_FEEDBACK=true \
+  exec "$NODE" "$ROOT/.xerj/bin/mcp-allowlist-proxy.mjs"
 
-# active DSH profile insert (tail of ~/.dsh/profiles/desktop/cordis.patch.yml)
+# allowlist proxy (.xerj/bin/mcp-allowlist-proxy.mjs)
+import { spawn } from 'node:child_process';
+import { createInterface } from 'node:readline';
+
+// Read-only allowlist enforced at the stdio boundary that dsh-mcp-client
+// launches. The installed dsh-mcp-client (0.2.1-rc.5) has no native tool
+// filter, so the bridge filters tools/list and rejects tools/call locally.
+const ALLOWED = new Set([
+  'xerj_search',
+  'xerj_semantic_search',
+  'xerj_vector_search',
+  'xerj_hybrid_search',
+  'xerj_batch_search',
+  'xerj_def',
+  'xerj_map',
+  'xerj_plan',
+  'xerj_code_search',
+  'xerj_brain_overview',
+  'xerj_brain_ego',
+  'xerj_memory_recall',
+]);
+
+const ROOT = '/Users/pipags/work/dsh-you-should-know';
+const BIN = ROOT + '/.tools/xerj/xerj';
+const URL = 'http://127.0.0.1:19200';
+
+const child = spawn(BIN, ['mcp', '--url', URL, '--disable-feedback'], {
+  stdio: ['pipe', 'pipe', 'pipe'],
+  env: { ...process.env, XERJ_DISABLE_FEEDBACK: 'true' },
+});
+
+const pendingList = new Set();
+const stdin = createInterface({ input: process.stdin });
+stdin.on('line', (line) => {
+  let msg;
+  try { msg = JSON.parse(line); } catch { child.stdin.write(line + '\n'); return; }
+  if (msg && msg.method === 'tools/list' && msg.id !== undefined) pendingList.add(msg.id);
+  if (msg && msg.method === 'tools/call' && !ALLOWED.has(msg.params?.name)) {
+    const id = msg.id === undefined ? null : msg.id;
+    process.stdout.write(JSON.stringify({
+      jsonrpc: '2.0',
+      id,
+      error: {
+        code: -32601,
+        message: 'tool blocked by DSH read-only XERJ allowlist: ' + String(msg.params?.name),
+      },
+    }) + '\n');
+    return;
+  }
+  child.stdin.write(line + '\n');
+});
+
+const stdout = createInterface({ input: child.stdout });
+stdout.on('line', (line) => {
+  let msg;
+  try { msg = JSON.parse(line); } catch { process.stdout.write(line + '\n'); return; }
+  if (msg && msg.id !== undefined && pendingList.has(msg.id) && Array.isArray(msg.result?.tools)) {
+    msg.result.tools = msg.result.tools.filter((t) => ALLOWED.has(t.name));
+    pendingList.delete(msg.id);
+  }
+  process.stdout.write(JSON.stringify(msg) + '\n');
+});
+
+child.stderr.on('data', (d) => process.stderr.write(d));
+child.on('exit', (code, signal) => {
+  if (signal) process.kill(process.pid, signal);
+  else process.exit(code ?? 0);
+});
+stdin.on('close', () => { try { child.stdin.end(); } catch {} });
+
+# active DSH profile insert (tail)
         failOnStartupError: false
 
 # XERJ MCP — local loopback search over approved public project sources.
