@@ -138,9 +138,9 @@ The index is limited by `.xerjignore` to public project sources. Excluded:
 `docs/upstream/`, the untracked rollout log, and the tool directories.
 
 The plan was checked with `--dry-run` before writing. It listed 59 files and
-pruned 9 ignored directories (465 ignored files in pruned directories). The
-write then produced 1040 live documents in `dshysk-docs` with prefix
-`dshysk`, in 3.9 seconds.
+showed that the excluded directories were pruned. The write then produced
+1040 live documents in `dshysk-docs` with prefix `dshysk`, with a recorded
+`wall_seconds` of 3.0 (`evidence/12-index-run.txt`).
 
 All 59 indexed paths are tracked files at the task commit; the check found
 `untracked_or_missing=0`. The repository is public
@@ -155,7 +155,7 @@ The live DSH session registered 22 tools under the `xerj` namespace, from
 `xerj_autoindex_remove` through `xerj_vector_search`. The raw session log
 was filtered for `mcp__xerj__xerj_*`; the result is
 `evidence/06-dsh-mcp-discovery.txt` (`tool_count=22`). The same log still
-contains 42 tool names from context7, duckduckgo, exa, and chrome-devtools.
+contains 42 other MCP tool names (context7, duckduckgo, exa, and chrome-devtools).
 
 ### Real search through DSH MCP
 
@@ -187,9 +187,9 @@ file:line pairs, so the MCP path and the CLI path agree.
 | Control | Observation |
 |---|---|
 | Network bind | All three listeners are on `127.0.0.1` only |
-| Authentication | Unauthenticated requests to 19200 and 18080 return 401 |
+| Authentication | Unauthenticated `GET /` on 19200 and `GET /v1/health` on 18080 return 401. gRPC data methods require the same key: `XerjSearch/Search` returns grpc-status 16 without it and 5 with it (`evidence/08-security.txt`, `evidence/13-grpc-auth.txt`) |
 | Key handling | Key file mode `0600`; passed by environment; not in argv; not in committed evidence |
-| Outbound connections | The only established TCP connection is loopback between DSH's MCP child and the node |
+| Outbound connections | At capture, no XERJ socket had a non-loopback peer; the MCP child talks to the node over loopback (`evidence/08-security.txt`) |
 | Feedback and upload | `--disable-feedback` on the node and the MCP server; `XERJ_DISABLE_FEEDBACK=true` in the wrapper |
 | Field report | The `xerj_field_report` tool was not called. The text that asks for an automatic report is tool metadata, not an instruction that was followed |
 | Corpus Hub | No `xerj hub` pull or feedback call; no corpus pack was downloaded |
@@ -214,6 +214,13 @@ Residual risks:
   rollback, not a repository revert alone.
 - The XERJ CLI prints the admin key in its own "next command" hint. The hint
   was redacted in every captured file. The key was never committed.
+- Tool-level egress: `xerj_field_report`, `xerj_hub_*`, and
+  `xerj_corpus_feedback` can send data off-host if called.
+  `xerj_autoindex_remove` can delete the pilot index. `dsh-mcp-client` has
+  no tool allowlist; the pilot called none of these tools.
+- The admin key and index live in `.xerj/`, excluded through
+  `.git/info/exclude`, not `.gitignore`. A directory copy or `git add -f`
+  can carry them; treat the directory as local-only state.
 
 ## Reversibility and rollback
 
@@ -222,25 +229,44 @@ SHA-256 `0357c4eca968b9558cb31e2fcaaf54c28c29809d56adb3f14330acc8e8cb74d0`;
 it matched the live file before the edit.
 
 ```sh
-# 1. Restore the profile and reload or restart DSH so the tools unregister.
-cp /Users/pipags/work/dsh-you-should-know/.xerj/backup/cordis.patch.yml.before-xerj \
-   ~/.dsh/profiles/desktop/cordis.patch.yml
+set -eu
+cd /Users/pipags/work/dsh-you-should-know
+
+# 1. Remove the 15-line XERJ block from the live profile.
+#    Keep a timestamped copy, then delete only the block that starts with
+#    "# XERJ MCP — local loopback search" and ends at
+#    "failOnStartupError: false". Do not rewrite unrelated entries.
+cp ~/.dsh/profiles/desktop/cordis.patch.yml \
+   ~/.dsh/profiles/desktop/cordis.patch.yml.before-xerj-rollback
+# Edit the file and delete the block before running later steps.
+# Fallback only if the file is otherwise unchanged since the pilot:
+# cp .xerj/backup/cordis.patch.yml.before-xerj \
+#    ~/.dsh/profiles/desktop/cordis.patch.yml
 
 # 2. Remove only the pilot index while the node is still running.
-cd /Users/pipags/work/dsh-you-should-know
 XERJ_DISABLE_FEEDBACK=true .tools/xerj/xerj autoindex remove --prefix dshysk \
   --url http://127.0.0.1:19200 --api-key "$(cat .xerj/data/admin.key)" \
   --state-dir .xerj/autoindex --yes
 
-# 3. Stop the MCP bridge and the node, then delete the local state and binary.
+# 3. Stop the MCP bridge and the node.
 pkill -f 'xerj mcp --url http://127.0.0.1:19200' || true
 pkill -f '.tools/xerj/xerj --config' || true
+
+# 4. Refuse to delete state while the profile still names the server.
+! grep -q 'mcp-xerj' ~/.dsh/profiles/desktop/cordis.patch.yml
 rm -rf .xerj .tools
+rm -f .xerjignore
 ```
 
-The last command deletes the binary, data, key, logs, backup, and wrapper.
-After that, remove the three lines added to `.git/info/exclude`
-(`.tools/`, `.xerj/`, `.xerjignore`). No tracked repository file depends on this setup.
+The script stops if the profile still contains `mcp-xerj`, so it cannot leave
+a dangling entry that points at a deleted wrapper. `rm -f .xerjignore` removes
+the repository-root file too. Remove the three lines added to
+`.git/info/exclude` (`.tools/`, `.xerj/`, `.xerjignore`) afterward. No tracked
+repository file depends on this setup.
+
+The whole-file copy from `.xerj/backup/` is only a fallback: it discards any
+profile edit made after the pilot. The primary procedure deletes the single
+insert block, as the live profile comment also says.
 
 If the profile is restored while DSH is running, a restart is the reliable way
 to drop the registered tools. The pilot did not restart DSH.
@@ -254,7 +280,8 @@ to drop the registered tools. The pilot did not restart DSH.
 | `git diff --check` | pass (no output) |
 | XERJ dry-run before indexing | 59 files, 0 writes |
 | Index verification | 59 tracked paths, 0 untracked or missing |
-| Unauthenticated node access | 401 on both HTTP listeners |
+| Unauthenticated HTTP | 401 on `GET /` (19200) and `GET /v1/health` (18080) |
+| Unauthenticated gRPC | `XerjSearch/Search` returns grpc-status 16 without a key, 5 with it |
 | Secret scan of committed evidence | no key value and no 64-hex secret; only binary SHA-256 values |
 
 The tests cover the repository's own behavior. They do not cover the host DSH
@@ -291,6 +318,8 @@ All files are under `docs/harness-reports/xerj-mcp-pilot-20261031/evidence/`:
 | `09-profile-diff.txt` | The only profile change |
 | `10-tests.txt` | `npm run check` and `npm test` output |
 | `11-repo-scope.txt` | Repository visibility and tracked-file check |
+| `12-index-run.txt` | Journal wall time and live document count |
+| `13-grpc-auth.txt` | gRPC data-method auth probe with and without the key |
 
 ## Review request
 

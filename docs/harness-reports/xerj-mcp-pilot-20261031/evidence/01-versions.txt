@@ -7,3 +7,7 @@ dsh_app_version=0.2.1-rc.5
 dsh_profile=desktop
 workspace=/Users/pipags/work/dsh-you-should-know
 xerj v1.0.0-rc.100
+
+# disk at capture
+Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on
+/dev/disk3s5   460Gi   414Gi    20Gi    96%    7.1M  211M    3%   /System/Volumes/Data
