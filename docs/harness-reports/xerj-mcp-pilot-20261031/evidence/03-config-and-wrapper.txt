@@ -1,0 +1,62 @@
+# XERJ node config (.xerj/xerj.toml)
+[server]
+bind_address = "127.0.0.1"
+rest_port = 18080
+grpc_port = 18081
+es_compat_port = 19200
+data_dir = "/Users/pipags/work/dsh-you-should-know/.xerj/data"
+
+# Local dev machine sits at 96% used with ~20 GiB free. The default 95%
+# flood-stage guard would block all writes for a few-MB pilot index.
+# Raise only this local node's threshold; rollback = remove this section.
+[limits]
+disk_flood_stage_percent = 97
+
+# stdio wrapper (.xerj/bin/xerj-mcp.sh)
+#!/bin/sh
+# Local XERJ stdio MCP bridge for DeepSeek Harness.
+# Starts the loopback-only node if it is down, then execs the MCP server.
+set -eu
+ROOT="/Users/pipags/work/dsh-you-should-know"
+BIN="$ROOT/.tools/xerj/xerj"
+CFG="$ROOT/.xerj/xerj.toml"
+KEYFILE="$ROOT/.xerj/data/admin.key"
+URL="http://127.0.0.1:19200"
+LOG="$ROOT/.xerj/logs/node.log"
+
+status=$(curl -s -o /dev/null -w '%{http_code}' --max-time 2 "$URL/" 2>/dev/null || true)
+if [ "$status" != "401" ] && [ "$status" != "200" ]; then
+  XERJ_DISABLE_FEEDBACK=true nohup "$BIN" --config "$CFG" --disable-feedback >>"$LOG" 2>&1 &
+  i=0
+  while [ "$i" -lt 50 ]; do
+    sleep 0.2
+    status=$(curl -s -o /dev/null -w '%{http_code}' --max-time 2 "$URL/" 2>/dev/null || true)
+    [ "$status" = "401" ] && break
+    [ "$status" = "200" ] && break
+    i=$((i + 1))
+  done
+  if [ "$status" != "401" ] && [ "$status" != "200" ]; then
+    echo "xerj-mcp: node did not become ready at $URL" >&2
+    exit 1
+  fi
+fi
+
+XERJ_AUTH="ApiKey $(cat "$KEYFILE")" XERJ_DISABLE_FEEDBACK=true   exec "$BIN" mcp --url "$URL" --disable-feedback
+
+# active DSH profile insert (tail of ~/.dsh/profiles/desktop/cordis.patch.yml)
+        failOnStartupError: false
+
+# XERJ MCP — local loopback search over approved public project sources.
+# Pilot scope: stdio bridge to a node bound to 127.0.0.1:19200 only.
+# The wrapper starts the node when needed and passes the loopback API key from
+# .xerj/data/admin.key; feedback/upload is disabled via XERJ_DISABLE_FEEDBACK.
+# Rollback: remove this insert block and reload the profile.
+- insert:
+    - id: mcp-xerj
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: xerj
+        transport: stdio
+        command: /Users/pipags/work/dsh-you-should-know/.xerj/bin/xerj-mcp.sh
+        toolCallTimeoutMs: 60000
+        failOnStartupError: false

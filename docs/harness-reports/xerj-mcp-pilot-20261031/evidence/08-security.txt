@@ -1,0 +1,18 @@
+# listener sockets (expect 127.0.0.1 only)
+COMMAND NAME 
+xerj 127.0.0.1:19200 (LISTEN)
+xerj 127.0.0.1:18080 (LISTEN)
+xerj 127.0.0.1:18081 (LISTEN)
+
+# unauthenticated HTTP status (expect 401)
+es_compat_19200=401
+native_18080=401
+
+# xerj processes (argv only; the API key is passed by env, not argv)
+55670 .tools/xerj/xerj --config .xerj/xerj.toml --disable-feedback
+56454 /Users/pipags/work/dsh-you-should-know/.tools/xerj/xerj mcp --url http://127.0.0.1:19200 --disable-feedback
+
+# node TCP connections: loopback MCP client only, no non-loopback peer
+COMMAND   PID   USER   FD   TYPE            DEVICE SIZE/OFF NODE NAME
+xerj    55670 pipags   16u  IPv4 0x7d9af6b3dac1749      0t0  TCP 127.0.0.1:19200->127.0.0.1:60588 (ESTABLISHED)
+# no_remote_peer_above: any ESTABLISHED row must have 127.0.0.1 on both sides

@@ -1,0 +1,26 @@
+# Live DSH session tool names matching mcp__xerj__xerj_* (unique)
+mcp__xerj__xerj_autoindex_remove
+mcp__xerj__xerj_batch_search
+mcp__xerj__xerj_brain_ego
+mcp__xerj__xerj_brain_link
+mcp__xerj__xerj_brain_overview
+mcp__xerj__xerj_brain_unlink
+mcp__xerj__xerj_code_search
+mcp__xerj__xerj_corpus_feedback
+mcp__xerj__xerj_def
+mcp__xerj__xerj_field_report
+mcp__xerj__xerj_hub_ask
+mcp__xerj__xerj_hub_def
+mcp__xerj__xerj_hub_find
+mcp__xerj__xerj_hybrid_search
+mcp__xerj__xerj_index_budget
+mcp__xerj__xerj_map
+mcp__xerj__xerj_memory_recall
+mcp__xerj__xerj_memory_store
+mcp__xerj__xerj_plan
+mcp__xerj__xerj_search
+mcp__xerj__xerj_semantic_search
+mcp__xerj__xerj_vector_search
+# tool_count=22
+# existing_mcp_tool_names_still_present=42
+# captured_at=2026-10-31T18:51:52Z
