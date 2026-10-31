@@ -1,0 +1,18 @@
+--- .xerj/backup/cordis.patch.yml.before-xerj	2026-10-31 21:48:17
++++ /Users/pipags/.dsh/profiles/desktop/cordis.patch.yml	2026-10-31 21:49:53
+@@ -123,0 +124,15 @@
++
++# XERJ MCP — local loopback search over approved public project sources.
++# Pilot scope: stdio bridge to a node bound to 127.0.0.1:19200 only.
++# The wrapper starts the node when needed and passes the loopback API key from
++# .xerj/data/admin.key; feedback/upload is disabled via XERJ_DISABLE_FEEDBACK.
++# Rollback: remove this insert block and reload the profile.
++- insert:
++    - id: mcp-xerj
++      name: '@deepseek-ai/dsh-mcp-client'
++      config:
++        serverName: xerj
++        transport: stdio
++        command: /Users/pipags/work/dsh-you-should-know/.xerj/bin/xerj-mcp.sh
++        toolCallTimeoutMs: 60000
++        failOnStartupError: false

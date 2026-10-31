@@ -1,0 +1,13 @@
+# Captured: 2026-10-31T18:51:17Z (UTC)
+host_arch=arm64
+ProductName:		macOS
+ProductVersion:		27.0.1
+BuildVersion:		26A434
+dsh_app_version=0.2.1-rc.5
+dsh_profile=desktop
+workspace=/Users/pipags/work/dsh-you-should-know
+xerj v1.0.0-rc.100
+
+# disk at capture
+Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on
+/dev/disk3s5   460Gi   414Gi    20Gi    96%    7.1M  211M    3%   /System/Volumes/Data

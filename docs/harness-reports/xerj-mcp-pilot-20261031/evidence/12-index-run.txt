@@ -1,0 +1,6 @@
+# Journal fields for the successful autoindex run
+"wall_seconds":3.0
+"records_total":1040
+
+# Live document count
+{"count":1040,"_shards":{"total":1,"successful":1,"skipped":0,"failed":0}}

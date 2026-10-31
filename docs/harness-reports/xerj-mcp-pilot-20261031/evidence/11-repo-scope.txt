@@ -1,0 +1,10 @@
+# repo visibility
+{"defaultBranchRef":{"name":"main"},"isPrivate":false,"visibility":"PUBLIC"}
+# source commit/tree
+d81ecf35e42ff209d5882afc190f4d0869038371
+## task/xerj-mcp-pilot-20261031...origin/main
+?? docs/harness-reports/xerj-mcp-pilot-20261031/
+# indexed ax_paths that are not tracked at HEAD (expect 0)
+indexed_paths=59 untracked_or_missing=0
+# tracked files under selected roots (informational)
+      59

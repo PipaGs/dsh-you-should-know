@@ -1,0 +1,16 @@
+# Latest DSH system/message tool list containing mcp__xerj__ (allowlist active)
+seq=1414 tool_count=12
+mcp__xerj__xerj_batch_search
+mcp__xerj__xerj_brain_ego
+mcp__xerj__xerj_brain_overview
+mcp__xerj__xerj_code_search
+mcp__xerj__xerj_def
+mcp__xerj__xerj_hybrid_search
+mcp__xerj__xerj_map
+mcp__xerj__xerj_memory_recall
+mcp__xerj__xerj_plan
+mcp__xerj__xerj_search
+mcp__xerj__xerj_semantic_search
+mcp__xerj__xerj_vector_search
+# The earlier 22-tool list at seq 703/704 is superseded; this system/message is the live allowlisted list.
+# captured_at=2026-10-31T19:24:20Z

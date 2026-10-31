@@ -1,0 +1,18 @@
+# gRPC real method: xerj.v1.XerjSearch/Search, empty protobuf frame
+## no Authorization header
+HTTP/2 200
+content-type: application/grpc
+grpc-status: 16
+grpc-message: missing%20or%20invalid%20API%20key%20in%20authorization%20metadata
+content-length: 0
+date: Sat, 31 Oct 2026 18:56:51 GMT
+
+## with API key
+HTTP/2 200
+content-type: application/grpc
+grpc-status: 5
+grpc-message: index%20not%20found:%20
+content-length: 0
+date: Sat, 31 Oct 2026 18:56:51 GMT
+
+# fake method Health/Check reaches the gRPC server before auth and returns grpc-status 12 (unknown method); it is not a data method
