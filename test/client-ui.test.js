@@ -1085,6 +1085,8 @@ test('the file-address seam fails closed for unsafe paths', async () => {
 })
 
 const BIDI_CONTROLS = /[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/
+// Every control the card must never render: C0, DEL, C1, and bidi formatting.
+const CONTROL_TEXT = /[\u0000-\u001f\u007f-\u009f\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/
 
 test('the card strips bidi controls from a hostile payload without corrupting natural RTL text', async () => {
   const hebrew = 'הסוכן מחק את הקובץ (בטעות).'
@@ -1169,7 +1171,7 @@ test('the file-address seam fails closed for bidi-hostile paths but keeps safe R
   ], 'an ordinary safe path is unchanged')
 })
 
-test('Add to chat writes a draft with no bidi controls', async () => {
+test('Add to chat fails closed when the note carries bidi controls', async () => {
   const composer = createComposer('s-1')
   const hostile = {
     id: 'n-bidi',
@@ -1183,12 +1185,120 @@ test('Add to chat writes a draft with no bidi controls', async () => {
   assert.equal(BIDI_CONTROLS.test(textOf(view.output)), false, 'the card never renders a control')
   assert.equal(textOf(findAll(view.output, 'code')[0]), 'src/a.js', 'the card may still show the stripped path as plain text')
   pressControl('Add to chat', buttonByText(view.output, 'Add to chat'), composer)
-  assert.equal(composer.draft, 'Fix it.', 'a hostile source path contributes no File line')
-  assert.equal(composer.draft.includes('File:'), false, 'the draft carries no File line')
-  assert.equal(composer.draft.includes('src/a.js'), false, 'the stripped hostile path never reaches the draft')
-  assert.equal(composer.draft.includes('src/\u202Ea.js'), false, 'the raw hostile path never reaches the draft')
-  assert.equal(BIDI_CONTROLS.test(composer.draft), false, 'the draft carries no control')
+  assert.equal(composer.draft, '', 'a control-carrying note never becomes a draft')
+  assert.equal(composer.setDraftCalls, 0, 'setDraft is never called')
+  assert.deepEqual(composer.sent, [], 'Add to chat never sends')
   view.unmount()
+})
+
+test('the card strips C0, DEL, and C1 controls from a stale payload and never links a hostile path', async () => {
+  const hebrew = 'הסוכן מחק את הקובץ (בטעות).'
+  const env = await loadBundle({
+    backend: notesBackend([
+      { id: 'n-ctl', note: 'The file \u0007is safe.', importance: 'high', createdAt: 1, action: 'Fix \u009f it.', source: { path: 'src/\u0085a.js' } },
+      { id: 'n-he', note: hebrew, importance: 'high', createdAt: 2 },
+    ]),
+    allowIntervals: true,
+    sidebarRight: { openResource: () => {} },
+  })
+  const dock = env.dockComponent()
+  const face = dock.spec.inject('s-1')
+  const view = env.runtime.mount(dock.component, { ...face, inputActions: null, input: null })
+  await flushAsync()
+
+  const cards = findAll(view.output, 'section')
+  assert.equal(cards.length, 2)
+  const hostileText = textOf(cards[0])
+  assert.equal(CONTROL_TEXT.test(hostileText), false, 'no C0, DEL, or C1 control reaches the card')
+  assert.match(hostileText, /The file is safe\./)
+  assert.equal(buttonByText(cards[0], 'Open file'), null, 'a control-carrying path never gets a link')
+  assert.equal(textOf(findAll(cards[0], 'code')[0]), 'src/a.js', 'the stripped path stays visible as plain text')
+  assert.ok(textOf(cards[1]).includes(hebrew), 'natural Hebrew text is unchanged')
+  view.unmount()
+})
+
+test('Add to chat fails closed when the note carries a C1 control', async () => {
+  const composer = createComposer('s-1', 'draft in progress')
+  const { view } = await mountNotes([{ id: 'n-c1-note', note: 'Note \u0085here.', importance: 'high', createdAt: 1 }], composer)
+  pressControl('Add to chat', buttonByText(view.output, 'Add to chat'), composer)
+  assert.equal(composer.draft, 'draft in progress', 'the draft is untouched')
+  assert.equal(composer.setDraftCalls, 0, 'setDraft is never called')
+  assert.deepEqual(composer.sent, [], 'Add to chat never sends')
+  view.unmount()
+})
+
+test('Add to chat fails closed when the action carries a C0 control', async () => {
+  const composer = createComposer('s-1', 'keep me')
+  const { view } = await mountNotes([{ id: 'n-c0-action', note: 'Safe note.', importance: 'high', createdAt: 1, action: 'Fix \u0007it.' }], composer)
+  pressControl('Add to chat', buttonByText(view.output, 'Add to chat'), composer)
+  assert.equal(composer.draft, 'keep me', 'the draft is untouched')
+  assert.equal(composer.setDraftCalls, 0, 'setDraft is never called')
+  assert.deepEqual(composer.sent, [], 'Add to chat never sends')
+  view.unmount()
+})
+
+test('Add to chat fails closed when the source path carries a control', async () => {
+  const composer = createComposer('s-1', 'keep me')
+  const note = { id: 'n-ctl-path', note: 'Safe note.', importance: 'high', createdAt: 1, action: 'Fix src/a.js now.', source: { path: 'src/\u0085a.js' } }
+  const { view } = await mountNotes([note], composer)
+  pressControl('Add to chat', buttonByText(view.output, 'Add to chat'), composer)
+  assert.equal(composer.draft, 'keep me', 'the draft is untouched')
+  assert.equal(composer.setDraftCalls, 0, 'setDraft is never called')
+  assert.deepEqual(composer.sent, [], 'Add to chat never sends')
+  view.unmount()
+})
+
+test('the open history panel fails closed for a control-carrying entry', async () => {
+  const composer = createComposer('s-1', 'keep me')
+  const env = await loadBundle({
+    backend: historyBackend({
+      notes: [],
+      history: [{ id: 'n-history-ctl', note: 'Note \u0085here.', importance: 'high', createdAt: 1, resolved: false, action: 'Fix \u0007it.' }],
+    }),
+    allowIntervals: true,
+  })
+  const view = env.runtime.mount(env.dockComponent().component, {
+    sessionId: 's-1',
+    inputActions: composer.inputActions,
+    input: { draft: 'keep me' },
+  })
+  await flushAsync()
+  buttonByText(view.output, 'History').props.onClick()
+  await flushAsync()
+
+  const group = findByAria(view.output, 'Notification history')
+  assert.ok(group, 'the open history renders as one group')
+  const addButtons = findAll(group, 'button').filter((button) => textOf(button).includes('Add to chat'))
+  assert.equal(addButtons.length, 1, 'the single active entry offers Add to chat')
+  addButtons[0].props.onClick()
+  assert.equal(composer.draft, 'keep me', 'the draft is untouched')
+  assert.equal(composer.setDraftCalls, 0, 'setDraft is never called')
+  assert.deepEqual(composer.sent, [], 'Add to chat never sends')
+  assert.equal(env.calls.filter((call) => call.url === 'api/dsh-you-should-know/dismiss').length, 0, 'no dismiss POST is made for n-history-ctl')
+  view.unmount()
+})
+
+test('the file-address seam fails closed for C0, DEL, and C1 paths', async () => {
+  const opened = []
+  const env = await loadBundle({
+    backend: notesBackend([]),
+    allowIntervals: true,
+    sidebarRight: { openResource: (address) => opened.push(address) },
+  })
+  const face = env.dockComponent().spec.inject('s-1')
+  for (const path of ['src/\u0000a.js', 'src/\u007fa.js', 'src/\u0085a.js']) {
+    face.onOpenFile({ path })
+  }
+  assert.deepEqual(opened, [], 'a control-carrying path never reaches the resource service')
+
+  face.onOpenFile({ path: 'src/קובץ.js' })
+  assert.deepEqual(opened, ['dsh-resource://file/session/s-1/src/%D7%A7%D7%95%D7%91%D7%A5.js'], 'a natural Hebrew path still addresses normally')
+
+  face.onOpenFile({ path: 'src/a.js', line: 4 })
+  assert.deepEqual(opened, [
+    'dsh-resource://file/session/s-1/src/%D7%A7%D7%95%D7%91%D7%A5.js',
+    'dsh-resource://file/session/s-1/src/a.js',
+  ], 'an ordinary safe path is unchanged')
 })
 
 // --- Add to chat: composer lifecycle -----------------------------------------
@@ -1209,8 +1319,10 @@ function createComposer(sessionId, initialDraft = '') {
     sent: [],
     focused: null,
     deferredCalls: [],
+    setDraftCalls: 0,
     inputActions: {
       setDraft(text) {
+        composer.setDraftCalls += 1
         composer.draft = text
       },
       captureInsertion() {
