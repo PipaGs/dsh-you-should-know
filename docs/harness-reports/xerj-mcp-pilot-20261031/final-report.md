@@ -92,9 +92,9 @@ generated admin key to `.xerj/data/admin.key` with mode `0600`.
 The node uses the default 95% flood guard. The host started at 96% with about
 20 GiB free, so the first run needed a temporary 97% override. The override is
 removed. I deleted the regenerable npm download cache
-(`/Users/pipags/.npm/_cacache`, 5.6 GB) to free space instead. The disk is now
-94%, `disk.flood_blocked` is false, and a create/index/delete probe returned
-200/201/200 (`evidence/15-disk-guard.txt`).
+(`/Users/pipags/.npm/_cacache`, 5.6 GB) to free space instead. XERJ allocation now reports 94% and `disk.flood_blocked` is false; `df` shows
+26 GiB free. A create/index/delete probe returned 200/201/200
+(`evidence/15-disk-guard.txt`).
 
 ### 3. stdio bridge
 
