@@ -333,6 +333,43 @@ test('parseVerdict rejects Unicode bidi formatting controls in every text field'
   }
 })
 
+test('parseVerdict rejects C0, DEL, and C1 controls in every reviewer text field', () => {
+  const CONTROLS = ['\u0000', '\u0001', '\u0007', '\u000b', '\u001b', '\u001f', '\u007f', '\u0080', '\u0085', '\u009f']
+  for (const control of CONTROLS) {
+    const code = control.codePointAt(0).toString(16)
+    assert.equal(parseVerdict(JSON.stringify({ note: 'Note ' + control + ' text', importance: 'high' })), null, 'note ' + code)
+    assert.equal(parseVerdict(JSON.stringify({ note: 'N', importance: 'high', action: 'Fix ' + control + ' it' })), null, 'action ' + code)
+    assert.equal(parseVerdict(JSON.stringify({ note: 'N', importance: 'high', because: 'we ' + control + ' chose it' })), null, 'because ' + code)
+    assert.equal(parseVerdict(JSON.stringify({ note: 'N', importance: 'high', source: { path: 'src/' + control + 'a.js' } })), null, 'source ' + code)
+  }
+})
+
+test('parseVerdict rejects control characters at a field edge instead of trimming them away', () => {
+  for (const note of ['\nNote', 'Note\n', '\tNote', 'Note\t']) {
+    assert.equal(parseVerdict(JSON.stringify({ note, importance: 'high' })), null, 'note edge ' + JSON.stringify(note))
+  }
+  for (const action of ['\u0085Fix it', 'Fix it\u007f']) {
+    assert.equal(parseVerdict(JSON.stringify({ note: 'N', importance: 'high', action })), null, 'action edge ' + JSON.stringify(action))
+  }
+  for (const because of ['\u0000quote', 'quote\u0085']) {
+    assert.equal(parseVerdict(JSON.stringify({ note: 'N', importance: 'high', because })), null, 'because edge ' + JSON.stringify(because))
+  }
+  for (const path of ['\u0000src/a.js', 'src/a.js\u0085']) {
+    assert.equal(parseVerdict(JSON.stringify({ note: 'N', importance: 'high', source: { path } })), null, 'source edge ' + JSON.stringify(path))
+  }
+})
+
+test('parseVerdict rejects a multi-line note under the single-line note contract', () => {
+  for (const note of ['Line one\nLine two', 'Line one\rLine two']) {
+    assert.equal(parseVerdict(JSON.stringify({ note, importance: 'high' })), null, 'multi-line note ' + JSON.stringify(note))
+  }
+  assert.deepEqual(
+    parseVerdict(JSON.stringify({ note: 'Line one Line two', importance: 'high' })),
+    { note: 'Line one Line two', importance: 'high' },
+    'a single-line note is still valid',
+  )
+})
+
 test('parseVerdict keeps natural Hebrew and Arabic notes with Latin punctuation', () => {
   const notes = [
     'הסוכן מחק את הקובץ (בטעות), והנתונים אבדו.',
@@ -341,6 +378,20 @@ test('parseVerdict keeps natural Hebrew and Arabic notes with Latin punctuation'
   for (const note of notes) {
     assert.deepEqual(parseVerdict(JSON.stringify({ note, importance: 'high' })), { note, importance: 'high' })
   }
+})
+
+test('parseVerdict accepts natural Hebrew and Arabic in action, because, and source paths', () => {
+  const hebrewNote = 'הסוכן מחק את הקובץ (בטעות), והנתונים אבדו.'
+  const hebrewAction = 'החזר את הקובץ מגיבוי ובדוק את כתיבת הדיסק.'
+  const hebrewBecause = 'הבחירה נשמרה בזיכרון בלבד'
+  const hebrewPath = 'src/קובץ.js'
+  assert.deepEqual(
+    parseVerdict(JSON.stringify({ note: hebrewNote, importance: 'high', action: hebrewAction, because: hebrewBecause, source: { path: hebrewPath } })),
+    { note: hebrewNote, importance: 'high', action: hebrewAction, because: hebrewBecause, source: { path: hebrewPath } },
+  )
+  const arabic = parseVerdict(JSON.stringify({ note: 'ملاحظة', importance: 'high', action: '  صحح مسار الملف.  ' }))
+  assert.equal(arabic.action, 'صحح مسار الملف.', 'ordinary space padding around an Arabic action is trimmed')
+  assert.equal(arabic.note, 'ملاحظة')
 })
 
 test('parseVerdict rejects a malformed or unsafe source with the whole reply', () => {
