@@ -8,7 +8,7 @@ The intent mirrors Claude Code's *You Should Know* with one deliberately harder 
 
 ## Status
 
-Version `0.5.2`, MIT. Both halves are authored in TypeScript under `src/` and compiled with TypeScript `7.0.2`, which is pinned and was verified against the npm `latest` dist-tag at the same version. The emitted `lib/*.js` is committed, so a `github:` install needs no build and declares no `prepare` or `install` hook. The scope is intentionally small: a composer-adjacent note card with a bounded in-memory history, a Plugins settings card (strictness mode, additional instructions, custom prompt, update controls), a session-header mode and model override, one reviewer call per qualifying turn, and a per-session runtime that retries one transient failure, bounds the queue, and pauses on quota without losing the turn.
+Version `0.5.3`, MIT. Both halves are authored in TypeScript under `src/` and compiled with TypeScript `7.0.2`, which is pinned and was verified against the npm `latest` dist-tag at the same version. The emitted `lib/*.js` is committed, so a `github:` install needs no build and declares no `prepare` or `install` hook. The scope is intentionally small: a composer-adjacent note card with a bounded in-memory history, a Plugins settings card (strictness mode, additional instructions, custom prompt, update controls), a session-header mode and model override, one reviewer call per qualifying turn, and a per-session runtime that retries one transient failure, bounds the queue, and pauses on quota without losing the turn.
 
 ## What it does
 
@@ -73,7 +73,7 @@ Notes live in plugin-owned, in-memory, per-session state. The only consumer is t
 The host and browser halves are the committed `lib/*.js` emitted from the TypeScript sources in `src/`, so installation needs no source build and runs no `prepare` or `install` hook. Install an immutable release ref:
 
 ```sh
-dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.5.2
+dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.5.3
 ```
 
 A bare `github:PipaGs/dsh-you-should-know` address is saved as the same value on every run, so a second install cannot be told from the dependency change; a ref-pinned address is saved verbatim, so each install and upgrade is attributed to `dsh-you-should-know`. Enter the same pinned address in the Desktop **Add plugin** dialog. To move to a later release, install its tag; to reinstall the exact version already present, remove the plugin first.
@@ -191,12 +191,12 @@ The supported check is **Run self-check** in **Settings -> Plugins -> You Should
   "authTransport": "host-authenticated-connection",
   "healthy": true,
   "configured": true,
-  "pluginVersion": "0.5.2",
-  "runtimeVersion": "0.5.2",
-  "installedVersion": "0.5.2",
+  "pluginVersion": "0.5.3",
+  "runtimeVersion": "0.5.3",
+  "installedVersion": "0.5.3",
   "runtimeStatus": "idle",
   "reviewerMode": "balanced",
-  "update": { "currentVersion": "0.5.2", "updateAvailable": false, "automaticSupported": false }
+  "update": { "currentVersion": "0.5.3", "updateAvailable": false, "automaticSupported": false }
 }
 ```
 
