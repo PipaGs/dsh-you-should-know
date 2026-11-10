@@ -1,0 +1,14 @@
+# command: node scripts/install-smoke.mjs (spawnSync from node -e)
+# DSH_PNPM=(unset)
+# duration_ms=46588
+# exit_code=0
+--- stdout ---
+ok   a fresh pinned install saves the pinned spec
+ok   a fresh pinned install is attributed
+ok   a first bare install is attributed
+ok   re-adding the bare address leaves the dependency unchanged
+ok   an unchanged bare re-add is refused as ambiguous
+ok   the pinned address changes an existing bare dependency
+ok   the pinned upgrade is attributed
+install smoke passed
+--- stderr ---

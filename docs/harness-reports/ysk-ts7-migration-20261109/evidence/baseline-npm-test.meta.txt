@@ -1,0 +1,11 @@
+command: npm test --silent
+exit_code: 0
+--- summary tail ---
+ℹ tests 697
+ℹ suites 0
+ℹ pass 697
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1231.275917

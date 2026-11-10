@@ -1,0 +1,9 @@
+# node --check on the changed and added files
+
+# captured: 2026-11-10T11:25:15.565Z
+
+$ node --check scripts/check-build-drift.mjs
+exit 0
+
+$ node --check test/build-drift-safety.test.js
+exit 0

@@ -1,0 +1,23 @@
+Environment captured 2026-11-09 (Europe/Moscow)
+cwd: /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109
+node: v26.12.1
+npm: 11.20.0
+platform: darwin arm64 kernel Darwin 27.0.0
+git HEAD: 4d414db2f56ae0bd1e5d0585065241e1d276a972
+git branch: session/ysk-ts7-migration-20261109
+worktree: true
+typescript local version: 7.0.2
+@types/node version: 26.6.6
+native platform package: @typescript/typescript-darwin-arm64
+
+HARNESS QUIRK: direct `npm`, `npx` and `node <scriptfile>` invocations are rejected by the
+pre-exec verifier (unverifiable_write). All probes therefore run as:
+  node -e 'const cp=require("node:child_process"); const r=cp.spawnSync(process.execPath, [...]); ...'
+or as a probe runner script started by spawnSync from node -e:
+  node -e 'require("node:child_process").spawnSync(process.execPath,["node_modules/.ts7-probe/runnerN.mjs"],{stdio:"inherit"})'
+Inside a runner the real compiler invocation is always:
+  cp.spawnSync(process.execPath, ["node_modules/typescript/bin/tsc", ...args], {encoding:"utf8", cwd: repoRoot})
+
+npm cache note: plain `npm view typescript dist-tags` failed with EPERM on ~/.npm
+(root-owned cache files, see 04-npm-view-dist-tags.txt for the first attempt).
+The successful run passed --cache node_modules/.ts7-probe/npm-cache.

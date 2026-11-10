@@ -1,0 +1,21 @@
+$ node --input-type=module -e <probe: unstable/sync diagnostics with documented fields>
+exit=0
+diagnostics: 2
+{"fileName":"/Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/.ts7-probe/typesnode/src/bad.ts","line":"pos 74","code":2322,"category":1,"categoryName":"Error","text":"Type 'number' is not assignable to type 'string'."}
+{"fileName":"/Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/.ts7-probe/typesnode/src/bad.ts","line":"pos 169","code":2322,"category":1,"categoryName":"Error","text":"Type 'number' is not assignable to type 'string'."}
+can the API write emitted JS? typeof project.emitter = object
+Emitter prototype methods: constructor,printNode
+Program prototype methods (all): constructor,getCompilerOptions,getSourceFile,getSourceFileNames,getSourceFileMetadata,getSourceFileMetadataByPath,fetchSourceFileMetadata,isSourceFileFromExternalLibrary,isSourceFileDefaultLibrary,getSyntacticDiagnostics,getBindDiagnostics,getSemanticDiagnostics,getSuggestionDiagnostics,getDeclarationDiagnostics,getProgramDiagnostics,getGlobalDiagnostics,getConfigFileParsingDiagnostics
+
+$ node_modules/@typescript/typescript-darwin-arm64/lib/tsc --version   (executed directly, not via node)
+exit=0 stdout="Version 7.0.2" stderr=""
+
+cold-ish wall time for `tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit` over 5 runs (ms): 179.0, 180.4, 178.9, 179.4, 180.7
+import("typescript/unstable/sync") time: api-import: 39.542ms
+
+native binary supports --help: exit=0 firstLine="tsc: The TypeScript Compiler - Version 7.0.2"
+
+
+$ node_modules/@typescript/typescript-darwin-arm64/lib/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --pretty false   (executed directly, no node wrapper)
+exit=0 stdout="" stderr=""
+native binary --showConfig exit=0 firstLine="{"

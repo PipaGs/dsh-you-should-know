@@ -1,0 +1,19 @@
+# Review round 1 — tsc and emit summary
+
+Command (run via a script file because the harness rejects direct node/npm argv):
+  node -e '...spawnSync(process.execPath, ["node_modules/typescript/bin/tsc", "-p", "tsconfig.json", "--noEmit", "--pretty", "false"])'
+
+After the fixes: exit code 0, raw output lines 0, src/core.ts diagnostics 0, other-file diagnostics 0.
+Before the fixes: the same command also exited 0 with no output, which is why this round is a
+type-honesty change and not a diagnostic-count change. There is no saved pre-fix log because the
+pre-fix output was empty; the post-fix empty logs are captured below.
+
+  src/core.ts diagnostics: 0
+  other-file diagnostics: 0
+  raw output lines: 0 (the captured files are empty logs)
+
+The emit patch 04-emit-diff-vs-lib.patch was produced after compiling src/ into
+node_modules/.corecheck and diffing against the current lib/core.js, which is the phase-2 build.
+The patch is therefore the exact emitted delta of this review round: 147 lines, 13 hunks.
+
+Scratch-build tests: 254 + 182 = 436 pass, 0 fail (05-tests.txt).

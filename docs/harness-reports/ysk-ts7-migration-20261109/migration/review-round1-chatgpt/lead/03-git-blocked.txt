@@ -1,0 +1,21 @@
+# Lead verification — P1 fix (2026-11-10)
+
+Fixed files (uncommitted; real git index is sandbox-blocked):
+- scripts/check-build-drift.mjs
+- test/build-drift-safety.test.js
+- docs/harness-reports/ysk-ts7-migration-20261109/final-report.md (append-only section)
+- docs/harness-reports/ysk-ts7-migration-20261109/migration/review-round1-chatgpt/ (evidence)
+
+Independent targeted results:
+- node --check scripts/check-build-drift.mjs: exit 0
+- node --check test/build-drift-safety.test.js: exit 0
+- node --test test/build-drift-safety.test.js: exit 0 (1/1)
+- node --test test/: exit 0 (698/698, 0 fail)
+- npm test: exit 0 (698/698, 0 fail)
+- default drift: exit 0, 13/13 byte-identical
+- unsafe --out (node_modules/.lead-drift-sentinel): exit 2, sentinel byte-identical
+- git diff --check: exit 0
+
+Git state: git add -A fails with EPERM on the shared gitdir index.lock:
+  fatal: unable to create .../.git/worktrees/ysk-ts7-migration-20261109/index.lock: Operation not permitted
+No commit was created, nothing was pushed, PR #35 stays at 67a640f. No danger-full-access override attempted after the review instruction.

@@ -1,0 +1,13 @@
+# command: node scripts/check-build-drift.mjs --help
+# started: 2026-11-10T11:54:49.175Z
+# exit code: 0
+--- stdout ---
+Usage: node scripts/check-build-drift.mjs [--expected <dir>] [--out <dir>] [--tsconfig <file>]
+
+  --expected <dir>  committed build output to compare against (default: lib)
+  --out <dir>       scratch build directory; must be node_modules/.build-check
+                    or a path strictly below it (default: node_modules/.build-check)
+  --tsconfig <file> compiler project to build (default: tsconfig.json)
+  --help            print this message
+
+--- stderr ---

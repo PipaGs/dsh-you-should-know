@@ -1,0 +1,63 @@
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --showConfig
+exit=0
+--- stdout ---
+{
+    "compilerOptions": {
+        "declaration": false,
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "skipLibCheck": true,
+        "strict": true,
+        "sourceMap": false,
+        "target": "es2022",
+        "verbatimModuleSyntax": true,
+        "moduleDetection": "force",
+        "isolatedModules": true,
+        "preserveConstEnums": true
+    },
+    "files": [
+        "./src/default.ts",
+        "./src/main.ts",
+        "./src/math.ts"
+    ],
+    "include": [
+        "src"
+    ],
+    "exclude": [
+        "/Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/.ts7-probe/p1/dist"
+    ]
+}
+--- stderr ---
+
+
+--- showConfig json ---
+{
+    "compilerOptions": {
+        "declaration": false,
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "skipLibCheck": true,
+        "strict": true,
+        "sourceMap": false,
+        "target": "es2022",
+        "verbatimModuleSyntax": true,
+        "moduleDetection": "force",
+        "isolatedModules": true,
+        "preserveConstEnums": true
+    },
+    "files": [
+        "./src/default.ts",
+        "./src/main.ts",
+        "./src/math.ts"
+    ],
+    "include": [
+        "src"
+    ],
+    "exclude": [
+        "/Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/.ts7-probe/p1/dist"
+    ]
+}

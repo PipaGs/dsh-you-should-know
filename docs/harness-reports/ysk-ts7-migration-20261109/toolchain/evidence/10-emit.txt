@@ -1,0 +1,108 @@
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --pretty false
+exit=0 stdout="" stderr=""
+
+emitted tree:
+  node_modules/.ts7-probe/p1/dist/default.js  277B  sha256=8a389cd05daec1ceac159c0296999bd84b5e39d3700facdc0afa0d158cefad30
+  node_modules/.ts7-probe/p1/dist/main.js  650B  sha256=6282d68ea4645d70fcce766edc8aced42abf43d859c53806a1fc9af504c81919
+  node_modules/.ts7-probe/p1/dist/math.js  884B  sha256=31165ccf8a269fbc701db8383b2743ef01f6452b8fa2c5a95e5db7321f38053c
+
+dist/main.js content:
+// Entry point for the emit probe. It checks that emitted specifiers stay .js,
+// that no helper preamble appears, and that the output runs under node.
+import { Counter, VERSION, add, delay, firstPoint, label, memo } from './math.js';
+import z from './default.js';
+export async function run() {
+    const counter = new Counter(2);
+    counter.inc();
+    const total = memo('total', () => add(VERSION.length, counter.inc()));
+    await delay(1);
+    const point = firstPoint([
+        { x: 1, y: 2 },
+        { x: 3, y: 4 },
+    ]);
+    return `${label(point)} total=${total} isValue=${z(point)}`;
+}
+const message = await run();
+console.log(message);
+
+--- dist/math.js content: ---
+// Probe source that mirrors this repository's ESM style: explicit .js
+// specifiers on relative imports, top-level const/function, one class.
+export const VERSION = '1.0.0';
+export function add(a, b) {
+    return a + b;
+}
+export function memo(key, fn) {
+    const hit = cache.get(key);
+    if (hit !== undefined)
+        return hit;
+    const value = fn();
+    cache.set(key, value);
+    return value;
+}
+const cache = new Map();
+export class Counter {
+    n = 0;
+    step;
+    constructor(step = 1) {
+        this.step = step;
+    }
+    inc() {
+        this.n += this.step;
+        return this.n;
+    }
+}
+export function firstPoint(points) {
+    return points[0];
+}
+export function label(point) {
+    return point?.y !== undefined ? `${point.x},${point.y}` : 'none';
+}
+export async function delay(ms) {
+    await new Promise((resolve) => {
+        setTimeout(resolve, ms);
+    });
+}
+
+--- dist/default.js content: ---
+// Default-export module, mirroring `import z from '@deepseek-ai/schemastery'`
+// in lib/index.js. The named probe tests that a default import survives emit.
+export default function z(value) {
+    return value !== undefined && value !== null;
+}
+export const helper = () => 42;
+
+
+check for sourceMappingURL and .map files:
+  .map files: 0
+  sourceMappingURL occurrences: 0
+
+$ node dist/main.js
+exit=0 stdout="1,2 total=9 isValue=true\n" stderr=""
+
+$ node --check <each emitted .js>
+  node_modules/.ts7-probe/p1/dist/default.js exit=0 ""
+  node_modules/.ts7-probe/p1/dist/main.js exit=0 ""
+  node_modules/.ts7-probe/p1/dist/math.js exit=0 ""
+
+import specifier audit in dist:
+  default.js: "@deepseek-ai/schemastery"
+  main.js: "./math.js", "./default.js"
+  math.js: (none)
+
+CORRECTED import-specifier audit (regex anchored to real import/export-from statements;
+the earlier audit matched a path inside a comment in default.js):
+
+  default.js: (no import/export-from statements)
+  main.js: "./math.js", "./default.js"
+  math.js: (no import/export-from statements)
+
+helper-preamble scan (__awaiter/__generator/__importDefault/__rest/tslib):
+  default.js: none
+  main.js: none
+  math.js: none
+
+CJS/helper artifact scan of emitted ESM output:
+  default.js: none of exports./require(/__esModule/Object.defineProperty/use strict/__createBinding/__setModuleDefault
+  main.js: none of exports./require(/__esModule/Object.defineProperty/use strict/__createBinding/__setModuleDefault
+  math.js: none of exports./require(/__esModule/Object.defineProperty/use strict/__createBinding/__setModuleDefault

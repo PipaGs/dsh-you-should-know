@@ -1,0 +1,10 @@
+# command: node scripts/check-build-drift.mjs --out node_modules/.build-check/evidence-custom-subdir
+# started: 2026-11-10T11:38:45.230Z
+# duration ms: 374
+# exit code: 0
+# signal: null
+--- stdout ---
+build drift check: tsc exit 0, 0 diagnostic(s)
+build drift check passed: 13 file(s) in /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/lib match the fresh build byte for byte
+
+--- stderr ---

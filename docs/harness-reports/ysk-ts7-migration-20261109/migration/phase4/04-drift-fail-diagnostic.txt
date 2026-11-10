@@ -1,0 +1,6 @@
+exit=2
+scenario: a scratch compiler project with one type error, extending tsconfig.json so noEmitOnError is inherited
+no emit directory was created
+
+build drift check: the compiler failed (exit 1, 1 diagnostic(s)); a failed or diagnostic-bearing build must never be compared or shipped
+node_modules/.evidence-tmp/diag/broken.ts(1,14): error TS2322: Type 'string' is not assignable to type 'number'.

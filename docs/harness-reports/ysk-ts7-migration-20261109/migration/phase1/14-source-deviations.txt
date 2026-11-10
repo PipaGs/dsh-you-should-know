@@ -1,0 +1,39 @@
+# src/*.ts versus the original shipped lib/*.js (git HEAD)
+# every source was copied byte for byte; the only deliberate edits are the two comment relocations below.
+# method: diff -u <git show HEAD:lib/<name>.js> src/<name>.ts
+
+IDENTICAL adaptive.ts
+CHANGED client.ts:
+@@ -702,8 +702,7 @@
+               marginTop: 4,
+               fontSize: 12,
+             },
+-          },
+-            // The path is always copyable text. A link appears only when the
++          }, // The path is always copyable text. A link appears only when the
+             // public file-navigation service is mounted; otherwise there is no
+             // fake action, only the exact path the reviewer saw.
+             canOpen
+
+CHANGED core.ts:
+@@ -1120,8 +1120,7 @@
+     runtimeOptions = {},
+     validationDeadlineMs = RUNTIME_LIMITS.deadlineMs,
+     explainDeadlineMs = RUNTIME_LIMITS.deadlineMs,
+-    routeDeadlineMs = ROUTE_DEADLINE_MS,
+-    // The host's explicit user-language seam, when this build exposes one. The
++    routeDeadlineMs = ROUTE_DEADLINE_MS, // The host's explicit user-language seam, when this build exposes one. The
+     // resolver is optional and may throw; both are tolerated as "no host value".
+     getHostLanguage,
+   } = options
+
+IDENTICAL evidence.ts
+IDENTICAL explain.ts
+IDENTICAL feedback.ts
+IDENTICAL index.ts
+IDENTICAL language.ts
+IDENTICAL review-profile.ts
+IDENTICAL review-strictness.ts
+IDENTICAL runtime.ts
+IDENTICAL self-check.ts
+IDENTICAL update.ts

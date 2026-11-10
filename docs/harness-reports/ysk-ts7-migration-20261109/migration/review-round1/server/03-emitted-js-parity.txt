@@ -1,0 +1,24 @@
+# Emitted-JS parity — review round 1 server files
+
+Compile A: node_modules/.servercheck/lib (phase-3 emitted artifacts, before round-1 edits).
+Compile B: node_modules/.servercheck-r1/lib (same sources after round-1 edits).
+Both compiles ran tsc -p tsconfig.json with only --outDir changed; lib/ was not written.
+
+file: runtime.js
+  diff: identical
+  sha256 A: 9c9c907d53489a5c65185614ab9adcf73707ef24db19130e9c6fd0fdaf48ecc6
+  sha256 B: 9c9c907d53489a5c65185614ab9adcf73707ef24db19130e9c6fd0fdaf48ecc6
+file: update.js
+  diff: identical
+  sha256 A: ce33a82b1e01cf49f004f9c439e9cc1f616318bce6e36a35d69b8feae70272d8
+  sha256 B: ce33a82b1e01cf49f004f9c439e9cc1f616318bce6e36a35d69b8feae70272d8
+file: index.js
+  diff: identical
+  sha256 A: cc5d1b1e7c192ef8391a76d062b03469e71946f54d72c3f5a6d53175cbf02401
+  sha256 B: cc5d1b1e7c192ef8391a76d062b03469e71946f54d72c3f5a6d53175cbf02401
+file: self-check.js
+  diff: identical
+  sha256 A: 91c05551c9f8b062c2eab26e7a303284dcac43f7ee2aa99dd07c9f433ad819e5
+  sha256 B: 91c05551c9f8b062c2eab26e7a303284dcac43f7ee2aa99dd07c9f433ad819e5
+
+result: all four emitted files byte-identical after the round-1 edits

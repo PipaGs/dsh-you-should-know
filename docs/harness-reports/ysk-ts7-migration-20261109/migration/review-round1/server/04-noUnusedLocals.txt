@@ -1,0 +1,7 @@
+exit=1
+src/runtime.ts(335,7): error TS6133: 'currentEntry' is declared but its value is never read.
+
+Note: --noUnusedLocals is not enabled in tsconfig.json; this is a diagnostic probe.
+The removed SettingsFormEntry interface produced TS6196 before this round (per review).
+The single remaining TS6133 (currentEntry) is one of the three pre-existing findings the
+review asked not to fix.

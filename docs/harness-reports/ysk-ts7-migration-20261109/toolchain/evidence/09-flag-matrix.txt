@@ -1,0 +1,386 @@
+--noEmit: exit=1 codes=- => ACCEPTED, CODE ERRORS
+--build: exit=0 codes=- => ACCEPTED (exit 0)
+--incremental: exit=0 codes=- => ACCEPTED (exit 0)
+--pretty false: exit=0 codes=- => ACCEPTED (exit 0)
+--allowJs: exit=0 codes=- => ACCEPTED (exit 0)
+--checkJs: exit=0 codes=- => ACCEPTED (exit 0)
+--skipLibCheck: exit=0 codes=- => ACCEPTED (exit 0)
+--types node: exit=0 codes=- => ACCEPTED (exit 0)
+--forceConsistentCasingInFileNames: exit=0 codes=- => ACCEPTED (exit 0)
+--noUncheckedIndexedAccess: exit=0 codes=- => ACCEPTED (exit 0)
+--exactOptionalPropertyTypes: exit=0 codes=- => ACCEPTED (exit 0)
+--noImplicitOverride: exit=0 codes=- => ACCEPTED (exit 0)
+--isolatedModules: exit=0 codes=- => ACCEPTED (exit 0)
+--module preserve: exit=1 codes=TS5110 => REJECTED/CONFIG ERROR
+--moduleResolution bundler: exit=1 codes=TS5095,TS5109 => REJECTED/CONFIG ERROR
+--moduleResolution bundler + --module preserve: exit=0 codes=- => ACCEPTED (exit 0)
+--lib es2022: exit=1 codes=TS2584,TS2304 => ACCEPTED, CODE ERRORS
+--lib es2022,dom: exit=0 codes=- => ACCEPTED (exit 0)
+--lib esnext: exit=1 codes=TS2584,TS2304 => ACCEPTED, CODE ERRORS
+--lib bogus: exit=1 codes=TS6046 => REJECTED/CONFIG ERROR
+--target es2022: exit=0 codes=- => ACCEPTED (exit 0)
+--target es5 (rejected?): exit=1 codes=TS5108 => REJECTED/CONFIG ERROR
+--declaration true: exit=0 codes=- => ACCEPTED (exit 0)
+--sourceMap true: exit=0 codes=- => ACCEPTED (exit 0)
+--verbatimModuleSyntax false: exit=0 codes=- => ACCEPTED (exit 0)
+--module commonjs (conflict witin nodenext resolution): exit=1 codes=TS5110 => REJECTED/CONFIG ERROR
+--module esnext + moduleResolution bundler: exit=0 codes=- => ACCEPTED (exit 0)
+--strict false: exit=0 codes=- => ACCEPTED (exit 0)
+--noUnusedLocals: exit=0 codes=- => ACCEPTED (exit 0)
+--unknown flag: exit=1 codes=TS5023 => REJECTED/CONFIG ERROR
+
+===== FULL OUTPUTS =====
+
+$ node node_modules/typescript/bin/tsc --noEmit
+exit=1
+--- stdout ---
+Version 7.0.2
+tsc: The TypeScript Compiler - Version 7.0.2
+
+COMMON COMMANDS
+
+  tsc
+  Compiles the current project (tsconfig.json in the working directory.)
+
+  tsc app.ts util.ts
+  Ignoring tsconfig.json, compiles the specified files with default compiler options.
+
+  tsc -b
+  Build a composite project in the working directory.
+
+  tsc --init
+  Creates a tsconfig.json with the recommended settings in the working directory.
+
+  tsc -p ./path/to/tsconfig.json
+  Compiles the TypeScript project located at the specified path.
+
+  tsc --help --all
+  An expanded version of this information, showing all possible compiler options
+
+  tsc --noEmit
+  tsc --target esnext
+  Compiles the current project, with additional settings.
+
+COMMAND LINE FLAGS
+
+--help, -h
+Print this message.
+
+--watch, -w
+Watch input files.
+
+--all
+Show all compiler options.
+
+--version, -v
+Print the compiler's version.
+
+--init
+Initializes a TypeScript project and creates a tsconfig.json file.
+
+--project, -p
+Compile the project given the path to its configuration file, or to a folder with a 'tsconfig.json'.
+
+--showConfig
+Print the final configuration instead of building.
+
+--ignoreConfig
+Ignore the tsconfig found and build with commandline options and files.
+
+--build, -b
+Build one or more projects and their dependencies, if out of date
+
+COMMON COMPILER OPTIONS
+
+--pretty
+Enable color and formatting in TypeScript's output to make compiler errors easier to read.
+type: boolean
+default: true
+
+--declaration, -d
+Generate .d.ts files from TypeScript and JavaScript files in your project.
+type: boolean
+default: `false`, unless `composite` is set
+
+--declarationMap
+Create sourcemaps for d.ts files.
+type: boolean
+default: false
+
+--emitDeclarationOnly
+Only output d.ts files and not JavaScript files.
+type: boolean
+default: false
+
+--sourceMap
+Create source map files for emitted JavaScript files.
+type: boolean
+default: false
+
+--noEmit
+Disable emitting files from a compilation.
+type: boolean
+default: false
+
+--target, -t
+Set the JavaScript language version for emitted JavaScript and include compatible library declarations.
+one of: es6/es2015, es2016, es2017, es2018, es2019, es2020, es2021, es2022, es2023, es2024, es2025, esnext
+default: es2025
+
+--module, -m
+Specify what module code is generated.
+one of: commonjs, es6/es2015, es2020, es2022, esnext, node16, node18, node20, nodenext, preserve
+default: undefined
+
+--lib
+Specify a set of bundled library declaration files that describe the target runtime environment.
+one or more: es5, es6/es2015, es7/es2016, es2017, es2018, es2019, es2020, es2021, es2022, es2023, es2024, es2025, esnext, dom, dom.iterable, dom.asynciterable, webworker, webworker.importscripts, webworker.iterable, webworker.asynciterable, scripthost, es2015.core, es2015.collection, es2015.generator, es2015.iterable, es2015.promise, es2015.proxy, es2015.reflect, es2015.symbol, es2015.symbol.wellknown, es2016.array.include, es2016.intl, es2017.arraybuffer, es2017.date, es2017.object, es2017.sharedmemory, es2017.string, es2017.intl, es2017.typedarrays, es2018.asyncgenerator, es2018.asynciterable/esnext.asynciterable, es2018.intl, es2018.promise, es2018.regexp, es2019.array, es2019.object, es2019.string, es2019.symbol/esnext.symbol, es2019.intl, es2020.bigint/esnext.bigint, es2020.date, es2020.promise, es2020.sharedmemory, es2020.string, es2020.symbol.wellknown, es2020.intl, es2020.number, es2021.promise, es2021.string, es2021.weakref/esnext.weakref, es2021.intl, es2022.array, es2022.error, es2022.intl, es2022.object, es2022.string, es2022.regexp, es2023.array, es2023.collection, es2023.intl, es2024.arraybuffer, es2024.collection, es2024.object/esnext.object, es2024.promise, es2024.regexp/esnext.regexp, es2024.sharedmemory, es2024.string/esnext.string, es2025.collection, es2025.float16/esnext.float16, es2025.intl, es2025.iterator/esnext.iterator, es2025.promise/esnext.promise, es2025.regexp, esnext.array, esnext.collection, esnext.date, esnext.decorators, esnext.disposable, esnext.error, esnext.intl, esnext.sharedmemory, esnext.temporal, esnext.typedarrays, decorators, decorators.legacy
+default: undefined
+
+--allowJs
+Allow JavaScript files to be a part of your program. Use the 'checkJs' option to get errors from these files.
+type: boolean
+default: `false`, unless `checkJs` is set
+
+--checkJs
+Enable error reporting in type-checked JavaScript files.
+type: boolean
+default: false
+
+--jsx
+Specify what JSX code is generated.
+one of: preserve, react-native, react-jsx, react-jsxdev, react
+default: undefined
+
+--outFile
+Specify a file that bundles all outputs into one JavaScript file. If 'declaration' is true, also designates a file that bundles all .d.ts output.
+
+--outDir
+Specify an output folder for all emitted files.
+
+--removeComments
+Disable emitting comments.
+type: boolean
+default: false
+
+--strict
+Enable all strict type-checking options.
+type: boolean
+default: true
+
+--types
+Specify type package names to be included without being referenced in a source file.
+
+--esModuleInterop
+Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility.
+type: boolean
+default: true
+
+You can learn about all of the compiler options at https://aka.ms/tsc
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc --build node_modules/.ts7-probe/p1/tsconfig.json --pretty false
+exit=0
+--- stdout ---
+
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --incremental --noEmit --tsBuildInfoFile node_modules/.ts7-probe/p1/dist/.tsbuildinfo --pretty false
+exit=0
+--- stdout ---
+
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --pretty false
+exit=0
+--- stdout ---
+
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --allowJs --pretty false
+exit=0
+--- stdout ---
+
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --checkJs --pretty false
+exit=0
+--- stdout ---
+
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --skipLibCheck --pretty false
+exit=0
+--- stdout ---
+
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --types node --pretty false
+exit=0
+--- stdout ---
+
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --forceConsistentCasingInFileNames --pretty false
+exit=0
+--- stdout ---
+
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --noUncheckedIndexedAccess --pretty false
+exit=0
+--- stdout ---
+
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --exactOptionalPropertyTypes --pretty false
+exit=0
+--- stdout ---
+
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --noImplicitOverride --pretty false
+exit=0
+--- stdout ---
+
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --isolatedModules --pretty false
+exit=0
+--- stdout ---
+
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --module preserve --pretty false
+exit=1
+--- stdout ---
+node_modules/.ts7-probe/p1/tsconfig.json(5,15): error TS5110: Option 'module' must be set to 'NodeNext' when option 'moduleResolution' is set to 'NodeNext'.
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --moduleResolution bundler --pretty false
+exit=1
+--- stdout ---
+node_modules/.ts7-probe/p1/tsconfig.json(6,25): error TS5095: Option 'bundler' can only be used when 'module' is set to 'preserve', 'commonjs', or 'es2015' or later.
+node_modules/.ts7-probe/p1/tsconfig.json(6,25): error TS5109: Option 'moduleResolution' must be set to 'NodeNext' (or left unspecified) when option 'module' is set to 'NodeNext'.
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --module preserve --moduleResolution bundler --pretty false
+exit=0
+--- stdout ---
+
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --lib es2022 --pretty false
+exit=1
+--- stdout ---
+node_modules/.ts7-probe/p1/src/main.ts(20,1): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.
+node_modules/.ts7-probe/p1/src/math.ts(49,5): error TS2304: Cannot find name 'setTimeout'.
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --lib es2022,dom --pretty false
+exit=0
+--- stdout ---
+
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --lib esnext --pretty false
+exit=1
+--- stdout ---
+node_modules/.ts7-probe/p1/src/main.ts(20,1): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.
+node_modules/.ts7-probe/p1/src/math.ts(49,5): error TS2304: Cannot find name 'setTimeout'.
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --lib bogus --pretty false
+exit=1
+--- stdout ---
+error TS6046: Argument for '--lib' option must be: 'es5', 'es6', 'es2015', 'es7', 'es2016', 'es2017', 'es2018', 'es2019', 'es2020', 'es2021', 'es2022', 'es2023', 'es2024', 'es2025', 'esnext', 'dom', 'dom.iterable', 'dom.asynciterable', 'webworker', 'webworker.importscripts', 'webworker.iterable', 'webworker.asynciterable', 'scripthost', 'es2015.core', 'es2015.collection', 'es2015.generator', 'es2015.iterable', 'es2015.promise', 'es2015.proxy', 'es2015.reflect', 'es2015.symbol', 'es2015.symbol.wellknown', 'es2016.array.include', 'es2016.intl', 'es2017.arraybuffer', 'es2017.date', 'es2017.object', 'es2017.sharedmemory', 'es2017.string', 'es2017.intl', 'es2017.typedarrays', 'es2018.asyncgenerator', 'es2018.asynciterable', 'es2018.intl', 'es2018.promise', 'es2018.regexp', 'es2019.array', 'es2019.object', 'es2019.string', 'es2019.symbol', 'es2019.intl', 'es2020.bigint', 'es2020.date', 'es2020.promise', 'es2020.sharedmemory', 'es2020.string', 'es2020.symbol.wellknown', 'es2020.intl', 'es2020.number', 'es2021.promise', 'es2021.string', 'es2021.weakref', 'es2021.intl', 'es2022.array', 'es2022.error', 'es2022.intl', 'es2022.object', 'es2022.string', 'es2022.regexp', 'es2023.array', 'es2023.collection', 'es2023.intl', 'es2024.arraybuffer', 'es2024.collection', 'es2024.object', 'es2024.promise', 'es2024.regexp', 'es2024.sharedmemory', 'es2024.string', 'es2025.collection', 'es2025.float16', 'es2025.intl', 'es2025.iterator', 'es2025.promise', 'es2025.regexp', 'esnext.asynciterable', 'esnext.symbol', 'esnext.bigint', 'esnext.weakref', 'esnext.object', 'esnext.regexp', 'esnext.string', 'esnext.float16', 'esnext.iterator', 'esnext.promise', 'esnext.array', 'esnext.collection', 'esnext.date', 'esnext.decorators', 'esnext.disposable', 'esnext.error', 'esnext.intl', 'esnext.sharedmemory', 'esnext.temporal', 'esnext.typedarrays', 'decorators', 'decorators.legacy'.
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --target es2022 --pretty false
+exit=0
+--- stdout ---
+
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --target es5 --pretty false
+exit=1
+--- stdout ---
+node_modules/.ts7-probe/p1/tsconfig.json(4,15): error TS5108: Option 'target=ES5' has been removed. Please remove it from your configuration.
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --declaration --pretty false
+exit=0
+--- stdout ---
+
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --sourceMap --pretty false
+exit=0
+--- stdout ---
+
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --verbatimModuleSyntax false --pretty false
+exit=0
+--- stdout ---
+
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --module commonjs --pretty false
+exit=1
+--- stdout ---
+node_modules/.ts7-probe/p1/tsconfig.json(5,15): error TS5110: Option 'module' must be set to 'NodeNext' when option 'moduleResolution' is set to 'NodeNext'.
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --module esnext --moduleResolution bundler --pretty false
+exit=0
+--- stdout ---
+
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --strict false --pretty false
+exit=0
+--- stdout ---
+
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --noUnusedLocals --pretty false
+exit=0
+--- stdout ---
+
+--- stderr ---
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --notARealFlag --pretty false
+exit=1
+--- stdout ---
+error TS5023: Unknown compiler option '--notARealFlag'.
+--- stderr ---

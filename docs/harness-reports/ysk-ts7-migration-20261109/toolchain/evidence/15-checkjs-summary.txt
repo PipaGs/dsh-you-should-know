@@ -1,0 +1,101 @@
+checkJs on existing repo lib/*.js
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/checkjs/tsconfig.json --pretty false
+exit=1
+
+total diagnostics: 787
+files with diagnostics: 13
+
+per file:
+  323	lib/core.js
+  127	lib/client.js
+  92	lib/update.js
+  90	lib/runtime.js
+  31	lib/evidence.js
+  28	lib/self-check.js
+  24	lib/index.js
+  17	lib/language.js
+  15	lib/explain.js
+  13	lib/review-strictness.js
+  10	lib/adaptive.js
+  9	lib/review-profile.js
+  8	lib/feedback.js
+
+top diagnostic codes:
+  492	TS7006
+  96	TS2339
+  56	TS7005
+  52	TS8032
+  28	TS7053
+  22	TS2322
+  21	TS7034
+  5	TS2345
+  4	TS2304
+  4	TS1005
+  3	TS2531
+  2	TS2551
+  1	TS2307
+  1	TS2783
+
+raw log: docs/harness-reports/ysk-ts7-migration-20261109/toolchain/evidence/15-checkjs-raw.txt (81851 bytes)
+
+first 60 diagnostics:
+lib/adaptive.js(35,32): error TS7006: Parameter 'outcome' implicitly has an 'any' type.
+lib/adaptive.js(47,32): error TS7006: Parameter 'state' implicitly has an 'any' type.
+lib/adaptive.js(47,39): error TS7006: Parameter 'max' implicitly has an 'any' type.
+lib/adaptive.js(47,44): error TS7006: Parameter 'now' implicitly has an 'any' type.
+lib/adaptive.js(60,36): error TS7006: Parameter 'state' implicitly has an 'any' type.
+lib/adaptive.js(60,43): error TS7006: Parameter 'now' implicitly has an 'any' type.
+lib/adaptive.js(69,34): error TS7006: Parameter 'state' implicitly has an 'any' type.
+lib/adaptive.js(75,28): error TS7006: Parameter 'state' implicitly has an 'any' type.
+lib/adaptive.js(83,40): error TS7006: Parameter 'state' implicitly has an 'any' type.
+lib/adaptive.js(83,47): error TS7006: Parameter 'baseCooldown' implicitly has an 'any' type.
+lib/client.js(10,8): error TS2339: Property '__ModuleLoader__' does not exist on type 'Window & typeof globalThis'.
+lib/client.js(12,11): error TS7006: Parameter 'require' implicitly has an 'any' type.
+lib/client.js(13,27): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+lib/client.js(73,35): error TS7006: Parameter 'id' implicitly has an 'any' type.
+lib/client.js(97,31): error TS7006: Parameter 'id' implicitly has an 'any' type.
+lib/client.js(111,19): error TS7006: Parameter 'listener' implicitly has an 'any' type.
+lib/client.js(135,26): error TS7006: Parameter 'sessionId' implicitly has an 'any' type.
+lib/client.js(148,31): error TS7006: Parameter 'sessionId' implicitly has an 'any' type.
+lib/client.js(162,33): error TS7006: Parameter 'sessionId' implicitly has an 'any' type.
+lib/client.js(168,40): error TS7006: Parameter 'entry' implicitly has an 'any' type.
+lib/client.js(175,28): error TS7006: Parameter 'sessionId' implicitly has an 'any' type.
+lib/client.js(175,39): error TS7006: Parameter 'noteId' implicitly has an 'any' type.
+lib/client.js(175,47): error TS7006: Parameter 'action' implicitly has an 'any' type.
+lib/client.js(194,33): error TS7006: Parameter 'sessionId' implicitly has an 'any' type.
+lib/client.js(194,44): error TS7006: Parameter 'noteId' implicitly has an 'any' type.
+lib/client.js(227,33): error TS7006: Parameter 'sessionId' implicitly has an 'any' type.
+lib/client.js(240,32): error TS7006: Parameter 'body' implicitly has an 'any' type.
+lib/client.js(256,31): error TS7006: Parameter 'payload' implicitly has an 'any' type.
+lib/client.js(294,27): error TS7006: Parameter 'runningVersion' implicitly has an 'any' type.
+lib/client.js(294,43): error TS7006: Parameter 'installedVersion' implicitly has an 'any' type.
+lib/client.js(302,34): error TS7006: Parameter 'payload' implicitly has an 'any' type.
+lib/client.js(316,30): error TS7006: Parameter 'payload' implicitly has an 'any' type.
+lib/client.js(321,18): error TS7006: Parameter 'route' implicitly has an 'any' type.
+lib/client.js(322,15): error TS7006: Parameter 'route' implicitly has an 'any' type.
+lib/client.js(329,31): error TS7006: Parameter 'catalog' implicitly has an 'any' type.
+lib/client.js(331,40): error TS7006: Parameter 'entry' implicitly has an 'any' type.
+lib/client.js(334,28): error TS7006: Parameter 'catalog' implicitly has an 'any' type.
+lib/client.js(334,37): error TS7006: Parameter 'provider' implicitly has an 'any' type.
+lib/client.js(335,53): error TS7006: Parameter 'entry' implicitly has an 'any' type.
+lib/client.js(336,74): error TS7006: Parameter 'model' implicitly has an 'any' type.
+lib/client.js(339,25): error TS7006: Parameter 'event' implicitly has an 'any' type.
+lib/client.js(343,27): error TS7006: Parameter 'event' implicitly has an 'any' type.
+lib/client.js(348,31): error TS7006: Parameter 'source' implicitly has an 'any' type.
+lib/client.js(354,27): error TS7006: Parameter 'route' implicitly has an 'any' type.
+lib/client.js(365,31): error TS7006: Parameter 'value' implicitly has an 'any' type.
+lib/client.js(380,32): error TS7006: Parameter 'value' implicitly has an 'any' type.
+lib/client.js(385,28): error TS7006: Parameter 'value' implicitly has an 'any' type.
+lib/client.js(394,33): error TS7006: Parameter 'path' implicitly has an 'any' type.
+lib/client.js(402,27): error TS7006: Parameter 'note' implicitly has an 'any' type.
+lib/client.js(416,29): error TS7006: Parameter 'note' implicitly has an 'any' type.
+lib/client.js(426,26): error TS7006: Parameter 'source' implicitly has an 'any' type.
+lib/client.js(438,33): error TS7006: Parameter 'sessionId' implicitly has an 'any' type.
+lib/client.js(438,44): error TS7006: Parameter 'path' implicitly has an 'any' type.
+lib/client.js(445,23): error TS7006: Parameter 'segment' implicitly has an 'any' type.
+lib/client.js(455,27): error TS7006: Parameter 'note' implicitly has an 'any' type.
+lib/client.js(470,30): error TS7006: Parameter 'action' implicitly has an 'any' type.
+lib/client.js(470,38): error TS7006: Parameter 'path' implicitly has an 'any' type.
+lib/client.js(491,24): error TS7006: Parameter 'note' implicitly has an 'any' type.
+lib/client.js(522,29): error TS7006: Parameter 'note' implicitly has an 'any' type.
+lib/client.js(522,35): error TS7006: Parameter 'inputActions' implicitly has an 'any' type.

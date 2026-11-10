@@ -1,0 +1,411 @@
+exit=1
+src/client.ts(14,15): error TS18046: 'React' is of type 'unknown'.
+src/client.ts(15,13): error TS2339: Property 'useEffect' does not exist on type 'unknown'.
+src/client.ts(15,24): error TS2339: Property 'useRef' does not exist on type 'unknown'.
+src/client.ts(15,32): error TS2339: Property 'useState' does not exist on type 'unknown'.
+src/client.ts(73,35): error TS7006: Parameter 'id' implicitly has an 'any' type.
+src/client.ts(97,31): error TS7006: Parameter 'id' implicitly has an 'any' type.
+src/client.ts(111,19): error TS7006: Parameter 'listener' implicitly has an 'any' type.
+src/client.ts(120,50): error TS18046: 'listener' is of type 'unknown'.
+src/client.ts(135,26): error TS7006: Parameter 'sessionId' implicitly has an 'any' type.
+src/client.ts(148,31): error TS7006: Parameter 'sessionId' implicitly has an 'any' type.
+src/client.ts(153,33): error TS2339: Property 'ok' does not exist on type '{}'.
+src/client.ts(153,71): error TS2339: Property 'notes' does not exist on type '{}'.
+src/client.ts(154,48): error TS2339: Property 'historyCount' does not exist on type '{}'.
+src/client.ts(154,73): error TS2339: Property 'historyCount' does not exist on type '{}'.
+src/client.ts(154,101): error TS2339: Property 'historyCount' does not exist on type '{}'.
+src/client.ts(155,33): error TS2339: Property 'notes' does not exist on type '{}'.
+src/client.ts(162,33): error TS7006: Parameter 'sessionId' implicitly has an 'any' type.
+src/client.ts(167,33): error TS2339: Property 'ok' does not exist on type '{}'.
+src/client.ts(167,71): error TS2339: Property 'history' does not exist on type '{}'.
+src/client.ts(168,24): error TS2339: Property 'history' does not exist on type '{}'.
+src/client.ts(168,40): error TS7006: Parameter 'entry' implicitly has an 'any' type.
+src/client.ts(175,28): error TS7006: Parameter 'sessionId' implicitly has an 'any' type.
+src/client.ts(175,39): error TS7006: Parameter 'noteId' implicitly has an 'any' type.
+src/client.ts(175,47): error TS7006: Parameter 'action' implicitly has an 'any' type.
+src/client.ts(194,33): error TS7006: Parameter 'sessionId' implicitly has an 'any' type.
+src/client.ts(194,44): error TS7006: Parameter 'noteId' implicitly has an 'any' type.
+src/client.ts(204,21): error TS2339: Property 'ok' does not exist on type 'object'.
+src/client.ts(204,51): error TS2339: Property 'explanation' does not exist on type 'object'.
+src/client.ts(204,87): error TS2339: Property 'explanation' does not exist on type 'object'.
+src/client.ts(205,51): error TS2339: Property 'explanation' does not exist on type 'object'.
+src/client.ts(207,51): error TS2339: Property 'error' does not exist on type 'object'.
+src/client.ts(207,80): error TS2339: Property 'error' does not exist on type 'object'.
+src/client.ts(219,33): error TS2339: Property 'ok' does not exist on type '{}'.
+src/client.ts(219,57): error TS2339: Property 'config' does not exist on type '{}'.
+src/client.ts(219,82): error TS2339: Property 'config' does not exist on type '{}'.
+src/client.ts(227,33): error TS7006: Parameter 'sessionId' implicitly has an 'any' type.
+src/client.ts(232,33): error TS2339: Property 'ok' does not exist on type '{}'.
+src/client.ts(240,32): error TS7006: Parameter 'body' implicitly has an 'any' type.
+src/client.ts(256,31): error TS7006: Parameter 'payload' implicitly has an 'any' type.
+src/client.ts(282,72): error TS2339: Property 'ok' does not exist on type 'object'.
+src/client.ts(294,27): error TS7006: Parameter 'runningVersion' implicitly has an 'any' type.
+src/client.ts(294,43): error TS7006: Parameter 'installedVersion' implicitly has an 'any' type.
+src/client.ts(302,34): error TS7006: Parameter 'payload' implicitly has an 'any' type.
+src/client.ts(316,30): error TS7006: Parameter 'payload' implicitly has an 'any' type.
+src/client.ts(321,18): error TS7006: Parameter 'route' implicitly has an 'any' type.
+src/client.ts(322,15): error TS7006: Parameter 'route' implicitly has an 'any' type.
+src/client.ts(329,31): error TS7006: Parameter 'catalog' implicitly has an 'any' type.
+src/client.ts(331,40): error TS7006: Parameter 'entry' implicitly has an 'any' type.
+src/client.ts(334,28): error TS7006: Parameter 'catalog' implicitly has an 'any' type.
+src/client.ts(334,37): error TS7006: Parameter 'provider' implicitly has an 'any' type.
+src/client.ts(335,53): error TS7006: Parameter 'entry' implicitly has an 'any' type.
+src/client.ts(336,74): error TS7006: Parameter 'model' implicitly has an 'any' type.
+src/client.ts(339,25): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/client.ts(343,27): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/client.ts(348,31): error TS7006: Parameter 'source' implicitly has an 'any' type.
+src/client.ts(354,27): error TS7006: Parameter 'route' implicitly has an 'any' type.
+src/client.ts(365,31): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/client.ts(380,32): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/client.ts(385,28): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/client.ts(394,33): error TS7006: Parameter 'path' implicitly has an 'any' type.
+src/client.ts(402,27): error TS7006: Parameter 'note' implicitly has an 'any' type.
+src/client.ts(416,29): error TS7006: Parameter 'note' implicitly has an 'any' type.
+src/client.ts(426,26): error TS7006: Parameter 'source' implicitly has an 'any' type.
+src/client.ts(438,33): error TS7006: Parameter 'sessionId' implicitly has an 'any' type.
+src/client.ts(438,44): error TS7006: Parameter 'path' implicitly has an 'any' type.
+src/client.ts(445,23): error TS7006: Parameter 'segment' implicitly has an 'any' type.
+src/client.ts(455,27): error TS7006: Parameter 'note' implicitly has an 'any' type.
+src/client.ts(470,30): error TS7006: Parameter 'action' implicitly has an 'any' type.
+src/client.ts(470,38): error TS7006: Parameter 'path' implicitly has an 'any' type.
+src/client.ts(491,24): error TS7006: Parameter 'note' implicitly has an 'any' type.
+src/client.ts(522,29): error TS7006: Parameter 'note' implicitly has an 'any' type.
+src/client.ts(522,35): error TS7006: Parameter 'inputActions' implicitly has an 'any' type.
+src/client.ts(522,49): error TS7006: Parameter 'input' implicitly has an 'any' type.
+src/client.ts(541,32): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/client.ts(549,29): error TS7006: Parameter 'notes' implicitly has an 'any' type.
+src/client.ts(559,28): error TS7006: Parameter 'entry' implicitly has an 'any' type.
+src/client.ts(568,30): error TS7006: Parameter 'entry' implicitly has an 'any' type.
+src/client.ts(578,30): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/client.ts(599,23): error TS7006: Parameter 'props' implicitly has an 'any' type.
+src/client.ts(776,27): error TS7006: Parameter 'props' implicitly has an 'any' type.
+src/client.ts(891,32): error TS7006: Parameter 'props' implicitly has an 'any' type.
+src/client.ts(923,39): error TS7006: Parameter 'note' implicitly has an 'any' type.
+src/client.ts(929,18): error TS7006: Parameter 'current' implicitly has an 'any' type.
+src/client.ts(948,27): error TS7006: Parameter 'current' implicitly has an 'any' type.
+src/client.ts(968,29): error TS7006: Parameter 'noteId' implicitly has an 'any' type.
+src/client.ts(972,25): error TS7006: Parameter 'current' implicitly has an 'any' type.
+src/client.ts(978,18): error TS7006: Parameter 'current' implicitly has an 'any' type.
+src/client.ts(981,42): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/client.ts(987,26): error TS7006: Parameter 'note' implicitly has an 'any' type.
+src/client.ts(994,29): error TS7006: Parameter 'revision' implicitly has an 'any' type.
+src/client.ts(997,28): error TS7006: Parameter 'note' implicitly has an 'any' type.
+src/client.ts(1001,29): error TS7006: Parameter 'revision' implicitly has an 'any' type.
+src/client.ts(1005,32): error TS7006: Parameter 'note' implicitly has an 'any' type.
+src/client.ts(1005,38): error TS7006: Parameter 'action' implicitly has an 'any' type.
+src/client.ts(1009,29): error TS7006: Parameter 'revision' implicitly has an 'any' type.
+src/client.ts(1018,34): error TS7006: Parameter 'note' implicitly has an 'any' type.
+src/client.ts(1018,40): error TS7006: Parameter 'force' implicitly has an 'any' type.
+src/client.ts(1022,27): error TS7006: Parameter 'entry' implicitly has an 'any' type.
+src/client.ts(1022,38): error TS7006: Parameter 'view' implicitly has an 'any' type.
+src/client.ts(1039,25): error TS7006: Parameter 'view' implicitly has an 'any' type.
+src/client.ts(1074,42): error TS7006: Parameter 'current' implicitly has an 'any' type.
+src/client.ts(1087,28): error TS7006: Parameter 'entry' implicitly has an 'any' type.
+src/client.ts(1125,13): error TS2554: Expected 2 arguments, but got 1.
+src/client.ts(1152,36): error TS7006: Parameter 'props' implicitly has an 'any' type.
+src/client.ts(1174,74): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/client.ts(1182,29): error TS2339: Property 'config' does not exist on type '{}'.
+src/client.ts(1183,30): error TS2339: Property 'catalog' does not exist on type '{}'.
+src/client.ts(1184,31): error TS2339: Property 'writable' does not exist on type '{}'.
+src/client.ts(1185,33): error TS2339: Property 'update' does not exist on type '{}'.
+src/client.ts(1185,67): error TS2339: Property 'update' does not exist on type '{}'.
+src/client.ts(1185,97): error TS2339: Property 'update' does not exist on type '{}'.
+src/client.ts(1187,27): error TS2339: Property 'config' does not exist on type '{}'.
+src/client.ts(1188,38): error TS2339: Property 'config' does not exist on type '{}'.
+src/client.ts(1188,77): error TS2339: Property 'config' does not exist on type '{}'.
+src/client.ts(1189,35): error TS2339: Property 'config' does not exist on type '{}'.
+src/client.ts(1189,71): error TS2339: Property 'config' does not exist on type '{}'.
+src/client.ts(1190,52): error TS2339: Property 'config' does not exist on type '{}'.
+src/client.ts(1191,52): error TS2339: Property 'config' does not exist on type '{}'.
+src/client.ts(1191,105): error TS2339: Property 'config' does not exist on type '{}'.
+src/client.ts(1192,50): error TS2339: Property 'config' does not exist on type '{}'.
+src/client.ts(1192,101): error TS2339: Property 'config' does not exist on type '{}'.
+src/client.ts(1193,43): error TS2339: Property 'config' does not exist on type '{}'.
+src/client.ts(1194,43): error TS2339: Property 'config' does not exist on type '{}'.
+src/client.ts(1195,48): error TS2339: Property 'config' does not exist on type '{}'.
+src/client.ts(1196,39): error TS2339: Property 'config' does not exist on type '{}'.
+src/client.ts(1197,53): error TS2339: Property 'config' does not exist on type '{}'.
+src/client.ts(1198,32): error TS2339: Property 'config' does not exist on type '{}'.
+src/client.ts(1228,23): error TS7006: Parameter 'field' implicitly has an 'any' type.
+src/client.ts(1228,30): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/client.ts(1229,18): error TS7006: Parameter 'current' implicitly has an 'any' type.
+src/client.ts(1251,19): error TS2339: Property 'provider' does not exist on type '{ mode: any; reviewerMode: any; additionalInstructions: any; customReviewerPrompt: any; minDeltaChars: number; cooldownTurns: number; maxContextMessages: number; maxTokens: number; maxReviewerCallsPerHour: number; }'.
+src/client.ts(1252,19): error TS2551: Property 'model' does not exist on type '{ mode: any; reviewerMode: any; additionalInstructions: any; customReviewerPrompt: any; minDeltaChars: number; cooldownTurns: number; maxContextMessages: number; maxTokens: number; maxReviewerCallsPerHour: number; }'. Did you mean 'mode'?
+src/client.ts(1261,53): error TS2339: Property 'ok' does not exist on type '{}'.
+src/client.ts(1263,27): error TS2339: Property 'config' does not exist on type '{}'.
+src/client.ts(1264,39): error TS2339: Property 'config' does not exist on type '{}'.
+src/client.ts(1266,22): error TS7006: Parameter 'current' implicitly has an 'any' type.
+src/client.ts(1273,27): error TS2339: Property 'catalog' does not exist on type '{}'.
+src/client.ts(1273,59): error TS2339: Property 'catalog' does not exist on type '{}'.
+src/client.ts(1276,57): error TS2339: Property 'error' does not exist on type '{}'.
+src/client.ts(1276,90): error TS2339: Property 'error' does not exist on type '{}'.
+src/client.ts(1284,33): error TS7006: Parameter 'body' implicitly has an 'any' type.
+src/client.ts(1313,34): error TS7006: Parameter 'id' implicitly has an 'any' type.
+src/client.ts(1318,45): error TS7006: Parameter 'patch' implicitly has an 'any' type.
+src/client.ts(1323,41): error TS2339: Property 'ok' does not exist on type 'object'.
+src/client.ts(1323,64): error TS2339: Property 'update' does not exist on type 'object'.
+src/client.ts(1324,33): error TS2339: Property 'update' does not exist on type 'object'.
+src/client.ts(1337,41): error TS2339: Property 'update' does not exist on type 'object'.
+src/client.ts(1337,71): error TS2339: Property 'update' does not exist on type 'object'.
+src/client.ts(1338,41): error TS2339: Property 'ok' does not exist on type 'object'.
+src/client.ts(1342,34): error TS2339: Property 'result' does not exist on type 'object'.
+src/client.ts(1345,36): error TS7006: Parameter 'version' implicitly has an 'any' type.
+src/client.ts(1350,41): error TS2339: Property 'ok' does not exist on type 'object'.
+src/client.ts(1350,64): error TS2339: Property 'update' does not exist on type 'object'.
+src/client.ts(1350,94): error TS2339: Property 'update' does not exist on type 'object'.
+src/client.ts(1379,32): error TS7006: Parameter 'spec' implicitly has an 'any' type.
+src/client.ts(1422,26): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/client.ts(1432,26): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/client.ts(1443,30): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/client.ts(1445,30): error TS7006: Parameter 'current' implicitly has an 'any' type.
+src/client.ts(1448,35): error TS7006: Parameter 'entry' implicitly has an 'any' type.
+src/client.ts(1455,30): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/client.ts(1456,32): error TS7006: Parameter 'model' implicitly has an 'any' type.
+src/client.ts(1464,24): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/client.ts(1476,28): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/client.ts(1487,24): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/client.ts(1497,24): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/client.ts(1506,24): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/client.ts(1515,24): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/client.ts(1524,24): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/client.ts(1533,24): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/client.ts(1553,26): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/client.ts(1562,26): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/client.ts(1630,36): error TS7006: Parameter 'props' implicitly has an 'any' type.
+src/client.ts(1646,74): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/client.ts(1658,86): error TS2339: Property 'sessionId' does not exist on type '{}'.
+src/client.ts(1661,54): error TS2339: Property 'catalog' does not exist on type '{}'.
+src/client.ts(1698,49): error TS7006: Parameter 'entry' implicitly has an 'any' type.
+src/client.ts(1717,26): error TS7006: Parameter 'body' implicitly has an 'any' type.
+src/client.ts(1726,35): error TS2339: Property 'sessionId' does not exist on type '{}'.
+src/client.ts(1733,35): error TS7006: Parameter 'current' implicitly has an 'any' type.
+src/client.ts(1749,32): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/client.ts(1751,37): error TS7006: Parameter 'current' implicitly has an 'any' type.
+src/client.ts(1753,39): error TS7006: Parameter 'id' implicitly has an 'any' type.
+src/client.ts(1758,32): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/client.ts(1758,56): error TS7006: Parameter 'current' implicitly has an 'any' type.
+src/client.ts(1764,32): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/client.ts(1795,13): error TS7006: Parameter 'ctx' implicitly has an 'any' type.
+src/client.ts(1809,20): error TS7006: Parameter 'sessionId' implicitly has an 'any' type.
+src/client.ts(1813,18): error TS7006: Parameter 'source' implicitly has an 'any' type.
+src/client.ts(1846,22): error TS7006: Parameter 'sessionId' implicitly has an 'any' type.
+src/index.ts(90,20): error TS7053: Element implicitly has an 'any' type because expression of type 'unique symbol' can't be used to index type 'typeof globalThis'.
+  Property '[OWNER_KEY]' does not exist on type 'typeof globalThis'.
+src/index.ts(93,3): error TS7053: Element implicitly has an 'any' type because expression of type 'unique symbol' can't be used to index type 'typeof globalThis'.
+  Property '[OWNER_KEY]' does not exist on type 'typeof globalThis'.
+src/index.ts(98,27): error TS7006: Parameter 'token' implicitly has an 'any' type.
+src/index.ts(99,7): error TS7053: Element implicitly has an 'any' type because expression of type 'unique symbol' can't be used to index type 'typeof globalThis'.
+  Property '[OWNER_KEY]' does not exist on type 'typeof globalThis'.
+src/index.ts(99,47): error TS7053: Element implicitly has an 'any' type because expression of type 'unique symbol' can't be used to index type 'typeof globalThis'.
+  Property '[OWNER_KEY]' does not exist on type 'typeof globalThis'.
+src/index.ts(102,15): error TS7006: Parameter 'message' implicitly has an 'any' type.
+src/index.ts(106,19): error TS7006: Parameter 'error' implicitly has an 'any' type.
+src/index.ts(127,27): error TS7006: Parameter 'settings' implicitly has an 'any' type.
+src/index.ts(148,28): error TS7006: Parameter 'session' implicitly has an 'any' type.
+src/index.ts(160,23): error TS7006: Parameter 'ctx' implicitly has an 'any' type.
+src/index.ts(160,28): error TS7006: Parameter 'rawConfig' implicitly has an 'any' type.
+src/index.ts(207,22): error TS7006: Parameter 'request' implicitly has an 'any' type.
+src/index.ts(207,31): error TS7006: Parameter 'signal' implicitly has an 'any' type.
+src/index.ts(220,38): error TS7006: Parameter 'execution' implicitly has an 'any' type.
+src/index.ts(225,21): error TS7006: Parameter 'patch' implicitly has an 'any' type.
+src/index.ts(243,15): error TS7006: Parameter 'error' implicitly has an 'any' type.
+src/index.ts(264,28): error TS7006: Parameter 'session' implicitly has an 'any' type.
+src/index.ts(264,37): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/index.ts(275,31): error TS7006: Parameter 'session' implicitly has an 'any' type.
+src/index.ts(309,31): error TS7006: Parameter 'hostCtx' implicitly has an 'any' type.
+src/index.ts(350,5): error TS7053: Element implicitly has an 'any' type because expression of type '"self-check"' can't be used to index type '{ notes: (request: Request) => Promise<Response>; history: (request: Request) => Promise<Response>; dismiss: (request: Request) => Promise<...>; ... 4 more ...; update: (request: Request) => Promise<...>; }'.
+  Property 'self-check' does not exist on type '{ notes: (request: Request) => Promise<Response>; history: (request: Request) => Promise<Response>; dismiss: (request: Request) => Promise<...>; ... 4 more ...; update: (request: Request) => Promise<...>; }'.
+src/index.ts(355,17): error TS7006: Parameter 'error' implicitly has an 'any' type.
+src/index.ts(358,28): error TS7053: Element implicitly has an 'any' type because expression of type '"config" | "dismiss" | "explain" | "history" | "notes" | "self-check" | "session" | "status" | "update"' can't be used to index type '{ notes: (request: Request) => Promise<Response>; history: (request: Request) => Promise<Response>; dismiss: (request: Request) => Promise<...>; ... 4 more ...; update: (request: Request) => Promise<...>; }'.
+  Property 'self-check' does not exist on type '{ notes: (request: Request) => Promise<Response>; history: (request: Request) => Promise<Response>; dismiss: (request: Request) => Promise<...>; ... 4 more ...; update: (request: Request) => Promise<...>; }'.
+src/runtime.ts(61,33): error TS7006: Parameter 'code' implicitly has an 'any' type.
+src/runtime.ts(71,19): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/runtime.ts(76,20): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/runtime.ts(99,24): error TS7006: Parameter 'iterator' implicitly has an 'any' type.
+src/runtime.ts(127,5): error TS2339: Property 'getStream' does not exist on type '{}'.
+src/runtime.ts(128,5): error TS2339: Property 'resolveModelInfo' does not exist on type '{}'.
+src/runtime.ts(129,5): error TS2339: Property 'parseReply' does not exist on type '{}'.
+src/runtime.ts(130,5): error TS2339: Property 'onNote' does not exist on type '{}'.
+src/runtime.ts(131,5): error TS2339: Property 'onError' does not exist on type '{}'.
+src/runtime.ts(132,5): error TS2339: Property 'now' does not exist on type '{}'.
+src/runtime.ts(133,5): error TS2339: Property 'setTimer' does not exist on type '{}'.
+src/runtime.ts(133,17): error TS7006: Parameter 'fn' implicitly has an 'any' type.
+src/runtime.ts(133,21): error TS7006: Parameter 'ms' implicitly has an 'any' type.
+src/runtime.ts(134,5): error TS2339: Property 'clearTimer' does not exist on type '{}'.
+src/runtime.ts(134,19): error TS7006: Parameter 'handle' implicitly has an 'any' type.
+src/runtime.ts(136,46): error TS2339: Property 'maxQueued' does not exist on type '{}'.
+src/runtime.ts(136,68): error TS2339: Property 'maxQueued' does not exist on type '{}'.
+src/runtime.ts(136,92): error TS2339: Property 'maxQueued' does not exist on type '{}'.
+src/runtime.ts(137,46): error TS2339: Property 'deadlineMs' does not exist on type '{}'.
+src/runtime.ts(137,69): error TS2339: Property 'deadlineMs' does not exist on type '{}'.
+src/runtime.ts(137,94): error TS2339: Property 'deadlineMs' does not exist on type '{}'.
+src/runtime.ts(138,48): error TS2339: Property 'retryDelayMs' does not exist on type '{}'.
+src/runtime.ts(138,73): error TS2339: Property 'retryDelayMs' does not exist on type '{}'.
+src/runtime.ts(138,101): error TS2339: Property 'retryDelayMs' does not exist on type '{}'.
+src/runtime.ts(139,50): error TS2339: Property 'maxReplyChars' does not exist on type '{}'.
+src/runtime.ts(139,76): error TS2339: Property 'maxReplyChars' does not exist on type '{}'.
+src/runtime.ts(139,104): error TS2339: Property 'maxReplyChars' does not exist on type '{}'.
+src/runtime.ts(140,64): error TS2339: Property 'transportDropFlushThreshold' does not exist on type '{}'.
+src/runtime.ts(140,104): error TS2339: Property 'transportDropFlushThreshold' does not exist on type '{}'.
+src/runtime.ts(141,15): error TS2339: Property 'transportDropFlushThreshold' does not exist on type '{}'.
+src/runtime.ts(144,9): error TS7034: Variable 'queue' implicitly has type 'any[]' in some locations where its type cannot be determined.
+src/runtime.ts(153,7): error TS7034: Variable 'currentController' implicitly has type 'any' in some locations where its type cannot be determined.
+src/runtime.ts(156,7): error TS7034: Variable 'idleResolvers' implicitly has type 'any[]' in some locations where its type cannot be determined.
+src/runtime.ts(157,7): error TS7034: Variable 'releaseDispose' implicitly has type 'any' in some locations where its type cannot be determined.
+src/runtime.ts(178,26): error TS7006: Parameter 'failure' implicitly has an 'any' type.
+src/runtime.ts(178,35): error TS7006: Parameter 'cause' implicitly has an 'any' type.
+src/runtime.ts(185,83): error TS2339: Property 'code' does not exist on type 'Error'.
+src/runtime.ts(190,22): error TS7006: Parameter 'ms' implicitly has an 'any' type.
+src/runtime.ts(193,23): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/runtime.ts(214,32): error TS7006: Parameter 'provider' implicitly has an 'any' type.
+src/runtime.ts(214,42): error TS7006: Parameter 'model' implicitly has an 'any' type.
+src/runtime.ts(214,49): error TS7006: Parameter 'signal' implicitly has an 'any' type.
+src/runtime.ts(247,35): error TS7006: Parameter 'effort' implicitly has an 'any' type.
+src/runtime.ts(258,25): error TS7006: Parameter 'job' implicitly has an 'any' type.
+src/runtime.ts(258,30): error TS7006: Parameter 'signal' implicitly has an 'any' type.
+src/runtime.ts(258,38): error TS7006: Parameter 'reasoningEffort' implicitly has an 'any' type.
+src/runtime.ts(268,46): error TS2339: Property 'reasoningEffort' does not exist on type '{ provider: any; model: any; system: any; messages: { role: string; content: { type: string; text: any; }[]; }[]; temperature: number; maxTokens: any; signal: any; }'.
+src/runtime.ts(273,31): error TS7006: Parameter 'consume' implicitly has an 'any' type.
+src/runtime.ts(292,30): error TS7006: Parameter 'job' implicitly has an 'any' type.
+src/runtime.ts(292,35): error TS7006: Parameter 'controller' implicitly has an 'any' type.
+src/runtime.ts(380,26): error TS7006: Parameter 'text' implicitly has an 'any' type.
+src/runtime.ts(385,7): error TS2322: Type '"empty"' is not assignable to type 'null'.
+src/runtime.ts(400,7): error TS2322: Type '"unparsed"' is not assignable to type 'null'.
+src/runtime.ts(405,7): error TS2322: Type '"silent"' is not assignable to type 'null'.
+src/runtime.ts(410,5): error TS2322: Type 'string' is not assignable to type 'null'.
+src/runtime.ts(421,30): error TS7005: Variable 'queue' implicitly has an 'any[]' type.
+src/runtime.ts(424,5): error TS2322: Type '"degraded"' is not assignable to type '"idle"'.
+src/runtime.ts(427,27): error TS7006: Parameter 'entry' implicitly has an 'any' type.
+src/runtime.ts(434,7): error TS2322: Type '"reviewing"' is not assignable to type '"idle"'.
+src/runtime.ts(441,9): error TS2322: Type '"aborted"' is not assignable to type 'null'.
+src/runtime.ts(446,9): error TS2322: Type '"unroutable"' is not assignable to type 'null'.
+src/runtime.ts(458,9): error TS2322: Type '"aborted"' is not assignable to type 'null'.
+src/runtime.ts(463,9): error TS2322: Type '"quota_exhausted"' is not assignable to type 'null'.
+src/runtime.ts(469,9): error TS2322: Type '"halted"' is not assignable to type 'null'.
+src/runtime.ts(477,11): error TS2322: Type '"aborted"' is not assignable to type 'null'.
+src/runtime.ts(491,7): error TS2322: Type '"dropped"' is not assignable to type 'null'.
+src/runtime.ts(499,21): error TS7005: Variable 'queue' implicitly has an 'any[]' type.
+src/runtime.ts(506,9): error TS2322: Type '"quota_exhausted"' is not assignable to type '"idle"'.
+src/runtime.ts(512,9): error TS2322: Type '"halted"' is not assignable to type '"idle"'.
+src/runtime.ts(513,34): error TS7005: Variable 'queue' implicitly has an 'any[]' type.
+src/runtime.ts(517,19): error TS2322: Type '"disposed"' is not assignable to type '"idle"'.
+src/runtime.ts(518,22): error TS2322: Type '"halted"' is not assignable to type '"idle"'.
+src/runtime.ts(519,22): error TS2322: Type '"quota_exhausted"' is not assignable to type '"idle"'.
+src/runtime.ts(520,24): error TS2322: Type '"degraded"' is not assignable to type '"idle"'.
+src/runtime.ts(521,32): error TS2322: Type '"reviewing"' is not assignable to type '"idle"'.
+src/runtime.ts(540,27): error TS7005: Variable 'idleResolvers' implicitly has an 'any[]' type.
+src/runtime.ts(550,20): error TS7006: Parameter 'job' implicitly has an 'any' type.
+src/runtime.ts(579,5): error TS7005: Variable 'releaseDispose' implicitly has an 'any' type.
+src/runtime.ts(580,45): error TS18046: 'cancel' is of type 'unknown'.
+src/runtime.ts(582,9): error TS7005: Variable 'currentController' implicitly has an 'any' type.
+src/runtime.ts(589,30): error TS7005: Variable 'queue' implicitly has an 'any[]' type.
+src/runtime.ts(590,5): error TS2322: Type '"disposed"' is not assignable to type '"idle"'.
+src/self-check.ts(80,22): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/self-check.ts(92,34): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/self-check.ts(103,27): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/self-check.ts(115,37): error TS7006: Parameter 'handlers' implicitly has an 'any' type.
+src/self-check.ts(136,35): error TS7006: Parameter 'handlers' implicitly has an 'any' type.
+src/self-check.ts(136,45): error TS7006: Parameter 'diagnostics' implicitly has an 'any' type.
+src/self-check.ts(155,31): error TS7006: Parameter 'status' implicitly has an 'any' type.
+src/self-check.ts(161,37): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/self-check.ts(162,118): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/self-check.ts(163,30): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/self-check.ts(168,27): error TS7053: Element implicitly has an 'any' type because expression of type '"installSpec"' can't be used to index type '{}'.
+  Property 'installSpec' does not exist on type '{}'.
+src/self-check.ts(169,78): error TS7053: Element implicitly has an 'any' type because expression of type '"installSpec"' can't be used to index type '{}'.
+  Property 'installSpec' does not exist on type '{}'.
+src/self-check.ts(172,33): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{}'.
+  No index signature with a parameter of type 'string' was found on type '{}'.
+src/self-check.ts(184,25): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/self-check.ts(198,39): error TS7006: Parameter 'input' implicitly has an 'any' type.
+src/self-check.ts(229,44): error TS7006: Parameter 'onError' implicitly has an 'any' type.
+src/self-check.ts(251,40): error TS7006: Parameter 'options' implicitly has an 'any' type.
+src/self-check.ts(258,28): error TS7006: Parameter 'request' implicitly has an 'any' type.
+src/update.ts(73,20): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/update.ts(73,27): error TS7006: Parameter 'fallback' implicitly has an 'any' type.
+src/update.ts(77,26): error TS7006: Parameter 'text' implicitly has an 'any' type.
+src/update.ts(91,32): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/update.ts(106,33): error TS7006: Parameter 'left' implicitly has an 'any' type.
+src/update.ts(106,39): error TS7006: Parameter 'right' implicitly has an 'any' type.
+src/update.ts(115,20): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/update.ts(121,20): error TS7006: Parameter 'parsed' implicitly has an 'any' type.
+src/update.ts(140,33): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/update.ts(142,43): error TS2339: Property 'maxOutputChars' does not exist on type '{}'.
+src/update.ts(143,40): error TS2339: Property 'maxTagLines' does not exist on type '{}'.
+src/update.ts(156,26): error TS2531: Object is possibly 'null'.
+src/update.ts(166,29): error TS7006: Parameter 'tag' implicitly has an 'any' type.
+src/update.ts(172,15): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/update.ts(181,30): error TS7006: Parameter 'ms' implicitly has an 'any' type.
+src/update.ts(196,35): error TS7006: Parameter 'ms' implicitly has an 'any' type.
+src/update.ts(206,46): error TS7006: Parameter 'ms' implicitly has an 'any' type.
+src/update.ts(219,38): error TS7006: Parameter 'raw' implicitly has an 'any' type.
+src/update.ts(244,34): error TS7006: Parameter 'current' implicitly has an 'any' type.
+src/update.ts(244,43): error TS7006: Parameter 'raw' implicitly has an 'any' type.
+src/update.ts(265,25): error TS7006: Parameter 'result' implicitly has an 'any' type.
+src/update.ts(265,33): error TS7006: Parameter 'maxOutputChars' implicitly has an 'any' type.
+src/update.ts(298,41): error TS2339: Property 'currentVersion' does not exist on type '{}'.
+src/update.ts(298,79): error TS2339: Property 'currentVersion' does not exist on type '{}'.
+src/update.ts(299,35): error TS2339: Property 'getState' does not exist on type '{}'.
+src/update.ts(299,69): error TS2339: Property 'getState' does not exist on type '{}'.
+src/update.ts(300,34): error TS2339: Property 'persist' does not exist on type '{}'.
+src/update.ts(300,67): error TS2339: Property 'persist' does not exist on type '{}'.
+src/update.ts(301,29): error TS2339: Property 'shellExec' does not exist on type '{}'.
+src/update.ts(302,30): error TS2339: Property 'now' does not exist on type '{}'.
+src/update.ts(302,59): error TS2339: Property 'now' does not exist on type '{}'.
+src/update.ts(303,35): error TS2339: Property 'setTimer' does not exist on type '{}'.
+src/update.ts(303,69): error TS2339: Property 'setTimer' does not exist on type '{}'.
+src/update.ts(303,81): error TS7006: Parameter 'fn' implicitly has an 'any' type.
+src/update.ts(303,85): error TS7006: Parameter 'ms' implicitly has an 'any' type.
+src/update.ts(304,37): error TS2339: Property 'clearTimer' does not exist on type '{}'.
+src/update.ts(304,73): error TS2339: Property 'clearTimer' does not exist on type '{}'.
+src/update.ts(304,87): error TS7006: Parameter 'handle' implicitly has an 'any' type.
+src/update.ts(305,34): error TS2339: Property 'onError' does not exist on type '{}'.
+src/update.ts(305,67): error TS2339: Property 'onError' does not exist on type '{}'.
+src/update.ts(306,46): error TS2339: Property 'requestTimeoutMs' does not exist on type '{}'.
+src/update.ts(307,44): error TS2339: Property 'maxOutputChars' does not exist on type '{}'.
+src/update.ts(308,41): error TS2339: Property 'maxTagLines' does not exist on type '{}'.
+src/update.ts(312,7): error TS7034: Variable 'midnightHandle' implicitly has type 'any' in some locations where its type cannot be determined.
+src/update.ts(313,7): error TS7034: Variable 'immediateHandle' implicitly has type 'any' in some locations where its type cannot be determined.
+src/update.ts(314,7): error TS7034: Variable 'pending' implicitly has type 'any' in some locations where its type cannot be determined.
+src/update.ts(315,7): error TS7034: Variable 'pendingAutomatic' implicitly has type 'any' in some locations where its type cannot be determined.
+src/update.ts(316,7): error TS7034: Variable 'activeController' implicitly has type 'any' in some locations where its type cannot be determined.
+src/update.ts(317,7): error TS7034: Variable 'lastResult' implicitly has type 'any' in some locations where its type cannot be determined.
+src/update.ts(318,7): error TS7034: Variable 'lastCheckedAt' implicitly has type 'any' in some locations where its type cannot be determined.
+src/update.ts(320,24): error TS7006: Parameter 'error' implicitly has an 'any' type.
+src/update.ts(329,9): error TS7005: Variable 'midnightHandle' implicitly has an 'any' type.
+src/update.ts(330,18): error TS7005: Variable 'midnightHandle' implicitly has an 'any' type.
+src/update.ts(333,9): error TS7005: Variable 'immediateHandle' implicitly has an 'any' type.
+src/update.ts(334,18): error TS7005: Variable 'immediateHandle' implicitly has an 'any' type.
+src/update.ts(344,21): error TS7006: Parameter 'fn' implicitly has an 'any' type.
+src/update.ts(344,25): error TS7006: Parameter 'ms' implicitly has an 'any' type.
+src/update.ts(352,20): error TS7005: Variable 'midnightHandle' implicitly has an 'any' type.
+src/update.ts(364,20): error TS7005: Variable 'immediateHandle' implicitly has an 'any' type.
+src/update.ts(388,9): error TS7034: Variable 'handle' implicitly has type 'any' in some locations where its type cannot be determined.
+src/update.ts(411,11): error TS7005: Variable 'handle' implicitly has an 'any' type.
+src/update.ts(411,39): error TS7005: Variable 'handle' implicitly has an 'any' type.
+src/update.ts(412,11): error TS7005: Variable 'activeController' implicitly has an 'any' type.
+src/update.ts(442,31): error TS7006: Parameter 'outcome' implicitly has an 'any' type.
+src/update.ts(442,40): error TS7006: Parameter 'automatic' implicitly has an 'any' type.
+src/update.ts(448,75): error TS2339: Property 'lastAutoCheckDate' does not exist on type '{ lastSeenLatestVersion: any; }'.
+src/update.ts(457,57): error TS2531: Object is possibly 'null'.
+src/update.ts(463,9): error TS7005: Variable 'pending' implicitly has an 'any' type.
+src/update.ts(463,34): error TS7005: Variable 'pending' implicitly has an 'any' type.
+src/update.ts(473,9): error TS7005: Variable 'pendingAutomatic' implicitly has an 'any' type.
+src/update.ts(473,43): error TS7005: Variable 'pendingAutomatic' implicitly has an 'any' type.
+src/update.ts(477,14): error TS7006: Parameter 'outcome' implicitly has an 'any' type.
+src/update.ts(486,9): error TS7005: Variable 'pending' implicitly has an 'any' type.
+src/update.ts(486,38): error TS7005: Variable 'pending' implicitly has an 'any' type.
+src/update.ts(487,9): error TS7005: Variable 'pendingAutomatic' implicitly has an 'any' type.
+src/update.ts(487,47): error TS7005: Variable 'pendingAutomatic' implicitly has an 'any' type.
+src/update.ts(495,68): error TS2531: Object is possibly 'null'.
+src/update.ts(514,7): error TS7005: Variable 'lastCheckedAt' implicitly has an 'any' type.
+src/update.ts(515,7): error TS7005: Variable 'lastResult' implicitly has an 'any' type.
+src/update.ts(519,33): error TS7006: Parameter 'patch' implicitly has an 'any' type.
+src/update.ts(524,12): error TS2339: Property 'autoCheckUpdates' does not exist on type '{}'.
+src/update.ts(528,12): error TS2339: Property 'updateBehavior' does not exist on type '{}'.
+src/update.ts(541,26): error TS7006: Parameter 'version' implicitly has an 'any' type.
+src/update.ts(568,9): error TS7005: Variable 'activeController' implicitly has an 'any' type.
+src/update.ts(570,9): error TS7005: Variable 'activeController' implicitly has an 'any' type.

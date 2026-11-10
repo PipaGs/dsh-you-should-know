@@ -1,0 +1,17 @@
+# Filtered typecheck summary — phase 2, src/core.ts
+
+Command: tsc -p tsconfig.json --noEmit --pretty false (run via node spawnSync).
+Filter A: lines starting with 'src/core.ts(' -> src/core.ts diagnostics.
+Filter B: lines matching /^src/...ts(line,col): error / -> all attributed diagnostics.
+
+src/core.ts diagnostics: 0
+other-file diagnostics: 398
+multiline continuation lines: 12
+raw output lines: 410
+
+Other-file diagnostics per file:
+  client.ts: 190
+  index.ts: 23
+  runtime.ts: 82
+  self-check.ts: 18
+  update.ts: 85

@@ -1,0 +1,18 @@
+# export surface parity: git HEAD lib/*.js versus the phase 1 build of src/*.ts
+# method: dynamic import of both trees in one Node process, compare sorted export names
+# note: HEAD copies were written to node_modules/.parity-head so their relative imports resolve
+
+SAME adaptive exports=12
+SAME core exports=36
+SAME evidence exports=3
+SAME explain exports=6
+SAME feedback exports=11
+SAME index exports=4
+SAME language exports=7
+SAME review-profile exports=4
+SAME review-strictness exports=12
+SAME runtime exports=4
+SAME self-check exports=10
+SAME update exports=18
+SAME client envelope: window.__ModuleLoader__.load({ id, factory(require) })
+SAME client has no import/export statement: head=true built=true

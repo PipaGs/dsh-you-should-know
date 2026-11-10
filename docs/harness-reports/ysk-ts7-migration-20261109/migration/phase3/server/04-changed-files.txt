@@ -1,0 +1,35 @@
+# Changed files — phase 3 server files
+
+Scope: only src/runtime.ts, src/update.ts, src/index.ts, src/self-check.ts were edited.
+No other file was edited by this phase.
+
+## git status of the four files
+
+?? src/index.ts
+?? src/runtime.ts
+?? src/self-check.ts
+?? src/update.ts
+
+Note: src/ is still an untracked phase-1 addition, so git diff --stat is empty
+for these paths. The supplementary line counts and hashes below record the change.
+
+## Line counts (before -> after)
+
+  src/runtime.ts: 619 -> 808
+  src/update.ts: 578 -> 710
+  src/index.ts: 370 -> 482
+  src/self-check.ts: 278 -> 327
+
+## sha256 (after)
+
+  16cb0e28a07c0679ef2bb2465687084f366887c3dfcbfe223dc90aa9b1ba274a  src/runtime.ts
+  2968774be9b5c28321ca5a15b7e27c2cd27b37db977e29f671bfcf65cee12814  src/update.ts
+  f6d35e9c079710595f8e939d98d58dcc54e209809414aebff8284f7ca15b5da8  src/index.ts
+  4da7acc8b7cf6a4e1bfaf5cdf4e1493baf0296a4a35d4e96d071564d9690d2c6  src/self-check.ts
+
+## lib/ and other protected paths
+
+lib/*.js, test/, scripts/, package.json, tsconfig.json, README.md,
+docs/reference.md, src/globals.d.ts, src/client.ts and every other src file were
+not edited by this phase. lib/*.js still holds the phase-1 emitted artifacts
+until the Lead runs the build.

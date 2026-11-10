@@ -1,0 +1,27 @@
+final tree gate: git diff --check
+exit=0
+
+command: git status --porcelain=v1 (tree snapshot)
+exit=0
+ M AGENTS.md
+ M README.md
+ M docs/reference.md
+ M lib/adaptive.js
+ M lib/client.js
+ M lib/core.js
+ M lib/evidence.js
+ M lib/explain.js
+ M lib/feedback.js
+ M lib/index.js
+ M lib/language.js
+ M lib/review-profile.js
+ M lib/review-strictness.js
+ M lib/runtime.js
+ M lib/self-check.js
+ M lib/update.js
+ M package.json
+?? docs/harness-reports/ysk-ts7-migration-20261109/
+?? scripts/check-build-drift.mjs
+?? scripts/local-install-smoke.mjs
+?? src/
+?? tsconfig.json

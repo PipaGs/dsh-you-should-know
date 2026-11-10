@@ -1,0 +1,17 @@
+$ node --input-type=module -e 'await import(js-emit/core.js)'
+exit=0 stdout="core.js exports: 36 DEFAULT_CONFIG,EPISODE_EVIDENCE_BEGIN,EPISODE_EVIDENCE_END,LIMITS,NOTE_KINDS,RECENT_CHECK_OUTCOMES,REVIEW_INSTRUCTIONS,UNCLASSIFIED_KIND" stderr=""
+
+$ git diff --no-index --stat <built output> <copy>   (no changes)
+exit=0 stdout=""
+after appending one comment to the copy:
+exit=1 stdout=".../node_modules/.ts7-probe/{p1/out-build2 => drift-check}/math.js      | 2 ++\n 1 file changed, 2 insertions(+)"
+git diff --no-index --exit-code exit=1 (1 means drift detected)
+
+$ git status --porcelain
+?? docs/harness-reports/ysk-ts7-migration-20261109/
+
+package.json declares typescript? {"@deepseek-ai/schemastery":"^3.18.4"}
+node_modules/typescript present: true
+package-lock.json exists: false
+npm-shrinkwrap.json exists: false
+disk usage KB: typescript=3600 native-darwin-arm64=27748 @types/node=2728

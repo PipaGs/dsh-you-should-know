@@ -1,0 +1,44 @@
+# Unsafe --out rejection evidence
+# All targets are disposable fixtures under node_modules/; no repository, home, or ancestor directory was passed.
+# captured: 2026-11-10T11:25:29.471Z
+
+## arbitrary absolute path outside the scratch root
+$ node scripts/check-build-drift.mjs --out /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/.build-drift-evidence-outside
+exit code: 2
+stderr: "build drift check: refusing unsafe --out: /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/.build-drift-evidence-outside is outside the scratch root /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/.build-check\nbuild drift check: destructive output is confined to /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/.build-check"
+sentinel: /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/.build-drift-evidence-outside/sentinel.txt
+sha256 before: 218a687e7a63954261f46ecb1cbab1606595b70b00677e824324a05aabb60a0e
+sha256 after:  218a687e7a63954261f46ecb1cbab1606595b70b00677e824324a05aabb60a0e
+sentinel byte-identical: true
+sentinel still exists: true
+
+## sibling lookalike node_modules/.build-check-evil-evidence
+$ node scripts/check-build-drift.mjs --out ./node_modules/.build-check-evil-evidence
+exit code: 2
+stderr: "build drift check: refusing unsafe --out: /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/.build-check-evil-evidence is outside the scratch root /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/.build-check\nbuild drift check: destructive output is confined to /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/.build-check"
+sentinel: /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/.build-check-evil-evidence/sentinel.txt
+sha256 before: 218a687e7a63954261f46ecb1cbab1606595b70b00677e824324a05aabb60a0e
+sha256 after:  218a687e7a63954261f46ecb1cbab1606595b70b00677e824324a05aabb60a0e
+sentinel byte-identical: true
+sentinel still exists: true
+
+## lexical traversal outside the scratch root
+$ node scripts/check-build-drift.mjs --out node_modules/.build-check/../../node_modules/.build-drift-evidence-outside
+exit code: 2
+stderr: "build drift check: refusing unsafe --out: /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/.build-drift-evidence-outside is outside the scratch root /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/.build-check\nbuild drift check: destructive output is confined to /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/.build-check"
+sentinel: /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/.build-drift-evidence-outside/sentinel.txt
+sha256 before: 218a687e7a63954261f46ecb1cbab1606595b70b00677e824324a05aabb60a0e
+sha256 after:  218a687e7a63954261f46ecb1cbab1606595b70b00677e824324a05aabb60a0e
+sentinel byte-identical: true
+sentinel still exists: true
+
+## symlink escape through node_modules/.build-check/escape-link-evidence/nested
+$ node scripts/check-build-drift.mjs --out node_modules/.build-check/escape-link-evidence/nested
+exit code: 2
+stderr: "build drift check: refusing unsafe --out: /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/.build-check/escape-link-evidence/nested escapes the scratch root through /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/.build-check/escape-link-evidence (resolves to /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/.build-drift-evidence-outside)\nbuild drift check: destructive output is confined to /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/.build-check"
+sentinel: /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/.build-drift-evidence-outside/sentinel.txt
+sha256 before: 218a687e7a63954261f46ecb1cbab1606595b70b00677e824324a05aabb60a0e
+sha256 after:  218a687e7a63954261f46ecb1cbab1606595b70b00677e824324a05aabb60a0e
+sentinel byte-identical: true
+sentinel still exists: true
+

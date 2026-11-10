@@ -1,0 +1,20 @@
+final tree gate: tsc -p tsconfig.json --noEmit
+exit=0
+
+command: tsc -p tsconfig.json
+exit=0
+
+emitted lib/*.js files (13):
+adaptive.js
+client.js
+core.js
+evidence.js
+explain.js
+feedback.js
+index.js
+language.js
+review-profile.js
+review-strictness.js
+runtime.js
+self-check.js
+update.js

@@ -1,0 +1,49 @@
+=== TypeScript 5.9.3 comparison (installed in node_modules/.ts7-probe/ts5 scratch only for this comparison) ===
+
+Probe project: docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/typesnode-auto/tsconfig.json
+tsconfig: strict, target ES2022, module/moduleResolution nodenext, noEmit, lib ["ES2022"], include src/**/*.ts
+Sources: index.ts uses console + setTimeout; process.ts uses process.env. No "types" option, no triple-slash reference.
+
+$ node node_modules/.ts7-probe/ts5/node_modules/typescript/bin/tsc --version
+exit=0 stdout="Version 5.9.3"
+
+$ node node_modules/typescript/bin/tsc -p docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/typesnode-auto/tsconfig.json --noEmit --pretty false   [typescript 7.0.2]
+exit=1
+stdout: docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/typesnode-auto/src/index.ts(2,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.
+docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/typesnode-auto/src/index.ts(3,3): error TS2304: Cannot find name 'setTimeout'.
+docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/typesnode-auto/src/process.ts(2,10): error TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
+
+--listFiles [typescript 7.0.2]: @types/node present=false lib.dom present=false files=62
+
+$ node node_modules/.ts7-probe/ts5/node_modules/typescript/bin/tsc -p docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/typesnode-auto/tsconfig.json --noEmit --pretty false   [typescript 5.9.3]
+exit=0
+stdout:
+
+--listFiles [typescript 5.9.3]: @types/node present=true lib.dom present=false files=188
+
+After adding a file that starts with /// <reference types="node" />:
+$ node node_modules/typescript/bin/tsc -p docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/typesnode-auto/tsconfig.json --noEmit --pretty false
+exit=0
+stdout:
+
+TS 5.9.3 --showConfig for the minimal p5 project (default comparison with TS7):
+{
+    "compilerOptions": {
+        "target": "es2022",
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
+        "moduleDetection": "force",
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "resolvePackageJsonExports": true,
+        "resolvePackageJsonImports": true,
+        "resolveJsonModule": true,
+        "useDefineForClassFields": true
+    },
+    "files": [
+        "./src/a.ts"
+    ],
+    "include": [
+        "src"
+    ]
+}

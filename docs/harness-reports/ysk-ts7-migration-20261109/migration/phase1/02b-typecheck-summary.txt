@@ -1,0 +1,32 @@
+# typecheck diagnostics summary
+# total: 745
+
+## by file
+ 321  src/core.ts
+ 126  src/client.ts
+  85  src/update.ts
+  82  src/runtime.ts
+  31  src/evidence.ts
+  24  src/index.ts
+  18  src/self-check.ts
+  13  src/review-strictness.ts
+  11  src/explain.ts
+  10  src/adaptive.ts
+   8  src/feedback.ts
+   8  src/language.ts
+   8  src/review-profile.ts
+
+## by code
+ 492  TS7006
+ 102  TS2339
+  56  TS7005
+  28  TS7053
+  22  TS2322
+  21  TS7034
+   7  TS18046
+   5  TS2345
+   4  TS2554
+   3  TS2531
+   2  TS2551
+   2  TS18048
+   1  TS2783

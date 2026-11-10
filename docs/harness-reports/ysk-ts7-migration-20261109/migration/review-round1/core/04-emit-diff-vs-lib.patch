@@ -1,0 +1,147 @@
+--- lib/core.js	2026-11-09 23:21:59
++++ node_modules/.corecheck/core.js	2026-11-09 23:38:03
+@@ -77,7 +77,10 @@
+     const source = value;
+     return typeof source[Symbol.asyncIterator] === 'function' || typeof source[Symbol.iterator] === 'function';
+ }
+-/** The oldest inserted key of a map the caller knows is nonempty. */
++/**
++ * The oldest inserted key of a map, or undefined when the map is empty. Every
++ * caller below enters only after its own size check proves nonempty.
++ */
+ function oldestKey(map) {
+     return map.keys().next().value;
+ }
+@@ -159,7 +162,7 @@
+ const IMPORTANCE = Object.freeze(['high', 'critical']);
+ /** Whether one untrusted value is one of the two admitted importance tiers. */
+ function isReviewerImportance(value) {
+-    return typeof value === 'string' && IMPORTANCE.includes(value);
++    return typeof value === 'string' && IMPORTANCE.some((known) => known === value);
+ }
+ /**
+  * The terminal outcomes a recent-check diagnostic record may carry. The list
+@@ -181,6 +184,10 @@
+     'disposed',
+     'other',
+ ]);
++/** Whether one untrusted value is on the closed recent-check allowlist. */
++function isRecentCheckOutcome(value) {
++    return typeof value === 'string' && RECENT_CHECK_OUTCOMES.some((known) => known === value);
++}
+ /**
+  * The finding classes a reviewer may declare. The class changes no importance
+  * threshold; its only admission effect is the evidence gate that requires a
+@@ -190,6 +197,10 @@
+ export const NOTE_KINDS = Object.freeze(['defect', 'requirement_violation', 'consequence', 'tradeoff']);
+ /** Class assigned to a legacy, unknown, or malformed reviewer `kind`. */
+ export const UNCLASSIFIED_KIND = 'unclassified';
++/** Whether one untrusted value is an exact finding class, declared or the fallback. */
++function isNoteKind(value) {
++    return value === UNCLASSIFIED_KIND || (typeof value === 'string' && NOTE_KINDS.some((known) => known === value));
++}
+ /** The finding classes that must quote the decision they rest on. */
+ const EVIDENCE_KINDS = Object.freeze(['consequence', 'tradeoff']);
+ /** Whether one finding class must quote its basis. */
+@@ -1105,7 +1116,7 @@
+         // degrades to `unclassified` and the note survives. The recognized value is
+         // stored normalized, so padding cannot slip past the evidence gate below.
+         const kind = typeof payload.kind === 'string' ? payload.kind.trim() : '';
+-        verdict.kind = NOTE_KINDS.includes(kind) ? kind : UNCLASSIFIED_KIND;
++        verdict.kind = isNoteKind(kind) ? kind : UNCLASSIFIED_KIND;
+     }
+     if (Object.prototype.hasOwnProperty.call(payload, 'because')) {
+         const because = parseBecause(payload.because);
+@@ -1440,7 +1451,7 @@
+     }
+     /** Fold one runtime outcome onto the frozen diagnostic allowlist. */
+     function recentCheckOutcome(value) {
+-        return RECENT_CHECK_OUTCOMES.includes(value) ? value : 'other';
++        return isRecentCheckOutcome(value) ? value : 'other';
+     }
+     /**
+      * Append one bounded recent-check record when the opt-in is enabled. The
+@@ -1586,7 +1597,7 @@
+      * a disposed runtime is observed again after a re-enable.
+      */
+     function makeRuntime(state, sessionId) {
+-        const runtime = createRuntime({
++        return createRuntime({
+             getStream: () => {
+                 const llm = getLlm();
+                 return isStreamingLlm(llm) ? (callOptions) => llm.stream(callOptions) : undefined;
+@@ -1618,9 +1629,6 @@
+             now,
+             ...runtimeOptions,
+         });
+-        // The runtime documents enqueue() resolving to a terminal outcome with a
+-        // status name; its own inferred type is still a placeholder.
+-        return runtime;
+     }
+     /** Replace one session's runtime, disposing the old one and its capability cache. */
+     function rebuildRuntime(state, sessionId) {
+@@ -1640,7 +1648,10 @@
+         if (overrides.has(sessionId))
+             overrides.delete(sessionId);
+         while (overrides.size >= LIMITS.maxSessionOverrides) {
+-            overrides.delete(oldestKey(overrides));
++            const oldest = oldestKey(overrides);
++            if (oldest === undefined)
++                break;
++            overrides.delete(oldest);
+         }
+         overrides.set(sessionId, route);
+     }
+@@ -1649,7 +1660,10 @@
+         if (sessionModes.has(sessionId))
+             sessionModes.delete(sessionId);
+         while (sessionModes.size >= LIMITS.maxSessionOverrides) {
+-            sessionModes.delete(oldestKey(sessionModes));
++            const oldest = oldestKey(sessionModes);
++            if (oldest === undefined)
++                break;
++            sessionModes.delete(oldest);
+         }
+         sessionModes.set(sessionId, mode);
+     }
+@@ -1735,12 +1749,14 @@
+             // Insertion-order eviction: the oldest tracked session gives up its slot,
+             // and its runtime aborts anything still in flight before it is dropped.
+             const oldest = oldestKey(sessions);
+-            const evicted = sessions.get(oldest);
+-            if (evicted !== undefined && evicted.runtime !== undefined)
+-                evicted.runtime.dispose();
+-            sessions.delete(oldest);
+-            overrides.delete(oldest);
+-            sessionModes.delete(oldest);
++            if (oldest !== undefined) {
++                const evicted = sessions.get(oldest);
++                if (evicted !== undefined && evicted.runtime !== undefined)
++                    evicted.runtime.dispose();
++                sessions.delete(oldest);
++                overrides.delete(oldest);
++                sessionModes.delete(oldest);
++            }
+         }
+         const created = {
+             reviewedSeq: -1,
+@@ -2439,6 +2455,10 @@
+     halted: 4,
+     disposed: 5,
+ });
++/** Whether one untrusted value is a known runtime status. */
++function isRuntimeStatus(value) {
++    return typeof value === 'string' && Object.prototype.hasOwnProperty.call(RUNTIME_STATUS_SEVERITY, value);
++}
+ /**
+  * Fold per-session runtime states into one bounded status for the self-check.
+  * Unknown states are ignored rather than guessed, and an empty set is idle.
+@@ -2451,6 +2471,8 @@
+     if (!Array.isArray(statuses))
+         return result;
+     for (const status of statuses) {
++        if (!isRuntimeStatus(status))
++            continue;
+         const severity = RUNTIME_STATUS_SEVERITY[status];
+         if (severity === undefined)
+             continue;

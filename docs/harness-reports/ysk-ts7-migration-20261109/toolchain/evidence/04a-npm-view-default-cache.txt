@@ -1,0 +1,23 @@
+Attempt with the default npm cache (~/.npm):
+$ npm view typescript dist-tags --json
+exit=1
+stdout:
+{
+  "error": {
+    "code": "EPERM",
+    "summary": "Your cache folder contains root-owned files, due to a bug in previous versions of npm which has since been addressed.\n\nTo permanently fix this problem, please run:\n  sudo chown -R 501:20 \"/Users/pipags/.npm\"",
+    "detail": ""
+  }
+}
+stderr:
+npm error code EPERM
+npm error syscall open
+npm error path /Users/pipags/.npm/_cacache/tmp/***
+npm error errno EPERM
+npm error
+npm error Your cache folder contains root-owned files, due to a bug in previous versions of npm which has since been addressed.
+npm error
+npm error To permanently fix this problem, please run:
+npm error   sudo chown -R 501:20 "/Users/pipags/.npm"
+npm error Log files were not written due to an error writing to the directory: /Users/pipags/.npm/_logs
+npm error You can rerun the command with `--loglevel=verbose` to see the logs in your terminal

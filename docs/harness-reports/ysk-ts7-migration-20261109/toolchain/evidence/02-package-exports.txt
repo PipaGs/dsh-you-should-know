@@ -1,0 +1,2 @@
+0 package.json exports ok 7.0.2
+index exports: default,module.exports,version,versionMajorMinor

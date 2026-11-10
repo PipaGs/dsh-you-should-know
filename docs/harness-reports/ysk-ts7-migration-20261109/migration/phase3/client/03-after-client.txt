@@ -1,0 +1,1 @@
+# filtered tsc -p tsconfig.json --noEmit: 0 diagnostics for src/client.ts

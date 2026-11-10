@@ -1,0 +1,12 @@
+final tree gate: npm run check:js
+exit=0
+
+> dsh-you-should-know@0.5.2 check:js
+> node --check lib/core.js && node --check lib/self-check.js && node --check lib/runtime.js && node --check lib/review-profile.js && node --check lib/review-strictness.js && node --check lib/language.js && node --check lib/feedback.js && node --check lib/adaptive.js && node --check lib/evidence.js && node --check lib/explain.js && node --check lib/update.js && node --check lib/index.js && node --check lib/client.js && node --check scripts/note-voice-eval.mjs && node --check scripts/note-voice-eval-deepseek.mjs && node --check scripts/note-voice-eval-live.mjs && node --check scripts/note-voice-baseline.mjs
+
+
+command: node --check scripts/local-install-smoke.mjs
+exit=0
+
+command: node --check scripts/check-build-drift.mjs
+exit=0

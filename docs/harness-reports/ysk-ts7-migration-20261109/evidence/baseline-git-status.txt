@@ -1,0 +1,19 @@
+### git diff --check (baseline)
+
+$ git diff --check
+exit_code: 0
+--- stdout ---
+--- stderr ---
+
+
+### git status --porcelain (after baseline runs)
+
+$ git status --porcelain
+exit_code: 0
+--- stdout ---
+?? docs/harness-reports/ysk-ts7-migration-20261109/
+--- stderr ---
+
+
+### git ls-files counts
+$ git ls-files lib scripts test | wc -l -> 53

@@ -1,0 +1,4 @@
+# git diff --stat -- src/core.ts prints nothing: src/ is an untracked phase-1 addition.
+# supplementary:
+?? src/core.ts
+    3628 src/core.ts

@@ -1,0 +1,2 @@
+command: git diff --check (tracked working-tree changes; final gate uses the staged form in 16)
+exit=0

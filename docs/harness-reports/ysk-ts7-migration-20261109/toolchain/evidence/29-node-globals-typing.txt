@@ -1,0 +1,37 @@
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --lib es2022 --types node --pretty false
+--lib es2022 --types node (console/setTimeout supplied by @types/node): exit=0
+stdout:
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --lib es2022 --pretty false
+--lib es2022 without --types node (console/setTimeout expected missing): exit=1
+stdout: node_modules/.ts7-probe/p1/src/main.ts(20,1): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.
+node_modules/.ts7-probe/p1/src/math.ts(49,5): error TS2304: Cannot find name 'setTimeout'.
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --verbatimModuleSyntax --erasableSyntaxOnly --types node --lib es2022 --pretty false
+destination tsconfig shape: strict+ES2022+nodenext+verbatim+erasable+types node on p1: exit=0
+stdout:
+
+
+$ node node_modules/typescript/bin/tsc -p docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/typesnode-auto/tsconfig.json --pretty false
+project lives OUTSIDE node_modules; no "types" option; lib ES2022 only
+exit=1
+stdout: docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/typesnode-auto/src/index.ts(2,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.
+docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/typesnode-auto/src/index.ts(3,3): error TS2304: Cannot find name 'setTimeout'.
+
+=== automatic @types inclusion probes (project at docs/.../scratch/typesnode-auto) ===
+
+$ node node_modules/typescript/bin/tsc -p docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/typesnode-auto/tsconfig.json --noEmit --pretty false
+default lib (no --lib), source uses process (only @types/node provides it): exit=1
+stdout: docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/typesnode-auto/src/index.ts(2,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.
+docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/typesnode-auto/src/index.ts(3,3): error TS2304: Cannot find name 'setTimeout'.
+docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/typesnode-auto/src/process.ts(2,10): error TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
+
+$ node node_modules/typescript/bin/tsc -p docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/typesnode-auto/tsconfig.json --noEmit --pretty false --lib es2022 --typeRoots /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/@types
+--lib es2022 + explicit --typeRoots <repo>/node_modules/@types: exit=1
+stdout: docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/typesnode-auto/src/index.ts(2,3): error TS2584: Cannot find name 'console'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.
+docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/typesnode-auto/src/index.ts(3,3): error TS2304: Cannot find name 'setTimeout'.
+docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/typesnode-auto/src/process.ts(2,10): error TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
+
+$ node node_modules/typescript/bin/tsc -p docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/typesnode-auto/tsconfig.json --noEmit --pretty false --lib es2022 --types node
+--lib es2022 + --types node (explicit): exit=0
+stdout:

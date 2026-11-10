@@ -1,0 +1,10 @@
+scan: CJK, Kana, Hangul, Cyrillic, Greek, and fullwidth ranges
+ok   English-only: README.md
+ok   English-only: docs/reference.md
+ok   English-only: AGENTS.md
+ok   English-only: tsconfig.json
+ok   English-only: package.json
+ok   English-only: scripts/local-install-smoke.mjs
+ok   English-only: scripts/check-build-drift.mjs
+ok   English-only: docs/harness-reports/ysk-ts7-migration-20261109/design.md
+ok   English-only: docs/harness-reports/ysk-ts7-migration-20261109/migration/phase4/report.md

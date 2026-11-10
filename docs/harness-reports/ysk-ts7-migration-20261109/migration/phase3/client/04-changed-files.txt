@@ -1,0 +1,44 @@
+$ git status --short src/client.ts
+?? src/client.ts
+
+$ git diff --stat -- src/client.ts
+(no output: src/ is an untracked phase-1 addition, so git has no baseline
+for src/client.ts; the emitted-JS drift is reviewed in
+05-emit-diff-vs-lib.patch instead)
+
+$ wc -l src/client.ts
+2338 src/client.ts
+
+$ git status --short
+ M lib/adaptive.js
+ M lib/client.js
+ M lib/core.js
+ M lib/evidence.js
+ M lib/explain.js
+ M lib/feedback.js
+ M lib/index.js
+ M lib/language.js
+ M lib/review-profile.js
+ M lib/review-strictness.js
+ M lib/runtime.js
+ M lib/self-check.js
+ M lib/update.js
+ M package.json
+?? docs/harness-reports/ysk-ts7-migration-20261109/
+?? scripts/check-build-drift.mjs
+?? src/
+?? tsconfig.json
+
+Authored file for this phase: src/client.ts only. The modified lib/*.js and
+package.json entries above predate this phase and were not touched here: no
+`npm run build` was run, and lib/ was neither emitted nor edited by this task.
+The scratch emission used for verification went to node_modules/.clientcheck.
+
+Evidence files added under
+docs/harness-reports/ysk-ts7-migration-20261109/migration/phase3/client/:
+01-before.txt, 02-after-full.txt, 03-after-client.txt, 04-changed-files.txt,
+05-emit-diff-vs-lib.patch, 06-client-tests-vs-emitted.txt, 07-static-checks.txt,
+08-comment-preservation.txt, report.md.
+
+Not edited: lib/, test/, scripts/, package.json, tsconfig.json, README.md,
+docs/reference.md, src/globals.d.ts, and every src file other than src/client.ts.

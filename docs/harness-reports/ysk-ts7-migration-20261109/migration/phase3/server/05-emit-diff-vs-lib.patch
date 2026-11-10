@@ -1,0 +1,550 @@
+=== runtime.js ===
+--- lib/runtime.js	2026-11-09 22:58:44
++++ node_modules/.servercheck/lib/runtime.js	2026-11-09 23:11:27
+@@ -66,9 +66,43 @@
+         return 'permanent';
+     return 'unknown';
+ }
++/** Whether one untrusted value is a plain object to the runtime's readers. */
+ function isObject(value) {
+     return value !== null && typeof value === 'object';
+ }
++/** One positive integer budget override; the guard is the documented contract. */
++function isPositiveInteger(value) {
++    return Number.isInteger(value) && value > 0;
++}
++/** One finite positive budget override. */
++function isPositiveFinite(value) {
++    return Number.isFinite(value) && value > 0;
++}
++/** One finite non-negative budget override. */
++function isNonNegativeFinite(value) {
++    return Number.isFinite(value) && value >= 0;
++}
++/** Whether one value can be treated as an injected stream source. */
++function isStreamSource(value) {
++    if (value === null)
++        return false;
++    if (typeof value !== 'object' && typeof value !== 'function' && typeof value !== 'string')
++        return false;
++    const candidate = value;
++    return typeof candidate[Symbol.asyncIterator] === 'function' || typeof candidate[Symbol.iterator] === 'function';
++}
++/** Whether one value may own a `return` method. */
++function isClosable(value) {
++    return value !== null && (typeof value === 'object' || typeof value === 'function');
++}
++/** Whether one value exposes a promise-like `catch` method. */
++function isCatchable(value) {
++    if (value === null)
++        return false;
++    if (typeof value !== 'object' && typeof value !== 'function')
++        return false;
++    return typeof value.catch === 'function';
++}
+ /** Read a thrown value as a provider-neutral failure without trusting accessors. */
+ function failureOf(value) {
+     if (isObject(value)) {
+@@ -95,10 +129,12 @@
+ /** Close an async iterator without awaiting a hostile iterator's return. */
+ function closeIterator(iterator) {
+     try {
+-        if (!iterator || typeof iterator.return !== 'function')
++        if (!iterator || !isClosable(iterator))
+             return;
++        if (typeof iterator.return !== 'function')
++            return;
+         const result = iterator.return();
+-        if (result && typeof result.catch === 'function')
++        if (isCatchable(result))
+             result.catch(() => { });
+     }
+     catch (error) {
+@@ -123,11 +159,11 @@
+  */
+ export function createRuntime(options = {}) {
+     const { getStream, resolveModelInfo, parseReply, onNote, onError, now = () => Date.now(), setTimer = (fn, ms) => setTimeout(fn, ms), clearTimer = (handle) => clearTimeout(handle), } = options;
+-    const maxQueued = Number.isInteger(options.maxQueued) && options.maxQueued > 0 ? options.maxQueued : RUNTIME_LIMITS.maxQueued;
+-    const deadlineMs = Number.isFinite(options.deadlineMs) && options.deadlineMs > 0 ? options.deadlineMs : RUNTIME_LIMITS.deadlineMs;
+-    const retryDelayMs = Number.isFinite(options.retryDelayMs) && options.retryDelayMs >= 0 ? options.retryDelayMs : RUNTIME_LIMITS.retryDelayMs;
+-    const maxReplyChars = Number.isInteger(options.maxReplyChars) && options.maxReplyChars > 0 ? options.maxReplyChars : RUNTIME_LIMITS.maxReplyChars;
+-    const transportDropFlushThreshold = Number.isInteger(options.transportDropFlushThreshold) && options.transportDropFlushThreshold > 0
++    const maxQueued = isPositiveInteger(options.maxQueued) ? options.maxQueued : RUNTIME_LIMITS.maxQueued;
++    const deadlineMs = isPositiveFinite(options.deadlineMs) ? options.deadlineMs : RUNTIME_LIMITS.deadlineMs;
++    const retryDelayMs = isNonNegativeFinite(options.retryDelayMs) ? options.retryDelayMs : RUNTIME_LIMITS.retryDelayMs;
++    const maxReplyChars = isPositiveInteger(options.maxReplyChars) ? options.maxReplyChars : RUNTIME_LIMITS.maxReplyChars;
++    const transportDropFlushThreshold = isPositiveInteger(options.transportDropFlushThreshold)
+         ? options.transportDropFlushThreshold
+         : RUNTIME_LIMITS.transportDropFlushThreshold;
+     const queue = [];
+@@ -143,7 +179,7 @@
+     let consecutiveTransportDrops = 0;
+     let runtimeStatus = RUNTIME_STATUS.idle;
+     let idleResolvers = [];
+-    let releaseDispose;
++    let releaseDispose = () => { };
+     const disposePromise = new Promise((resolve) => {
+         releaseDispose = resolve;
+     });
+@@ -265,13 +301,16 @@
+     /** Race the stream consumption against the whole-call deadline and dispose. */
+     async function withDeadline(consume) {
+         let timedOut = false;
+-        let handle;
++        // The resolver is captured in the executor below; the seed only satisfies
++        // definite assignment because the executor runs before the timer can fire.
++        let resolveDeadline = () => { };
+         const deadline = new Promise((resolve) => {
+-            handle = setTimer(() => {
+-                timedOut = true;
+-                resolve('deadline');
+-            }, deadlineMs);
++            resolveDeadline = resolve;
+         });
++        const handle = setTimer(() => {
++            timedOut = true;
++            resolveDeadline('deadline');
++        }, deadlineMs);
+         const winner = await Promise.race([
+             consume.then(() => 'done'),
+             deadline,
+@@ -306,7 +345,7 @@
+         catch (error) {
+             return { kind: 'failure', failure: failureOf(error), cause: error };
+         }
+-        if (!iterable || (typeof iterable[Symbol.asyncIterator] !== 'function' && typeof iterable[Symbol.iterator] !== 'function')) {
++        if (!iterable || !isStreamSource(iterable)) {
+             return { kind: 'failure', failure: { message: 'stream returned a non-iterable', code: '' } };
+         }
+         let iterator;
+@@ -421,10 +460,17 @@
+             counters.lastQueueDropAt = now();
+         }
+         while (queue.length > 0)
+-            queue.shift().resolve({ status: 'dropped' });
++            dequeue().resolve({ status: 'dropped' });
+         degraded = true;
+         consecutiveTransportDrops = 0;
+         runtimeStatus = RUNTIME_STATUS.degraded;
++    }
++    /**
++     * Remove the oldest queued entry. Every caller has just checked that the queue
++     * is nonempty, so the entry is present.
++     */
++    function dequeue() {
++        return queue.splice(0, 1)[0];
+     }
+     async function runEntry(entry) {
+         const { job } = entry;
+@@ -452,7 +498,7 @@
+                 consecutiveTransportDrops = 0;
+                 return { result: classifyReply(result.text) };
+             }
+-            const failure = result.failure || { code: '' };
++            const failure = result.failure || { message: '', code: '' };
+             const code = typeof failure.code === 'string' ? failure.code : '';
+             const classification = classifyFailure(code);
+             if (classification === 'aborted') {
+@@ -499,7 +545,7 @@
+     }
+     async function runDrain() {
+         while (!disposed && !paused && !halted && queue.length > 0) {
+-            const entry = queue.shift();
++            const entry = dequeue();
+             currentEntry = entry;
+             const outcome = await runEntry(entry);
+             currentEntry = null;
+@@ -514,7 +560,7 @@
+                 halted = true;
+                 runtimeStatus = RUNTIME_STATUS.halted;
+                 while (queue.length > 0)
+-                    queue.shift().resolve({ status: 'halted' });
++                    dequeue().resolve({ status: 'halted' });
+                 break;
+             }
+         }
+@@ -567,11 +613,11 @@
+             counters.lastQueueDropAt = now();
+             return Promise.resolve({ status: 'queue_full' });
+         }
+-        let resolve;
+-        const promise = new Promise((resolver) => {
+-            resolve = resolver;
++        // The queue entry and its resolver are created together, before the drain
++        // starts, so a settled job can never race an unregistered entry.
++        const promise = new Promise((resolve) => {
++            queue.push({ job, resolve });
+         });
+-        queue.push({ job, resolve });
+         drain();
+         return promise;
+     }
+@@ -602,13 +648,13 @@
+             }
+         }
+         while (queue.length > 0)
+-            queue.shift().resolve({ status: 'aborted' });
++            dequeue().resolve({ status: 'aborted' });
+         runtimeStatus = RUNTIME_STATUS.disposed;
+     }
+     function whenIdle() {
+         if (!draining)
+             return Promise.resolve();
+-        return new Promise((resolve) => idleResolvers.push(resolve));
++        return new Promise((resolve) => idleResolvers.push(() => resolve()));
+     }
+     function status() {
+         return {
+=== update.js ===
+--- lib/update.js	2026-11-09 22:58:44
++++ node_modules/.servercheck/lib/update.js	2026-11-09 23:11:27
+@@ -59,7 +59,27 @@
+ /** A locale-independent local calendar date key. */
+ const DATE_KEY = /^\d{4}-\d{2}-\d{2}$/;
+ function readLimit(value, fallback) {
+-    return Number.isInteger(value) && value > 0 ? value : fallback;
++    return isPositiveInteger(value) ? value : fallback;
++}
++/** One positive integer bound override; the guard is the documented contract. */
++function isPositiveInteger(value) {
++    return Number.isInteger(value) && value > 0;
++}
++/** Whether one value is a caller-supplied plain row of update fields. */
++function isPlainRow(value) {
++    return value !== null && typeof value === 'object' && !Array.isArray(value);
++}
++/** Whether one untrusted value is an update behavior id. */
++function isUpdateBehavior(value) {
++    return typeof value === 'string' && UPDATE_BEHAVIORS.includes(value);
++}
++/** Whether one value is an object from which the progress fields are read. */
++function hasUpdateProgress(value) {
++    return value !== null && typeof value === 'object';
++}
++/** Whether one untrusted value carries the shell result projection members. */
++function isObjectLike(value) {
++    return value !== null && typeof value === 'object';
+ }
+ function isSafeComponent(text) {
+     return Number.isSafeInteger(Number(text));
+@@ -103,8 +123,10 @@
+     return 0;
+ }
+ function isVersion(value) {
+-    return value !== null && typeof value === 'object' &&
+-        Number.isSafeInteger(value.major) && Number.isSafeInteger(value.minor) && Number.isSafeInteger(value.patch);
++    if (value === null || typeof value !== 'object')
++        return false;
++    const candidate = value;
++    return Number.isSafeInteger(candidate.major) && Number.isSafeInteger(candidate.minor) && Number.isSafeInteger(candidate.patch);
+ }
+ /** Render the dotted numeric version of a parsed tag. */
+ function versionOf(parsed) {
+@@ -147,7 +169,7 @@
+         const parsed = parseStableTag(match[2]);
+         if (parsed === null)
+             continue;
+-        if (best === null || compareVersions(parsed, best) > 0)
++        if (best === null || compareVersions(parsed, best) === 1)
+             best = parsed;
+     }
+     return best;
+@@ -208,12 +230,13 @@
+  * @returns the normalized update state.
+  */
+ export function normalizeUpdateState(raw) {
+-    const input = raw !== null && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
++    const input = isPlainRow(raw) ? raw : {};
+     const latest = parseStableTag(input.lastSeenLatestVersion);
+     const dismissed = parseStableTag(input.dismissedUpdateVersion);
++    const updateBehavior = input.updateBehavior;
+     return {
+         autoCheckUpdates: input.autoCheckUpdates === false ? false : true,
+-        updateBehavior: UPDATE_BEHAVIORS.includes(input.updateBehavior) ? input.updateBehavior : DEFAULT_UPDATE_BEHAVIOR,
++        updateBehavior: isUpdateBehavior(updateBehavior) ? updateBehavior : DEFAULT_UPDATE_BEHAVIOR,
+         lastAutoCheckDate: typeof input.lastAutoCheckDate === 'string' && DATE_KEY.test(input.lastAutoCheckDate) ? input.lastAutoCheckDate : '',
+         lastSeenLatestVersion: latest === null ? '' : latest.tag,
+         dismissedUpdateVersion: dismissed === null ? '' : dismissed.tag,
+@@ -234,7 +257,7 @@
+ export function mergeUpdateState(current, raw) {
+     const next = normalizeUpdateState(raw);
+     const merged = { ...next };
+-    const previous = current !== null && typeof current === 'object' ? current : normalizeUpdateState({});
++    const previous = hasUpdateProgress(current) ? current : normalizeUpdateState({});
+     if (merged.lastAutoCheckDate === '' && previous.lastAutoCheckDate !== '')
+         merged.lastAutoCheckDate = previous.lastAutoCheckDate;
+     if (merged.lastSeenLatestVersion === '' && previous.lastSeenLatestVersion !== '')
+@@ -255,7 +278,7 @@
+  * @returns the listing text, or null when the result is unusable.
+  */
+ function tagListingText(result, maxOutputChars) {
+-    if (result === null || typeof result !== 'object')
++    if (!isObjectLike(result))
+         return null;
+     if (result.exitCode !== 0)
+         return null;
+@@ -264,15 +287,16 @@
+     if (result.timedOut === true || result.aborted === true)
+         return null;
+     const stdout = result.stdout;
+-    if (stdout === null || typeof stdout !== 'object')
++    if (!isObjectLike(stdout))
+         return null;
+-    if (typeof stdout.text !== 'string')
++    const text = stdout.text;
++    if (typeof text !== 'string')
+         return null;
+     if (stdout.truncated === true)
+         return null;
+-    if (stdout.text.length > maxOutputChars)
++    if (text.length > maxOutputChars)
+         return null;
+-    return stdout.text;
++    return text;
+ }
+ /**
+  * Create the once-per-local-day update checker.
+@@ -383,7 +407,7 @@
+         scheduleMidnight();
+         scheduleImmediate();
+     }
+-    function requestWithTimeout() {
++    function requestWithTimeout(exec) {
+         const controller = typeof AbortController === 'function' ? new AbortController() : null;
+         activeController = controller;
+         let handle = null;
+@@ -393,7 +417,7 @@
+             timeoutMs: requestTimeoutMs,
+             stdoutMaxBytes: maxOutputChars,
+         };
+-        const call = Promise.resolve().then(() => shellExec(request, controller === null ? undefined : controller.signal));
++        const call = Promise.resolve().then(() => exec(request, controller === null ? undefined : controller.signal));
+         const timeout = new Promise((resolve, reject) => {
+             // The timeout is unref'd like every other plugin timer: it must not keep
+             // an otherwise idle process alive while a hung command is pending.
+@@ -426,7 +450,7 @@
+         try {
+             if (typeof shellExec !== 'function')
+                 throw new Error('no public shell service is mounted');
+-            const result = await requestWithTimeout();
++            const result = await requestWithTimeout(shellExec);
+             const text = tagListingText(result, maxOutputChars);
+             if (text === null)
+                 throw new Error('the git tag discovery returned no usable listing');
+@@ -462,32 +486,36 @@
+             return { ok: false, result: 'failed' };
+         }
+         const parsed = parseStableTag(outcome.tag);
+-        lastResult = current !== null && parsed !== null && compareVersions(parsed, current) > 0 ? 'update-available' : 'up-to-date';
++        lastResult = current !== null && parsed !== null && compareVersions(parsed, current) === 1 ? 'update-available' : 'up-to-date';
+         return { ok: true, result: lastResult, latest: outcome.tag };
+     }
+     /** Coalesce overlapping triggers into one shared discovery command. */
+     function runCheck() {
+-        if (pending !== null)
+-            return pending;
+-        pending = fetchLatest().finally(() => {
++        const inFlight = pending;
++        if (inFlight !== null)
++            return inFlight;
++        const started = fetchLatest().finally(() => {
+             pending = null;
+         });
+-        return pending;
++        pending = started;
++        return started;
+     }
+     function runAutomatic() {
+         if (stopped || getState().autoCheckUpdates !== true)
+             return Promise.resolve({ ok: false, result: 'failed' });
+         scheduleMidnight();
+-        if (pendingAutomatic !== null)
+-            return pendingAutomatic;
++        const inFlight = pendingAutomatic;
++        if (inFlight !== null)
++            return inFlight;
+         // Every automatic trigger applies its own stamp after the shared command,
+         // so a manual check in flight can never swallow the day's automatic success.
+-        pendingAutomatic = runCheck()
++        const started = runCheck()
+             .then((outcome) => applyOutcome(outcome, true))
+             .finally(() => {
+             pendingAutomatic = null;
+         });
+-        return pendingAutomatic;
++        pendingAutomatic = started;
++        return started;
+     }
+     function whenIdle() {
+         const waits = [];
+@@ -502,7 +530,7 @@
+     function status() {
+         const state = getState();
+         const latest = parseStableTag(state.lastSeenLatestVersion);
+-        const updateAvailable = current !== null && latest !== null && compareVersions(latest, current) > 0;
++        const updateAvailable = current !== null && latest !== null && compareVersions(latest, current) === 1;
+         return {
+             currentVersion,
+             latestVersion: latest === null ? '' : versionOf(latest),
+@@ -526,7 +554,7 @@
+         };
+     }
+     async function setPreferences(patch) {
+-        if (patch === null || typeof patch !== 'object' || Array.isArray(patch))
++        if (!isPlainRow(patch))
+             return { ok: false, error: 'invalid-preferences' };
+         const next = {};
+         if (patch.autoCheckUpdates !== undefined) {
+@@ -535,7 +563,7 @@
+             next.autoCheckUpdates = patch.autoCheckUpdates;
+         }
+         if (patch.updateBehavior !== undefined) {
+-            if (!UPDATE_BEHAVIORS.includes(patch.updateBehavior))
++            if (!isUpdateBehavior(patch.updateBehavior))
+                 return { ok: false, error: 'invalid-preferences' };
+             next.updateBehavior = patch.updateBehavior;
+         }
+=== index.js ===
+--- lib/index.js	2026-11-09 22:58:44
++++ node_modules/.servercheck/lib/index.js	2026-11-09 23:11:27
+@@ -16,6 +16,10 @@
+ import { MAX_ADDITIONAL_INSTRUCTIONS_CHARS, MAX_CUSTOM_PROMPT_CHARS, REVIEW_MODES } from './review-strictness.js';
+ import { ROUTE_CAPABILITIES, createSelfCheckHandler } from './self-check.js';
+ import { DEFAULT_UPDATE_BEHAVIOR, UPDATE_BEHAVIORS, createUpdateChecker, mergeUpdateState, normalizeUpdateState } from './update.js';
++/** Whether one untrusted value is a plain object the readers may probe. */
++function isRecord(value) {
++    return value !== null && typeof value === 'object';
++}
+ export const name = 'dsh-you-should-know';
+ // The running plugin version. It mirrors package.json, and the update checker
+ // compares it against the newest stable Git tag of the public repository.
+@@ -67,18 +71,19 @@
+ // so the claim lives there, keyed by a registered symbol every import resolves
+ // to the same value.
+ const OWNER_KEY = Symbol.for('dsh-you-should-know.reviewer-owner');
++const ownership = globalThis;
+ function claimOwnership() {
+-    const existing = globalThis[OWNER_KEY];
++    const existing = ownership[OWNER_KEY];
+     if (existing !== undefined && existing.active === true)
+         return null;
+     const token = { active: true };
+-    globalThis[OWNER_KEY] = token;
++    ownership[OWNER_KEY] = token;
+     return token;
+ }
+ /** Release only our own token, so a stale disposer cannot free a newer owner. */
+ function releaseOwnership(token) {
+-    if (globalThis[OWNER_KEY] === token)
+-        delete globalThis[OWNER_KEY];
++    if (ownership[OWNER_KEY] === token)
++        delete ownership[OWNER_KEY];
+ }
+ function warn(message) {
+     console.warn(`[dsh-you-should-know] ${message}`);
+@@ -115,13 +120,14 @@
+     }
+     if (!Array.isArray(forms))
+         return undefined;
+-    for (const form of forms) {
+-        if (form === null || typeof form !== 'object' || form.ns !== LOCALE_SETTINGS_NAMESPACE)
++    const entries = forms;
++    for (const form of entries) {
++        if (!isRecord(form) || form.ns !== LOCALE_SETTINGS_NAMESPACE)
+             continue;
+-        const value = form.value !== null && typeof form.value === 'object' ? form.value[LOCALE_PREFERENCE_FIELD] : undefined;
++        const value = isRecord(form.value) ? form.value[LOCALE_PREFERENCE_FIELD] : undefined;
+         if (typeof value === 'string' && value !== '')
+             return value;
+-        const user = form.user !== null && typeof form.user === 'object' ? form.user[LOCALE_PREFERENCE_FIELD] : undefined;
++        const user = isRecord(form.user) ? form.user[LOCALE_PREFERENCE_FIELD] : undefined;
+         if (typeof user === 'string' && user !== '')
+             return user;
+         return undefined;
+@@ -130,8 +136,9 @@
+ }
+ /** The disposed session id, accepting a Session-like object or a bare id. */
+ function disposedSessionId(session) {
+-    if (typeof session === 'string' && session !== '')
+-        return session;
++    // An empty id is as absent as a missing one: sessionIdOf already rejects it.
++    if (typeof session === 'string')
++        return session !== '' ? session : undefined;
+     return sessionIdOf(session);
+ }
+ /**
+=== self-check.js ===
+--- lib/self-check.js	2026-11-09 22:58:44
++++ node_modules/.servercheck/lib/self-check.js	2026-11-09 23:11:27
+@@ -61,6 +61,14 @@
+ const INSTALL_SPEC = /^github:[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+#v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
+ /** Longest accepted install spec; a parsed stable tag is at most 64 chars. */
+ const MAX_SPEC_CHARS = 128;
++/** Whether one untrusted value is a plain object the readers may probe. */
++function isRecord(value) {
++    return value !== null && typeof value === 'object';
++}
++/** Whether one untrusted value is a runtime state the payload may report. */
++function isRuntimeState(value) {
++    return typeof value === 'string' && RUNTIME_STATES.includes(value);
++}
+ /**
+  * Bound one string to a short metadata value, or null when it is unusable.
+  * @param value - a candidate version or enum label.
+@@ -103,7 +111,7 @@
+  * @returns one bounded entry per capability, in registration order.
+  */
+ export function routeCapabilityView(handlers) {
+-    const map = handlers !== null && typeof handlers === 'object' ? handlers : {};
++    const map = isRecord(handlers) ? handlers : {};
+     return ROUTE_CAPABILITIES.map((capability) => ({
+         name: capability.name,
+         methods: [...capability.methods],
+@@ -123,7 +131,7 @@
+  * @returns the bounded capability map.
+  */
+ export function buildCapabilities(handlers, diagnostics) {
+-    const map = handlers !== null && typeof handlers === 'object' ? handlers : {};
++    const map = isRecord(handlers) ? handlers : {};
+     return {
+         feedback: typeof map.dismiss === 'function',
+         explain: typeof map.explain === 'function',
+@@ -131,7 +139,7 @@
+         episodeTrigger: typeof collectEpisodeEvidence === 'function',
+         adaptiveBudget: typeof reviewerBudget === 'function',
+         updateChecker: typeof map.update === 'function',
+-        recentCheckDiagnostics: diagnostics !== null && typeof diagnostics === 'object' && diagnostics.recentCheckDiagnostics === true,
++        recentCheckDiagnostics: isRecord(diagnostics) && diagnostics.recentCheckDiagnostics === true,
+     };
+ }
+ /**
+@@ -141,7 +149,7 @@
+  * @returns the allowlisted update summary.
+  */
+ export function updateSummary(status) {
+-    const source = status !== null && typeof status === 'object' ? status : {};
++    const source = isRecord(status) ? status : {};
+     const summary = {};
+     for (const field of UPDATE_FIELDS) {
+         if (!Object.hasOwn(source, field))
+@@ -190,9 +198,9 @@
+  * @returns the self-check response body.
+  */
+ export function buildSelfCheckPayload(input) {
+-    const diagnostics = input.diagnostics !== null && typeof input.diagnostics === 'object' ? input.diagnostics : {};
++    const diagnostics = isRecord(input.diagnostics) ? input.diagnostics : {};
+     const routes = routeCapabilityView(input.handlers);
+-    const runtimeStatus = RUNTIME_STATES.includes(diagnostics.runtimeStatus) ? diagnostics.runtimeStatus : 'unknown';
++    const runtimeStatus = isRuntimeState(diagnostics.runtimeStatus) ? diagnostics.runtimeStatus : 'unknown';
+     const configured = diagnostics.configured === true;
+     const runtimeHealthy = runtimeStatus === 'idle' || runtimeStatus === 'reviewing';
+     return {
+@@ -222,7 +230,7 @@
+ export async function readInstalledVersion(onError) {
+     try {
+         const manifest = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
+-        return normalizeVersion(manifest !== null && typeof manifest === 'object' ? manifest.version : undefined);
++        return normalizeVersion(isRecord(manifest) ? manifest.version : undefined);
+     }
+     catch (error) {
+         // An unreadable manifest is not fatal; the caller reports no installed
