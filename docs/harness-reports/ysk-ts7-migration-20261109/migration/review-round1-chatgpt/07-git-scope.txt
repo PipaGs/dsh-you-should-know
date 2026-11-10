@@ -1,0 +1,29 @@
+# Repository scope and whitespace check for the P1 fix (final tree)
+# captured: 2026-11-10T11:54:40.177Z
+$ git diff --check
+exit code: 0
+
+$ git status --porcelain
+M docs/harness-reports/ysk-ts7-migration-20261109/final-report.md
+ M scripts/check-build-drift.mjs
+?? docs/harness-reports/ysk-ts7-migration-20261109/migration/review-round1-chatgpt/
+?? test/build-drift-safety.test.js
+
+$ git diff --name-only (tracked modifications)
+docs/harness-reports/ysk-ts7-migration-20261109/final-report.md
+scripts/check-build-drift.mjs
+
+$ git ls-files --others --exclude-standard (untracked additions)
+docs/harness-reports/ysk-ts7-migration-20261109/migration/review-round1-chatgpt/01-node-check.txt
+docs/harness-reports/ysk-ts7-migration-20261109/migration/review-round1-chatgpt/02-focused-test.txt
+docs/harness-reports/ysk-ts7-migration-20261109/migration/review-round1-chatgpt/03-unsafe-rejections.txt
+docs/harness-reports/ysk-ts7-migration-20261109/migration/review-round1-chatgpt/04-default-drift.txt
+docs/harness-reports/ysk-ts7-migration-20261109/migration/review-round1-chatgpt/05-safe-out-subdir.txt
+docs/harness-reports/ysk-ts7-migration-20261109/migration/review-round1-chatgpt/06-full-node-test.txt
+docs/harness-reports/ysk-ts7-migration-20261109/migration/review-round1-chatgpt/07-git-scope.txt
+docs/harness-reports/ysk-ts7-migration-20261109/migration/review-round1-chatgpt/08-final-report-append.txt
+docs/harness-reports/ysk-ts7-migration-20261109/migration/review-round1-chatgpt/report.md
+test/build-drift-safety.test.js
+
+# allowed scope for this fix: scripts/check-build-drift.mjs, test/build-drift-safety.test.js, final-report.md, and the review-round1-chatgpt evidence directory.
+# no src/**, lib/**, package.json, tsconfig.json, or other test/script file was modified.

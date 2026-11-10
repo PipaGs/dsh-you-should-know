@@ -6,6 +6,11 @@
 // ignored scratch directory and compares the emitted file set and bytes with
 // lib/. It never writes to lib/ and never runs a Git command.
 //
+// The scratch directory is the only path this script ever deletes or writes,
+// and it is deleted with `rm -r` before the compiler runs. `--out` is therefore
+// confined to node_modules/.build-check (or a path below it); every other value
+// is rejected with exit code 2 before any deletion and before tsc starts.
+//
 // Usage:
 //   node scripts/check-build-drift.mjs
 //   node scripts/check-build-drift.mjs --expected <dir> --out <dir>
@@ -17,11 +22,12 @@
 // it refuses to compare whenever tsc reports an error.
 //
 // Exit codes: 0 = the emitted tree matches the expected tree byte for byte,
-// 1 = drift found, 2 = the compiler failed, did not run, or emitted nothing.
+// 1 = drift found, 2 = the compiler failed, did not run, emitted nothing, or
+// `--out` was unsafe.
 
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { existsSync } from 'node:fs'
+import { existsSync, realpathSync } from 'node:fs'
 import { readFile, readdir, rm } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -30,13 +36,17 @@ const ROOT = path.resolve(fileURLToPath(new URL('..', import.meta.url)))
 const TSC = path.join(ROOT, 'node_modules', 'typescript', 'bin', 'tsc')
 const TSCONFIG = path.join(ROOT, 'tsconfig.json')
 const DEFAULT_EXPECTED = path.join(ROOT, 'lib')
-const DEFAULT_OUT = path.join(ROOT, 'node_modules', '.build-check')
+// The one directory this script may delete and write. Keep the name stable: the
+// ignore rules and the safety tests rely on it.
+const SAFE_OUT_ROOT = path.join(ROOT, 'node_modules', '.build-check')
+const DEFAULT_OUT = SAFE_OUT_ROOT
 
 const USAGE = [
   'Usage: node scripts/check-build-drift.mjs [--expected <dir>] [--out <dir>] [--tsconfig <file>]',
   '',
   '  --expected <dir>  committed build output to compare against (default: lib)',
-  '  --out <dir>       scratch directory for the fresh build (default: node_modules/.build-check)',
+  '  --out <dir>       scratch build directory; must be node_modules/.build-check',
+  '                    or a path strictly below it (default: node_modules/.build-check)',
   '  --tsconfig <file> compiler project to build (default: tsconfig.json)',
   '  --help            print this message',
 ].join('\n')
@@ -60,6 +70,75 @@ function parseArgs(argv) {
     }
   }
   return options
+}
+
+/** True when `child` equals `parent` or sits below it, compared by path segment. */
+function isInsideOrEqual(child, parent) {
+  const relative = path.relative(parent, child)
+  return relative === '' || (relative !== '..' && !relative.startsWith(`..${path.sep}`) && !path.isAbsolute(relative))
+}
+
+/** Real path of the deepest existing ancestor of an absolute path, or null. */
+function deepestExistingRealpath(target) {
+  let current = target
+  for (;;) {
+    try {
+      return { existing: current, real: realpathSync(current) }
+    } catch (error) {
+      const parent = path.dirname(current)
+      if (parent === current) return null
+      current = parent
+    }
+  }
+}
+
+/**
+ * Why an `--out` value is unsafe, or null when it is safe.
+ *
+ * The script deletes `--out` with `rm -r` before the compiler runs, so the path
+ * must be lexically inside the scratch root, the scratch root and its parent
+ * must not resolve outside the repository through a symlink, and the deepest
+ * existing ancestor of the target must not escape the scratch root through a
+ * symlink either. String prefixes alone are not enough.
+ */
+function unsafeOutReason(outPath) {
+  if (!isInsideOrEqual(outPath, SAFE_OUT_ROOT)) {
+    return `${outPath} is outside the scratch root ${SAFE_OUT_ROOT}`
+  }
+  const realRoot = realpathSync(ROOT)
+  const nodeModules = path.join(ROOT, 'node_modules')
+  let realNodeModules
+  try {
+    realNodeModules = realpathSync(nodeModules)
+  } catch (error) {
+    return `${nodeModules} cannot be resolved (${error.message})`
+  }
+  if (!isInsideOrEqual(realNodeModules, realRoot)) {
+    return `${nodeModules} resolves outside the repository root (${realNodeModules})`
+  }
+  let realScratch = null
+  try {
+    realScratch = realpathSync(SAFE_OUT_ROOT)
+  } catch (error) {
+    realScratch = null
+  }
+  if (realScratch !== null) {
+    if (!isInsideOrEqual(realScratch, realRoot)) {
+      return `${SAFE_OUT_ROOT} resolves outside the repository root (${realScratch})`
+    }
+    if (!isInsideOrEqual(realScratch, realNodeModules)) {
+      return `${SAFE_OUT_ROOT} resolves outside node_modules (${realScratch})`
+    }
+  }
+  const deepest = deepestExistingRealpath(outPath)
+  if (deepest === null) {
+    return `${outPath} has no resolvable existing ancestor`
+  }
+  const boundary = realScratch ?? realNodeModules
+  if (!isInsideOrEqual(deepest.real, boundary)) {
+    return `${outPath} escapes the scratch root through ${deepest.existing} (resolves to ${deepest.real})`
+  }
+  return null
 }
 
 /** List regular files below a directory as sorted POSIX relative paths. */
@@ -115,6 +194,14 @@ async function main() {
   if (options.help) {
     console.log(USAGE)
     return 0
+  }
+
+  // Reject an unsafe scratch directory before any deletion and before tsc runs.
+  const unsafeReason = unsafeOutReason(options.out)
+  if (unsafeReason !== null) {
+    console.error(`build drift check: refusing unsafe --out: ${unsafeReason}`)
+    console.error(`build drift check: destructive output is confined to ${SAFE_OUT_ROOT}`)
+    return 2
   }
 
   if (!existsSync(options.tsconfig)) {

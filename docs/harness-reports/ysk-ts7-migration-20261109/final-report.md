@@ -205,3 +205,45 @@ Paths are relative to `docs/harness-reports/ysk-ts7-migration-20261109/`.
 | `migration/review-round1/` | Round-1 fix reports and emit-parity logs |
 | `migration/final/18-github-install-smoke.txt` | Direct GitHub install of the committed SHA: 13 checks, 0 failed |
 | `migration/final/00`, `07`-`18` | Normalization; final typecheck/build/test/check/drift/smoke/language/diff logs; staged `--check`/`--stat` and eol logs; GitHub install log |
+
+
+---
+
+## Review round 1 (ChatGPT) — P1 fix
+
+- Date: 2026-11-10
+- Defect: the build-drift gate accepted any user-controlled `--out` through
+  `path.resolve`, then deleted it with `rm -r` and passed it to `tsc --outDir`
+  before any containment check. Values such as `.`, `lib`, or an ancestor could
+  destroy data. Severity P1 (destructive).
+- Fix: destructive output is now confined to `node_modules/.build-check`.
+  `--out` is accepted only when it equals that ignored scratch root or sits
+  strictly below it; every other value exits 2 before any deletion and before
+  tsc runs. The check combines segment-wise path containment, `realpath` checks
+  on `node_modules` and `.build-check` against the repository root, and a
+  `realpath` of the deepest existing ancestor of `--out`, so an existing
+  symlink cannot escape the scratch root. Sibling lookalikes are rejected
+  because string prefixes are not used. Defaults (`--out node_modules/.build-check`,
+  `--expected lib`, `--tsconfig tsconfig.json`), exit codes 0/1/2, the compiler
+  policy, and the drift output format are unchanged; `USAGE` documents the
+  restriction.
+- Regression test: `test/build-drift-safety.test.js` (one test) drives the real
+  script only with disposable fixtures under gitignored `node_modules/`. It
+  asserts exit 2, the `refusing unsafe --out` message, and a byte-identical
+  sentinel for an absolute outside path, a sibling lookalike, a lexical
+  traversal, and a symlink escape, then proves the default run and an explicit
+  safe subdirectory both report 13 byte-identical files. `node --check` passes
+  on both files.
+- Gates: focused test exit 0 (1 test, 1 pass); `node --test test/` exit 0 with
+  698 tests, 698 pass, 0 fail; default drift exit 0 with 13/13 byte-identical and
+  tsc exit 0 / 0 diagnostics; unsafe `--out` cases exit 2 with the sentinel
+  intact; `git diff --check` exit 0.
+- Evidence:
+  `docs/harness-reports/ysk-ts7-migration-20261109/migration/review-round1-chatgpt/report.md`
+  and its `01-node-check.txt`, `02-focused-test.txt`, `03-unsafe-rejections.txt`,
+  `04-default-drift.txt`, `05-safe-out-subdir.txt`, `06-full-node-test.txt`, and
+  `07-git-scope.txt`.
+- Residual risk: a local time-of-check/time-of-use race between validation and
+  `rm` is not closed by Node 26 path APIs; the script is an unprivileged local
+  development gate and the scratch root is gitignored. `--expected` and
+  `--tsconfig` remain read-only user inputs by design.

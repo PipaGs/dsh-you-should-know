@@ -1,0 +1,15 @@
+# command: node --test test/build-drift-safety.test.js
+# started: 2026-11-10T11:25:17.579Z
+# exit code: 0
+--- stdout ---
+✔ the build drift gate confines destructive output to the scratch root (1405.32175ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1567.1895
+
+--- stderr ---

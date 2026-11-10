@@ -1,0 +1,8 @@
+check1=0
+check2=0
+focused=0
+drift=0
+unsafe=2
+sentinelIntact=true
+unsafeStderr=build drift check: refusing unsafe --out: /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/.lead-drift-sentinel is outside the scratch root /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/.build-check
+build drift check: destructive output is confined to /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/.build-check
