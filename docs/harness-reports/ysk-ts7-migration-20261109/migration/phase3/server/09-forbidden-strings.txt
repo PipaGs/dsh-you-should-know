@@ -1,0 +1,23 @@
+# Forbidden discovery strings — phase 3 update.ts
+
+Test/update.test.js rejects these literals in lib/update.js. The check below scans
+the edited source and the scratch-emitted lib/update.js for each literal.
+
+file: src/update.ts
+  api.github.com: absent
+  releases/latest: absent
+  LATEST_RELEASE_URL: absent
+  latestReleaseTag: absent
+  webFetch: absent
+  web.fetch: absent
+  ctx.web: absent
+file: node_modules/.servercheck/lib/update.js
+  api.github.com: absent
+  releases/latest: absent
+  LATEST_RELEASE_URL: absent
+  latestReleaseTag: absent
+  webFetch: absent
+  web.fetch: absent
+  ctx.web: absent
+
+result: no forbidden literal present

@@ -1,0 +1,40 @@
+### environment facts
+
+### node --version
+$ /opt/homebrew/Cellar/node/26.12.1_1/bin/node --version
+exit_code: 0
+--- stdout ---
+v26.12.1
+--- stderr ---
+
+
+### npm --version
+$ /opt/homebrew/bin/npm --version
+exit_code: 0
+--- stdout ---
+11.20.0
+--- stderr ---
+
+
+### git rev-parse HEAD
+$ git rev-parse HEAD
+exit_code: 0
+--- stdout ---
+4d414db2f56ae0bd1e5d0585065241e1d276a972
+--- stderr ---
+
+
+### git status --porcelain
+$ git status --porcelain
+exit_code: 0
+--- stdout ---
+?? docs/harness-reports/ysk-ts7-migration-20261109/
+--- stderr ---
+
+
+### git branch --show-current
+$ git branch --show-current
+exit_code: 0
+--- stdout ---
+session/ysk-ts7-migration-20261109
+--- stderr ---

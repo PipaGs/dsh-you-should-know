@@ -1,0 +1,368 @@
+--- lib/client.js	2026-11-09 22:58:44
++++ node_modules/.clientcheck/client.js	2026-11-09 23:11:53
+@@ -10,6 +10,11 @@
+ window.__ModuleLoader__.load({
+     id: 'dsh-you-should-know',
+     factory(require) {
++        // The host module table injects its own CommonJS `require`, which
++        // `ModuleLoaderEntry` types as returning `unknown`. The DSH Web runtime
++        // always resolves 'react' to its bundled React, so this one assertion at the
++        // injection seam records the documented host contract; every client-side
++        // React call is then checked against the narrow interface below.
+         const React = require('react');
+         const h = React.createElement;
+         const { useEffect, useRef, useState } = React;
+@@ -130,11 +135,43 @@
+                 set = new Set();
+                 resolvedBySession.set(sessionId, set);
+                 if (resolvedBySession.size > MAX_RESOLVED_SESSIONS) {
+-                    resolvedBySession.delete(resolvedBySession.keys().next().value);
++                    // The size check above proves the map is nonempty; the guard only
++                    // satisfies the iterator result type.
++                    const oldest = resolvedBySession.keys().next().value;
++                    if (oldest !== undefined)
++                        resolvedBySession.delete(oldest);
+                 }
+             }
+             return set;
+         }
++        /** Whether one untrusted value is the notes route envelope. */
++        function isNotesPayload(value) {
++            if (value === null || typeof value !== 'object')
++                return false;
++            if (!('ok' in value) || value.ok !== true)
++                return false;
++            return 'notes' in value && Array.isArray(value.notes);
++        }
++        /** Whether one untrusted value is the history route envelope. */
++        function isHistoryPayload(value) {
++            if (value === null || typeof value !== 'object')
++                return false;
++            if (!('ok' in value) || value.ok !== true)
++                return false;
++            return 'history' in value && Array.isArray(value.history);
++        }
++        /** Whether one untrusted value is one active or history note row. */
++        function isClientNote(value) {
++            if (value === null || typeof value !== 'object')
++                return false;
++            if (!('id' in value) || typeof value.id !== 'string')
++                return false;
++            return 'note' in value && typeof value.note === 'string';
++        }
++        /** Whether one untrusted value is a non-negative integer. */
++        function isNonNegativeInteger(value) {
++            return typeof value === 'number' && Number.isInteger(value) && value >= 0;
++        }
+         /** The active notes plus the bounded history count, or null when unavailable. */
+         async function fetchNotes(sessionId) {
+             try {
+@@ -142,9 +179,9 @@
+                 if (response.ok !== true)
+                     return null;
+                 const payload = await response.json();
+-                if (!payload || payload.ok !== true || !Array.isArray(payload.notes))
++                if (!isNotesPayload(payload))
+                     return null;
+-                const count = Number.isInteger(payload.historyCount) && payload.historyCount >= 0 ? payload.historyCount : 0;
++                const count = isNonNegativeInteger(payload.historyCount) ? payload.historyCount : 0;
+                 return { notes: payload.notes, historyCount: count };
+             }
+             catch (error) {
+@@ -158,9 +195,9 @@
+                 if (response.ok !== true)
+                     return null;
+                 const payload = await response.json();
+-                if (!payload || payload.ok !== true || !Array.isArray(payload.history))
++                if (!isHistoryPayload(payload))
+                     return null;
+-                return payload.history.filter((entry) => entry && typeof entry.id === 'string' && typeof entry.note === 'string');
++                return payload.history.filter(isClientNote);
+             }
+             catch (error) {
+                 return null;
+@@ -181,6 +218,10 @@
+                 // Best effort: the local resolution above already hid the note.
+             }
+         }
++        /** Whether one untrusted value is the explain route envelope (arrays included). */
++        function isExplainPayload(value) {
++            return value !== null && typeof value === 'object';
++        }
+         /**
+          * Request one bounded explanation for a stored finding. Returns
+          * { ok, explanation }, { ok: false, error }, or null on transport failure;
+@@ -195,7 +236,7 @@
+                     cache: 'no-store',
+                 });
+                 const payload = await response.json().catch(() => null);
+-                if (payload === null || typeof payload !== 'object')
++                if (!isExplainPayload(payload))
+                     return null;
+                 if (payload.ok === true && typeof payload.explanation === 'string' && payload.explanation !== '') {
+                     return { ok: true, explanation: payload.explanation };
+@@ -206,6 +247,14 @@
+                 return null;
+             }
+         }
++        /** Whether one untrusted value is the config read envelope. */
++        function isConfigPayload(value) {
++            if (value === null || typeof value !== 'object')
++                return false;
++            if (!('ok' in value) || value.ok !== true)
++                return false;
++            return 'config' in value && value.config !== null && typeof value.config === 'object';
++        }
+         /** Read the bounded config payload, or null when it is unavailable. */
+         async function fetchConfig() {
+             try {
+@@ -213,7 +262,7 @@
+                 if (response.ok !== true)
+                     return null;
+                 const payload = await response.json();
+-                if (!payload || payload.ok !== true || !payload.config || typeof payload.config !== 'object')
++                if (!isConfigPayload(payload))
+                     return null;
+                 return payload;
+             }
+@@ -221,6 +270,12 @@
+                 return null;
+             }
+         }
++        /** Whether one untrusted value is the session route envelope. */
++        function isSessionPayload(value) {
++            if (value === null || typeof value !== 'object')
++                return false;
++            return 'ok' in value && value.ok === true;
++        }
+         /** Read one session's bounded reviewer view, or null when unavailable. */
+         async function fetchSession(sessionId) {
+             try {
+@@ -228,7 +283,7 @@
+                 if (response.ok !== true)
+                     return null;
+                 const payload = await response.json();
+-                if (!payload || payload.ok !== true)
++                if (!isSessionPayload(payload))
+                     return null;
+                 return payload;
+             }
+@@ -253,6 +308,10 @@
+                 return null;
+             }
+         }
++        /** Whether one untrusted value is the config write body (arrays included). */
++        function isConfigWriteBody(value) {
++            return value !== null && typeof value === 'object';
++        }
+         /** Post the bounded config for one reviewer route. */
+         async function postConfig(payload) {
+             try {
+@@ -263,12 +322,18 @@
+                     cache: 'no-store',
+                 });
+                 const body = await response.json().catch(() => null);
+-                return { ok: response.ok === true, body };
++                return { ok: response.ok === true, body: isConfigWriteBody(body) ? body : null };
+             }
+             catch (error) {
+                 return { ok: false, body: null };
+             }
+         }
++        /** Whether one untrusted value is the self-check route envelope. */
++        function isSelfCheckPayload(value) {
++            if (value === null || typeof value !== 'object')
++                return false;
++            return 'ok' in value && value.ok === true;
++        }
+         /**
+          * Read the authenticated self-check payload, or null when it is
+          * unavailable. The request is a document-relative same-origin GET, so the
+@@ -281,7 +346,7 @@
+                 if (response.ok !== true)
+                     return null;
+                 const payload = await response.json();
+-                if (payload === null || typeof payload !== 'object' || payload.ok !== true)
++                if (!isSelfCheckPayload(payload))
+                     return null;
+                 return payload;
+             }
+@@ -311,6 +376,14 @@
+             }
+             return names.length === 0 ? 'none reported' : names.join(', ');
+         }
++        /** Whether one untrusted route row reports an unregistered named route. */
++        function isUnregisteredRoute(value) {
++            if (value === null || typeof value !== 'object')
++                return false;
++            if (!('registered' in value) || value.registered !== false)
++                return false;
++            return 'name' in value && typeof value.name === 'string';
++        }
+         /**
+          * Explain a not-healthy self-check from the bounded fields the route
+          * returns: whether the reviewer is configured, which routes lack a handler,
+@@ -321,30 +394,50 @@
+             if (payload.configured !== true)
+                 reasons.push('the reviewer route is not configured');
+             const routes = Array.isArray(payload.routes) ? payload.routes : [];
+-            const unregistered = routes
+-                .filter((route) => route !== null && typeof route === 'object' && route.registered === false && typeof route.name === 'string')
+-                .map((route) => route.name);
++            const unregistered = routes.filter(isUnregisteredRoute).map((route) => route.name);
+             if (unregistered.length > 0)
+                 reasons.push(`unregistered routes: ${unregistered.join(', ')}`);
+             if (typeof payload.runtimeStatus === 'string' && payload.runtimeStatus !== 'idle' && payload.runtimeStatus !== 'reviewing')
+                 reasons.push(`runtime status is ${payload.runtimeStatus}`);
+             return reasons.length === 0 ? 'No specific reason was reported.' : reasons.join('; ') + '.';
+         }
++        /** Whether one untrusted value is a provider catalog. */
++        function isProviderCatalog(value) {
++            if (value === null || typeof value !== 'object')
++                return false;
++            return 'providers' in value && Array.isArray(value.providers);
++        }
++        /** Whether one untrusted value is a catalog provider row. */
++        function isProviderEntry(value) {
++            if (value === null || typeof value !== 'object')
++                return false;
++            return 'id' in value && typeof value.id === 'string' && value.id !== '';
++        }
++        /** Whether one untrusted value is a non-empty string. */
++        function isNonEmptyString(value) {
++            return typeof value === 'string' && value !== '';
++        }
+         /** Providers advertised by the bounded catalog. */
+         function catalogProviders(catalog) {
+-            if (!catalog || !Array.isArray(catalog.providers))
++            if (!isProviderCatalog(catalog))
+                 return [];
+-            return catalog.providers.filter((entry) => entry && typeof entry.id === 'string' && entry.id !== '');
++            return catalog.providers.filter(isProviderEntry);
+         }
+         function catalogModels(catalog, provider) {
+             const found = catalogProviders(catalog).find((entry) => entry.id === provider);
+-            return found && Array.isArray(found.models) ? found.models.filter((model) => typeof model === 'string' && model !== '') : [];
++            return found && Array.isArray(found.models) ? found.models.filter(isNonEmptyString) : [];
++        }
++        /** Whether one untrusted value is a React change event with a target. */
++        function isChangeEvent(value) {
++            if (value === null || typeof value !== 'object')
++                return false;
++            return 'target' in value && Boolean(value.target);
+         }
+         function fieldValue(event) {
+-            return event && event.target ? event.target.value : event;
++            return isChangeEvent(event) ? event.target.value : event;
+         }
+         function checkedValue(event) {
+-            return event && event.target ? event.target.checked === true : event === true;
++            return isChangeEvent(event) ? event.target.checked === true : event === true;
+         }
+         /** The label for the effective route source in the session header action. */
+         function routeSourceLabel(source) {
+@@ -354,8 +447,14 @@
+                 return 'Global';
+             return 'Automatic';
+         }
++        /** Whether one untrusted value is a reviewer route view with both names. */
++        function isReviewerRoute(value) {
++            if (value === null || typeof value !== 'object')
++                return false;
++            return 'provider' in value && typeof value.provider === 'string' && 'model' in value && typeof value.model === 'string';
++        }
+         function routeSummary(route) {
+-            if (!route || typeof route.provider !== 'string' || typeof route.model !== 'string')
++            if (!isReviewerRoute(route))
+                 return 'Automatic';
+             return `${route.provider}/${route.model}`;
+         }
+@@ -626,7 +725,8 @@
+             const accent = critical ? 'rgba(239, 68, 68, 0.95)' : 'rgba(245, 158, 11, 0.95)';
+             const source = noteSourceOf(note);
+             const sourceText = source === null ? noteSourceText(note) : sourceLabel(source);
+-            const canOpen = source !== null && typeof props.onOpenFile === 'function';
++            const onOpenFile = props.onOpenFile;
++            const canOpen = source !== null && typeof onOpenFile === 'function';
+             return h('section', {
+                 role: 'note',
+                 'aria-label': 'You should know',
+@@ -720,7 +820,7 @@
+             canOpen
+                 ? h('button', {
+                     type: 'button',
+-                    onClick: () => props.onOpenFile(source),
++                    onClick: () => onOpenFile(source),
+                     title: 'Open file',
+                     'aria-label': 'Open file',
+                     style: {
+@@ -786,7 +886,8 @@
+             const accent = critical ? 'rgba(239, 68, 68, 0.95)' : 'rgba(245, 158, 11, 0.95)';
+             const source = noteSourceOf(entry);
+             const sourceText = source === null ? noteSourceText(entry) : sourceLabel(source);
+-            const canOpen = source !== null && typeof props.onOpenFile === 'function';
++            const onOpenFile = props.onOpenFile;
++            const canOpen = source !== null && typeof onOpenFile === 'function';
+             const timestamp = formatTimestamp(entry.createdAt);
+             return h('section', {
+                 role: 'history-entry',
+@@ -809,7 +910,7 @@
+             }, h('div', { style: { flex: 1, minWidth: 0 } }, h('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 6, fontWeight: 600, color: accent } }, h('span', null, `State: ${resolutionState(entry)}`), h('span', { style: { fontWeight: 400, opacity: 0.8 } }, critical ? 'critical' : 'high'), timestamp === '' ? null : h('span', { style: { fontWeight: 400, opacity: 0.8 } }, timestamp)), h('div', { dir: 'auto', style: { whiteSpace: 'pre-wrap', wordBreak: 'break-word' } }, stripControls(entry.note)), sourceText === '' ? null : h('div', { style: { display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', gap: 6, marginTop: 3, fontSize: 11 } }, canOpen
+                 ? h('button', {
+                     type: 'button',
+-                    onClick: () => props.onOpenFile(source),
++                    onClick: () => onOpenFile(source),
+                     title: 'Open file',
+                     'aria-label': 'Open file',
+                     style: { border: 'none', background: 'none', color: 'inherit', opacity: 0.8, cursor: 'pointer', padding: 0, fontSize: 11, textDecoration: 'underline' },
+@@ -910,7 +1011,7 @@
+                         return;
+                     setView({
+                         sessionId,
+-                        notes: next.notes.filter((note) => note && typeof note.id === 'string' && typeof note.note === 'string' && !resolved.has(note.id)),
++                        notes: next.notes.filter((note) => isClientNote(note) && !resolved.has(note.id)),
+                         historyCount: next.historyCount,
+                     });
+                 };
+@@ -1133,6 +1234,10 @@
+         const FIELD_STYLE = { display: 'block', width: '100%', boxSizing: 'border-box', marginTop: 2, padding: '4px 6px' };
+         const LABEL_STYLE = { display: 'block', fontSize: 12, opacity: 0.8, marginTop: 8 };
+         const BUTTON_STYLE = { marginTop: 10, padding: '4px 10px', cursor: 'pointer' };
++        /** Whether one untrusted value is the update route envelope (arrays included). */
++        function isUpdateResponse(value) {
++            return value !== null && typeof value === 'object';
++        }
+         /**
+          * The Plugins settings card. It is registered under the bundle's key and is
+          * entirely host-backed: the form reads the live config and catalog and
+@@ -1281,7 +1386,7 @@
+                     if (response.ok !== true)
+                         return null;
+                     const payload = await response.json();
+-                    return payload !== null && typeof payload === 'object' ? payload : null;
++                    return isUpdateResponse(payload) ? payload : null;
+                 }
+                 catch (error) {
+                     return null;
+@@ -1683,6 +1788,12 @@
+                     : null, status !== '' ? h('span', null, status) : null)
+                 : null);
+         }
++        /** Whether one untrusted value is the file-navigation service. */
++        function isFileNavigationService(value) {
++            if (value === null || typeof value !== 'object')
++                return false;
++            return 'openResource' in value && typeof value.openResource === 'function';
++        }
+         return {
+             name: 'dsh-you-should-know',
+             // The connection service carries the reconnect signal every host-backed
+@@ -1705,7 +1816,7 @@
+                     inject: (sessionId) => {
+                         const id = typeof sessionId === 'string' ? sessionId : '';
+                         const sidebar = typeof ctx.get === 'function' ? ctx.get('sidebarRight') : ctx.sidebarRight;
+-                        const onOpenFile = sidebar && typeof sidebar.openResource === 'function'
++                        const onOpenFile = isFileNavigationService(sidebar)
+                             ? (source) => {
+                                 try {
+                                     const address = sessionFileAddress(id, source.path);

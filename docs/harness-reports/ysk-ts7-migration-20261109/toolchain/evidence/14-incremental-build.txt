@@ -1,0 +1,29 @@
+$ node node_modules/typescript/bin/tsc -p .../p1/tsconfig.json --incremental --outDir .../out-inc --tsBuildInfoFile .../out-inc/.tsbuildinfo --pretty false
+incremental exit=0 stdout="" stderr=""
+tsbuildinfo exists=true size=7622
+
+$ node node_modules/typescript/bin/tsc --build node_modules/.ts7-probe/p1/tsconfig.json --pretty false
+build (non-composite project) exit=0 stdout="" stderr=""
+
+Note: the tsconfig above has no "composite"; --build needs composite/incremental. A build-capable variant follows.
+$ node node_modules/typescript/bin/tsc --build node_modules/.ts7-probe/p1/tsconfig.build.json --pretty false --verbose
+build (composite) exit=2
+stdout:
+10:18:04 PM - Projects in this build:
+    * node_modules/.ts7-probe/p1/tsconfig.build.json
+
+10:18:04 PM - Project 'node_modules/.ts7-probe/p1/tsconfig.build.json' is out of date because output file 'node_modules/.ts7-probe/p1/out-build/.tsbuildinfo' does not exist
+
+10:18:04 PM - Building project 'node_modules/.ts7-probe/p1/tsconfig.build.json'...
+
+node_modules/.ts7-probe/p1/tsconfig.build.json(3,3): error TS6304: Composite projects may not disable declaration emit.
+stderr:
+
+build output tree:
+  node_modules/.ts7-probe/p1/out-build/.tsbuildinfo
+  node_modules/.ts7-probe/p1/out-build/default.d.ts
+  node_modules/.ts7-probe/p1/out-build/default.js
+  node_modules/.ts7-probe/p1/out-build/main.d.ts
+  node_modules/.ts7-probe/p1/out-build/main.js
+  node_modules/.ts7-probe/p1/out-build/math.d.ts
+  node_modules/.ts7-probe/p1/out-build/math.js

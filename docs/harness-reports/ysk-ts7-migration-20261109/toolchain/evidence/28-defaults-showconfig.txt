@@ -1,0 +1,27 @@
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p5/tsconfig.json --showConfig
+exit=0
+IMPLICIT DEFAULTS for a minimal ES2022 + nodenext project (only target/module/moduleResolution set by the probe):
+
+{
+    "compilerOptions": {
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
+        "target": "es2022",
+        "moduleDetection": "force"
+    },
+    "files": [
+        "./src/a.ts"
+    ],
+    "include": [
+        "src"
+    ]
+}
+
+stderr:
+verbatimModuleSyntax: isolatedModules=true preserveConstEnums=true moduleDetection=force
+isolatedModules: isolatedModules=true preserveConstEnums=true moduleDetection=force
+verbatimModuleSyntax false: isolatedModules=undefined preserveConstEnums=undefined moduleDetection=force
+no options: isolatedModules=undefined preserveConstEnums=undefined moduleDetection=force
+
+---
+Note: the four lines above were produced by appending --showConfig plus the named extra flag to the minimal p5 project (target ES2022, module nodenext). They show that isolatedModules (explicit or implied by verbatimModuleSyntax) resolves preserveConstEnums to true, and that moduleDetection resolves to force for module nodenext in TS7.

@@ -1,0 +1,36 @@
+# Phase 2 small-module typing: files changed in this phase
+#
+# src/ is still untracked as a whole (added in phase 1), so git shows one
+# `?? src/` entry instead of a per-file diff. The seven authored files edited
+# in this phase are listed explicitly below.
+
+src/adaptive.ts
+src/feedback.ts
+src/explain.ts
+src/language.ts
+src/review-strictness.ts
+src/review-profile.ts
+src/evidence.ts
+
+# Raw `git status --short` at the end of this phase:
+M lib/adaptive.js
+ M lib/client.js
+ M lib/core.js
+ M lib/evidence.js
+ M lib/explain.js
+ M lib/feedback.js
+ M lib/index.js
+ M lib/language.js
+ M lib/review-profile.js
+ M lib/review-strictness.js
+ M lib/runtime.js
+ M lib/self-check.js
+ M lib/update.js
+ M package.json
+?? docs/harness-reports/ysk-ts7-migration-20261109/
+?? scripts/check-build-drift.mjs
+?? src/
+?? tsconfig.json
+
+# Raw `git diff --check` (empty output, exit 0):
+(clean, no output)

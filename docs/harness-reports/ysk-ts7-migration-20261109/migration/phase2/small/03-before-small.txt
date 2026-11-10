@@ -1,0 +1,89 @@
+src/adaptive.ts(35,32): error TS7006: Parameter 'outcome' implicitly has an 'any' type.
+src/adaptive.ts(47,32): error TS7006: Parameter 'state' implicitly has an 'any' type.
+src/adaptive.ts(47,39): error TS7006: Parameter 'max' implicitly has an 'any' type.
+src/adaptive.ts(47,44): error TS7006: Parameter 'now' implicitly has an 'any' type.
+src/adaptive.ts(60,36): error TS7006: Parameter 'state' implicitly has an 'any' type.
+src/adaptive.ts(60,43): error TS7006: Parameter 'now' implicitly has an 'any' type.
+src/adaptive.ts(69,34): error TS7006: Parameter 'state' implicitly has an 'any' type.
+src/adaptive.ts(75,28): error TS7006: Parameter 'state' implicitly has an 'any' type.
+src/adaptive.ts(83,40): error TS7006: Parameter 'state' implicitly has an 'any' type.
+src/adaptive.ts(83,47): error TS7006: Parameter 'baseCooldown' implicitly has an 'any' type.
+src/evidence.ts(52,19): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/evidence.ts(57,24): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/evidence.ts(57,31): error TS7006: Parameter 'max' implicitly has an 'any' type.
+src/evidence.ts(67,20): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/evidence.ts(74,22): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/evidence.ts(81,22): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/evidence.ts(89,22): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/evidence.ts(94,26): error TS7006: Parameter 'meta' implicitly has an 'any' type.
+src/evidence.ts(95,9): error TS7034: Variable 'paths' implicitly has type 'any[]' in some locations where its type cannot be determined.
+src/evidence.ts(96,31): error TS7005: Variable 'paths' implicitly has an 'any[]' type.
+src/evidence.ts(109,23): error TS7006: Parameter 'result' implicitly has an 'any' type.
+src/evidence.ts(109,31): error TS7006: Parameter 'path' implicitly has an 'any' type.
+src/evidence.ts(115,26): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/evidence.ts(115,33): error TS7006: Parameter 'data' implicitly has an 'any' type.
+src/evidence.ts(136,40): error TS7006: Parameter 'events' implicitly has an 'any' type.
+src/evidence.ts(136,48): error TS7006: Parameter 'turn' implicitly has an 'any' type.
+src/evidence.ts(161,20): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/evidence.ts(180,29): error TS2345: Argument of type '{ name: string; step: any; callId: string | undefined; failed: boolean; }' is not assignable to parameter of type 'never'.
+src/evidence.ts(198,31): error TS2345: Argument of type 'any' is not assignable to parameter of type 'never'.
+src/evidence.ts(217,42): error TS2339: Property 'errorCode' does not exist on type '{ kind: string; }'.
+src/evidence.ts(218,7): error TS2322: Type '{ kind: string; }' is not assignable to type 'null'.
+src/evidence.ts(226,40): error TS2339: Property 'mode' does not exist on type '{ kind: string; childId: string; }'.
+src/evidence.ts(227,29): error TS2345: Argument of type '{ kind: string; childId: string; }' is not assignable to parameter of type 'never'.
+src/evidence.ts(234,29): error TS2345: Argument of type '{ kind: string; childId: string; }' is not assignable to parameter of type 'never'.
+src/evidence.ts(247,45): error TS2339: Property 'childId' does not exist on type '{ kind: any; runId: string; }'.
+src/evidence.ts(248,43): error TS2339: Property 'phase' does not exist on type '{ kind: any; runId: string; }'.
+src/evidence.ts(251,45): error TS2339: Property 'outcome' does not exist on type '{ kind: any; runId: string; }'.
+src/evidence.ts(254,42): error TS2339: Property 'name' does not exist on type '{ kind: any; runId: string; }'.
+src/evidence.ts(257,48): error TS2339: Property 'stopReason' does not exist on type '{ kind: any; runId: string; }'.
+src/evidence.ts(259,29): error TS2345: Argument of type '{ kind: any; runId: string; }' is not assignable to parameter of type 'never'.
+src/evidence.ts(276,38): error TS7006: Parameter 'evidence' implicitly has an 'any' type.
+src/explain.ts(38,46): error TS7006: Parameter 'messages' implicitly has an 'any' type.
+src/explain.ts(38,56): error TS7006: Parameter 'options' implicitly has an 'any' type.
+src/explain.ts(44,21): error TS7006: Parameter 'source' implicitly has an 'any' type.
+src/explain.ts(61,24): error TS2339: Property 'note' does not exist on type '{}'.
+src/explain.ts(61,56): error TS2339: Property 'note' does not exist on type '{}'.
+src/explain.ts(61,84): error TS2339: Property 'note' does not exist on type '{}'.
+src/explain.ts(62,34): error TS2339: Property 'excerpt' does not exist on type '{}'.
+src/explain.ts(62,65): error TS2339: Property 'excerpt' does not exist on type '{}'.
+src/explain.ts(63,34): error TS2339: Property 'capsule' does not exist on type '{}'.
+src/explain.ts(63,65): error TS2339: Property 'capsule' does not exist on type '{}'.
+src/explain.ts(92,34): error TS7006: Parameter 'raw' implicitly has an 'any' type.
+src/feedback.ts(35,20): error TS7006: Parameter 'key' implicitly has an 'any' type.
+src/feedback.ts(41,35): error TS7006: Parameter 'key' implicitly has an 'any' type.
+src/feedback.ts(55,35): error TS7006: Parameter 'left' implicitly has an 'any' type.
+src/feedback.ts(55,41): error TS7006: Parameter 'right' implicitly has an 'any' type.
+src/feedback.ts(74,38): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/feedback.ts(90,9): error TS7006: Parameter 'key' implicitly has an 'any' type.
+src/feedback.ts(97,9): error TS7006: Parameter 'key' implicitly has an 'any' type.
+src/feedback.ts(100,13): error TS7006: Parameter 'key' implicitly has an 'any' type.
+src/language.ts(38,39): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/language.ts(52,40): error TS7006: Parameter 'messages' implicitly has an 'any' type.
+src/language.ts(71,46): error TS2339: Property 'hostLanguage' does not exist on type '{}'.
+src/language.ts(73,38): error TS2339: Property 'messages' does not exist on type '{}'.
+src/language.ts(87,34): error TS2339: Property 'subject' does not exist on type '{}'.
+src/language.ts(87,66): error TS2339: Property 'subject' does not exist on type '{}'.
+src/language.ts(87,91): error TS2339: Property 'subject' does not exist on type '{}'.
+src/language.ts(108,61): error TS2339: Property 'subject' does not exist on type '{}'.
+src/review-profile.ts(229,22): error TS7006: Parameter 'alias' implicitly has an 'any' type.
+src/review-profile.ts(235,26): error TS7006: Parameter 'text' implicitly has an 'any' type.
+src/review-profile.ts(247,29): error TS7006: Parameter 'text' implicitly has an 'any' type.
+src/review-profile.ts(262,24): error TS7006: Parameter 'entry' implicitly has an 'any' type.
+src/review-profile.ts(281,39): error TS7006: Parameter 'messages' implicitly has an 'any' type.
+src/review-profile.ts(319,33): error TS7006: Parameter 'languages' implicitly has an 'any' type.
+src/review-profile.ts(340,43): error TS7006: Parameter 'messages' implicitly has an 'any' type.
+src/review-profile.ts(340,53): error TS7006: Parameter 'options' implicitly has an 'any' type.
+src/review-strictness.ts(118,30): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/review-strictness.ts(126,37): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/review-strictness.ts(134,35): error TS7006: Parameter 'mode' implicitly has an 'any' type.
+src/review-strictness.ts(135,10): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'Readonly<{ relaxed: Readonly<{ id: "relaxed"; label: "Relaxed"; minImportance: "critical"; instruction: string; }>; balanced: Readonly<{ id: "balanced"; label: "Balanced"; minImportance: "high"; instruction: string; }>; strict: Readonly<...>; paranoid: Readonly<...>; custom: Readonly<...>; }>'.
+src/review-strictness.ts(142,31): error TS7006: Parameter 'mode' implicitly has an 'any' type.
+src/review-strictness.ts(142,37): error TS7006: Parameter 'importance' implicitly has an 'any' type.
+src/review-strictness.ts(143,16): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'Readonly<{ high: 1; critical: 2; }>'.
+src/review-strictness.ts(145,19): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'Readonly<{ high: 1; critical: 2; }>'.
+src/review-strictness.ts(154,31): error TS7006: Parameter 'mode' implicitly has an 'any' type.
+src/review-strictness.ts(154,37): error TS7006: Parameter 'verdict' implicitly has an 'any' type.
+src/review-strictness.ts(191,40): error TS7006: Parameter 'mode' implicitly has an 'any' type.
+src/review-strictness.ts(191,46): error TS7006: Parameter 'additionalInstructions' implicitly has an 'any' type.
+src/review-strictness.ts(191,70): error TS7006: Parameter 'customPrompt' implicitly has an 'any' type.

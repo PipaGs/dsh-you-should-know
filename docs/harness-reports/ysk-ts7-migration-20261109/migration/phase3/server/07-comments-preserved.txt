@@ -1,0 +1,13 @@
+# Comment preservation — phase 3 server files
+
+Original source files were copied to a scratch directory before editing; every
+comment line of the original .ts sources was compared verbatim with the edited
+source (trailing whitespace trimmed on both sides).
+
+runtime.ts: 71 original comment lines, 0 missing
+update.ts: 184 original comment lines, 0 missing
+index.ts: 121 original comment lines, 0 missing
+self-check.ts: 115 original comment lines, 0 missing
+
+total original comment lines checked: 491
+result: all original comment lines preserved verbatim

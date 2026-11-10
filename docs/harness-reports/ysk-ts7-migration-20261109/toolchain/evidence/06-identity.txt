@@ -1,0 +1,70 @@
+$ node node_modules/typescript/bin/tsc --version
+exit=0 stdout="Version 7.0.2\n" stderr=""
+
+bin/tsc: size=44 mode=755
+bin/tsc content:
+#!/usr/bin/env node
+import "../lib/tsc.js";
+
+native binary: /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/@typescript/typescript-darwin-arm64/lib/tsc size=23653616 mode=755
+native binary magic: cffaedfe0c000001
+
+typescript/package.json (identity fields):
+{
+  "name": "typescript",
+  "version": "7.0.2",
+  "type": "module",
+  "engines": {
+    "node": ">=16.20.0"
+  },
+  "bin": {
+    "tsc": "./bin/tsc"
+  },
+  "exports": {
+    "./package.json": "./package.json",
+    ".": "./lib/version.cjs",
+    "./unstable/sync": "./dist/api/sync/api.js",
+    "./unstable/async": "./dist/api/async/api.js",
+    "./unstable/fs": "./dist/api/fs.js",
+    "./unstable/proto": "./dist/api/proto.js",
+    "./unstable/ast": "./dist/ast/index.js",
+    "./unstable/ast/is": "./dist/ast/is.js",
+    "./unstable/ast/factory": "./dist/ast/factory.generated.js",
+    "./unstable/ast/utils": "./dist/ast/utils.js",
+    "./unstable/ast/scanner": "./dist/ast/scanner.js",
+    "./unstable/ast/visitor": "./dist/ast/visitor.js",
+    "./unstable/ast/clone": "./dist/ast/clone.js"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "dist",
+    "vendor",
+    "NOTICE.txt"
+  ]
+}
+optionalDependencies count: 20
+optionalDependencies: @typescript/typescript-win32-x64, @typescript/typescript-win32-arm64, @typescript/typescript-linux-x64, @typescript/typescript-linux-arm, @typescript/typescript-linux-arm64, @typescript/typescript-darwin-x64, @typescript/typescript-darwin-arm64, @typescript/typescript-aix-ppc64, @typescript/typescript-freebsd-arm64, @typescript/typescript-freebsd-x64, @typescript/typescript-linux-loong64, @typescript/typescript-linux-mips64el, @typescript/typescript-linux-ppc64, @typescript/typescript-linux-riscv64, @typescript/typescript-linux-s390x, @typescript/typescript-netbsd-arm64, @typescript/typescript-netbsd-x64, @typescript/typescript-openbsd-arm64, @typescript/typescript-openbsd-x64, @typescript/typescript-sunos-x64
+installed platform package: @typescript/typescript-darwin-arm64@7.0.2 os=["darwin"] cpu=["arm64"]
+
+node_modules/typescript/lib:
+  getExePath.d.ts
+  getExePath.js
+  tsc.js
+  version.cjs
+  version.d.cts
+
+node_modules/typescript/dist (top level):
+  api
+  ast
+  enums
+  internal
+
+Is the classic JS compiler API present? Checking known entry points:
+  typescript/lib/typescript.js: MISSING
+  typescript/lib/tsc.js: EXISTS
+  typescript/lib/version.cjs: EXISTS
+  typescript/dist/typescript.js: MISSING
+
+$ node -e "import('typescript').then(m=>console.log(Object.keys(m)))"
+exit=0 stdout="keys: default,module.exports,version,versionMajorMinor\n" stderr=""

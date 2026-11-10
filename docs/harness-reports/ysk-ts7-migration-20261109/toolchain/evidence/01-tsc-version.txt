@@ -1,0 +1,3 @@
+status 0
+stdout "Version 7.0.2\n"
+stderr ""

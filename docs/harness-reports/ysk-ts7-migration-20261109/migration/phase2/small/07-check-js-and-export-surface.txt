@@ -1,0 +1,15 @@
+emit exit: 0
+node --check adaptive.js: exit 0
+exports identical adaptive.js: [MAX_QUIET_COOLDOWN_MULTIPLIER, MAX_QUIET_STREAK, MAX_RECORDED_CALLS, QUIET_OUTCOMES, REVIEWER_HOURLY_WINDOW_MS, createAdaptiveState, effectiveCooldownTurns, isQuietOutcome, noteQuietOutcome, recordReviewerCall, resetQuiet, reviewerBudget]
+node --check feedback.js: exit 0
+exports identical feedback.js: [FEEDBACK_RESOLUTIONS, FINGERPRINT_CONTAINMENT, MAX_FINGERPRINT_TOKENS, MAX_KNOWN_FINGERPRINTS, MIN_SHARED_FINGERPRINT_TOKENS, SUPPRESSING_RESOLUTION, USEFUL_RESOLUTIONS, createFingerprintSet, fingerprintTokens, fingerprintsMatch, isFeedbackResolution]
+node --check explain.js: exit 0
+exports identical explain.js: [EXPLAIN_INSTRUCTIONS, MAX_EXPLANATION_CHARS, MAX_EXPLANATION_REPLY_CHARS, buildExplanationPrompt, buildExplanationSystemPrompt, parseExplanation]
+node --check language.js: exit 0
+exports identical language.js: [FALLBACK_OUTPUT_LANGUAGE, MAX_LANGUAGE_TAG_CHARS, hasGenuineHumanMessage, languageDirectiveFor, languageSentenceFor, normalizeHostLanguage, resolveOutputLanguage]
+node --check review-strictness.js: exit 0
+exports identical review-strictness.js: [DEFAULT_REVIEW_MODE, MAX_ADDITIONAL_INSTRUCTIONS_CHARS, MAX_CUSTOM_PROMPT_CHARS, REVIEW_MODES, REVIEW_MODE_LABELS, REVIEW_MODE_PROFILES, admitsFinding, admitsVerdict, buildStrictnessSection, isReviewMode, normalizeReviewMode, reviewModeProfile]
+node --check review-profile.js: exit 0
+exports identical review-profile.js: [MAX_REVIEW_SKILLS, buildReviewProfileSection, detectReviewLanguages, reviewSkillsFor]
+node --check evidence.js: exit 0
+exports identical evidence.js: [EVIDENCE_LIMITS, buildEvidenceCapsule, collectEpisodeEvidence]

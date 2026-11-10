@@ -1,0 +1,15 @@
+# Scratch-build test evidence (not a gate run; lib/ is untouched).
+# Procedure: compile src to node_modules/.corecheck, copy the emitted files plus test/ and package.json into a temp dir,
+# symlink node_modules, then run node --test against the emitted artifacts.
+
+$ node --test test/core.test.js test/engine.test.js test/explain.test.js test/config.test.js test/route-deadline.test.js test/recent-check-diagnostics.test.js test/recent-check-disable.test.js test/strictness.test.js
+ℹ tests 254
+ℹ pass 254
+ℹ fail 0
+ℹ cancelled 0
+
+$ node --test test/adaptive.test.js test/feedback.test.js test/feedback-route.test.js test/self-check.test.js test/update-route.test.js test/plugin.test.js test/evidence.test.js test/runtime.test.js test/update.test.js test/review-profile.test.js test/language.test.js
+ℹ tests 182
+ℹ pass 182
+ℹ fail 0
+ℹ cancelled 0

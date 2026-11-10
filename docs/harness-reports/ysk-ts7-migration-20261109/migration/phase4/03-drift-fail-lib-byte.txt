@@ -1,0 +1,12 @@
+exit=1
+scenario: one committed lib byte edited in a scratch copy of lib
+first byte of expected/adaptive.js changed from "/" to "!"
+
+build drift check: tsc exit 0, 0 diagnostic(s)
+build drift check FAILED: the committed output is not the current build
+different bytes (1):
+    adaptive.js
+    expected 3597 B sha256=1ac39e324d375e55
+    emitted  3597 B sha256=7ed2c22ebbdc71c8
+    first difference: line 1
+fresh build kept for inspection at /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/.evidence-tmp/out-drift

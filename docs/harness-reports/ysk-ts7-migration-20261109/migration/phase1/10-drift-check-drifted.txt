@@ -1,0 +1,21 @@
+# drift detection proof, without touching lib/
+# setup: copytree lib/ to node_modules/.drift-proof/expected, append one comment line to expected/adaptive.js
+# command: node scripts/check-build-drift.mjs --expected node_modules/.drift-proof/expected --out node_modules/.drift-proof/out
+# exit code: 1
+--- stdout ---
+build drift check: tsc exit 2, 745 diagnostic(s); diagnostics are advisory here, byte parity is the gate
+build drift check FAILED: the committed output is not the current build
+different bytes (1):
+    adaptive.js
+    expected 3623 B sha256=732c92225c36ff53
+    emitted  3580 B sha256=8e22e8cfbe064114
+    first difference: line 80
+fresh build kept for inspection at /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/.drift-proof/out
+
+--- stderr ---
+
+--- proof that lib/ and git state were untouched ---
+# git status --porcelain identical before/after: true
+# git status --porcelain lines: 18
+# lib/adaptive.js still ends the build output: "k : 0;\n    return base * Math.min(streak + 1, MAX_QUIET_COOLDOWN_MULTIPLIER);\n}\n"
+# scratch kept for inspection: true

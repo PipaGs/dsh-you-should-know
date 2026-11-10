@@ -65,7 +65,13 @@ Before opening or updating a pull request, confirm:
 - every new commit message is English;
 - new review comments are English;
 - the task-owned final report and its authored evidence are English, except for
-  preserved historical artifacts or dated English addenda; and
+  preserved historical artifacts or dated English addenda;
+- the TypeScript sources typecheck (`npm run typecheck`, zero diagnostics) and
+  the committed `lib/*.js` is the current output of `npm run build`, proven by
+  the build-drift gate (`npm run check:drift`);
+- a change to `src/**/*.ts` carries the rebuilt `lib/**/*.js` output in the same
+  change, and no generated `lib/*.js` file is edited by hand;
+- packaging or install-surface changes pass `npm run smoke:local`; and
 - the applicable repository checks pass (npm test, npm run check, and
   git diff --check for code or multi-file changes).
 

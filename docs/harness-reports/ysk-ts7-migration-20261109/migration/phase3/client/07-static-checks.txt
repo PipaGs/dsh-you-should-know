@@ -1,0 +1,33 @@
+# static checks on src/client.ts (comments stripped for code checks)
+
+suppression comments: none
+
+
+blanket any (code only): none
+
+
+as unknown as: none
+
+
+casts to a named type (code only): 1 hit(s) - REVIEW
+18:     const React = require('react') as ReactInterface
+
+enum / namespace: none
+
+
+parameter properties: none
+
+
+top-level import/export: none
+
+
+non-null assertion before member access: none
+
+
+trailing whitespace: none
+
+
+tab characters: none
+
+
+exported declarations: none

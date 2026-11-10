@@ -1,0 +1,199 @@
+===== lib/adaptive.js vs emitted =====
+--- lib/adaptive.js	2026-11-09 22:40:17
++++ node_modules/.phase2small-emit/adaptive.js	2026-11-09 22:50:15
+@@ -26,7 +26,7 @@
+ }
+ /** Whether one terminal outcome grows the quiet streak. */
+ export function isQuietOutcome(outcome) {
+-    return typeof outcome === 'string' && QUIET_OUTCOMES.includes(outcome);
++    return typeof outcome === 'string' && QUIET_OUTCOMES.some((quiet) => quiet === outcome);
+ }
+ /**
+  * Prune timestamps outside the sliding window and report the current budget.
+
+===== lib/feedback.js vs emitted =====
+--- lib/feedback.js	2026-11-09 22:40:17
++++ node_modules/.phase2small-emit/feedback.js	2026-11-09 22:50:15
+@@ -5,14 +5,16 @@
+ // per-session set of known finding fingerprints. A known fingerprint means the
+ // human already knew this class of finding, so the same or a similar finding is
+ // suppressed for the rest of that session instead of being shown again.
++const FEEDBACK_RESOLUTION_VALUES = Object.freeze(['dismissed', 'added_to_chat', 'knew_it', 'thanks']);
++const USEFUL_RESOLUTION_VALUES = Object.freeze(['added_to_chat', 'thanks']);
+ /**
+  * The exact resolution actions a human may apply. 'dismissed' and
+  * 'added_to_chat' are the v0.3.x values; 'knew_it' and 'thanks' are the
+  * v0.4.0 feedback values and are stored distinctly.
+  */
+-export const FEEDBACK_RESOLUTIONS = Object.freeze(['dismissed', 'added_to_chat', 'knew_it', 'thanks']);
++export const FEEDBACK_RESOLUTIONS = FEEDBACK_RESOLUTION_VALUES;
+ /** Resolutions that mean the finding was a useful new discovery. */
+-export const USEFUL_RESOLUTIONS = Object.freeze(['added_to_chat', 'thanks']);
++export const USEFUL_RESOLUTIONS = USEFUL_RESOLUTION_VALUES;
+ /** The resolution that strengthens fingerprint suppression. */
+ export const SUPPRESSING_RESOLUTION = 'knew_it';
+ /** Small, documented cap on one session's known-fingerprint set. */
+@@ -69,7 +71,7 @@
+ }
+ /** Whether one value is exactly one of the four resolution actions. */
+ export function isFeedbackResolution(value) {
+-    return typeof value === 'string' && FEEDBACK_RESOLUTIONS.includes(value);
++    return typeof value === 'string' && FEEDBACK_RESOLUTIONS.some((resolution) => resolution === value);
+ }
+ /**
+  * Create a bounded, insertion-order fingerprint set. Re-adding an existing key
+@@ -89,8 +91,11 @@
+             if (keys.has(key))
+                 keys.delete(key);
+             keys.add(key);
+-            while (keys.size > cap)
+-                keys.delete(keys.keys().next().value);
++            while (keys.size > cap) {
++                const oldest = keys.keys().next().value;
++                if (oldest !== undefined)
++                    keys.delete(oldest);
++            }
+             return true;
+         },
+         has(key) {
+
+===== lib/explain.js vs emitted =====
+--- lib/explain.js	2026-11-09 22:40:17
++++ node_modules/.phase2small-emit/explain.js	2026-11-09 22:50:15
+@@ -34,9 +34,13 @@
+     const hostLanguage = options !== null && typeof options === 'object' ? options.hostLanguage : undefined;
+     return `${EXPLAIN_INSTRUCTIONS}\n\n${languageSentenceFor({ hostLanguage, messages, subject: 'explanation' })}`;
+ }
++/** Whether one value is a non-array object. */
++function isRecord(value) {
++    return value !== null && typeof value === 'object' && !Array.isArray(value);
++}
+ /** The unparseable-sentinel value a malformed reply maps to. */
+ function sourceLine(source) {
+-    if (source === null || typeof source !== 'object')
++    if (!isRecord(source))
+         return '';
+     if (typeof source.path !== 'string' || source.path === '')
+         return '';
+@@ -53,7 +57,7 @@
+  * @returns the user message text.
+  */
+ export function buildExplanationPrompt(options = {}) {
+-    const note = options.note !== null && typeof options.note === 'object' ? options.note : {};
++    const note = isRecord(options.note) ? options.note : {};
+     const excerpt = typeof options.excerpt === 'string' ? options.excerpt : '';
+     const capsule = typeof options.capsule === 'string' ? options.capsule : '';
+     const lines = ['--- BEGIN FINDING (reviewer output, data) ---'];
+@@ -95,7 +99,7 @@
+     catch (error) {
+         return null;
+     }
+-    if (payload === null || typeof payload !== 'object' || Array.isArray(payload))
++    if (!isRecord(payload))
+         return null;
+     if (!Object.prototype.hasOwnProperty.call(payload, 'explanation'))
+         return null;
+
+===== lib/language.js vs emitted =====
+(no difference)
+===== lib/review-strictness.js vs emitted =====
+--- lib/review-strictness.js	2026-11-09 22:40:17
++++ node_modules/.phase2small-emit/review-strictness.js	2026-11-09 22:50:15
+@@ -17,8 +17,9 @@
+ // "high or critical" floor because the fixed verdict contract has no lower
+ // tier; their wider scrutiny lives in the instruction fragment, and Custom
+ // replaces that fragment with the human's saved prompt.
++const REVIEW_MODE_VALUES = Object.freeze(['relaxed', 'balanced', 'strict', 'paranoid', 'custom']);
+ /** The five stable mode ids, in display order. */
+-export const REVIEW_MODES = Object.freeze(['relaxed', 'balanced', 'strict', 'paranoid', 'custom']);
++export const REVIEW_MODES = REVIEW_MODE_VALUES;
+ /** The default mode for a missing or migrated config. */
+ export const DEFAULT_REVIEW_MODE = 'balanced';
+ /** The exact display names, keyed by stable id. */
+@@ -105,9 +106,13 @@
+ // Importance ranks. The gate admits a finding whose importance is at or above
+ // the mode's minimum. An unknown importance is never admitted.
+ const IMPORTANCE_RANK = Object.freeze({ high: 1, critical: 2 });
++/** Whether one value is a non-array object. */
++function isRecord(value) {
++    return value !== null && typeof value === 'object' && !Array.isArray(value);
++}
+ /** Whether one value is exactly one of the five stable mode ids. */
+ export function isReviewMode(value) {
+-    return typeof value === 'string' && REVIEW_MODES.includes(value);
++    return typeof value === 'string' && REVIEW_MODES.some((mode) => mode === value);
+ }
+ /**
+  * Normalize a mode id, returning undefined for anything but the five exact ids.
+@@ -128,7 +133,7 @@
+  * one mode. A null or unknown importance is never admissible.
+  */
+ export function admitsFinding(mode, importance) {
+-    const rank = IMPORTANCE_RANK[importance];
++    const rank = importance === 'high' || importance === 'critical' ? IMPORTANCE_RANK[importance] : undefined;
+     if (rank === undefined)
+         return false;
+     const minimum = IMPORTANCE_RANK[reviewModeProfile(mode).minImportance];
+@@ -140,7 +145,7 @@
+  * only when it carries a concrete action. A malformed verdict never passes.
+  */
+ export function admitsVerdict(mode, verdict) {
+-    if (verdict === null || typeof verdict !== 'object' || Array.isArray(verdict))
++    if (!isRecord(verdict))
+         return false;
+     if (!admitsFinding(mode, verdict.importance))
+         return false;
+
+===== lib/review-profile.js vs emitted =====
+(no difference)
+===== lib/evidence.js vs emitted =====
+--- lib/evidence.js	2026-11-09 22:40:17
++++ node_modules/.phase2small-emit/evidence.js	2026-11-09 22:50:15
+@@ -49,6 +49,13 @@
+ function isRecord(value) {
+     return value !== null && typeof value === 'object' && !Array.isArray(value);
+ }
++function isUnknownArray(value) {
++    return Array.isArray(value);
++}
++/** Whether one value is an integer; Number.isInteger alone does not narrow. */
++function isInteger(value) {
++    return Number.isInteger(value);
++}
+ /** A bounded, control-character-free string, or undefined when unusable. */
+ function boundedString(value, max) {
+     if (typeof value !== 'string')
+@@ -87,7 +94,7 @@
+     return trimmed;
+ }
+ function boundedStep(value) {
+-    return Number.isInteger(value) && value >= 0 ? value : undefined;
++    return isInteger(value) && value >= 0 ? value : undefined;
+ }
+ /** Extract only the documented path members of one tool presentation meta. */
+ function resourcePathsOf(meta) {
+@@ -149,7 +156,7 @@
+         turnReason: null,
+         meaningful: false,
+     };
+-    if (!Array.isArray(events) || !Number.isInteger(turn))
++    if (!isUnknownArray(events) || !Number.isInteger(turn))
+         return result;
+     // Events that carry no turn of their own belong to the episode when their
+     // public sequence sits inside the turn's range.
+@@ -322,13 +329,13 @@
+     }
+     const tools = Array.isArray(evidence.toolCalls) ? evidence.toolCalls : [];
+     if (tools.length > 0) {
+-        const count = Number.isInteger(evidence.toolCount) ? evidence.toolCount : tools.length;
++        const count = isInteger(evidence.toolCount) ? evidence.toolCount : tools.length;
+         lines.push('- significant tools (' + count + '):');
+         for (const tool of tools) {
+             if (!isRecord(tool) || typeof tool.name !== 'string')
+                 continue;
+             const parts = [tool.name];
+-            if (Number.isInteger(tool.step))
++            if (isInteger(tool.step))
+                 parts.push('step ' + tool.step);
+             if (tool.failed === true)
+                 parts.push(typeof tool.errorCode === 'string' ? 'failed (' + tool.errorCode + ')' : 'failed');

@@ -1,0 +1,40 @@
+whitespace normalization (formatting only, no content edits)
+scope: docs/harness-reports/ysk-ts7-migration-20261109/**, README.md, docs/reference.md, AGENTS.md, package.json, tsconfig.json, scripts/check-build-drift.mjs, scripts/local-install-smoke.mjs
+rule: convert CRLF to LF, strip trailing spaces and tabs; no words, order, or values changed
+
+files changed: 10
+CRLF pairs converted: 3
+trailing-space/tab lines stripped: 26
+
+docs/harness-reports/ysk-ts7-migration-20261109/migration/phase3/server/03b-after-server-summary.txt crlf=0 trailing=1
+docs/harness-reports/ysk-ts7-migration-20261109/toolchain/evidence/02-package-exports.txt crlf=0 trailing=1
+docs/harness-reports/ysk-ts7-migration-20261109/toolchain/evidence/03-tsc-help-all.txt crlf=0 trailing=1
+docs/harness-reports/ysk-ts7-migration-20261109/toolchain/evidence/05-registry-direct-fetch.txt crlf=0 trailing=1
+docs/harness-reports/ysk-ts7-migration-20261109/toolchain/evidence/14-incremental-build.txt crlf=1 trailing=1
+docs/harness-reports/ysk-ts7-migration-20261109/toolchain/evidence/23-build-composite.txt crlf=2 trailing=2
+docs/harness-reports/ysk-ts7-migration-20261109/toolchain/evidence/26-verbatim-import-type.txt crlf=0 trailing=13
+docs/harness-reports/ysk-ts7-migration-20261109/toolchain/evidence/28-defaults-showconfig.txt crlf=0 trailing=1
+docs/harness-reports/ysk-ts7-migration-20261109/toolchain/evidence/29-node-globals-typing.txt crlf=0 trailing=3
+docs/harness-reports/ysk-ts7-migration-20261109/toolchain/evidence/31-ts5-comparison.txt crlf=0 trailing=2
+
+second pass (git diff --cached --check hygiene): 18 files had blank lines at EOF removed; formatting only
+docs/harness-reports/ysk-ts7-migration-20261109/evidence/env-facts.txt removed 1 trailing newline(s)
+docs/harness-reports/ysk-ts7-migration-20261109/migration/final/03-npm-check.txt removed 1 trailing newline(s)
+docs/harness-reports/ysk-ts7-migration-20261109/migration/final/11-gate-npm-check.txt removed 1 trailing newline(s)
+docs/harness-reports/ysk-ts7-migration-20261109/migration/phase2/small/06-emit-delta-vs-lib.txt removed 1 trailing newline(s)
+docs/harness-reports/ysk-ts7-migration-20261109/migration/phase3/client/07-static-checks.txt removed 1 trailing newline(s)
+docs/harness-reports/ysk-ts7-migration-20261109/migration/phase3/client/08-comment-preservation.txt removed 2 trailing newline(s)
+docs/harness-reports/ysk-ts7-migration-20261109/migration/phase3/server/08-export-surface.txt removed 1 trailing newline(s)
+docs/harness-reports/ysk-ts7-migration-20261109/toolchain/evidence/02-package-exports.txt removed 1 trailing newline(s)
+docs/harness-reports/ysk-ts7-migration-20261109/toolchain/evidence/03-tsc-help-all.txt removed 3 trailing newline(s)
+docs/harness-reports/ysk-ts7-migration-20261109/toolchain/evidence/04-npm-view-dist-tags.txt removed 1 trailing newline(s)
+docs/harness-reports/ysk-ts7-migration-20261109/toolchain/evidence/09-flag-matrix.txt removed 1 trailing newline(s)
+docs/harness-reports/ysk-ts7-migration-20261109/toolchain/evidence/13-declaration-emit.txt removed 1 trailing newline(s)
+docs/harness-reports/ysk-ts7-migration-20261109/toolchain/evidence/15-checkjs-raw.txt removed 1 trailing newline(s)
+docs/harness-reports/ysk-ts7-migration-20261109/toolchain/evidence/17-node-native-ts.txt removed 1 trailing newline(s)
+docs/harness-reports/ysk-ts7-migration-20261109/toolchain/evidence/20-typesnode-api.txt removed 1 trailing newline(s)
+docs/harness-reports/ysk-ts7-migration-20261109/toolchain/evidence/22-option-combos.txt removed 1 trailing newline(s)
+docs/harness-reports/ysk-ts7-migration-20261109/toolchain/evidence/27-erasable-syntax-only.txt removed 2 trailing newline(s)
+docs/harness-reports/ysk-ts7-migration-20261109/toolchain/evidence/29-node-globals-typing.txt removed 1 trailing newline(s)
+
+pass 3 (final tree, after the final report): 0 files; crlf=0 trailing-lines=0 eof-blank-files=0

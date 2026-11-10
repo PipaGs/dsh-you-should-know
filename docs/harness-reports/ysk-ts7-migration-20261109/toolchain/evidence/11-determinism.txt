@@ -1,0 +1,13 @@
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --outDir node_modules/.ts7-probe/p1/out-second --pretty false
+exit=0 stdout="" stderr=""
+
+main.js run1=6282d68ea4645d70fcce766edc8aced42abf43d859c53806a1fc9af504c81919 run2=6282d68ea4645d70fcce766edc8aced42abf43d859c53806a1fc9af504c81919 IDENTICAL
+math.js run1=31165ccf8a269fbc701db8383b2743ef01f6452b8fa2c5a95e5db7321f38053c run2=31165ccf8a269fbc701db8383b2743ef01f6452b8fa2c5a95e5db7321f38053c IDENTICAL
+default.js run1=8a389cd05daec1ceac159c0296999bd84b5e39d3700facdc0afa0d158cefad30 run2=8a389cd05daec1ceac159c0296999bd84b5e39d3700facdc0afa0d158cefad30 IDENTICAL
+
+deterministic (same abs path, two runs): true
+
+emitted out-second tree:
+  node_modules/.ts7-probe/p1/out-second/default.js sha256=8a389cd05daec1ceac159c0296999bd84b5e39d3700facdc0afa0d158cefad30
+  node_modules/.ts7-probe/p1/out-second/main.js sha256=6282d68ea4645d70fcce766edc8aced42abf43d859c53806a1fc9af504c81919
+  node_modules/.ts7-probe/p1/out-second/math.js sha256=31165ccf8a269fbc701db8383b2743ef01f6452b8fa2c5a95e5db7321f38053c

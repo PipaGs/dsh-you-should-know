@@ -1,0 +1,15 @@
+runtime.js exports before: RUNTIME_LIMITS,RUNTIME_STATUS,classifyFailure,createRuntime
+runtime.js exports after:  RUNTIME_LIMITS,RUNTIME_STATUS,classifyFailure,createRuntime
+parity: true
+
+update.js exports before: DEFAULT_UPDATE_BEHAVIOR,TAG_DISCOVERY_COMMAND,TAG_DISCOVERY_ENV,UPDATE_BEHAVIORS,UPDATE_GIT_URL,UPDATE_LIMITS,UPDATE_REPO,UPDATE_SOURCE,compareVersions,createUpdateChecker,installSpec,localDateKey,mergeUpdateState,millisUntilNextLocalMidnight,nextLocalMidnight,normalizeUpdateState,parseRemoteTags,parseStableTag
+update.js exports after:  DEFAULT_UPDATE_BEHAVIOR,TAG_DISCOVERY_COMMAND,TAG_DISCOVERY_ENV,UPDATE_BEHAVIORS,UPDATE_GIT_URL,UPDATE_LIMITS,UPDATE_REPO,UPDATE_SOURCE,compareVersions,createUpdateChecker,installSpec,localDateKey,mergeUpdateState,millisUntilNextLocalMidnight,nextLocalMidnight,normalizeUpdateState,parseRemoteTags,parseStableTag
+parity: true
+
+index.js exports before: Config,PLUGIN_VERSION,apply,name
+index.js exports after:  Config,PLUGIN_VERSION,apply,name
+parity: true
+
+self-check.js exports before: AUTH_TRANSPORT,ROUTE_CAPABILITIES,SELF_CHECK_PATH,buildCapabilities,buildSelfCheckPayload,createSelfCheckHandler,normalizeVersion,routeCapabilityView,updateSummary
+self-check.js exports after:  AUTH_TRANSPORT,ROUTE_CAPABILITIES,SELF_CHECK_PATH,buildCapabilities,buildSelfCheckPayload,createSelfCheckHandler,normalizeVersion,routeCapabilityView,updateSummary
+parity: true

@@ -1,0 +1,8 @@
+status 0
+  --experimental-strip-types, --no-strip-types
+                              Type-stripping for TypeScript files.
+--- node --v8-options no; check all flags containing type ---
+  --bench-isolation=...       configures the type of benchmark
+  --disable-proto=...         disable Object.prototype.__proto__
+  --input-type=...            set module type for string input
+  --experimental-strip-types, --no-strip-types

@@ -1,0 +1,9 @@
+# Filtered typecheck summary — phase 3, server files
+
+Command: tsc -p tsconfig.json --noEmit --pretty false (run via node spawnSync).
+Scope: src/runtime.ts, src/update.ts, src/index.ts, src/self-check.ts.
+
+Server-file diagnostics after: 0 (03-after-server.txt is the empty filtered log).
+Full-program diagnostics after: 0
+
+Per-file diagnostics after (all files):

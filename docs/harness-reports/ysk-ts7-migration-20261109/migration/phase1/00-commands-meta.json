@@ -1,0 +1,96 @@
+{
+  "task": "ysk-ts7-migration-20261109 phase 1",
+  "capturedAt": "2026-11-09T19:38:39.213Z",
+  "node": "v26.12.1",
+  "head": "4d414db2f56ae0bd1e5d0585065241e1d276a972",
+  "branch": "session/ysk-ts7-migration-20261109",
+  "tsconfig": "tsconfig.json (target ES2022, module nodenext, moduleResolution nodenext, moduleDetection legacy, strict, verbatimModuleSyntax, erasableSyntaxOnly, rootDir src, outDir lib, declaration false, sourceMap false, skipLibCheck true, types [node], forceConsistentCasingInFileNames; noEmitOnError intentionally absent)",
+  "commands": [
+    {
+      "name": "typecheck",
+      "command": "node node_modules/typescript/bin/tsc -p tsconfig.json --noEmit --pretty false",
+      "exitCode": 1,
+      "diagnostics": 745,
+      "log": "02-typecheck.txt",
+      "note": "exit code is 1 with --noEmit and 2 when emit runs; both are non-zero by design during the typing phases"
+    },
+    {
+      "name": "build",
+      "command": "node node_modules/typescript/bin/tsc -p tsconfig.json --pretty false",
+      "exitCode": 2,
+      "diagnostics": 745,
+      "emittedFiles": 13,
+      "log": "03-build.txt"
+    },
+    {
+      "name": "check:js",
+      "command": "npm run check:js --silent",
+      "exitCode": 0,
+      "log": "05-check-js.txt"
+    },
+    {
+      "name": "node-test",
+      "command": "node --test test/",
+      "exitCode": 0,
+      "tests": 697,
+      "pass": 697,
+      "fail": 0,
+      "log": "06-node-test.txt"
+    },
+    {
+      "name": "npm-test",
+      "command": "npm test --silent",
+      "exitCode": 0,
+      "tests": 697,
+      "pass": 697,
+      "fail": 0,
+      "log": "07-npm-test.txt"
+    },
+    {
+      "name": "check",
+      "command": "npm run check --silent",
+      "exitCode": 1,
+      "log": "08-npm-check.txt",
+      "note": "expected red in phase 1: stops at the typecheck step because src/*.ts still carries 745 strict diagnostics; check:drift and check:js are green when run directly"
+    },
+    {
+      "name": "drift-check-synced",
+      "command": "node scripts/check-build-drift.mjs",
+      "exitCode": 0,
+      "log": "09-drift-check-pass.txt"
+    },
+    {
+      "name": "drift-check-drifted",
+      "command": "node scripts/check-build-drift.mjs --expected node_modules/.drift-proof/expected --out node_modules/.drift-proof/out",
+      "exitCode": 1,
+      "log": "10-drift-check-drifted.txt",
+      "note": "proof only: expected tree was a scratch copy with one appended comment; lib/ and git state were not touched"
+    },
+    {
+      "name": "git-diff-check",
+      "command": "git diff --check",
+      "exitCode": 0,
+      "log": "11-git-state.txt"
+    }
+  ],
+  "workingTreeStatus": [
+    " M lib/adaptive.js",
+    " M lib/client.js",
+    " M lib/core.js",
+    " M lib/evidence.js",
+    " M lib/explain.js",
+    " M lib/feedback.js",
+    " M lib/index.js",
+    " M lib/language.js",
+    " M lib/review-profile.js",
+    " M lib/review-strictness.js",
+    " M lib/runtime.js",
+    " M lib/self-check.js",
+    " M lib/update.js",
+    " M package.json",
+    "?? docs/harness-reports/ysk-ts7-migration-20261109/",
+    "?? scripts/check-build-drift.mjs",
+    "?? src/",
+    "?? tsconfig.json"
+  ]
+}

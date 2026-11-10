@@ -1,0 +1,29 @@
+final tree gate: node scripts/local-install-smoke.mjs (default tarball mode)
+exit=0
+
+workspace: /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109
+ok   npm pack names dsh-you-should-know@0.5.2 and reports every packed file
+tarball: dsh-you-should-know-0.5.2.tgz (18 entries)
+ok   the tarball contains all 13 emitted lib/*.js files
+ok   the tarball contains package.json
+ok   the tarball contains README.md
+ok   the tarball contains docs/reference.md
+ok   the tarball contains cordis.patch.yml
+ok   the tarball contains LICENSE
+ok   the tarball contains no source, declaration, map, test, or dev-script entries
+ok   npm installs the packed working tree (dsh-you-should-know-0.5.2.tgz) into a scratch consumer with --ignore-scripts
+peer: @deepseek-ai/schemastery resolved by npm
+ok   the installed package.json declares no install, prepare, or pack script
+ok   the installed package keeps the committed lib output as its entry points
+ok   the consumer probe imports the installed package
+ok   import('dsh-you-should-know') exposes name
+ok   import('dsh-you-should-know') exposes PLUGIN_VERSION matching the installed package
+ok   import('dsh-you-should-know') exposes apply
+ok   import('dsh-you-should-know') exposes Config as a schemastery schema with volatile fields
+ok   import('dsh-you-should-know/client') resolves to the installed browser half
+ok   import('dsh-you-should-know/core') resolves to the installed core module
+ok   the installed browser half registers the host module-table envelope
+ok   the installed lib/client.js has no top-level import or export
+ok   the installed lib/client.js is a window.__ModuleLoader__.load({ id, factory(require) }) script
+result: 21 checks, 0 failed
+local install smoke passed

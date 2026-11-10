@@ -8,7 +8,7 @@ The intent mirrors Claude Code's *You Should Know* with one deliberately harder 
 
 ## Status
 
-Version `0.5.2`, MIT. Host and browser halves ship as plain JavaScript, so a `github:` install needs no build. The scope is intentionally small: a composer-adjacent note card with a bounded in-memory history, a Plugins settings card (strictness mode, additional instructions, custom prompt, update controls), a session-header mode and model override, one reviewer call per qualifying turn, and a per-session runtime that retries one transient failure, bounds the queue, and pauses on quota without losing the turn.
+Version `0.5.2`, MIT. Both halves are authored in TypeScript under `src/` and compiled with TypeScript `7.0.2`, which is pinned and was verified against the npm `latest` dist-tag at the same version. The emitted `lib/*.js` is committed, so a `github:` install needs no build and declares no `prepare` or `install` hook. The scope is intentionally small: a composer-adjacent note card with a bounded in-memory history, a Plugins settings card (strictness mode, additional instructions, custom prompt, update controls), a session-header mode and model override, one reviewer call per qualifying turn, and a per-session runtime that retries one transient failure, bounds the queue, and pauses on quota without losing the turn.
 
 ## What it does
 
@@ -70,7 +70,7 @@ Notes live in plugin-owned, in-memory, per-session state. The only consumer is t
 
 ## Install from GitHub
 
-The built host and browser halves are committed, so installation needs no source build. Install an immutable release ref:
+The host and browser halves are the committed `lib/*.js` emitted from the TypeScript sources in `src/`, so installation needs no source build and runs no `prepare` or `install` hook. Install an immutable release ref:
 
 ```sh
 dsh plugin --profile <profile> add github:PipaGs/dsh-you-should-know#v0.5.2
@@ -212,9 +212,17 @@ Field-by-field schemas for both routes: [status and self-check](./docs/reference
 
 ## Development
 
+`src/*.ts` is the source of truth and `lib/*.js` is its committed output. Both change together: run `npm run build` after any source edit and commit the emitted `lib/*.js`, because an install ships the committed files and never compiles them.
+
 ```sh
-npm test
+npm run typecheck   # tsc -p tsconfig.json --noEmit; zero diagnostics required
+npm run build       # tsc -p tsconfig.json -> lib/*.js
+npm run check       # typecheck, build drift, and node --check on every shipped file
+npm test            # check:js plus the full node --test suite
+npm run smoke:local # pack and install the working tree into a scratch consumer
 ```
+
+`npm run check:drift` rebuilds `src/` into an ignored scratch directory and requires `lib/*.js` to match byte for byte, so a stale or hand-edited build fails the gate. `npm run smoke:local` packs the tree, installs that tarball into a scratch directory under `node_modules/`, and checks the install: the tarball file list, the absent install hooks, the main and subpath exports, the `Config` schema, and the browser bundle envelope. It uses the workspace npm cache and reaches the network only when npm cannot resolve the `@deepseek-ai/schemastery` peer from that cache; passing a `github:` spec as its argument always installs from the network. The tests and the dev-only scripts stay JavaScript on purpose: the tests read the exact committed `lib/*.js` an install loads, and the scripts run directly under Node without a build.
 
 The suite covers route discovery and recovery, the verdict contract and silence handling, every gate, dedupe, strictness thresholds, language detection, the human-only invariant, the note card and history, runtime queue, retry, and resume, live config, persistence, the update checker, and release consistency. Full coverage list: [test coverage](./docs/reference.md#test-coverage).
 

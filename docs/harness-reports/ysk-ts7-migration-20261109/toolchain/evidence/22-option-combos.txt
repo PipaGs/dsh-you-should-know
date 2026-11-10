@@ -1,0 +1,85 @@
+=== migration-relevant option combinations ===
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p2/tsconfig.json --noEmit --pretty false
+.ts specifier without allowImportingTsExtensions (expected TS5097): exit=1
+  stdout="node_modules/.ts7-probe/p2/src/main.ts(3,23): error TS5097: An import path can only end with a '.ts' extension when 'allowImportingTsExtensions' is enabled."
+  stderr=""
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p2/tsconfig.json --noEmit --allowImportingTsExtensions --pretty false
+.ts specifier + allowImportingTsExtensions + noEmit: exit=0
+  stdout=""
+  stderr=""
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p2/tsconfig.json --rewriteRelativeImportExtensions --outDir node_modules/.ts7-probe/p2/dist-rw --pretty false
+.ts specifier + rewriteRelativeImportExtensions emit: exit=0
+  stdout=""
+  stderr=""
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --moduleResolution node10 --pretty false
+moduleResolution node10 (removed in TS7?): exit=1
+  stdout="node_modules/.ts7-probe/p1/tsconfig.json(6,25): error TS5108: Option 'moduleResolution=node10' has been removed. Please remove it from your configuration."
+  stderr=""
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --moduleResolution classic --pretty false
+moduleResolution classic (removed?): exit=1
+  stdout="node_modules/.ts7-probe/p1/tsconfig.json(6,25): error TS5108: Option 'moduleResolution=Classic' has been removed. Please remove it from your configuration."
+  stderr=""
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --module commonjs --moduleResolution bundler --pretty false
+module commonjs + moduleResolution bundler: exit=1
+  stdout="node_modules/.ts7-probe/p1/src/main.ts(19,17): error TS1378: Top-level 'await' expressions are only allowed when the 'module' option is set to 'es2022', 'esnext', 'system', 'node16', 'node18', 'node20', 'nodenext', or 'preserve', and the 'target' option is set to 'es2017' or higher."
+  stderr=""
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --module node16 --moduleResolution node16 --pretty false
+module node16: exit=0
+  stdout=""
+  stderr=""
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --target es2015 --pretty false
+target es2015 (lowest accepted target?): exit=1
+  stdout="node_modules/.ts7-probe/p1/src/main.ts(19,17): error TS1378: Top-level 'await' expressions are only allowed when the 'module' option is set to 'es2022', 'esnext', 'system', 'node16', 'node18', 'node20', 'nodenext', or 'preserve', and the 'target' option is set to 'es2017' or higher."
+  stderr=""
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --isolatedDeclarations --pretty false
+isolatedDeclarations: exit=1
+  stdout="node_modules/.ts7-probe/p1/tsconfig.json(8,5): error TS5069: Option 'isolatedDeclarations' cannot be specified without specifying option 'declaration' or option 'composite'."
+  stderr=""
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --noUncheckedSideEffectImports false --pretty false
+noUncheckedSideEffectImports default: exit=0
+  stdout=""
+  stderr=""
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/does-not-exist.json --pretty false
+missing project (exit code): exit=1
+  stdout="error TS5058: The specified path does not exist: '/Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/node_modules/.ts7-probe/does-not-exist.json'."
+  stderr=""
+
+p2 dist-rw tree:
+  dep.js 25B
+  main.js 236B
+
+p2 dist-rw/main.js content:
+// P2 probes .ts import specifiers: one module uses rewriteRelativeImportExtensions
+// so tsc rewrites the specifier to .js on emit.
+import { value } from './dep.js';
+export const result = value + 1;
+console.log(`p2 result=${result}`);
+
+
+$ node node_modules/.ts7-probe/p2/dist-rw/main.js
+exit=0 stdout="p2 result=42" stderr=""
+
+=== checkJs variants on the existing lib/*.js ===
+
+strict true (baseline): exit=1 total=787 top=TS7006:492,TS2339:96,TS7005:56,TS8032:52,TS7053:28
+strict false: exit=1 total=75 top=TS8032:52,TS2322:10,TS2304:4,TS1005:4,TS2339:3
+strict true + noImplicitAny false: exit=1 total=112 top=TS8032:52,TS2322:34,TS2339:6,TS2345:5,TS2304:4
+strict true + strictNullChecks false: exit=1 total=785 top=TS7006:492,TS2339:96,TS7005:57,TS8032:52,TS7053:28
+
+=== Node --test with a glob of several .ts test files ===
+
+$ node --test 'docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/node-native/*.test.ts'
+exit=0
+stdout="✔ typescript test file runs under node --test (0.4745ms)\n✔ async assertion works (0.081291ms)\n✔ second ts test (0.448083ms)\nℹ tests 3\nℹ suites 0\nℹ pass 3\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 187.401834"
+stderr=""

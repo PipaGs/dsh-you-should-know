@@ -1,0 +1,7 @@
+# command: npm run check:js --silent
+# cwd: /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109
+# started: 2026-11-09T19:37:26.814Z
+# exit code: 0
+--- stdout ---
+
+--- stderr ---

@@ -1,0 +1,11 @@
+exit=1
+--- tsconfig.json (phase 3, before)
++++ tsconfig.json (phase 4, final)
+@@ -12,6 +12,7 @@
+     "outDir": "lib",
+     "declaration": false,
+     "sourceMap": false,
++    "noEmitOnError": true,
+     "skipLibCheck": true,
+     "types": ["node"],
+     "forceConsistentCasingInFileNames": true

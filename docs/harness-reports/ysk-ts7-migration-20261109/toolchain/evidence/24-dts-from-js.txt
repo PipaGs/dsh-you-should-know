@@ -1,0 +1,63 @@
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/checkjs/tsconfig.dts.json --pretty false
+exit=0
+stdout:
+
+stderr:
+
+
+emitted d.ts files: 13, total bytes 59073
+  adaptive.d.ts 1972B
+  client.d.ts 11B
+  core.d.ts 21485B
+  evidence.d.ts 1681B
+  explain.d.ts 1521B
+  feedback.d.ts 2525B
+  index.d.ts 3428B
+  language.d.ts 2051B
+  review-profile.d.ts 1716B
+  review-strictness.d.ts 3549B
+  runtime.d.ts 2980B
+  self-check.d.ts 6291B
+  update.d.ts 9863B
+
+sample adaptive.d.ts:
+/** Exactly one hour: the sliding budget window. */
+export declare const REVIEWER_HOURLY_WINDOW_MS: number;
+/** Deterministic ceiling on the cooldown multiplier. */
+export declare const MAX_QUIET_COOLDOWN_MULTIPLIER = 4;
+/** Internal ceiling on the quiet streak, so it cannot grow forever. */
+export declare const MAX_QUIET_STREAK = 64;
+/** Internal ceiling on retained call timestamps. */
+export declare const MAX_RECORDED_CALLS = 256;
+/** Terminal reviewer outcomes that count as nothing useful emitted. */
+export declare const QUIET_OUTCOMES: readonly string[];
+/** Fresh per-session adaptive accounting state. */
+export declare function createAdaptiveState(): {
+    callTimes: never[];
+    explainCallTimes: never[];
+    quietStreak: number;
+};
+/** Whether one terminal outcome grows the quiet streak. */
+export declare function isQuietOutcome(outcome: any): boolean;
+/**
+ * Prune timestamps outside the sliding window and report the current budget.
+ *
+ * @param state - adaptive state.
+ * @param max - the per-hour call cap.
+ * @param now - the current time.
+ * @returns the used, remaining, and max counts.
+ */
+export declare function reviewerBudget(state: any, max: any, now: any, field?: string): {
+    used: any;
+    remaining: number;
+    max: any;
+};
+/**
+ * Record one call at the given time. The caller names the window: the review
+ * budget and the separate explainer budget never share a counter.
+ */
+export declare function recordReviewerCall(state: any, now: any, field?: string): void;
+/** Grow the quiet streak by exactly one, up to the internal ceiling. */
+export declare function noteQuietOutcome(state: any): void;
+/** Reset the quiet streak to normal cadence. */
+export declare function resetQuiet(state: any): void;

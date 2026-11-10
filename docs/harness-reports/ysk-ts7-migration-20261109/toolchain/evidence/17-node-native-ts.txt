@@ -1,0 +1,79 @@
+node version: v26.12.1
+process.features.typescript: "strip"
+
+Node CLI flags that mention typescript/type-strip (from `node --help`):
+    --experimental-strip-types, --no-strip-types
+                                Type-stripping for TypeScript files.
+
+`node --experimental-transform-types --version`:
+  exit=9 stdout="" stderr="/opt/homebrew/Cellar/node/26.12.1_1/bin/node: bad option: --experimental-transform-types"
+
+$ node docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/node-native/erasable.ts
+erasable.ts (default flags): exit=0
+  stdout="ok chosen=7 maybe=none pair=1-two"
+  stderr=""
+
+$ node --experimental-strip-types docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/node-native/erasable.ts
+erasable.ts (--experimental-strip-types): exit=0
+  stdout="ok chosen=7 maybe=none pair=1-two"
+  stderr=""
+
+$ node --no-strip-types docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/node-native/erasable.ts
+erasable.ts (--no-strip-types): exit=1
+  stdout=""
+  stderr="node:internal/modules/esm/get_format:243\n  throw new ERR_UNKNOWN_FILE_EXTENSION(ext, filepath);\n        ^\n\nTypeError [ERR_UNKNOWN_FILE_EXTENSION]: Unknown file extension \".ts\" for /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/node-native/erasable.ts\n    at Object.getFileProtocolModuleFormat [as file:] (node:internal/modules/esm/get_format:243:9)\n    at defaultGetFormat (node:internal/modules/esm/get_format:283:36)\n    at defaultLoadSync (node:internal/modules/esm/load:159:16)"
+
+$ node docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/node-native/erasable.mts
+erasable.mts (default flags): exit=0
+  stdout="mts n=3"
+  stderr=""
+
+$ node docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/node-native/enum.ts
+enum.ts (default flags): exit=1
+  stdout=""
+  stderr="node:internal/modules/run_main:111\n    triggerUncaughtException(\n    ^\n\nfile:///Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/node-native/enum.ts:2\n    // TypeScript-only syntax that cannot be erased: enum.\n  > enum Color {\n      Red = 'red',"
+
+$ node docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/node-native/namespace.ts
+namespace.ts (default flags): exit=1
+  stdout=""
+  stderr="node:internal/modules/run_main:111\n    triggerUncaughtException(\n    ^\n\nfile:///Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/node-native/namespace.ts:2\n    // TypeScript-only syntax that cannot be erased: namespace.\n  > namespace Shapes {\n      export const kind = 'square'"
+
+$ node docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/node-native/param-props.ts
+param-props.ts (default flags): exit=1
+  stdout=""
+  stderr="node:internal/modules/run_main:111\n    triggerUncaughtException(\n    ^\n\nfile:///Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/node-native/param-props.ts:4\n  constructor(\n    private readonly x: number,\n                     ^^^^^^^^^"
+
+$ node docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/node-native/decorators.ts
+decorators.ts (default flags): exit=1
+  stdout=""
+  stderr="file:///Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/node-native/decorators.ts:13\n  @logged\n  ^\n\nSyntaxError: Invalid or unexpected token\n    at compileSourceTextModule (node:internal/modules/esm/utils:355:16)\n    at ModuleLoader.moduleStrategy (node:internal/modules/esm/translators:94:18)\n    at ModuleLoader.<anonymous> (node:internal/modules/esm/translators:689:10)"
+
+$ node --experimental-strip-types docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/node-native/decorators.ts
+decorators.ts (--experimental-strip-types): exit=1
+  stdout=""
+  stderr="file:///Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/node-native/decorators.ts:13\n  @logged\n  ^\n\nSyntaxError: Invalid or unexpected token\n    at compileSourceTextModule (node:internal/modules/esm/utils:355:16)\n    at ModuleLoader.moduleStrategy (node:internal/modules/esm/translators:94:18)\n    at ModuleLoader.<anonymous> (node:internal/modules/esm/translators:689:10)"
+
+$ node docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/node-native/chain/main-js.ts
+chain/main-js.ts (default flags, .js specifier): exit=1
+  stdout=""
+  stderr="node:internal/modules/esm/resolve:241\n    throw new ERR_MODULE_NOT_FOUND(\n          ^\n\nError [ERR_MODULE_NOT_FOUND]: Cannot find module '/Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/node-native/chain/dep.js' imported from /Users/pipags/work/dsh-you-should-know-worktrees/ysk-ts7-migration-20261109/docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/node-native/chain/main-js.ts\n    at finalizeResolution (node:internal/modules/esm/resolve:241:11)\n    at moduleResolve (node:internal/modules/esm/resolve:846:10)\n    at defaultResolve (node:internal/modules/esm/resolve:973:11)"
+
+$ node docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/node-native/chain/main-ts.ts
+chain/main-ts.ts (default flags, .ts specifier): exit=0
+  stdout="ts-specifier result=42"
+  stderr=""
+
+$ node --test docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/node-native/sample.test.ts
+node --test sample.test.ts: exit=0
+  stdout="✔ typescript test file runs under node --test (0.524ms)\n✔ async assertion works (0.089083ms)\nℹ tests 2\nℹ suites 0\nℹ pass 2\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 190.0355"
+  stderr=""
+
+$ node --experimental-strip-types --test docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/node-native/sample.test.ts
+node --test sample.test.ts (--experimental-strip-types): exit=0
+  stdout="✔ typescript test file runs under node --test (0.507458ms)\n✔ async assertion works (0.090625ms)\nℹ tests 2\nℹ suites 0\nℹ pass 2\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 194.891667"
+  stderr=""
+
+$ node docs/harness-reports/ysk-ts7-migration-20261109/toolchain/scratch/node-native/require-probe.cjs
+require-probe.cjs (CJS require of .ts): exit=0
+  stdout="require dep.ts value=41"
+  stderr=""

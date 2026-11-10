@@ -1,0 +1,47 @@
+# repository state after the phase 1 build (final tree, docs included)
+# captured: 2026-11-09T19:40:04.135Z
+$ git rev-parse HEAD
+4d414db2f56ae0bd1e5d0585065241e1d276a972
+$ git rev-parse --abbrev-ref HEAD
+session/ysk-ts7-migration-20261109
+$ git diff --check
+exit 0
+$ git diff --stat
+ lib/adaptive.js          |   63 +-
+ lib/client.js            | 3507 ++++++++++++++++----------------
+ lib/core.js              | 5056 +++++++++++++++++++++++-----------------------
+ lib/evidence.js          |  534 ++---
+ lib/explain.js           |  124 +-
+ lib/feedback.js          |  131 +-
+ lib/index.js             |  562 +++---
+ lib/language.js          |   83 +-
+ lib/review-profile.js    |  558 +++--
+ lib/review-strictness.js |  253 ++-
+ lib/runtime.js           | 1082 +++++-----
+ lib/self-check.js        |  288 ++-
+ lib/update.js            |  771 +++----
+ package.json             |   12 +-
+ 14 files changed, 6505 insertions(+), 6519 deletions(-)
+
+$ git status --porcelain
+ M lib/adaptive.js
+ M lib/client.js
+ M lib/core.js
+ M lib/evidence.js
+ M lib/explain.js
+ M lib/feedback.js
+ M lib/index.js
+ M lib/language.js
+ M lib/review-profile.js
+ M lib/review-strictness.js
+ M lib/runtime.js
+ M lib/self-check.js
+ M lib/update.js
+ M package.json
+?? docs/harness-reports/ysk-ts7-migration-20261109/
+?? scripts/check-build-drift.mjs
+?? src/
+?? tsconfig.json
+
+$ git ls-files --others --exclude-standard count
+150

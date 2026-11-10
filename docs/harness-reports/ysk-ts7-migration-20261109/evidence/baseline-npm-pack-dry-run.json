@@ -1,0 +1,106 @@
+[
+  {
+    "id": "dsh-you-should-know@0.5.2",
+    "name": "dsh-you-should-know",
+    "version": "0.5.2",
+    "size": 120493,
+    "unpackedSize": 438764,
+    "shasum": "eab623b2e75654ccc23ccbe2c4ec4287ab6eb840",
+    "integrity": "sha512-YqOrnUQqofnhg9Iodm2VKGmx2yqIYBOmmFmHa0PKB7qGzVWmCE4kvgNKcc+0bStIRUjtjWXx4yXm7qi18W+0/g==",
+    "filename": "dsh-you-should-know-0.5.2.tgz",
+    "files": [
+      {
+        "path": "LICENSE",
+        "size": 1063,
+        "mode": 420
+      },
+      {
+        "path": "README.md",
+        "size": 25844,
+        "mode": 420
+      },
+      {
+        "path": "cordis.patch.yml",
+        "size": 1800,
+        "mode": 420
+      },
+      {
+        "path": "docs/reference.md",
+        "size": 53702,
+        "mode": 420
+      },
+      {
+        "path": "lib/adaptive.js",
+        "size": 3506,
+        "mode": 420
+      },
+      {
+        "path": "lib/client.js",
+        "size": 86647,
+        "mode": 420
+      },
+      {
+        "path": "lib/core.js",
+        "size": 131870,
+        "mode": 420
+      },
+      {
+        "path": "lib/evidence.js",
+        "size": 14048,
+        "mode": 420
+      },
+      {
+        "path": "lib/explain.js",
+        "size": 5007,
+        "mode": 420
+      },
+      {
+        "path": "lib/feedback.js",
+        "size": 4602,
+        "mode": 420
+      },
+      {
+        "path": "lib/index.js",
+        "size": 17669,
+        "mode": 420
+      },
+      {
+        "path": "lib/language.js",
+        "size": 5191,
+        "mode": 420
+      },
+      {
+        "path": "lib/review-profile.js",
+        "size": 14839,
+        "mode": 420
+      },
+      {
+        "path": "lib/review-strictness.js",
+        "size": 10663,
+        "mode": 420
+      },
+      {
+        "path": "lib/runtime.js",
+        "size": 22359,
+        "mode": 420
+      },
+      {
+        "path": "lib/self-check.js",
+        "size": 13336,
+        "mode": 420
+      },
+      {
+        "path": "lib/update.js",
+        "size": 23310,
+        "mode": 420
+      },
+      {
+        "path": "package.json",
+        "size": 3308,
+        "mode": 420
+      }
+    ],
+    "entryCount": 18,
+    "bundled": []
+  }
+]

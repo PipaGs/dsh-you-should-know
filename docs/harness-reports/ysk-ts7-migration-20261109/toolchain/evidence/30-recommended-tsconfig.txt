@@ -1,0 +1,34 @@
+=== exact recommended tsconfig, compiled and executed ===
+
+tsconfig.json:
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "strict": true,
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
+    "rootDir": "src",
+    "outDir": "lib",
+    "declaration": false,
+    "sourceMap": false,
+    "skipLibCheck": true,
+    "types": ["node"],
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "lib"]
+}
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p6/tsconfig.json --pretty false
+exit=0 stdout="" stderr=""
+
+emitted lib/:
+  default.js 277B sha256=8a389cd05daec1ceac159c0296999bd84b5e39d3700facdc0afa0d158cefad30
+  main.js 650B sha256=6282d68ea4645d70fcce766edc8aced42abf43d859c53806a1fc9af504c81919
+  math.js 884B sha256=31165ccf8a269fbc701db8383b2743ef01f6452b8fa2c5a95e5db7321f38053c
+
+$ node node_modules/.ts7-probe/p6/lib/main.js
+exit=0 stdout="1,2 total=9 isValue=true" stderr=""
+$ node --check node_modules/.ts7-probe/p6/lib/main.js   exit=0 stderr=""

@@ -1,0 +1,484 @@
+--- lib/core.js	2026-11-09 22:40:17
++++ node_modules/.corecheck/core.js	2026-11-09 22:57:24
+@@ -12,6 +12,83 @@
+ import { FEEDBACK_RESOLUTIONS, SUPPRESSING_RESOLUTION, USEFUL_RESOLUTIONS, createFingerprintSet, isFeedbackResolution, } from './feedback.js';
+ import { buildReviewProfileSection } from './review-profile.js';
+ import { DEFAULT_REVIEW_MODE, MAX_ADDITIONAL_INSTRUCTIONS_CHARS, MAX_CUSTOM_PROMPT_CHARS, admitsVerdict, buildStrictnessSection, normalizeReviewMode, } from './review-strictness.js';
++/** Whether one untrusted value is a plain object rather than null or an array. */
++function isPlainObject(value) {
++    return value !== null && typeof value === 'object' && !Array.isArray(value);
++}
++/** Whether a mounted LLM service exposes a model stream. */
++function isStreamingLlm(llm) {
++    return llm !== null && llm !== undefined && typeof llm.stream === 'function';
++}
++/** Whether a mounted LLM service enumerates the models of one route. */
++function isListingLlm(llm) {
++    return llm !== null && llm !== undefined && typeof llm.listModels === 'function';
++}
++/** Whether one untrusted catalog row carries a string id. */
++function isCatalogEntry(value) {
++    if (value === null || typeof value !== 'object')
++        return false;
++    return typeof value.id === 'string';
++}
++/** One catalog row's id, accepting an object row or a bare string. */
++function catalogIdOf(value) {
++    if (isCatalogEntry(value))
++        return value.id;
++    return typeof value === 'string' ? value : '';
++}
++/** Whether one untrusted value is a volatile `{ get() }` reference. */
++function isVolatileRef(value) {
++    return value !== null && typeof value === 'object' && typeof value.get === 'function';
++}
++/** Whether one untrusted value is a text content block. */
++function isTextBlock(value) {
++    if (value === null || typeof value !== 'object')
++        return false;
++    const block = value;
++    return block.type === 'text' && typeof block.text === 'string';
++}
++/** Whether one untrusted value is a session event: an object with a string type. */
++function isSessionEvent(value) {
++    if (value === null || typeof value !== 'object')
++        return false;
++    return typeof value.type === 'string';
++}
++/** Whether one untrusted value is a text-delta chunk. */
++function isTextDeltaChunk(value) {
++    if (value === null || typeof value !== 'object')
++        return false;
++    const chunk = value;
++    return chunk.type === 'text-delta' && typeof chunk.text === 'string';
++}
++/** Whether one parsed verdict carries the non-null note the engine stores. */
++function isNoteVerdict(verdict) {
++    return verdict.note !== null;
++}
++/** Whether one untrusted value is the stream's finish chunk. */
++function isFinishChunk(value) {
++    if (value === null || typeof value !== 'object')
++        return false;
++    return value.type === 'finish';
++}
++/** Whether one untrusted value exposes a model-stream iterator. */
++function isChunkSource(value) {
++    if (value === null || (typeof value !== 'object' && typeof value !== 'function'))
++        return false;
++    const source = value;
++    return typeof source[Symbol.asyncIterator] === 'function' || typeof source[Symbol.iterator] === 'function';
++}
++/** The oldest inserted key of a map the caller knows is nonempty. */
++function oldestKey(map) {
++    return map.keys().next().value;
++}
++/** Whether a host settings service exposes both write methods. */
++function isWritableSettings(value) {
++    return value !== null && value !== undefined && typeof value.update === 'function' && typeof value.replace === 'function';
++}
++/** Whether one untrusted value is an exact feedback resolution. */
++function isResolution(value) {
++    return isFeedbackResolution(value);
++}
+ /**
+  * Built-in defaults. The reviewer route is deliberately left automatic: at
+  * review time the plugin asks the live LLM registry which DeepSeek route this
+@@ -80,6 +157,10 @@
+     maxTrackedTurns: 8,
+ });
+ const IMPORTANCE = Object.freeze(['high', 'critical']);
++/** Whether one untrusted value is one of the two admitted importance tiers. */
++function isReviewerImportance(value) {
++    return typeof value === 'string' && IMPORTANCE.includes(value);
++}
+ /**
+  * The terminal outcomes a recent-check diagnostic record may carry. The list
+  * is a closed allowlist: an unknown runtime string is folded to `other`, so a
+@@ -111,6 +192,10 @@
+ export const UNCLASSIFIED_KIND = 'unclassified';
+ /** The finding classes that must quote the decision they rest on. */
+ const EVIDENCE_KINDS = Object.freeze(['consequence', 'tradeoff']);
++/** Whether one finding class must quote its basis. */
++function isEvidenceKind(value) {
++    return value !== undefined && EVIDENCE_KINDS.includes(value);
++}
+ /** The exact resolution actions a human may apply to one note. */
+ const RESOLUTIONS = FEEDBACK_RESOLUTIONS;
+ // Only a human-authored `user/message` enters the reviewer excerpt. Tool
+@@ -133,11 +218,11 @@
+  * @returns the same shape with each reference replaced by its current value.
+  */
+ export function snapshotConfig(raw) {
+-    if (raw === null || typeof raw !== 'object' || Array.isArray(raw))
++    if (!isPlainObject(raw))
+         return raw;
+     const snapshot = {};
+     for (const [key, value] of Object.entries(raw)) {
+-        snapshot[key] = value !== null && typeof value === 'object' && typeof value.get === 'function'
++        snapshot[key] = isVolatileRef(value)
+             ? value.get()
+             : value;
+     }
+@@ -155,7 +240,7 @@
+  */
+ export function normalizeConfig(raw) {
+     const warnings = [];
+-    const input = raw !== null && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
++    const input = isPlainObject(raw) ? raw : {};
+     if (raw !== undefined && (raw === null || typeof raw !== 'object' || Array.isArray(raw))) {
+         warnings.push('config must be a mapping; every field fell back to its default');
+     }
+@@ -293,7 +378,7 @@
+             return null;
+         const ids = [];
+         for (const entry of listed) {
+-            const id = entry && typeof entry.id === 'string' ? entry.id : typeof entry === 'string' ? entry : '';
++            const id = catalogIdOf(entry);
+             if (id !== '' && !ids.includes(id))
+                 ids.push(id);
+         }
+@@ -338,8 +423,9 @@
+         const models = await llm.listModels(provider);
+         if (!Array.isArray(models))
+             return [];
+-        return models
+-            .map((entry) => (entry && typeof entry.id === 'string' ? entry.id : typeof entry === 'string' ? entry : ''))
++        const entries = models;
++        return entries
++            .map(catalogIdOf)
+             .filter((id) => id !== '');
+     }
+     catch (error) {
+@@ -530,9 +616,10 @@
+ export function textOfBlocks(content) {
+     if (!Array.isArray(content))
+         return '';
++    const blocks = content;
+     const parts = [];
+-    for (const block of content) {
+-        if (block && block.type === 'text' && typeof block.text === 'string')
++    for (const block of blocks) {
++        if (isTextBlock(block))
+             parts.push(block.text);
+     }
+     return parts.join('\n');
+@@ -543,7 +630,7 @@
+  * user-role source is machine traffic that must not reach the reviewer.
+  */
+ export function messageText(event) {
+-    if (!event || typeof event !== 'object')
++    if (!isSessionEvent(event))
+         return null;
+     if (event.type === 'user/message') {
+         const source = event.data && event.data.source;
+@@ -731,10 +818,10 @@
+  * @returns the system instruction text.
+  */
+ export function buildReviewerSystemPrompt(messages, options) {
+-    const mode = options !== null && typeof options === 'object' ? options.mode : undefined;
+-    const additionalInstructions = options !== null && typeof options === 'object' ? options.additionalInstructions : undefined;
+-    const customReviewerPrompt = options !== null && typeof options === 'object' ? options.customReviewerPrompt : undefined;
+-    const hostLanguage = options !== null && typeof options === 'object' ? options.hostLanguage : undefined;
++    const mode = isPlainObject(options) ? options.mode : undefined;
++    const additionalInstructions = isPlainObject(options) ? options.additionalInstructions : undefined;
++    const customReviewerPrompt = isPlainObject(options) ? options.customReviewerPrompt : undefined;
++    const hostLanguage = isPlainObject(options) ? options.hostLanguage : undefined;
+     return `${REVIEW_INSTRUCTIONS}\n\n${buildStrictnessSection(mode, additionalInstructions, customReviewerPrompt)}\n\n${buildReviewProfileSection(messages, { hostLanguage })}`;
+ }
+ /**
+@@ -865,7 +952,7 @@
+  * @returns a fresh `{ path, line? }` object, or null when malformed.
+  */
+ function parseSource(value) {
+-    if (value === null || typeof value !== 'object' || Array.isArray(value))
++    if (!isPlainObject(value))
+         return null;
+     if (!Object.prototype.hasOwnProperty.call(value, 'path'))
+         return null;
+@@ -994,7 +1081,7 @@
+     const trimmed = note.trim();
+     if (trimmed === '')
+         return null;
+-    if (typeof importance !== 'string' || !IMPORTANCE.includes(importance))
++    if (!isReviewerImportance(importance))
+         return null;
+     // Extra object keys are tolerated and ignored: the reviewer is asked for
+     // exactly two keys, but a harmless extra field must not throw away a valid
+@@ -1028,7 +1115,7 @@
+     }
+     // A consequence or tradeoff must quote its basis. This is an evidence gate,
+     // not metadata: without the quotation the reply is dropped quietly.
+-    if (EVIDENCE_KINDS.includes(verdict.kind)) {
++    if (isEvidenceKind(verdict.kind)) {
+         if (verdict.because === undefined)
+             return null;
+     }
+@@ -1080,7 +1167,7 @@
+         }
+     }
+     if (verdict.because === undefined) {
+-        return EVIDENCE_KINDS.includes(verdict.kind) ? null : verdict;
++        return isEvidenceKind(verdict.kind) ? null : verdict;
+     }
+     if (typeof verdict.because !== 'string' || verdict.because === '')
+         return null;
+@@ -1422,9 +1509,9 @@
+                 }
+                 finish({ kind: 'timeout' });
+             }, Number.isFinite(explainDeadlineMs) && explainDeadlineMs > 0 ? explainDeadlineMs : RUNTIME_LIMITS.deadlineMs);
+-            let iterable;
++            let streamed;
+             try {
+-                iterable = llm.stream({
++                streamed = llm.stream({
+                     provider: route.provider,
+                     model: route.model,
+                     system,
+@@ -1438,13 +1525,15 @@
+                 finish({ kind: 'failure', error });
+                 return;
+             }
+-            if (!iterable || (typeof iterable[Symbol.asyncIterator] !== 'function' && typeof iterable[Symbol.iterator] !== 'function')) {
++            if (!isChunkSource(streamed)) {
+                 finish({ kind: 'unparsable' });
+                 return;
+             }
++            const iterable = streamed;
+             const consume = (async () => {
+-                const iterator = typeof iterable[Symbol.asyncIterator] === 'function'
+-                    ? iterable[Symbol.asyncIterator]()
++                const asyncIterator = iterable[Symbol.asyncIterator];
++                const iterator = typeof asyncIterator === 'function'
++                    ? asyncIterator.call(iterable)
+                     : iterable[Symbol.iterator]();
+                 let text = '';
+                 for (;;) {
+@@ -1452,14 +1541,14 @@
+                     if (!step || step.done)
+                         break;
+                     const chunk = step.value;
+-                    if (chunk !== null && typeof chunk === 'object' && chunk.type === 'text-delta' && typeof chunk.text === 'string') {
++                    if (isTextDeltaChunk(chunk)) {
+                         text += chunk.text;
+                         if (text.length >= MAX_EXPLANATION_REPLY_CHARS) {
+                             text = text.slice(0, MAX_EXPLANATION_REPLY_CHARS);
+                             break;
+                         }
+                     }
+-                    else if (chunk !== null && typeof chunk === 'object' && chunk.type === 'finish') {
++                    else if (isFinishChunk(chunk)) {
+                         break;
+                     }
+                 }
+@@ -1497,10 +1586,10 @@
+      * a disposed runtime is observed again after a re-enable.
+      */
+     function makeRuntime(state, sessionId) {
+-        return createRuntime({
++        const runtime = createRuntime({
+             getStream: () => {
+                 const llm = getLlm();
+-                return llm && typeof llm.stream === 'function' ? (callOptions) => llm.stream(callOptions) : undefined;
++                return isStreamingLlm(llm) ? (callOptions) => llm.stream(callOptions) : undefined;
+             },
+             resolveModelInfo: (provider, model) => {
+                 const llm = getLlm();
+@@ -1521,12 +1610,17 @@
+                     return 'filtered';
+                 if (!admitsVerdict(state.reviewMode, grounded))
+                     return 'filtered';
++                if (!isNoteVerdict(grounded))
++                    return 'filtered';
+                 return deliverNote(state, sessionId, grounded);
+             },
+             onError,
+             now,
+             ...runtimeOptions,
+         });
++        // The runtime documents enqueue() resolving to a terminal outcome with a
++        // status name; its own inferred type is still a placeholder.
++        return runtime;
+     }
+     /** Replace one session's runtime, disposing the old one and its capability cache. */
+     function rebuildRuntime(state, sessionId) {
+@@ -1546,7 +1640,7 @@
+         if (overrides.has(sessionId))
+             overrides.delete(sessionId);
+         while (overrides.size >= LIMITS.maxSessionOverrides) {
+-            overrides.delete(overrides.keys().next().value);
++            overrides.delete(oldestKey(overrides));
+         }
+         overrides.set(sessionId, route);
+     }
+@@ -1555,7 +1649,7 @@
+         if (sessionModes.has(sessionId))
+             sessionModes.delete(sessionId);
+         while (sessionModes.size >= LIMITS.maxSessionOverrides) {
+-            sessionModes.delete(sessionModes.keys().next().value);
++            sessionModes.delete(oldestKey(sessionModes));
+         }
+         sessionModes.set(sessionId, mode);
+     }
+@@ -1640,7 +1734,7 @@
+         if (sessions.size >= LIMITS.maxTrackedSessions) {
+             // Insertion-order eviction: the oldest tracked session gives up its slot,
+             // and its runtime aborts anything still in flight before it is dropped.
+-            const oldest = sessions.keys().next().value;
++            const oldest = oldestKey(sessions);
+             const evicted = sessions.get(oldest);
+             if (evicted !== undefined && evicted.runtime !== undefined)
+                 evicted.runtime.dispose();
+@@ -1648,7 +1742,7 @@
+             overrides.delete(oldest);
+             sessionModes.delete(oldest);
+         }
+-        state = {
++        const created = {
+             reviewedSeq: -1,
+             turnIndex: 0,
+             lastReviewTurn: Number.NEGATIVE_INFINITY,
+@@ -1686,7 +1780,10 @@
+         // One runtime per session serializes every reviewer call, bounds the
+         // queue, retries a transient failure once, enforces the whole-call
+         // deadline, and pauses or halts on quota/permanent failures.
+-        state.runtime = makeRuntime(state, sessionId);
++        // The runtime is attached before the state is stored, so a stored state
++        // always owns one.
++        created.runtime = makeRuntime(created, sessionId);
++        state = created;
+         sessions.set(sessionId, state);
+         syncFromLog(session, state);
+         return state;
+@@ -1696,7 +1793,7 @@
+             return { status: 'disposed' };
+         if (!isConfigured(config))
+             return { status: 'inert' };
+-        if (!event || typeof event.type !== 'string')
++        if (!isSessionEvent(event))
+             return { status: 'ignored' };
+         // Children are never reviewed, so they never allocate tracked state.
+         if (isChildSession(session))
+@@ -1716,8 +1813,7 @@
+         }
+         if (event.type !== 'turn/end')
+             return { status: 'ignored' };
+-        const reason = event.data && event.data.reason;
+-        if (!reason || reason.kind !== 'completed')
++        if (!event.data || !event.data.reason || event.data.reason.kind !== 'completed')
+             return { status: 'ignored' };
+         const turn = event.data.turn;
+         state.turnIndex += 1;
+@@ -1964,7 +2060,7 @@
+                 if (route === null)
+                     return { ok: false, error: 'unroutable' };
+                 const llm = getLlm();
+-                if (!llm || typeof llm.stream !== 'function')
++                if (!isStreamingLlm(llm))
+                     return { ok: false, error: 'unavailable' };
+                 // Explain runs on its own bounded sliding window with the same cap, so a
+                 // failing explanation can never be retried without bound.
+@@ -2038,6 +2134,7 @@
+         const llm = getLlm();
+         if (!llm || typeof llm.resolveModelInfo !== 'function')
+             return Promise.resolve('unresolvable');
++        const resolveModelInfo = llm.resolveModelInfo;
+         return new Promise((resolve) => {
+             let settled = false;
+             let handle;
+@@ -2053,7 +2150,7 @@
+                 handle = setTimer(() => finish('timeout'), validationDeadlineMs);
+             }
+             Promise.resolve()
+-                .then(() => llm.resolveModelInfo(provider, model))
++                .then(() => resolveModelInfo(provider, model))
+                 .then(() => finish('ok'), () => finish('unresolvable'));
+         });
+     }
+@@ -2441,7 +2538,7 @@
+ function readResolution(body) {
+     if (body.action === undefined)
+         return { action: 'dismissed', legacy: true };
+-    if (isFeedbackResolution(body.action))
++    if (isResolution(body.action))
+         return { action: body.action, legacy: false };
+     return null;
+ }
+@@ -2832,7 +2929,6 @@
+     const provider = typeof config.provider === 'string' ? config.provider : '';
+     const model = typeof config.model === 'string' ? config.model : '';
+     const base = {
+-        mode: provider !== '' && model !== '' ? 'pinned' : 'automatic',
+         reviewerMode: normalizeReviewMode(config.reviewerMode) ?? DEFAULT_REVIEW_MODE,
+         additionalInstructions: typeof config.additionalInstructions === 'string' ? config.additionalInstructions : '',
+         customReviewerPrompt: typeof config.customReviewerPrompt === 'string' ? config.customReviewerPrompt : '',
+@@ -2843,7 +2939,9 @@
+         maxReviewerCallsPerHour: config.maxReviewerCallsPerHour,
+         recentCheckDiagnostics: config.recentCheckDiagnostics === true,
+     };
+-    return base.mode === 'pinned' ? { mode: 'pinned', provider, model, ...base } : base;
++    return provider !== '' && model !== ''
++        ? { mode: 'pinned', provider, model, ...base }
++        : { mode: 'automatic', ...base };
+ }
+ /** Resolve one promise against a deadline; a timeout resolves to undefined. */
+ function withDeadline(promise, deadlineMs) {
+@@ -2879,10 +2977,11 @@
+     for (const id of [...new Set(ids)].sort()) {
+         let models = [];
+         try {
+-            const listed = await withDeadline(llm.listModels(id), deadlineMs);
++            const listed = await withDeadline(isListingLlm(llm) ? llm.listModels(id) : undefined, deadlineMs);
+             if (Array.isArray(listed)) {
+-                models = [...new Set(listed
+-                        .map((entry) => (entry && typeof entry.id === 'string' ? entry.id : typeof entry === 'string' ? entry : ''))
++                const entries = listed;
++                models = [...new Set(entries
++                        .map(catalogIdOf)
+                         .map((model) => model.trim())
+                         .filter((model) => model !== '' && model.length <= MAX_CONFIG_FIELD_CHARS))].sort();
+             }
+@@ -2907,7 +3006,7 @@
+         return {};
+     try {
+         const value = preserveFields();
+-        if (value === null || typeof value !== 'object' || Array.isArray(value))
++        if (!isPlainObject(value))
+             return {};
+         return value;
+     }
+@@ -2935,7 +3034,7 @@
+     // Both settings methods are required: a pinned write merges, and only
+     // replace can reset a field, which is what automatic mode needs to clear a
+     // stored provider/model pin.
+-    const writable = Boolean(settings && typeof settings.update === 'function' && typeof settings.replace === 'function');
++    const writable = isWritableSettings(settings);
+     function quiet(work) {
+         return Promise.resolve()
+             .then(work)
+@@ -2963,6 +3062,7 @@
+         const llm = getLlm();
+         if (!llm || typeof llm.resolveModelInfo !== 'function')
+             return Promise.resolve('unresolvable');
++        const resolveModelInfo = llm.resolveModelInfo;
+         return new Promise((resolve) => {
+             let settled = false;
+             const finish = (value) => {
+@@ -2974,7 +3074,7 @@
+             };
+             const handle = setTimeout(() => finish('timeout'), Number.isFinite(validationDeadlineMs) && validationDeadlineMs > 0 ? validationDeadlineMs : RUNTIME_LIMITS.deadlineMs);
+             Promise.resolve()
+-                .then(() => llm.resolveModelInfo(provider, model))
++                .then(() => resolveModelInfo(provider, model))
+                 .then(() => finish('ok'), () => finish('unresolvable'));
+         });
+     }
+@@ -2985,7 +3085,7 @@
+      * @returns an ok result with the patch, or a stable error code.
+      */
+     async function validate(raw) {
+-        if (raw === undefined || raw === null || typeof raw !== 'object' || Array.isArray(raw)) {
++        if (!isPlainObject(raw)) {
+             return { ok: false, error: 'invalid-body' };
+         }
+         const mode = raw.mode;

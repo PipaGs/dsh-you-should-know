@@ -1,0 +1,32 @@
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --declaration --outDir node_modules/.ts7-probe/p1/out-dts --pretty false
+exit=0 stdout="" stderr=""
+
+emitted declaration tree:
+  node_modules/.ts7-probe/p1/out-dts/default.d.ts 95B sha256=bd85bc36f56f49dd4550f1e9807fd580a36f9c2460a48cdea77a7e9591ae26e9
+  node_modules/.ts7-probe/p1/out-dts/default.js 277B sha256=8a389cd05daec1ceac159c0296999bd84b5e39d3700facdc0afa0d158cefad30
+  node_modules/.ts7-probe/p1/out-dts/main.d.ts 48B sha256=956bb4492246d2064de68d19fbe51a241f8831982c11337868f3fd8a1d5c58b8
+  node_modules/.ts7-probe/p1/out-dts/main.js 650B sha256=6282d68ea4645d70fcce766edc8aced42abf43d859c53806a1fc9af504c81919
+  node_modules/.ts7-probe/p1/out-dts/math.d.ts 546B sha256=b55473b9d57b079f683d62f7df50ae3ac6ac48b8c81530f168ba9affb1860357
+  node_modules/.ts7-probe/p1/out-dts/math.js 884B sha256=31165ccf8a269fbc701db8383b2743ef01f6452b8fa2c5a95e5db7321f38053c
+
+main.d.ts content:
+export declare function run(): Promise<string>;
+
+
+math.d.ts content:
+export declare const VERSION = "1.0.0";
+export declare function add(a: number, b: number): number;
+export declare function memo(key: string, fn: () => number): number;
+export declare class Counter {
+    private n;
+    readonly step: number;
+    constructor(step?: number);
+    inc(): number;
+}
+export interface Point {
+    x: number;
+    y: number;
+}
+export declare function firstPoint(points: Point[]): Point | undefined;
+export declare function label(point: Point | undefined): string;
+export declare function delay(ms: number): Promise<void>;

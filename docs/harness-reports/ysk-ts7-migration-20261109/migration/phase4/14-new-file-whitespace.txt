@@ -1,0 +1,6 @@
+scan: trailing space or tab on every line of the new and modified files git diff --check does not cover
+ok   no trailing whitespace: tsconfig.json
+ok   no trailing whitespace: scripts/check-build-drift.mjs
+ok   no trailing whitespace: scripts/local-install-smoke.mjs
+ok   no trailing whitespace: docs/harness-reports/ysk-ts7-migration-20261109/design.md
+ok   no trailing whitespace: docs/harness-reports/ysk-ts7-migration-20261109/migration/phase4/report.md

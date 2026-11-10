@@ -1,0 +1,30 @@
+# scratch emit with lib [ES2022]; lib/ was not touched
+# command: node node_modules/typescript/bin/tsc -p tsconfig.json --outDir node_modules/.lib-es2022-check --pretty false --noEmitOnError false
+# started: 2026-11-09T19:42:47.834Z
+# exit code: 2
+# diagnostics: 809
+
+## emitted client boundary
+first line: "\"use strict\";"
+last non-empty line: "});"
+top-level import/export present: false
+envelope window.__ModuleLoader__.load({ id, factory(require) }) intact: true
+
+## scratch emit compared with committed lib/
+file	bytes scratch	bytes lib	identical
+adaptive.js	3580	3580	true
+client.js	98181	98181	true
+core.js	145038	145038	true
+evidence.js	15957	15957	true
+explain.js	5224	5224	true
+feedback.js	4946	4946	true
+index.js	18834	18834	true
+language.js	5375	5375	true
+review-profile.js	16199	16199	true
+review-strictness.js	11080	11080	true
+runtime.js	25849	25849	true
+self-check.js	13990	13990	true
+update.js	25408	25408	true
+
+all 13 emitted files byte-identical to lib/: true
+node --check on scratch emit: all pass

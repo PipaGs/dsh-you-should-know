@@ -1,0 +1,18 @@
+=== syntax-only gate (allowJs, checkJs:false, noEmit) over lib/*.js ===
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/checkjs/tsconfig.syntax.json --pretty false
+exit=0 stdout="" stderr=""
+
+=== allowJs emit (checkJs:false) loadability of every emitted module ===
+  adaptive.js: exit=0 exports 12
+  client.js: exit=0 IMPORT ERROR undefined window is not defined
+  core.js: exit=0 exports 36
+  evidence.js: exit=0 exports 3
+  explain.js: exit=0 exports 6
+  feedback.js: exit=0 exports 11
+  index.js: exit=0 exports 4
+  language.js: exit=0 exports 7
+  review-profile.js: exit=0 exports 4
+  review-strictness.js: exit=0 exports 12
+  runtime.js: exit=0 exports 4
+  self-check.js: exit=0 exports 10
+  update.js: exit=0 exports 18

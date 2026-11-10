@@ -1,0 +1,13 @@
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p1/tsconfig.json --noEmit --erasableSyntaxOnly --pretty false
+--erasableSyntaxOnly with non-erasable syntax (expected errors): exit=1
+stdout:
+node_modules/.ts7-probe/p1/src/nonerasable.ts(2,13): error TS1294: This syntax is not allowed when 'erasableSyntaxOnly' is enabled.
+node_modules/.ts7-probe/p1/src/nonerasable.ts(8,15): error TS1294: This syntax is not allowed when 'erasableSyntaxOnly' is enabled.
+stderr:
+
+
+$ node node_modules/typescript/bin/tsc -p node_modules/.ts7-probe/p3/tsconfig.json --noEmit --erasableSyntaxOnly --pretty false
+--erasableSyntaxOnly on erasable-only project p3: exit=0
+stdout:
+
+stderr:

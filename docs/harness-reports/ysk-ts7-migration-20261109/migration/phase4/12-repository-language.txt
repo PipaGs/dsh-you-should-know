@@ -1,0 +1,16 @@
+final tree gate: node --test test/repository-language.test.js
+exit=0
+✔ the authoritative repository rule exists and covers every required artifact (1.068625ms)
+✔ the README indexes the authoritative repository rules (0.324084ms)
+✔ the new repository-facing artifacts are English-only (0.395042ms)
+✔ the rule separates human chat from repository artifacts and preserves history (0.212667ms)
+✔ the PR #19 addendum records the deviation and links the preserved report (0.123916ms)
+✔ the PR #19 historical report is preserved rather than silently translated (0.17475ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 163.440875

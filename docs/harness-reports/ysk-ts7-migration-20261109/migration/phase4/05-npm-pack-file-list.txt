@@ -1,0 +1,109 @@
+exit=0
+command: npm pack --json --pack-destination node_modules/.evidence-tmp/pack
+
+[
+  {
+    "id": "dsh-you-should-know@0.5.2",
+    "name": "dsh-you-should-know",
+    "version": "0.5.2",
+    "size": 125835,
+    "unpackedSize": 489220,
+    "shasum": "ce92e0c793675fd21af1cd63857ae62f47ba3e0b",
+    "integrity": "sha512-CgjMOS6p5GMmPPVZBf3M+h1KJM6qZwVrx4XnGQ7dQ1+8qy6m1Vsmx6KqQeEUiqdXTpICZB6BpJP9KWKRAvUsfQ==",
+    "filename": "dsh-you-should-know-0.5.2.tgz",
+    "files": [
+      {
+        "path": "LICENSE",
+        "size": 1063,
+        "mode": 420
+      },
+      {
+        "path": "README.md",
+        "size": 27576,
+        "mode": 420
+      },
+      {
+        "path": "cordis.patch.yml",
+        "size": 1800,
+        "mode": 420
+      },
+      {
+        "path": "docs/reference.md",
+        "size": 54168,
+        "mode": 420
+      },
+      {
+        "path": "lib/adaptive.js",
+        "size": 3597,
+        "mode": 420
+      },
+      {
+        "path": "lib/client.js",
+        "size": 103274,
+        "mode": 420
+      },
+      {
+        "path": "lib/core.js",
+        "size": 148092,
+        "mode": 420
+      },
+      {
+        "path": "lib/evidence.js",
+        "size": 16151,
+        "mode": 420
+      },
+      {
+        "path": "lib/explain.js",
+        "size": 5264,
+        "mode": 420
+      },
+      {
+        "path": "lib/feedback.js",
+        "size": 5196,
+        "mode": 420
+      },
+      {
+        "path": "lib/index.js",
+        "size": 19052,
+        "mode": 420
+      },
+      {
+        "path": "lib/language.js",
+        "size": 5375,
+        "mode": 420
+      },
+      {
+        "path": "lib/review-profile.js",
+        "size": 16199,
+        "mode": 420
+      },
+      {
+        "path": "lib/review-strictness.js",
+        "size": 11310,
+        "mode": 420
+      },
+      {
+        "path": "lib/runtime.js",
+        "size": 27596,
+        "mode": 420
+      },
+      {
+        "path": "lib/self-check.js",
+        "size": 14131,
+        "mode": 420
+      },
+      {
+        "path": "lib/update.js",
+        "size": 26323,
+        "mode": 420
+      },
+      {
+        "path": "package.json",
+        "size": 3053,
+        "mode": 420
+      }
+    ],
+    "entryCount": 18,
+    "bundled": []
+  }
+]
