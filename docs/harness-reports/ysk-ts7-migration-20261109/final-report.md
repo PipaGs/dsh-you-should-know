@@ -5,8 +5,10 @@
 - Base SHA: `4d414db2f56ae0bd1e5d0585065241e1d276a972`
 - Default branch `main` at base: `4d414db2f56ae0bd1e5d0585065241e1d276a972`
 - Date: 2026-11-09
-- State: implementation and review round 1 complete; staged in a
-  workspace-local index, not committed, no merge. The real index is sandbox-blocked (section 8).
+- State: implementation and review round 1 complete; committed as
+  `27b7292c4c9e8af66dd5ada0d5735f18c2048022` and pushed to
+  `origin/session/ysk-ts7-migration-20261109`; one PR to main is opened by the
+  Lead after this report commit; no merge performed.
 
 ## 1. Task
 
@@ -74,10 +76,11 @@ conclusions: `toolchain/verification.md`.
 | Diagnostic alarm | scratch project with a type error | exit 2, no emit |
 | Package | `npm pack --json` | 18 entries (13 `lib/*.js` + metadata/docs) |
 | Install smoke | `node scripts/local-install-smoke.mjs` | exit 0, 21 checks |
+| GitHub install | `node scripts/local-install-smoke.mjs github:PipaGs/dsh-you-should-know#<sha>` | exit 0, 13 checks, 0 failed |
 | Language | `node --test test/repository-language.test.js` | exit 0, 6 pass |
 | Whitespace | `git diff --check` / `git diff --cached --check` | exit 0 / exit 0 |
 
-Logs: `migration/final/07`-`15`; drift and pack logs in `migration/phase4/`.
+Logs: `migration/final/07`-`15` and `18`; drift and pack logs in `migration/phase4/`.
 
 ## 5. Preserved contracts
 
@@ -131,9 +134,12 @@ five P2 findings fixed and two limitations accepted (section 7). Evidence:
 concise task-owned English report with paths/SHA/results; no fictional pass.
 The implementer never merges." **Result:** branch
 `session/ysk-ts7-migration-20261109` at base
-`4d414db2f56ae0bd1e5d0585065241e1d276a972`; the change set is staged in the
-verification index (section 8), not committed; the Lead opens one PR to `main`
-after push. No merge was performed and no result is claimed without a log.
+`4d414db2f56ae0bd1e5d0585065241e1d276a972`; the change is committed as
+`27b7292c4c9e8af66dd5ada0d5735f18c2048022` and pushed to
+`origin/session/ysk-ts7-migration-20261109`; exactly one PR to the actual default
+`main` (at base `4d414db2f56ae0bd1e5d0585065241e1d276a972`) is opened by the
+Lead, and the implementer never merges. No merge was performed and no result is
+claimed without a log.
 
 ## 7. Independent review round 1
 
@@ -166,16 +172,15 @@ checkout, or reset occurred. `toolchain/scratch/`, `toolchain/probes/`, and
 `migration/final/00-whitespace-normalization.txt`. Reports outside this task
 directory were not modified.
 
-Staging: the worktree gitdir lives under the parent checkout's
-`.git/worktrees/`, outside the session workspace, and the DSH sandbox rejects
-writes there with `Operation not permitted`; `git add -A` cannot update the real
-index here. The existing index was copied to `node_modules/.dsh-stage-index`
-with an alternate object directory, and
-`GIT_INDEX_FILE`/`GIT_OBJECT_DIRECTORY`/`GIT_ALTERNATE_OBJECT_DIRECTORIES`
-produced authentic staged checks: `git diff --cached --check` exit 0, no CRLF.
-Scope: `migration/final/16-staged-verification.txt`. The Lead must run
-`git add -A` in an unsandboxed context to persist it; direct `github:` install
-of the branch head is pending push.
+Staging and commit: the worktree gitdir lives under the parent checkout's
+`.git/worktrees/`, outside the session workspace, and the DSH sandbox otherwise
+returns `Operation not permitted` for index and object writes. The Lead staged
+with `git add -A` under a one-shot full-access approval:
+`git diff --cached --check` exit 0, 200 files changed, 46670 insertions, 6526
+deletions. Commit `27b7292c4c9e8af66dd5ada0d5735f18c2048022` was created and
+pushed to `origin/session/ysk-ts7-migration-20261109`; no publish, release,
+merge, checkout, or reset was performed. Staged-check scope:
+`migration/final/16-staged-verification.txt`.
 
 ## 9. Unproven items
 
@@ -183,8 +188,9 @@ of the branch head is pending push.
   `node:vm` stub harness and by text/envelope assertions.
 - The Node `>=22.19.0` floor, long-running update scheduler, and real
   `git ls-remote` path were not executed (unit tests/mocks only).
-- Direct `github:` install of branch head: pending push, to be recorded by the
-  Lead; ChatGPT's review of the exact SHA and PR is outside this task run.
+- ChatGPT's review of the exact SHA and PR is outside this task run; the direct
+  GitHub install is proven by `migration/final/18-github-install-smoke.txt`
+  (13 checks, 0 failed).
 
 ## 10. Evidence index
 
@@ -197,4 +203,5 @@ Paths are relative to `docs/harness-reports/ysk-ts7-migration-20261109/`.
 | `toolchain/verification.md`, `toolchain/evidence/` | TypeScript 7.0.2 probes, dist tags, option checks |
 | `migration/phase1/`-`phase4/` | Scaffold, parity, typing, packaging, drift and install logs |
 | `migration/review-round1/` | Round-1 fix reports and emit-parity logs |
-| `migration/final/00`, `07`-`17` | Normalization; final typecheck/build/test/check/drift/smoke/language/diff logs; staged `--check`/`--stat` and eol logs |
+| `migration/final/18-github-install-smoke.txt` | Direct GitHub install of the committed SHA: 13 checks, 0 failed |
+| `migration/final/00`, `07`-`18` | Normalization; final typecheck/build/test/check/drift/smoke/language/diff logs; staged `--check`/`--stat` and eol logs; GitHub install log |
