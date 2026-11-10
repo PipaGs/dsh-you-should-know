@@ -20,7 +20,7 @@ import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const DEFAULT_PR_BASE = '0419b70797a8d37db245d55817a7be273b5edcdb'
+const DEFAULT_PR_BASE = '511e7ee563293faac9590031c60da6965cffffea'
 const prBase = process.env.PR_BASE_SHA?.trim() || DEFAULT_PR_BASE
 
 function git(args) {
